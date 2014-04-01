@@ -10,9 +10,13 @@ If the L1 result is not zero the remaining data from the LKr is requested and th
 ### TriggerProcessor
 L1 and L2 trigger algorithms must be implemented in the compute method of the respective TriggerProcessors: l1/L1TriggerProcessor::compute(Event* event) and l2/L2TriggerProcessor::compute(Event* event)
 
-These methods are called after each event building (L1 and L2) with the Event object containing all the raw data at this state. Following sections show how you can access the raw data as it has been sent within MEPs.
+These methods are called after each event building (L1 and L2) with the Event object containing all the raw data at this state.
 
-### Accessing L0 data
+#### Guideline
+Please keep the TriggerProcessor classes clean and outsource your code into the L1/L2 and general folders. Also feel free to provide external libraries to be used within the TrigerProcessor implementations.
+
+Following sections show how you can access the raw data as it has been sent within MEPs. Please see also example codes in the [[examples|https://github.com/NA62/na62-trigger-algorithms/tree/examples]] branch.
+#### Accessing L0 data
 ```C++
 for (int i = SourceIDManager::NUMBER_OF_L0_DATA_SOURCES - 1; i >= 0; i--) {
 Subevent* subevent = event->getL0SubeventBySourceIDNum(i);
@@ -28,7 +32,7 @@ for (int i = SourceIDManager::NUMBER_OF_L0_DATA_SOURCES - 1; i >= 0; i--) {
 }
 ```
 
-### Accessing LKr data
+#### Accessing LKr data
 ```C++
 for (int localCreamID = event->getNumberOfZSuppressedLKrEvents() - 1;
 		localCreamID != -1; localCreamID--) {
