@@ -29,19 +29,16 @@ L2TriggerProcessor::~L2TriggerProcessor() {
 uint8_t L2TriggerProcessor::compute(Event* event) {
 	using namespace cream;
 
-//	std::vector<uint16_t> localCreamIDsToRequestNonZSuppressedData;
-//
-//	if (Options::Instance()->TEST > 0) {
-//		uint32_t sum = 0;
-//		for (int localCreamID = event->getNumberOfZSuppressedLKrEvents() - 1; localCreamID != -1; localCreamID--) {
-//			LKREvent* lkrEvent = event->getZSuppressedLKrEvent(localCreamID);
-//			localCreamIDsToRequestNonZSuppressedData.push_back(lkrEvent->getCrateCREAMID());
-//			const char* data = lkrEvent->getDataWithHeader();
-//			for (int j = lkrEvent->getEventLength() - 1; j >= 0; j--) {
-//				sum += data[j];
-//			}
-//		}
-//	}
+	std::vector<uint16_t> localCreamIDsToRequestNonZSuppressedData;
+
+//for (int localCreamID = event->getNumberOfZSuppressedLKrEvents() - 1;
+//		localCreamID != -1; localCreamID--) {
+//	LKREvent* lkrEvent = event->getZSuppressedLKrEvent(localCreamID);
+//	localCreamIDsToRequestNonZSuppressedData.push_back(
+//			lkrEvent->getCrateCREAMID());
+//	const char* data = lkrEvent->getDataWithHeader();
+//	const uint dataSize = lkrEvent->getEventLength();
+//}
 
 //	async_requestNonZSuppressedLKrData(localCreamIDsToRequestNonZSuppressedData, event);
 

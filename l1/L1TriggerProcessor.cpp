@@ -28,19 +28,16 @@ int counter;
 uint16_t L1TriggerProcessor::compute(Event* event) {
 	using namespace l0;
 
-//		uint32_t sum = 0;
-//		for (int i = SourceIDManager::NUMBER_OF_L0_DATA_SOURCES - 1; i >= 0; i--) {
-//			Subevent* subevent = event->getL0SubeventBySourceIDNum(i);
+//for (int i = SourceIDManager::NUMBER_OF_L0_DATA_SOURCES - 1; i >= 0; i--) {
+//	Subevent* subevent = event->getL0SubeventBySourceIDNum(i);
 //
-//			for (int i = subevent->getNumberOfParts() - 1; i >= 0; i--) {
-//				MEPEvent* e = subevent->getPart(i);
+//	for (int i = subevent->getNumberOfParts() - 1; i >= 0; i--) {
+//		MEPEvent* e = subevent->getPart(i);
 //
-//				const char* data = e->getDataWithHeader();
-//				for (int j = e->getEventLength() - 1; j >= 0; j--) {
-//					sum += data[j];
-//				}
-//			}
-//		}
+//		const char* data = e->getDataWithHeader();
+//		const uint dataSize = e->getEventLength();
+//	}
+//}
 
 	/*
 	 * Accessing the raw data of one Detector (MUV):
