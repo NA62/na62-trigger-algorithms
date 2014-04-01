@@ -5,4 +5,4 @@ In this repository the L1 and L2 trigger algorithms running on the pc-farm are i
 
 ## How to contribute
 
-If you want to develop algorithms that should be run within the L1/L2 triggers please visit the Wiki pages [[here|https://github.com/NA62/na62-trigger-algorithms/wiki]]
+If you want to develop algorithms that should be run within the L1/L2 triggers please visit the Wiki pages https://github.com/NA62/na62-trigger-algorithms/wiki
