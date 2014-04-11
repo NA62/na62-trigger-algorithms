@@ -11,7 +11,7 @@
 
 #include <eventBuilding/Event.h>
 #include <LKr/L1DistributionHandler.h>
-#include <options/Options.h>
+#include "../options/MyOptions.h"
 
 namespace na62 {
 

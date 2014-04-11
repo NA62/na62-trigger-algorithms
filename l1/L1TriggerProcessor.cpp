@@ -12,7 +12,7 @@
 #include <eventBuilding/Event.h>
 #include <l0/MEPEvent.h>
 #include <l0/Subevent.h>
-#include <options/Options.h>
+#include "../options/MyOptions.h"
 
 int L1_DOWNSCALE_FACTOR = 0;
 namespace na62 {
