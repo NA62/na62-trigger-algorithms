@@ -2,7 +2,7 @@
  * L1TriggerProcessor.cpp
  *
  *  Created on: Nov 17, 2011
- *      Author: Jonas Kunze (kunzej@cern.ch)
+ *      Author: Jonas Kunze (kunze.jonas@gmail.com)
  */
 
 #include "L1TriggerProcessor.h"
