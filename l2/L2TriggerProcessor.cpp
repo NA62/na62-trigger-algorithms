@@ -7,20 +7,16 @@
 
 #include "L2TriggerProcessor.h"
 
-#include <iostream>
-
 #include <eventBuilding/Event.h>
 #include <LKr/L1DistributionHandler.h>
-#include <options/Options.h>
+#include <iostream>
 
 namespace na62 {
 
-int L2_DOWNSCALE_FACTOR = 0;
+uint L2TriggerProcessor::L2_DOWNSCALE_FACTOR = 0;
 
 L2TriggerProcessor::L2TriggerProcessor(const uint16_t ThreadNum) :
 		ThreadNum_(ThreadNum), rr(0) {
-
-	L2_DOWNSCALE_FACTOR = Options::GetInt(OPTION_L2_DOWNSCALE_FACTOR);
 }
 
 L2TriggerProcessor::~L2TriggerProcessor() {
@@ -58,6 +54,6 @@ void L2TriggerProcessor::async_requestNonZSuppressedLKrData(
 		const std::vector<uint16_t> crateCREAMIDs, Event* event) {
 	event->setNonZSuppressedDataRequestedNum((uint16_t) crateCREAMIDs.size());
 	cream::L1DistributionHandler::Async_RequestLKRDataUnicast(ThreadNum_, event,
-	true, crateCREAMIDs);
+			true, crateCREAMIDs);
 }
 } /* namespace na62 */

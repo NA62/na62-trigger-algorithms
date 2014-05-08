@@ -9,6 +9,7 @@
 #ifndef TRIGGERPROCESSOR_H_
 #define TRIGGERPROCESSOR_H_
 
+#include <sys/types.h>
 #include <cstdint>
 
 namespace na62 {
@@ -31,7 +32,12 @@ public:
 	 */
 	uint16_t compute(Event* event);
 
+	static void Initialize(const uint L1_DOWNSCALE_FACTOR) {
+		L1TriggerProcessor::L1_DOWNSCALE_FACTOR = L1_DOWNSCALE_FACTOR;
+	}
+
 	int rr;
+	static uint L1_DOWNSCALE_FACTOR;
 };
 
 } /* namespace na62 */

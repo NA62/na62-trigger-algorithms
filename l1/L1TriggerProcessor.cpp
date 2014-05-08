@@ -7,18 +7,18 @@
 
 #include "L1TriggerProcessor.h"
 
-#include <iostream>
-
 #include <eventBuilding/Event.h>
-#include <l0/MEPEvent.h>
-#include <l0/Subevent.h>
-#include <options/Options.h>
+//#include <l0/MEPEvent.h>
+//#include <l0/Subevent.h>
+//#include <options/Options.h>
+//#include <iostream>
 
-int L1_DOWNSCALE_FACTOR = 0;
 namespace na62 {
+
+uint L1TriggerProcessor::L1_DOWNSCALE_FACTOR = 0;
+
 L1TriggerProcessor::L1TriggerProcessor() {
 	rr = 0;
-	L1_DOWNSCALE_FACTOR = Options::GetInt(OPTION_L1_DOWNSCALE_FACTOR);
 }
 
 L1TriggerProcessor::~L1TriggerProcessor() {
