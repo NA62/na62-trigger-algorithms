@@ -18,13 +18,21 @@ Please keep the TriggerProcessor classes clean and outsource your code into the 
 Following sections show how you can access the raw data as it has been sent within MEPs. Please see also example codes in the [[examples|https://github.com/NA62/na62-trigger-algorithms/tree/examples]] branch.
 #### Accessing L0 data
 ```C++
-for (int i = SourceIDManager::NUMBER_OF_L0_DATA_SOURCES - 1; i >= 0; i--) {
-Subevent* subevent = event->getL0SubeventBySourceIDNum(i);
+// Access a specific detector:
+Subevent* subevent = getL0SubeventBySourceID(sourceID);
+for (int j = subevent->getNumberOfParts() - 1; j >= 0; j--) {
+	MEPEvent* e = subevent->getPart(j);
+
+	const char* data = e->getDataWithHeader();
+	const uint dataSize = e->getEventLength();
+}
+
+// Access all detectors:
 for (int i = SourceIDManager::NUMBER_OF_L0_DATA_SOURCES - 1; i >= 0; i--) {
 	Subevent* subevent = event->getL0SubeventBySourceIDNum(i);
 
-	for (int i = subevent->getNumberOfParts() - 1; i >= 0; i--) {
-		MEPEvent* e = subevent->getPart(i);
+	for (int j = subevent->getNumberOfParts() - 1; j >= 0; j--) {
+		MEPEvent* e = subevent->getPart(j);
 
 		const char* data = e->getDataWithHeader();
 		const uint dataSize = e->getEventLength();
