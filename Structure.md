@@ -1,4 +1,5 @@
 # Code structure and data flow
+The code is optimized to be used within IDEs like Eclipse. So please use the autocompletion (ctrl+space) and read the list of available methods together with their documentation within your IDE!
 
 ## Data flow
 An introductory overview of the data flow can be found [[here|https://github.com/NA62/na26-farm/blob/master/README.md]].
