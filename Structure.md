@@ -8,12 +8,12 @@ The L1 trigger algorithms are executed with all data sent by all detectors excep
 If the L1 result is not zero the remaining data from the LKr is requested and the L2 algorithms are executed. The result of L2 is the L2 trigger type word (8 bit). If the L2 trigger is not zero the event will be sent to the merger PC.
 
 ### TriggerProcessor
-L1 and L2 trigger algorithms must be implemented in the compute method of the respective TriggerProcessors: l1/L1TriggerProcessor::compute(Event* event) and l2/L2TriggerProcessor::compute(Event* event)
+L1 and L2 trigger algorithms must be implemented in the compute method of the respective TriggerProcessors: (L1/L2)TriggerProcessor::compute(Event* event)
 
-These methods are called after each event building (L1 and L2) with the Event object containing all the raw data at this state.
+These methods are called after each event building (L1 and L2 event building) with the Event object containing all the raw data at this stage.
 
 #### Guideline
-Please keep the TriggerProcessor classes clean and outsource your code into the L1/L2 and general folders. Also feel free to provide external libraries to be used within the TrigerProcessor implementations.
+Please keep the TriggerProcessor classes clean and outsource your code into the "l1", "l2" and "general" folders. Also feel free to provide external libraries to be used within the TrigerProcessor implementations.
 
 Following sections show how you can access the raw data as it has been sent within MEPs. Please see also example codes in the [[examples|https://github.com/NA62/na62-trigger-algorithms/tree/examples]] branch.
 #### Accessing L0 data
