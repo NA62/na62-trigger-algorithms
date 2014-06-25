@@ -14,7 +14,7 @@ git clone git@github.com:YourUserName/na62-trigger-algorithms.git
 
 Don't forget to upload your ssh-key before cloning!
 
-After you've implemented your changes you can send a Pull Request. I will have a look at your commits and accept the request asap. Please always push to the develop branch.
+After you've implemented your changes you can send a Pull Request. I will have a look at your commits and accept the request asap.
 
 ## Cloning directly
 If you don't want to contribute to the project but only run it you can directly clone the code via 
