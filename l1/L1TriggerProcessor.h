@@ -10,6 +10,7 @@
 #define TRIGGERPROCESSOR_H_
 
 #include <sys/types.h>
+#include <atomic>
 #include <cstdint>
 
 namespace na62 {
@@ -19,9 +20,6 @@ class Event;
 
 class L1TriggerProcessor {
 public:
-	L1TriggerProcessor();
-	virtual ~L1TriggerProcessor();
-
 	/**
 	 * @param event Event* This is a pointer to the built Event containing all subevents (except those from the LKr)
 	 *
@@ -36,7 +34,7 @@ public:
 		L1TriggerProcessor::L1_DOWNSCALE_FACTOR = L1_DOWNSCALE_FACTOR;
 	}
 
-	int rr;
+	static std::atomic<int> rr;
 	static uint L1_DOWNSCALE_FACTOR;
 };
 

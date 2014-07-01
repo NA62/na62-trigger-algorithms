@@ -14,13 +14,7 @@
 namespace na62 {
 
 uint L2TriggerProcessor::L2_DOWNSCALE_FACTOR = 0;
-
-L2TriggerProcessor::L2TriggerProcessor(const uint16_t ThreadNum) :
-		ThreadNum_(ThreadNum), rr(0) {
-}
-
-L2TriggerProcessor::~L2TriggerProcessor() {
-}
+std::atomic<int> L2TriggerProcessor::rr(0);
 
 uint8_t L2TriggerProcessor::compute(Event* event) {
 	using namespace cream;
@@ -53,7 +47,7 @@ uint8_t L2TriggerProcessor::onNonZSuppressedLKrDataReceived(Event* event) {
 void L2TriggerProcessor::async_requestNonZSuppressedLKrData(
 		const std::vector<uint16_t> crateCREAMIDs, Event* event) {
 	event->setNonZSuppressedDataRequestedNum((uint16_t) crateCREAMIDs.size());
-	cream::L1DistributionHandler::Async_RequestLKRDataUnicast(ThreadNum_, event,
+	cream::L1DistributionHandler::Async_RequestLKRDataUnicast(event,
 	true, crateCREAMIDs);
 }
 } /* namespace na62 */

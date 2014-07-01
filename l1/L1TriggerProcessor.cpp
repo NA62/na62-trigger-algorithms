@@ -14,13 +14,7 @@
 namespace na62 {
 
 uint L1TriggerProcessor::L1_DOWNSCALE_FACTOR = 0;
-
-L1TriggerProcessor::L1TriggerProcessor() {
-	rr = 0;
-}
-
-L1TriggerProcessor::~L1TriggerProcessor() {
-}
+std::atomic<int> L1TriggerProcessor::rr(0);
 
 int counter;
 uint16_t L1TriggerProcessor::compute(Event* event) {

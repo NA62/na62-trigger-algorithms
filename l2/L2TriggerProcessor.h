@@ -10,6 +10,7 @@
 #define L2TriggerProcessor_H_
 
 #include <sys/types.h>
+#include <atomic>
 #include <cstdint>
 #include <vector>
 
@@ -20,14 +21,9 @@ class Event;
 
 class L2TriggerProcessor {
 private:
-	const uint16_t ThreadNum_;
-
-	int rr;
+	static std::atomic<int> rr;
 
 public:
-	L2TriggerProcessor(const uint16_t ThreadNum);
-	virtual ~L2TriggerProcessor();
-
 	/**
 	 * The event pointer may not be deleted by this method as it is deleted by the EventBuilder
 	 *
