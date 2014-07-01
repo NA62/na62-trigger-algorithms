@@ -33,7 +33,7 @@ public:
 	 *
 	 * @return uint8_t <0> if the event is rejected, the L2 trigger type word in other cases
 	 */
-	uint8_t compute(Event* event);
+	static uint8_t compute(Event* event);
 
 	/**
 	 * Will send a unicast request to all CREAMs within the given localCREAMIDs vector
@@ -46,7 +46,7 @@ public:
 	 * if async_requestNonZSuppressedLKrData has been called
 	 * @return uint8_t <0> if the event is rejected, the L2 trigger type word in other cases
 	 */
-	uint8_t onNonZSuppressedLKrDataReceived(Event* event);
+	static uint8_t onNonZSuppressedLKrDataReceived(Event* event);
 
 	static void Initialize(const uint L2_DOWNSCALE_FACTOR) {
 		L2TriggerProcessor::L2_DOWNSCALE_FACTOR = L2_DOWNSCALE_FACTOR;
