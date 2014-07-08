@@ -26,30 +26,28 @@ int counter;
 uint16_t L1TriggerProcessor::compute(Event* event) {
 	using namespace l0;
 
-//	for (int sourceIDNum = SourceIDManager::NUMBER_OF_L0_DATA_SOURCES - 1;
-//			sourceIDNum >= 0; sourceIDNum--) {
-//		Subevent* subevent = event->getL0SubeventBySourceIDNum(sourceIDNum);
+//	// Access a specific detector:
+//	Subevent* muv = event->getMUVSubevent();
+//	for (int p = muv->getNumberOfParts() - 1; p >= 0; p--) {
+//		MEPEvent* mepEvent = muv->getPart(p);
+//		const MEPEVENT_HDR* data = mepEvent->getData();
+//		mepEvent->getSourceID();
+//		mepEvent->getData();
+//		const uint dataSize = mepEvent->getDataLength();
+//	}
 //
-//		for (int partNum = subevent->getNumberOfParts() - 1; partNum >= 0;
-//				partNum--) {
-//			MEPEvent* e = subevent->getPart(partNum);
+//	// Access all detectors:
+//	for (int i = SourceIDManager::NUMBER_OF_L0_DATA_SOURCES - 1; i >= 0; i--) {
+//		Subevent* subevent = event->getL0SubeventBySourceIDNum(i);
 //
-//			const char* data = e->getDataWithHeader();
-//			const uint dataSize = e->getEventLength();
+//		for (int j = subevent->getNumberOfParts() - 1; j >= 0; j--) {
+//			MEPEvent* mepEvent = subevent->getPart(j);
+//
+//			const MEPEVENT_HDR* data = mepEvent->getData();
+//			const uint dataSize = mepEvent->getDataLength();
 //		}
 //	}
 
-	/*
-	 * Accessing the raw data of one Detector (MUV):
-	 */
-//	Subevent* muv = event->getMUVSubevent();
-//	for (int p = muv->getNumberOfParts() - 1; p >= 0; p--) {
-//		MEPEvent* mepData = muv->getPart(p);
-//		mepData->getSourceID();
-//		mepData->getData()
-//		mepData->getEventLength()
-//		mepData->getSourceIDNum()
-//	}
 	/*
 	 * The following values have to be calculated by the L0TP-packet
 	 * L0TP_RAW is to be defined
