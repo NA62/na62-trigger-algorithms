@@ -8,7 +8,7 @@
 #include "L1TriggerProcessor.h"
 
 #include <eventBuilding/Event.h>
-#include <l0/MEPEvent.h>
+#include <l0/MEPFragment.h>
 #include <l0/Subevent.h>
 
 namespace na62 {
@@ -29,11 +29,11 @@ uint16_t L1TriggerProcessor::compute(Event* event) {
 //	// Access a specific detector:
 //	Subevent* muv = event->getMUVSubevent();
 //	for (int p = muv->getNumberOfParts() - 1; p >= 0; p--) {
-//		MEPEvent* mepEvent = muv->getPart(p);
-//		const MEPEVENT_HDR* data = mepEvent->getData();
-//		mepEvent->getSourceID();
-//		mepEvent->getData();
-//		const uint dataSize = mepEvent->getDataLength();
+//		MEPFragment* MEPFragment = muv->getPart(p);
+//		const MEPFragment_HDR* data = MEPFragment->getData();
+//		MEPFragment->getSourceID();
+//		MEPFragment->getData();
+//		const uint dataSize = MEPFragment->getDataLength();
 //	}
 //
 //	// Access all detectors:
@@ -41,10 +41,10 @@ uint16_t L1TriggerProcessor::compute(Event* event) {
 //		Subevent* subevent = event->getL0SubeventBySourceIDNum(i);
 //
 //		for (int j = subevent->getNumberOfParts() - 1; j >= 0; j--) {
-//			MEPEvent* mepEvent = subevent->getPart(j);
+//			MEPFragment* MEPFragment = subevent->getPart(j);
 //
-//			const MEPEVENT_HDR* data = mepEvent->getData();
-//			const uint dataSize = mepEvent->getDataLength();
+//			const MEPFragment_HDR* data = MEPFragment->getData();
+//			const uint dataSize = MEPFragment->getDataLength();
 //		}
 //	}
 
@@ -52,7 +52,7 @@ uint16_t L1TriggerProcessor::compute(Event* event) {
 	 * The following values have to be calculated by the L0TP-packet
 	 * L0TP_RAW is to be defined
 	 */
-//	l0::MEPEvent* L0TPEvent = event->getL0TPSubevent()->getPart(0);
+//	l0::MEPFragment* L0TPEvent = event->getL0TPSubevent()->getPart(0);
 //	L0TP_RAW* L0TPData = (L0TP_RAW*) L0TPEvent->getData();
 //	event->setFinetime(L0TPData->fineTime);
 	event->setProcessingID(0); // 0 indicates raw data as collected from the detector
