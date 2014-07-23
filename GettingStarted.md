@@ -20,4 +20,6 @@ After you've implemented your changes you can send a Pull Request. I will have a
 If you don't want to contribute to the project but only run it you can directly clone the code via 
 ```
 git clone https://github.com/NA62/na62-trigger-algorithms.git
+
+
 ```
