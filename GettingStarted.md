@@ -5,7 +5,7 @@
 - [Getting the code](#getting-the-code)
   - [Forking within github](#forking-within-github)
   - [Cloning directly](#cloning-directly)
-- [dependencies](#dependencies)
+- [Dependencies](#dependencies)
   - [Compiler](#compiler)
 - [Compiling](#compiling)
   - [Installing Eclipse](#installing-eclipse)
@@ -39,7 +39,7 @@ If you don't want to contribute to the project but only run it you can directly 
 git clone https://github.com/NA62/na62-farm-lib.git
 ```
 
-# dependencies
+# Dependencies
 The trigger-algorithms project is only a library linked by na62-trigger-test and linking another library called na62-farm-lib. To install these dependencies please do following:
 ```
 git clone https://github.com/NA62/na62-trigger-algorithms.git
