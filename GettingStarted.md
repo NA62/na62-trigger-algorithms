@@ -22,11 +22,24 @@ If you don't want to contribute to the project but only run it you can directly 
 git clone https://github.com/NA62/na62-farm-lib.git
 ```
 
-# Getting the dependencies
+# dependencies
 The trigger-algorithms project is only a library linked by na62-trigger-test and linking another library called na62-farm-lib. To install these dependencies please do following:
 ```
 git clone https://github.com/NA62/na62-trigger-algorithms.git
 git clone https://github.com/NA62/na62-trigger-test.git
+```
+
+## Compiler
+So far all na62-farm projects are tested with gcc 4.8 and 4.9. As c++11 is heavily used it is not to use any gcc compiler below 4.7.
+
+On SLC6 with AFS running you can activate gcc 4.9 as follows
+```
+source /afs/cern.ch/sw/lcg/contrib/gcc/4.9.0/x86_64-slc6/setup.sh
+```
+
+It is recommended to add this to your .bashrc:
+```
+echo "source /afs/cern.ch/sw/lcg/contrib/gcc/4.9.0/x86_64-slc6/setup.sh" >> ~/.bashrc
 ```
 
 # Compiling
