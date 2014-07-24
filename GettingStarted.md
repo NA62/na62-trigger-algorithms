@@ -1,3 +1,20 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents** 
+- [Guideline](#guideline)
+- [Getting the code](#getting-the-code)
+  - [Forking within github](#forking-within-github)
+  - [Cloning directly](#cloning-directly)
+- [dependencies](#dependencies)
+  - [Compiler](#compiler)
+- [Compiling](#compiling)
+  - [Installing Eclipse](#installing-eclipse)
+  - [Importing the projects](#importing-the-projects)
+  - [Building and running](#building-and-running)
+  - [Configuring trigger-test](#configuring-trigger-test)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Guideline
 
 If you want to develop trigger algorithms that should run in the PC-farm, you need to clone this repository and na62-farm-lib. As these are eclipse projects you should import them into your eclipse workspace. Testing the algorithms should be done by cloning [[na62-trigger-test|https://github.com/NA62/na62-trigger-test/wiki]] which links this project and na62-farm-lib.
