@@ -1,3 +1,16 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+
+- [Code structure and data flow](#code-structure-and-data-flow)
+  - [Data flow](#data-flow)
+    - [TriggerProcessor](#triggerprocessor)
+      - [Guideline](#guideline)
+      - [Accessing L0 data](#accessing-l0-data)
+      - [Accessing LKr data](#accessing-lkr-data)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Code structure and data flow
 The code is optimized to be used within IDEs like Eclipse. So please use the autocompletion (ctrl+space) and read the list of available methods together with their documentation within your IDE!
 
