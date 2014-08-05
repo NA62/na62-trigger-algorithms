@@ -8,7 +8,7 @@
 #include "L1TriggerProcessor.h"
 
 #include <eventBuilding/Event.h>
-#include <l0/MEPEvent.h>
+#include <l0/MEPFragment.h>
 #include <l0/Subevent.h>
 
 namespace na62 {

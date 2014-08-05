@@ -8,7 +8,7 @@
 #include "L2TriggerProcessor.h"
 
 #include <eventBuilding/Event.h>
-#include <LKr/L1DistributionHandler.h>
+#include <cstdbool>
 #include <iostream>
 
 namespace na62 {
@@ -46,8 +46,8 @@ uint8_t L2TriggerProcessor::onNonZSuppressedLKrDataReceived(Event* event) {
 
 void L2TriggerProcessor::async_requestNonZSuppressedLKrData(
 		const std::vector<uint16_t> crateCREAMIDs, Event* event) {
-	event->setNonZSuppressedDataRequestedNum((uint16_t) crateCREAMIDs.size());
-	cream::L1DistributionHandler::Async_RequestLKRDataUnicast(event,
-	true, crateCREAMIDs);
+//	event->setNonZSuppressedDataRequestedNum((uint16_t) crateCREAMIDs.size());
+//	cream::L1DistributionHandler::Async_RequestLKRDataUnicast(event,
+//	true, crateCREAMIDs);
 }
 } /* namespace na62 */

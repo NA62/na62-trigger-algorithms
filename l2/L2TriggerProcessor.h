@@ -34,7 +34,7 @@ public:
 	/**
 	 * Will send a unicast request to all CREAMs within the given localCREAMIDs vector
 	 */
-	void async_requestNonZSuppressedLKrData(
+	static void async_requestNonZSuppressedLKrData(
 			const std::vector<uint16_t> crateCREAMIDs, Event* event);
 
 	/**
