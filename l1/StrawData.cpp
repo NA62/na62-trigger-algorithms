@@ -37,7 +37,7 @@ inline int StrawData::getSrbID(uint8_t chamber, uint8_t view, uint8_t halfView) 
 }
 
 double StrawData::getStrawDistance() { 
-	// Note: This code what written when the straw mapping was not finalised, and so this function will need modifying once the final straw mapping is done
+	// Note: This code was written when the straw mapping was not finalised, and so this function will need modifying once the final straw mapping is done
 	double strawDisplacement = m_strawID*strawparameters::STRAW_SPACING;
 	if (strawDisplacement > (strawparameters::STRAW_LENGTH/2.0)+strawparameters::CENTRAL_GAP_DISPLACEMENT[m_view][m_chamber]) {
 		strawDisplacement += strawparameters::CENTRAL_GAP_WIDTH;

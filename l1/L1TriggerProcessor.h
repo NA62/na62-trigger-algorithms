@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <atomic>
 #include <cstdint>
+#include <iostream>
 
 namespace na62 {
 
@@ -29,7 +30,7 @@ public:
 	 * 								   trigger type word should be taken from the L0TP subevent
 	 */
 	static uint16_t compute(Event* event);
-
+	
 	static void Initialize(const uint L1_DOWNSCALE_FACTOR) {
 		L1TriggerProcessor::L1_DOWNSCALE_FACTOR = L1_DOWNSCALE_FACTOR;
 	}
@@ -40,3 +41,18 @@ public:
 
 } /* namespace na62 */
 #endif /* TRIGGERPROCESSOR_H_ */
+
+/*
+ * Defines the structure of a L0 event header within a MEP as defined in table 2 in NA62-11-02.
+ * The data is over-allocated so you can access the actual payload by something like
+ * char* data = MEPFragmentHdr_ptr+sizeof(MEPFragment_HDR);
+ 
+ struct MEPFragment_HDR {
+	uint16_t eventLength_; // Number of bytes of the following event data,	including this header.
+	uint8_t eventNumberLSB_;
+	uint8_t reserved_ :7;
+	uint8_t lastEventOfBurst_ :1; // don't take bool as it will allocate 8 bits!
+	uint32_t timestamp_;
+}__attribute__ ((__packed__));
+
+*/
