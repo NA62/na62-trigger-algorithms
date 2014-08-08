@@ -8,54 +8,56 @@
 #include "L1TriggerProcessor.h"
 
 #include <eventBuilding/Event.h>
+#include <eventBuilding/SourceIDManager.h>
 #include <l0/MEPFragment.h>
 #include <l0/Subevent.h>
 
 namespace na62 {
 
 uint L1TriggerProcessor::L1_DOWNSCALE_FACTOR = 0;
-
-L1TriggerProcessor::L1TriggerProcessor() {
-	rr = 0;
-}
-
-L1TriggerProcessor::~L1TriggerProcessor() {
-}
+std::atomic<int> L1TriggerProcessor::rr(0);
 
 int counter;
 uint16_t L1TriggerProcessor::compute(Event* event) {
 	using namespace l0;
 
-//	// Access a specific detector:
+//	long sum = 0;
+//	for (int sourceIDNum = 0;
+//			sourceIDNum != SourceIDManager::NUMBER_OF_L0_DATA_SOURCES; sourceIDNum++) {
+//		Subevent* subevent = event->getL0SubeventBySourceIDNum(sourceIDNum);
+
+//		Subevent* lav = event->getLAVSubevent();
+//		for (int p = lav->getNumberOfParts() - 1; p >= 0; p--) {
+//			MEPFragment* fragment = lav->getPart(p);
+//			const MEPFragment_HDR* data = fragment->getData();
+//
+//			for(int i=0; i<fragment->getDataLength(); i++){
+//				sum+=((char*)data)[i];
+//			}
+//		}
+
+//	}
+	/*
+	 * Accessing the raw data of one Detector (MUV):
+	 */
 //	Subevent* muv = event->getMUVSubevent();
 //	for (int p = muv->getNumberOfParts() - 1; p >= 0; p--) {
-//		MEPFragment* MEPFragment = muv->getPart(p);
-//		const MEPFragment_HDR* data = MEPFragment->getData();
-//		MEPFragment->getSourceID();
-//		MEPFragment->getData();
-//		const uint dataSize = MEPFragment->getDataLength();
+//		MEPEvent* mepData = muv->getPart(p);
+//		mepData->getSourceID();
+//		mepData->getData()
+//		mepData->getEventLength()
+//		mepData->getSourceIDNum()
 //	}
-//
-//	// Access all detectors:
-//	for (int i = SourceIDManager::NUMBER_OF_L0_DATA_SOURCES - 1; i >= 0; i--) {
-//		Subevent* subevent = event->getL0SubeventBySourceIDNum(i);
-//
-//		for (int j = subevent->getNumberOfParts() - 1; j >= 0; j--) {
-//			MEPFragment* MEPFragment = subevent->getPart(j);
-//
-//			const MEPFragment_HDR* data = MEPFragment->getData();
-//			const uint dataSize = MEPFragment->getDataLength();
-//		}
-//	}
-
 	/*
 	 * The following values have to be calculated by the L0TP-packet
 	 * L0TP_RAW is to be defined
 	 */
-//	l0::MEPFragment* L0TPEvent = event->getL0TPSubevent()->getPart(0);
+//	l0::MEPEvent* L0TPEvent = event->getL0TPSubevent()->getPart(0);
 //	L0TP_RAW* L0TPData = (L0TP_RAW*) L0TPEvent->getData();
 //	event->setFinetime(L0TPData->fineTime);
 	event->setProcessingID(0); // 0 indicates raw data as collected from the detector
+
+//	return (sum%2)+1;
 
 	if (rr++ % L1_DOWNSCALE_FACTOR == 0) {
 		// Accept event
