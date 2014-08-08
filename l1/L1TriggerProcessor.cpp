@@ -8,6 +8,7 @@
 #include "L1TriggerProcessor.h"
 
 #include <eventBuilding/Event.h>
+#include <eventBuilding/SourceIDManager.h>
 #include <l0/MEPFragment.h>
 #include <l0/Subevent.h>
 
@@ -20,19 +21,22 @@ int counter;
 uint16_t L1TriggerProcessor::compute(Event* event) {
 	using namespace l0;
 
-//	for (int sourceIDNum = SourceIDManager::NUMBER_OF_L0_DATA_SOURCES - 1;
-//			sourceIDNum >= 0; sourceIDNum--) {
+//	long sum = 0;
+//	for (int sourceIDNum = 0;
+//			sourceIDNum != SourceIDManager::NUMBER_OF_L0_DATA_SOURCES; sourceIDNum++) {
 //		Subevent* subevent = event->getL0SubeventBySourceIDNum(sourceIDNum);
-//
-//		for (int partNum = subevent->getNumberOfParts() - 1; partNum >= 0;
-//				partNum--) {
-//			MEPEvent* e = subevent->getPart(partNum);
-//
-//			const char* data = e->getDataWithHeader();
-//			const uint dataSize = e->getEventLength();
-//		}
-//	}
 
+//		Subevent* lav = event->getLAVSubevent();
+//		for (int p = lav->getNumberOfParts() - 1; p >= 0; p--) {
+//			MEPFragment* fragment = lav->getPart(p);
+//			const MEPFragment_HDR* data = fragment->getData();
+//
+//			for(int i=0; i<fragment->getDataLength(); i++){
+//				sum+=((char*)data)[i];
+//			}
+//		}
+
+//	}
 	/*
 	 * Accessing the raw data of one Detector (MUV):
 	 */
@@ -52,6 +56,8 @@ uint16_t L1TriggerProcessor::compute(Event* event) {
 //	L0TP_RAW* L0TPData = (L0TP_RAW*) L0TPEvent->getData();
 //	event->setFinetime(L0TPData->fineTime);
 	event->setProcessingID(0); // 0 indicates raw data as collected from the detector
+
+//	return (sum%2)+1;
 
 	if (rr++ % L1_DOWNSCALE_FACTOR == 0) {
 		// Accept event
