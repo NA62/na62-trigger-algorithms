@@ -32,18 +32,19 @@ Following sections show how you can access the raw data as it has been sent with
 #### Accessing L0 data
 ```C++
 // Access a specific detector:
-Subevent* muv = event->getMUVSubevent();
-for (int p = muv->getNumberOfParts() - 1; p >= 0; p--) {
-	MEPEvent* mepEvent = muv->getPart(p);
-	const MEPEVENT_HDR* data = mepEvent->getData();
-	mepEvent->getSourceID();
-	mepEvent->getData();
-	mepEvent->getEventLength();
-	mepEvent->getSourceIDNum();
+
+Subevent* lav = event->getLAVSubevent();
+for (int p = lav->getNumberOfParts() - 1; p >= 0; p--) {
+	MEPFragment* fragment = lav->getPart(p);
+	const MEPFragment_HDR* data = fragment->getData();
+
+	for(int i=0; i<fragment->getDataLength(); i++){
+		sum+=((char*)data)[i];
+	}
 }
 
 // Access all detectors:
-for (int i = SourceIDManager::NUMBER_OF_L0_DATA_SOURCES - 1; i >= 0; i--) {
+for (int i = 0; i != SourceIDManager::NUMBER_OF_L0_DATA_SOURCES; i++) {
 	Subevent* subevent = event->getL0SubeventBySourceIDNum(i);
 
 	for (int j = subevent->getNumberOfParts() - 1; j >= 0; j--) {
