@@ -8,7 +8,6 @@
 #include "L2TriggerProcessor.h"
 
 #include <eventBuilding/Event.h>
-#include <cstdbool>
 #include <iostream>
 
 namespace na62 {
@@ -19,16 +18,15 @@ std::atomic<int> L2TriggerProcessor::rr(0);
 uint8_t L2TriggerProcessor::compute(Event* event) {
 	using namespace cream;
 
-	std::vector<uint16_t> localCreamIDsToRequestNonZSuppressedData;
-
-//for (int localCreamID = event->getNumberOfZSuppressedLKrEvents() - 1;
-//		localCreamID != -1; localCreamID--) {
-//	LKREvent* lkrEvent = event->getZSuppressedLKrEvent(localCreamID);
-//	localCreamIDsToRequestNonZSuppressedData.push_back(
-//			lkrEvent->getCrateCREAMID());
-//	const char* data = lkrEvent->getDataWithHeader();
-//	const uint dataSize = lkrEvent->getEventLength();
-//}
+//	std::vector<uint16_t> localCreamIDsToRequestNonZSuppressedData;
+//	for (int localCreamID = event->getNumberOfZSuppressedLkrFragments() - 1;
+//			localCreamID != -1; localCreamID--) {
+//		LkrFragment* lkrEvent = event->getZSuppressedLkrFragment(localCreamID);
+//		localCreamIDsToRequestNonZSuppressedData.push_back(
+//				lkrEvent->getCrateCREAMID());
+//		const char* data = lkrEvent->getDataWithHeader();
+//		const uint dataSize = lkrEvent->getEventLength();
+//	}
 
 //	async_requestNonZSuppressedLKrData(localCreamIDsToRequestNonZSuppressedData, event);
 
