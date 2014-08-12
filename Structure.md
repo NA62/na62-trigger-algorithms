@@ -61,10 +61,10 @@ for (int i = 0; i != SourceIDManager::NUMBER_OF_L0_DATA_SOURCES; i++) {
 std::vector<uint16_t> localCreamIDsToRequestNonZSuppressedData;
 for (int localCreamID = event->getNumberOfZSuppressedLkrFragments() - 1;
 		localCreamID != -1; localCreamID--) {
-	LkrFragment* lkrEvent = event->getZSuppressedLkrFragment(localCreamID);
+	LkrFragment* fragment = event->getZSuppressedLkrFragment(localCreamID);
 	localCreamIDsToRequestNonZSuppressedData.push_back(
-			lkrEvent->getCrateCREAMID());
-	const char* data = lkrEvent->getDataWithHeader();
-	const uint dataSize = lkrEvent->getEventLength();
+			fragment->getCrateCREAMID());
+	const char* data = fragment->getDataWithHeader();
+	const uint dataSize = fragment->getEventLength();
 }
 ```
