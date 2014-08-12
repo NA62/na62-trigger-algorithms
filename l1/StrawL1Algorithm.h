@@ -33,13 +33,13 @@ public:
 	
 private:
 // Functions for locating and getting information about the data
-	inline void getPart(int partNo) {m_MEPFragment = m_straw->getPart(partNo);}
+	inline void getPart(int partNo) {m_MEPFragment = m_straw->getFragment(partNo);}
 	inline void getData() {
 		const l0::MEPFragment_HDR* data = m_MEPFragment->getData();
 		m_hitData = ((char*) data) + sizeof(l0::MEPFragment_HDR);
 	}
 	void loadData(int partNo);
-	inline int getNumberOfParts() {return m_straw->getNumberOfParts();}
+	inline int getNumberOfParts() {return m_straw->getNumberOfFragments();}
 	inline uint getDataSize() {
 		if (m_MEPFragment == NULL) return 0;
 		return m_MEPFragment->getDataLength();
