@@ -3,8 +3,8 @@
 	<name>na62-trigger-algorithms</name>
 	<comment></comment>
 	<projects>
-		<project>na62-farm-lib</project>
 		<project>na62-trigger-algorithms</project>
+		<project>na62-farm-lib</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
