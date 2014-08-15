@@ -12,8 +12,6 @@
 #include <iostream>
 #include <cmath>
 
-//#include "StrawDetectorParameters.h"
-
 namespace na62 {
 
 class HitCoordinates {

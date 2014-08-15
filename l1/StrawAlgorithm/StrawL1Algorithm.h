@@ -17,8 +17,8 @@
 #include <cmath> // Allows the use of the pow function
 
 #include "StrawData.h"
-#include "HitCoordinates.h"
-#include "ParticlePath.h"
+#include "../HitCoordinates.h"
+#include "../ParticlePath.h"
 
 #include <eventBuilding/Event.h>
 #include <l0/MEPFragment.h>
@@ -33,12 +33,12 @@ public:
 	
 private:
 // Functions for locating and getting information about the data
-	inline void getPart(int partNo) {m_MEPFragment = m_straw->getFragment(partNo);}
-	inline void getData() {
+	inline void loadPart(int partNo) {m_MEPFragment = m_straw->getFragment(partNo);}
+	inline void loadData() {
 		const l0::MEPFragment_HDR* data = m_MEPFragment->getData();
 		m_hitData = ((char*) data) + sizeof(l0::MEPFragment_HDR);
 	}
-	void loadData(int partNo);
+	void loadPartAndData(int partNo);
 	inline int getNumberOfParts() {return m_straw->getNumberOfFragments();}
 	inline uint getDataSize() {
 		if (m_MEPFragment == NULL) return 0;

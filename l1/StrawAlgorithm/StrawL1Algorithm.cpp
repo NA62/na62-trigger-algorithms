@@ -24,19 +24,19 @@ void StrawL1Algorithm::compute() {
 	std::cout << std::endl << "Path Parameters: " << std::endl;
 	m_particlePath.printPathParameters();
 
-	std::cout << "Test 37" << std::endl; // Provides a way to quickly check if the program compiled successfully
+	std::cout << "Test 40" << std::endl; // Provides a way to quickly check if the program compiled successfully
 }
 
 // Private Functions
-void StrawL1Algorithm::loadData(int partNo) {
-	getPart(partNo);
-	getData();
+void StrawL1Algorithm::loadPartAndData(int partNo) {
+	loadPart(partNo);
+	loadData();
 }
 
 void StrawL1Algorithm::findHitsInChamber(int chamberNo) {
 	double hitDisplacementArray[4];
 	for (int i = chamberNo*8; i < (chamberNo+1)*8; i+=2) {
-		loadData(i);
+		loadPartAndData(i);
 		StrawData strawData (m_hitData);
 		if (strawData.getNumberOfHits() == 0) {
 			hitDisplacementArray[(int) floor((i%8)/2.0)] = 0.0;

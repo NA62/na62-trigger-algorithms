@@ -12,8 +12,6 @@
 #include <l0/MEPFragment.h>
 #include <l0/Subevent.h>
 
-#include "StrawL1Algorithm.h"
-
 namespace na62 {
 
 uint L1TriggerProcessor::L1_DOWNSCALE_FACTOR = 0;

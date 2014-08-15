@@ -14,6 +14,8 @@
 #include <cstdint>
 #include <iostream>
 
+#include "StrawAlgorithm/StrawL1Algorithm.h"
+
 namespace na62 {
 
 class EventBuilder;

@@ -12,7 +12,7 @@
 #include <iostream>
 #include <cmath>
 
-#include "StrawDetectorParameters.h"
+#include "StrawAlgorithm/StrawDetectorParameters.h"
 #include "HitCoordinates.h"
 
 namespace na62 {
