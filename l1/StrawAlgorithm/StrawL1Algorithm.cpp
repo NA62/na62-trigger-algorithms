@@ -1,9 +1,13 @@
 /*
- * StrawL1Algorithm.cpp
- *
- *  Created on: Aug 7, 2014
- *      Author: Thomas Hancock (Thomas.hancock@cern.ch)
- */
+* StrawL1Algorithm.cpp
+*
+*  Created on: Aug 7, 2014
+*      Author: Thomas Hancock (Thomas.hancock@cern.ch)
+*      Modified: Laura Rogers (Laura.Kathryn.Rogers@cern.ch)
+*
+*      Please Note: Thomas was a summer student who finished on the 15/8/14. While he can still answer questions, he is no longer working on the code.
+*/ 
+
  
 #include "StrawL1Algorithm.h"
 
@@ -24,20 +28,59 @@ void StrawL1Algorithm::compute() {
 	std::cout << std::endl << "Path Parameters: " << std::endl;
 	m_particlePath.printPathParameters();
 
-	std::cout << "Test 40" << std::endl; // Provides a way to quickly check if the program compiled successfully
+	std::cout << "Test 52" << std::endl; // Provides a way to quickly check if the program compiled successfully
+	
+	std::vector <double> vectorX1(0);//defines four vectors, one for each view in chamber one, X,Y,V,U
+	std::vector <double> vectorY1(0);	
+	std::vector <double> vectorV1(0);
+	std::vector <double> vectorU1(0); 
+	
+	std::vector <double> vectorX2(0);//defines four vectors, one for each view in chamber two, X,Y,V,U
+	std::vector <double> vectorY2(0);	
+	std::vector <double> vectorV2(0);
+	std::vector <double> vectorU2(0); 
+	std::cout<<getNumberOfSrbs()<<std::endl; //returns number of Srbs=32
+	for (int i=0;i<16;i++) {
+		loadSrbAndData(i);
+		StrawData strawData(m_hitData);		
+		if (i%8==0||i%8==1) {
+			//std::cout<<"For  "<<i<<std::endl;
+			//std::cout<< (double) strawData.getStrawDistance()<<std::endl;
+			vectorX1.push_back(strawData.getStrawDistance());	
+		}
+		else if (i%8==2||i%8==3) {	
+			//std::cout<<"For  "<<i<<std::endl;
+			//std::cout<< (double) strawData.getStrawDistance()<<std::endl;
+			vectorY1.push_back(strawData.getStrawDistance());	
+		}
+		else if (i%8==4||i%8==5) {	
+			//std::cout<<"For  "<<i<<std::endl;
+			//std::cout<< (double) strawData.getStrawDistance()<<std::endl;
+			vectorV1.push_back(strawData.getStrawDistance());
+		}
+		else if (i%8==6||i%8==7) {	
+			//std::cout<<"For  "<<i<<std::endl;
+			//std::cout<< (double) strawData.getStrawDistance()<<std::endl;
+			vectorU1.push_back(strawData.getStrawDistance());
+		}
+		
+		/* need to add in the other chamber*/
+		
+		
+	}
 }
 
 // Private Functions
-void StrawL1Algorithm::loadPartAndData(int partNo) {
-	loadPart(partNo);
+void StrawL1Algorithm::loadSrbAndData(int srbNo) {
+	loadSrb(srbNo);
 	loadData();
 }
 
 void StrawL1Algorithm::findHitsInChamber(int chamberNo) {
 	double hitDisplacementArray[4];
 	for (int i = chamberNo*8; i < (chamberNo+1)*8; i+=2) {
-		loadPartAndData(i);
-		StrawData strawData (m_hitData);
+		loadSrbAndData(i);
+		StrawData strawData(m_hitData);
 		if (strawData.getNumberOfHits() == 0) {
 			hitDisplacementArray[(int) floor((i%8)/2.0)] = 0.0;
 		} else {

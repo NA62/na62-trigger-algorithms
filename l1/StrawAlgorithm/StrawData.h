@@ -27,7 +27,7 @@ public:
 	void loadHit(int hitNum);
 	inline int getSrbID(uint8_t chamber, uint8_t view, uint8_t halfView);
 	double getStrawDistance();
-// getVariable functions
+// getter functions
 	inline uint8_t getL0TriggerDecision() {return m_L0TriggerDecision;}
 	inline uint8_t getChamber() {return m_chamber;}
 	inline uint8_t getView() {return m_view;}
