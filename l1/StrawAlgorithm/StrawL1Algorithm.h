@@ -15,6 +15,7 @@
 #include <cstring> // Allows the use of memcpy
 #include <bitset> // Allows the bitset type to be used
 #include <cmath> // Allows the use of the pow function
+#include <vector>
 
 #include "StrawData.h"
 #include "../HitCoordinates.h"
