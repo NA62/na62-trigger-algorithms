@@ -20,6 +20,15 @@
 
 namespace na62 {
 
+struct STRAW_DATA_HDR {
+	uint16_t packetLength;
+	uint8_t triggerTypeWord;
+	uint8_t chamber:2;
+	uint8_t view:2;
+	uint8_t halfView:2;
+	uint8_t reserved:2;
+} __attribute__ ((__packed__));
+
 /* WARNING: When reading in the file, the endianness of each byte has been reversed */
 class StrawData {
 public:
@@ -28,11 +37,11 @@ public:
 	inline int getSrbID(uint8_t chamber, uint8_t view, uint8_t halfView);
 	double getStrawDistance();
 // getter functions
-	inline uint8_t getL0TriggerDecision() {return m_L0TriggerDecision;}
-	inline uint8_t getChamber() {return m_chamber;}
-	inline uint8_t getView() {return m_view;}
-	inline uint8_t getHalfView() {return m_halfView;}
-	inline uint16_t getPacketLength() {return m_packetLength;}
+	inline uint8_t getL0TriggerDecision() {return m_strawDataHdr.triggerTypeWord;}
+	inline uint8_t getChamber() {return m_strawDataHdr.chamber;}
+	inline uint8_t getView() {return m_strawDataHdr.view;}
+	inline uint8_t getHalfView() {return m_strawDataHdr.halfView;}
+	inline uint16_t getPacketLength() {return m_strawDataHdr.packetLength;}
 	inline uint16_t getCoarseTime() {return m_coarseTime;}
 	inline uint8_t getError() {return m_error;}
 	inline uint8_t getStrawID() {return m_strawID;}
@@ -53,21 +62,22 @@ public:
 	void printHit();
 	
 private:
-	uint8_t readL0TriggerDecision();
-	uint8_t readChamber();
-	uint8_t readView();
-	uint8_t readHalfView();
-	uint16_t readPacketLength();
-	uint32_t readCoarseTime();
+	void readL0TriggerDecision();
+	void readChamber();
+	void readView();
+	void readHalfView();
+	void readPacketLength();
+	void readCoarseTime();
 	void readNEdgesSlots();
 	void readDataWord(int hitNum);
 	void initialiseHitVariables();
 	double decodeFineTime(int tempFineTime);
 	void separateStrawAndPlaneIDs();
 // Header Variables
-	uint8_t m_L0TriggerDecision, m_chamber, m_view, m_halfView;
-	uint16_t m_packetLength = 0;
+//	uint8_t m_strawDataHdr.triggerTypeWord, m_chamber, m_view, m_halfView;
+//	uint16_t m_packetLength = 0;
 	uint32_t m_coarseTime;
+	STRAW_DATA_HDR m_strawDataHdr;
 // Data word variables
 	uint8_t m_error;
 	uint8_t m_strawID;

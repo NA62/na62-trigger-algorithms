@@ -60,7 +60,7 @@ namespace na62 {
 		std::cout << std::endl << "Path Parameters: " << std::endl;
 		m_particlePath.printPathParameters();
 
-		std::cout << "Test 63" << std::endl; // Provides a way to quickly check if the program compiled successfully
+		std::cout << "Test 74" << std::endl; // Provides a way to quickly check if the program compiled successfully
 		
 		std::vector <double> vectorX1(0); //defines eight vectors, one for each view in chamber one and again for chamber 2, X,Y,V,U
 		std::vector <double> vectorY1(0);	
@@ -83,15 +83,15 @@ namespace na62 {
 		vectors.push_back(&vectorV2);
 		vectors.push_back(&vectorU2);
 				
-		std::cout<< "VECTOR SIZE " << vectors.size()<<std::endl; //Ensures the vector is filled
+		//std::cout<< "VECTOR SIZE " << vectors.size()<<std::endl; //Ensures the vector is filled
 				
 		int j;
 		for(int i=0;i<16;i++) { 
-			j=(floor) (i/2);
+			j=floor (i/2);
 			loadSrbAndData(i);
 			StrawData strawData(m_hitData);		
 			vectors[j]->push_back(strawData.getStrawDistance());	
-			std::cout<<"For SRB "<<(i+1)<<" the hit coordinate is... "<< (double) strawData.getStrawDistance()<<std::endl;			
+			//std::cout<<"For SRB "<<(i+1)<<" the hit coordinate is... "<< (double) strawData.getStrawDistance()<<std::endl;			
 		}  
 	} 
 

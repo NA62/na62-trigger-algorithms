@@ -11,13 +11,13 @@ namespace na62 {
 // Public Functions
 StrawData::StrawData (char* pointerToData) {
 	dataPointer = pointerToData;
-	m_packetLength = readPacketLength();
-	m_numberOfHits = (int) (m_packetLength - 24)/2.0;
-	m_L0TriggerDecision = readL0TriggerDecision();
-	m_chamber = readChamber();
-	m_view = readView();
-	m_halfView = readHalfView();
-	m_coarseTime = readCoarseTime();
+	readPacketLength();
+	m_numberOfHits = (int) (m_strawDataHdr.packetLength - 24)/2.0;
+	readL0TriggerDecision();
+	readChamber();
+	readView();
+	readHalfView();
+	readCoarseTime();
 	readNEdgesSlots();
 	if (m_numberOfHits != 0) loadHit(0); // Loads the first hit automatically if it exists.
 }
@@ -39,17 +39,17 @@ inline int StrawData::getSrbID(uint8_t chamber, uint8_t view, uint8_t halfView) 
 double StrawData::getStrawDistance() { 
 	// Note: This code was written when the straw mapping was not finalised, and so this function will need modifying once the final straw mapping is done
 	double strawDisplacement = m_strawID*strawparameters::STRAW_SPACING;
-	if (strawDisplacement > (strawparameters::STRAW_LENGTH/2.0)+strawparameters::CENTRAL_GAP_DISPLACEMENT[m_view][m_chamber]) {
+	if (strawDisplacement > (strawparameters::STRAW_LENGTH/2.0)+strawparameters::CENTRAL_GAP_DISPLACEMENT[m_strawDataHdr.view][m_strawDataHdr.chamber]) {
 		strawDisplacement += strawparameters::CENTRAL_GAP_WIDTH;
 	}
-	strawDisplacement += strawparameters::PLANE_INDENTS[m_planeID + 2*m_halfView];
+	strawDisplacement += strawparameters::PLANE_INDENTS[m_planeID + 2*m_strawDataHdr.halfView];
 	return strawDisplacement - (strawparameters::STRAW_LENGTH/2.0);
 }
 
 void StrawData::printHeader() {
-	std::cout << " PacketLength = " << (int) m_packetLength << std::endl;
-	std::cout << " L0TriggerDecision = " << (int) m_L0TriggerDecision << std::endl;
-	std::cout << " Chamber, View, Halfview = " << (int) m_chamber << ", " << (int) m_view << ", " << (int) m_halfView << std::endl;
+	std::cout << " PacketLength = " << (int) m_strawDataHdr.packetLength << std::endl;
+	std::cout << " L0TriggerDecision = " << (int) m_strawDataHdr.triggerTypeWord << std::endl;
+	std::cout << " Chamber, View, Halfview = " << (int) m_strawDataHdr.chamber << ", " << (int) m_strawDataHdr.view << ", " << (int) m_strawDataHdr.halfView << std::endl;
 	std::cout << " CoarseTime = " << (int) m_coarseTime << std::endl;
 }
 
@@ -75,50 +75,50 @@ void StrawData::printHit() {
 }
 
 // Private Functions
-uint8_t StrawData::readL0TriggerDecision() {
+void StrawData::readL0TriggerDecision() {
 	std::bitset<8> tempByte;
-	uint8_t m_L0TriggerDecision = 0;
+	uint8_t L0TriggerDecision = 0;
 	memcpy(&tempByte, (dataPointer + 2), 1);
 	for (int i = 7; i >= 0; i--) { //Reversed to deal with the swap in endianness
-		if (tempByte[7-i] == 1) m_L0TriggerDecision += (int) pow(2, i);
+		if (tempByte[7-i] == 1) L0TriggerDecision += (int) pow(2, i);
 	}
-	return m_L0TriggerDecision;
+	m_strawDataHdr.triggerTypeWord=L0TriggerDecision;
 }
 
-uint8_t StrawData::readChamber() {
+void StrawData::readChamber() {
 	std::bitset<8> tempBinary;
 	memcpy(&tempBinary, dataPointer + 3, 1);
-	return (2*tempBinary[0] + 1*tempBinary[1]);
+	m_strawDataHdr.chamber=(2*tempBinary[0] + 1*tempBinary[1]);
 }
 
-uint8_t StrawData::readView() {
+void StrawData::readView() {
 	std::bitset<8> tempBinary;
 	memcpy(&tempBinary, dataPointer + 3, 1);
-	return (2*tempBinary[2] + 1*tempBinary[3]);
+	m_strawDataHdr.view=(2*tempBinary[2] + 1*tempBinary[3]);
 }
 
-uint8_t StrawData::readHalfView() {
+void StrawData::readHalfView() {
 	std::bitset<8> tempBinary;
 	memcpy(&tempBinary, dataPointer + 3, 1);
-	return tempBinary[4];
+	m_strawDataHdr.halfView=tempBinary[4];
 }
 
-uint16_t StrawData::readPacketLength() {
+void StrawData::readPacketLength() {
 	std::bitset<8> tempBinary1, tempBinary2;
 	memcpy(&tempBinary1, dataPointer, 1);
 	memcpy(&tempBinary2, (dataPointer + 1), 1);
-	uint8_t m_packetLength = 0;
+	uint8_t packetLength = 0;
 	for (int i = 15; i >= 0; i--) { //Reversed to deal with the swap in endianness
 		if (i > 7) {
-			if (tempBinary2[15-i] == 1) m_packetLength += (int) pow(2, i);
+			if (tempBinary2[15-i] == 1) packetLength += (int) pow(2, i);
 		} else {
-			if (tempBinary1[7-i] == 1) m_packetLength += (int) pow(2, i);
+			if (tempBinary1[7-i] == 1) packetLength += (int) pow(2, i);
 		}
 	}
-	return m_packetLength;
+	m_strawDataHdr.packetLength = packetLength;
 }
 
-uint32_t StrawData::readCoarseTime() {
+void StrawData::readCoarseTime() {
 	std::bitset<8> tempByte;
 	std::bitset<32> tempBinary;
 	for (int i = 0; i < 4; i++) {
@@ -131,15 +131,15 @@ uint32_t StrawData::readCoarseTime() {
 	for (int i = 0; i < 32; i++) { //Reversed to deal with the swap in endianness
 		if (tempBinary[i] == 1) CoarseTime += (int) pow(2, i);
 	}
-	return CoarseTime;
+	m_coarseTime = CoarseTime;
 }
 
 void StrawData::readNEdgesSlots() {
-	if (m_packetLength == 0) m_packetLength = readPacketLength(); //Ensures the m_packetLength has been accessed
+	if (m_strawDataHdr.packetLength == 0) readPacketLength(); //Ensures the m_strawDataHdr.packetLength has been accessed
 	for (int i = 0; i < 16; i++) m_nEdgesArray[i] = 0;
 	std::bitset<8> tempByte;
 	for (int i = 0; i < 16; i++) {
-		memcpy(&tempByte, dataPointer+m_packetLength-16+i, 1);
+		memcpy(&tempByte, dataPointer+m_strawDataHdr.packetLength-16+i, 1);
 		for (int j = 7; j >= 0; j--) { //Reversed to deal with the swap in endianness
 			if (tempByte[7-j] == 1) m_nEdgesArray[i] += (int) pow(2, j);
 		}
