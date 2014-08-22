@@ -48,7 +48,7 @@ public:
 	inline uint8_t getPlaneID() {return m_planeID;}
 	inline uint8_t getEdgeType() {return m_edgeType;}
 	inline double getFineTime () {return m_fineTime;}
-	inline uint8_t getNEdgesSlot (int n) {
+	inline uint8_t getNEdgesSlot (int n) { 
 		if (n < 16) {
 			return m_nEdgesArray[n];
 		} else {

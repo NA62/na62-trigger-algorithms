@@ -1,0 +1,43 @@
+/*
+ * StrawViewVectors.h
+ *
+ *  Created on: Aug 20, 2014
+ *      Author: Laura Rogers (laura.kathryn.rogers@cern.ch)
+ */
+ 
+#pragma once
+#ifndef STRAWVIEWVECTOR_H_
+#define STRAWVIEWVECTOR_H_
+
+#include <sys/types.h>
+#include <cstdint>
+#include <iostream>
+#include <vector>
+
+#include "StrawData.h"
+
+namespace na62 {
+
+class StrawViewVectors {
+public:
+	StrawViewVectors();
+	void pushBackVector(int i, double input);
+	std::vector <std::vector <double> * > vectors; //this vector contains all eight previous vectors, added below	
+	std::vector <double> vectorX1; //defines eight vectors, one for each view in chamber one and again for chamber 2, X,Y,V,U
+	std::vector <double> vectorY1;	
+	std::vector <double> vectorV1;
+	std::vector <double> vectorU1; 
+	std::vector <double> vectorX2;
+	std::vector <double> vectorY2;	
+	std::vector <double> vectorV2;
+	std::vector <double> vectorU2; 
+	
+private:
+	void initialiseViewVector();
+	// Member Variables
+
+}; 
+
+} /* namespace na62 */
+
+#endif /* STRAWVIEWVECTOR_H_ */

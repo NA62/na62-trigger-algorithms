@@ -19,38 +19,6 @@ namespace na62 {
 		m_hitData = NULL;
 	}
 	
-	/*void initialiseViewVectors() {
-		std::vector <double> vectorX1(0); //defines eight vectors, one for each view in chamber one and again for chamber 2, X,Y,V,U
-		std::vector <double> vectorY1(0);	
-		std::vector <double> vectorV1(0);
-		std::vector <double> vectorU1(0); 
-		std::vector <double> vectorX2(0);
-		std::vector <double> vectorY2(0);	
-		std::vector <double> vectorV2(0);
-		std::vector <double> vectorU2(0); 
-		std::cout<<getNumberOfSrbs()<<std::endl; //returns number of Srbs=32
-		
-		std::vector <std::vector <double> * > vectors(0); //this vector contains all eight previous vectors, added below
-				
-		vectors.push_back(&vectorX1);
-		vectors.push_back(&vectorY1); 
-		vectors.push_back(&vectorV1);
-		vectors.push_back(&vectorU1);
-		vectors.push_back(&vectorX2);
-		vectors.push_back(&vectorY2);
-		vectors.push_back(&vectorV2);
-		vectors.push_back(&vectorU2);
-				
-		int j;
-		for(int i=0;i<16;i++) {
-			j=(floor) (i/2);
-			loadSrbAndData(i);
-			StrawData strawData(m_hitData);		
-			vectors[j]->push_back(strawData.getStrawDistance());	
-			std::cout<<"For SRB "<<i<<"... "<< (double) strawData.getStrawDistance()<<std::endl;			
-		}  
-	} */
-
 	void StrawL1Algorithm::compute() {
 		findHitsInChamber(0);
 		findHitsInChamber(1);
@@ -58,42 +26,39 @@ namespace na62 {
 
 		printBothHitCoordinates();
 		std::cout << std::endl << "Path Parameters: " << std::endl;
-		m_particlePath.printPathParameters();
+		m_particlePath.printPathParameters(); 
 
-		std::cout << "Test 74" << std::endl; // Provides a way to quickly check if the program compiled successfully
+		std::cout << "Test 105" << std::endl; // Provides a way to quickly check if the program compiled successfully
+							
+		StrawViewVectors strawViewVectors;
 		
-		std::vector <double> vectorX1(0); //defines eight vectors, one for each view in chamber one and again for chamber 2, X,Y,V,U
-		std::vector <double> vectorY1(0);	
-		std::vector <double> vectorV1(0);
-		std::vector <double> vectorU1(0); 
-		std::vector <double> vectorX2(0);
-		std::vector <double> vectorY2(0);	
-		std::vector <double> vectorV2(0);
-		std::vector <double> vectorU2(0);  
-		std::cout<<getNumberOfSrbs()<<std::endl; //returns number of Srbs=32
-		
-		std::vector <std::vector <double> * > vectors(0); //vector which stores the eight vectors defined above, assigned below
-				
-		vectors.push_back(&vectorX1);
-		vectors.push_back(&vectorY1); 
-		vectors.push_back(&vectorV1);
-		vectors.push_back(&vectorU1);
-		vectors.push_back(&vectorX2);
-		vectors.push_back(&vectorY2);
-		vectors.push_back(&vectorV2);
-		vectors.push_back(&vectorU2);
-				
-		//std::cout<< "VECTOR SIZE " << vectors.size()<<std::endl; //Ensures the vector is filled
-				
 		int j;
-		for(int i=0;i<16;i++) { 
-			j=floor (i/2);
+		for(int i = 0; i < 16; i++) { 
+			j=(int) (i/2.0);
 			loadSrbAndData(i);
-			StrawData strawData(m_hitData);		
-			vectors[j]->push_back(strawData.getStrawDistance());	
-			//std::cout<<"For SRB "<<(i+1)<<" the hit coordinate is... "<< (double) strawData.getStrawDistance()<<std::endl;			
-		}  
-	} 
+			StrawData strawData(m_hitData);	
+			strawViewVectors.pushBackVector(j, strawData.getStrawDistance());
+			std::cout << "For SRB "<< i << " the hit coordinate is:  " << strawData.getStrawDistance() << std::endl;
+		} 
+				
+		std::cout<<"X1[0] "<<strawViewVectors.vectorX1[0]<<std::endl;
+		std::cout<<"X1[1] "<<strawViewVectors.vectorX1[1]<<std::endl;
+		std::cout<<"Y1[0] "<<strawViewVectors.vectorY1[0]<<std::endl;
+		std::cout<<"Y1[1] "<<strawViewVectors.vectorY1[1]<<std::endl;
+		std::cout<<"V1[0] "<<strawViewVectors.vectorV1[0]<<std::endl;
+		std::cout<<"V1[1] "<<strawViewVectors.vectorV1[1]<<std::endl;
+		std::cout<<"U1[0] "<<strawViewVectors.vectorU1[0]<<std::endl;
+		std::cout<<"U1[1] "<<strawViewVectors.vectorU1[1]<<std::endl;		
+		std::cout<<"X2[0] "<<strawViewVectors.vectorX2[0]<<std::endl;
+		std::cout<<"X2[1] "<<strawViewVectors.vectorX2[1]<<std::endl;
+		std::cout<<"Y2[0] "<<strawViewVectors.vectorY2[0]<<std::endl;
+		std::cout<<"Y2[1] "<<strawViewVectors.vectorY2[1]<<std::endl;
+		std::cout<<"V2[0] "<<strawViewVectors.vectorV2[0]<<std::endl;
+		std::cout<<"V2[1] "<<strawViewVectors.vectorV2[1]<<std::endl;
+		std::cout<<"U2[0] "<<strawViewVectors.vectorU2[0]<<std::endl;
+		std::cout<<"U2[1] "<<strawViewVectors.vectorU2[1]<<std::endl;
+		
+	}
 
 	// Private Functions
 	void StrawL1Algorithm::loadSrbAndData(int srbNo) {

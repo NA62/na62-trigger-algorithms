@@ -20,6 +20,7 @@
 #include "StrawData.h"
 #include "../HitCoordinates.h"
 #include "../ParticlePath.h"
+#include "StrawViewVectors.h"
 
 #include <eventBuilding/Event.h>
 #include <l0/MEPFragment.h>

@@ -19,7 +19,7 @@ StrawData::StrawData (char* pointerToData) {
 	readHalfView();
 	readCoarseTime();
 	readNEdgesSlots();
-	if (m_numberOfHits != 0) loadHit(0); // Loads the first hit automatically if it exists.
+	loadHit(0); // Loads the first hit automatically
 }
 
 void StrawData::loadHit(int hitNum) {
@@ -38,12 +38,16 @@ inline int StrawData::getSrbID(uint8_t chamber, uint8_t view, uint8_t halfView) 
 
 double StrawData::getStrawDistance() { 
 	// Note: This code was written when the straw mapping was not finalised, and so this function will need modifying once the final straw mapping is done
-	double strawDisplacement = m_strawID*strawparameters::STRAW_SPACING;
-	if (strawDisplacement > (strawparameters::STRAW_LENGTH/2.0)+strawparameters::CENTRAL_GAP_DISPLACEMENT[m_strawDataHdr.view][m_strawDataHdr.chamber]) {
-		strawDisplacement += strawparameters::CENTRAL_GAP_WIDTH;
+	if (m_error == 255) { // Prevent the distance trying to be set when the hit did not load correctly.
+		return 0;
+	} else {
+		double strawDisplacement = m_strawID*strawparameters::STRAW_SPACING;
+		if (strawDisplacement > (strawparameters::STRAW_LENGTH/2.0)+strawparameters::CENTRAL_GAP_DISPLACEMENT[m_strawDataHdr.view][m_strawDataHdr.chamber]) {
+			strawDisplacement += strawparameters::CENTRAL_GAP_WIDTH;
+		}  
+		strawDisplacement += strawparameters::PLANE_INDENTS[m_planeID+ 2* (int) m_strawDataHdr.halfView]; 
+		return strawDisplacement - (strawparameters::STRAW_LENGTH/2.0);
 	}
-	strawDisplacement += strawparameters::PLANE_INDENTS[m_planeID + 2*m_strawDataHdr.halfView];
-	return strawDisplacement - (strawparameters::STRAW_LENGTH/2.0);
 }
 
 void StrawData::printHeader() {
