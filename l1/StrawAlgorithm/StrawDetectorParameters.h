@@ -37,6 +37,8 @@ const double PLANE_INDENTS[4] = {0.0, 8.8, 13.2, 4.4}; // Warning: Need to check
 
 const double CHAMBERS_ONE_AND_TWO_SPACING = 198.0699 - 183.7049; // m. Calculated from the end of 1 to the end of 2.
 
+const double DECAY_LENGTH = 65000; //mm
+
 } /* namespace strawparameters */
 } /* namespace na62 */
 

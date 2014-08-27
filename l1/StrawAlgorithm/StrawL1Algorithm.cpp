@@ -10,6 +10,7 @@
 
 
 #include "StrawL1Algorithm.h"
+#include "StrawDetectorParameters.h"
 
 namespace na62 {
 	// Public Functions
@@ -28,36 +29,47 @@ namespace na62 {
 		std::cout << std::endl << "Path Parameters: " << std::endl;
 		m_particlePath.printPathParameters(); 
 
-		std::cout << "Test 105" << std::endl; // Provides a way to quickly check if the program compiled successfully
+		std::cout << "Test 131" << std::endl; // Provides a way to quickly check if the program compiled successfully
 							
 		StrawViewVectors strawViewVectors;
 		
+		//THIS WORKS FOR THE FIRST HIT IN THE SRB
 		int j;
 		for(int i = 0; i < 16; i++) { 
 			j=(int) (i/2.0);
 			loadSrbAndData(i);
 			StrawData strawData(m_hitData);	
 			strawViewVectors.pushBackVector(j, strawData.getStrawDistance());
-			std::cout << "For SRB "<< i << " the hit coordinate is:  " << strawData.getStrawDistance() << std::endl;
-		} 
-				
-		std::cout<<"X1[0] "<<strawViewVectors.vectorX1[0]<<std::endl;
-		std::cout<<"X1[1] "<<strawViewVectors.vectorX1[1]<<std::endl;
-		std::cout<<"Y1[0] "<<strawViewVectors.vectorY1[0]<<std::endl;
-		std::cout<<"Y1[1] "<<strawViewVectors.vectorY1[1]<<std::endl;
-		std::cout<<"V1[0] "<<strawViewVectors.vectorV1[0]<<std::endl;
-		std::cout<<"V1[1] "<<strawViewVectors.vectorV1[1]<<std::endl;
-		std::cout<<"U1[0] "<<strawViewVectors.vectorU1[0]<<std::endl;
-		std::cout<<"U1[1] "<<strawViewVectors.vectorU1[1]<<std::endl;		
-		std::cout<<"X2[0] "<<strawViewVectors.vectorX2[0]<<std::endl;
-		std::cout<<"X2[1] "<<strawViewVectors.vectorX2[1]<<std::endl;
-		std::cout<<"Y2[0] "<<strawViewVectors.vectorY2[0]<<std::endl;
-		std::cout<<"Y2[1] "<<strawViewVectors.vectorY2[1]<<std::endl;
-		std::cout<<"V2[0] "<<strawViewVectors.vectorV2[0]<<std::endl;
-		std::cout<<"V2[1] "<<strawViewVectors.vectorV2[1]<<std::endl;
-		std::cout<<"U2[0] "<<strawViewVectors.vectorU2[0]<<std::endl;
-		std::cout<<"U2[1] "<<strawViewVectors.vectorU2[1]<<std::endl;
+			//std::cout << "For SRB "<< i << " the hit coordinate is:  " << strawData.getStrawDistance() << std::endl;
+		}	
+			
+		/*
+		* This code first loops through the 'vectors' vector, for each vector, it then loops
+		* through all the elements, if this vector is in chamber 1, it then loops through the
+		* chamber 2 vectors to find whether the path falls within the decay length, if it is
+		* in chamber 2, it looks in chamber 1. 
+		*/ 
 		
+		double  theta=0.246, error=0.01;
+		int temp,number=0;
+		for(int i=0;i<strawViewVectors.vectors.size();i++) { 
+			for(int j=0; j<strawViewVectors.getVectorSize(i); j++) {
+				double length1=strawViewVectors.getVectorValue(i,j)/tan(theta);
+				if( i>=0||i<=3) temp=4;
+				else {temp=0;}
+				for(int k=temp;k<(temp+4);k++) {
+					for(int l=0; l<strawViewVectors.getVectorSize(k); l++) {
+						double length2=strawViewVectors.getVectorValue(k,l)/tan(theta);
+						if ((length1>((1-error)*length2))&&(length1<((1+error)*length2))&&(length1<strawparameters::DECAY_LENGTH)) {
+							number++;
+							std::cout<<"Found Path"<<std::endl; //Replace this with trigger decision and outputting to file
+						} 
+					}
+				}
+			}
+		}   
+		std::cout<<"The number of path matches is... "<<number<<std::endl;
+			
 	}
 
 	// Private Functions

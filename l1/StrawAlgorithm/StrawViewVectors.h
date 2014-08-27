@@ -21,6 +21,11 @@ namespace na62 {
 class StrawViewVectors {
 public:
 	StrawViewVectors();
+	
+	
+	inline double getVectorSize(int i) {return vectors.at(i)->size();}
+	inline double getVectorValue(int i, int j) {return vectors.at(i)->at(j);}
+	
 	void pushBackVector(int i, double input);
 	std::vector <std::vector <double> * > vectors; //this vector contains all eight previous vectors, added below	
 	std::vector <double> vectorX1; //defines eight vectors, one for each view in chamber one and again for chamber 2, X,Y,V,U
