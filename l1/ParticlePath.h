@@ -22,8 +22,12 @@ public:
 	ParticlePath();
 	ParticlePath(HitCoordinates Chamber1Hit, HitCoordinates Chamber2Hit);
 	ParticlePath(double xCoor1, double xCoor2, double yCoor1, double yCoor2);
-	inline double getPathLength() {return m_pathLength;}
-	inline double getPathAngle() {return m_angleFromZAxis;}
+	inline double getPathLength() {
+		return m_pathLength;
+	}
+	inline double getPathAngle() {
+		return m_angleFromZAxis;
+	}
 	void printPathParameters();
 	void printCoordinateDifferences();
 	void initialise(double xCoor1, double xCoor2, double yCoor1, double yCoor2);

@@ -18,14 +18,22 @@ class HitCoordinates {
 public:
 	HitCoordinates();
 	HitCoordinates(double arrayOfCoordinates[]);
-	inline double getX() {return m_x;}
-	inline double getY() {return m_y;}
-	inline double getV() {return m_v;}
-	inline double getU() {return m_u;}
+	inline double getX() {
+		return m_x;
+	}
+	inline double getY() {
+		return m_y;
+	}
+	inline double getV() {
+		return m_v;
+	}
+	inline double getU() {
+		return m_u;
+	}
 	void setCoordinates(double x, double y, double v, double u);
 	void setCoordinates(double arrayOfCoordinates[]);
 	void printCoordinates();
-	
+
 private:
 	void fillMissingCoordinate();
 	double m_x;
