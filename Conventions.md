@@ -10,3 +10,46 @@ Here's a rough list of conventions I try to stick to:
  - Instance variables are lower case and end with ```_``` e.g. ```int someVar_;```
  - Class names are capitalized as in ```class SomeClass {```
  - Method names are in lower case e.g. ```void doSomething() {```
+
+## C++11
+Use c++11 syntax and objects like in following examples:
+- Range-based loops:
+```
+std::vector<int> v = someFunction();
+for (int i: v) {
+    std::cout << i << std::endl;
+}
+```
+
+- Type inference: 
+```
+auto myMap = getSomeMap();
+for (auto& keyValue : myMap) {
+    std::cout << "Key: "<< keyValue.first << ", value: " << keyValue.second << std::endl;
+}
+```
+
+- Use move semantics and rvalue references:
+```
+void addElement(Element&& e) {
+    myVector.push_back(std::move(e));
+}
+```
+
+- Use ```std::unordered_set``` and ```std::unordered_map``` with O(const) access time instead of the binary tree implementations (```std::set``` and ```std::map```) with O(n*log(n)) access time if you have large collections.
+
+- Consider using ```std::unique_ptr```, ```std::shared_ptr``` and  ```std::make_shared```
+
+- Nested constructors: 
+```
+class MyClass  {
+    int num_;
+public:
+    MyClass(int theNumber) : num_(theNumber) {}
+    MyClass() : MyClass(23) {}
+};
+```
+
+- Use ```nullptr``` instead of ```NULL``` 
+- Initializer lists: ```MyStruct vector = {0.23f, 42.5f};```
+- See more at [wiki](http://en.wikipedia.org/wiki/C%2B%2B11)
