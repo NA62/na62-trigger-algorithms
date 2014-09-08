@@ -5,6 +5,7 @@
 - [Getting the code](#getting-the-code)
   - [Forking within github](#forking-within-github)
   - [Cloning directly](#cloning-directly)
+  - [git branches](#git-branches)
 - [Dependencies](#dependencies)
   - [Compiler](#compiler)
 - [Compiling](#compiling)
@@ -56,6 +57,11 @@ The trigger-algorithms project is only a library linked by na62-trigger-test and
 ```
 git clone https://github.com/NA62/na62-farm-lib.git
 git clone https://github.com/NA62/na62-trigger-test.git
+```
+
+Additionally you need to have boost and tbb installed:
+```bash
+sudo apt-get install libboost-dev libtbb-dev
 ```
 
 ## Compiler
