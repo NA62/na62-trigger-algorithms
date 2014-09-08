@@ -46,7 +46,7 @@ All PC-Farm frameworks are developed based on the git flow paradigm. To get fami
  * http://danielkummer.github.io/git-flow-cheatsheet/ (more about git flow)
 
 The short summary would be:
-Always code in specific branches like ```feature/yourFeatre``` where ```yourFeatre``` should describe the feature you're currently developing. I recommend to install the git-flow package so that you can use following commands:
+Always code in specific branches like ```feature/yourFeature``` where ```yourFeature``` should describe the feature you're currently developing. I recommend to install the git-flow package so that you can use following commands:
  * ```git flow init``` (use standard settings)
  * ```git flow feature start yourFeature```
  * ```git flow feature finish yourFeature```
