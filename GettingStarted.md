@@ -13,6 +13,7 @@
   - [Importing the projects](#importing-the-projects)
   - [Building and running](#building-and-running)
   - [Configuring trigger-test](#configuring-trigger-test)
+- [Conventions](#conventions)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -119,3 +120,7 @@ To specify these options while running within eclipse, you should click the righ
 After selecting the `na62-trigger-test` under `C/C++ Application` you need to select the `Arguments` tab where you can add all the arguments you like:
 
 ![](https://raw.githubusercontent.com/NA62/na62-farm-docs/master/wiki-images/eclipse/runConfigs2.png)
+
+# Conventions
+Before starting to code please visit the Conventions page [[here|Conventions]]!
+
