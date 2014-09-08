@@ -36,13 +36,13 @@ After you've implemented your changes you can send a Pull Request. I will have a
 ## Cloning directly
 If you don't want to contribute to the project but only run it you can directly clone the code via 
 ```
-git clone https://github.com/NA62/na62-farm-lib.git
+git clone https://github.com/NA62/na62-trigger-algorithms.git
 ```
 
 # Dependencies
 The trigger-algorithms project is only a library linked by na62-trigger-test and linking another library called na62-farm-lib. To install these dependencies please do following:
 ```
-git clone https://github.com/NA62/na62-trigger-algorithms.git
+git clone https://github.com/NA62/na62-farm-lib.git
 git clone https://github.com/NA62/na62-trigger-test.git
 ```
 
