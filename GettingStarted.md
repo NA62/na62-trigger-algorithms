@@ -39,6 +39,18 @@ If you don't want to contribute to the project but only run it you can directly 
 git clone https://github.com/NA62/na62-trigger-algorithms.git
 ```
 
+## git branches
+All PC-Farm frameworks are developed based on the git flow paradigm. To get familiar with git and git flow please see following links:
+ * http://pcottle.github.io/learnGitBranching/ (a game to easily learn git)
+ * http://nvie.com/posts/a-git-flow-screencast/ (video about git flow)
+ * http://danielkummer.github.io/git-flow-cheatsheet/ (more about git flow)
+
+The short summary would be:
+Always code in specific branches like ```feature/yourFeatre``` where ```yourFeatre``` should describe the feature you're currently developing. I recommend to install the git-flow package so that you can use following commands:
+ * ```git flow init``` (use standard settings)
+ * ```git flow feature start yourFeature```
+ * ```git flow feature finish yourFeature```
+
 # Dependencies
 The trigger-algorithms project is only a library linked by na62-trigger-test and linking another library called na62-farm-lib. To install these dependencies please do following:
 ```
@@ -65,7 +77,7 @@ As all projects are Eclipse projects, please install Eclipse with CDT ([[link|ht
 ```
 wget http://ftp.fau.de/eclipse/technology/epp/downloads/release/luna/R/eclipse-cpp-luna-R-linux-gtk-x86_64.tar.gz
 sudo tar -xvzf eclipse-cpp*.tar.gz -C /usr/share/
-ln -s /usr/share/eclipse /usr/bin/
+sudo ln -s /usr/share/eclipse/eclipse /usr/bin/
 ```
 
 ## Importing the projects
