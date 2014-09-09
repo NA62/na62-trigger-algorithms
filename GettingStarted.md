@@ -6,6 +6,7 @@
   - [Forking within github](#forking-within-github)
   - [Cloning directly](#cloning-directly)
   - [git branches](#git-branches)
+  - [Example installation](#example-installation)
 - [Dependencies](#dependencies)
   - [Compiler](#compiler)
 - [Compiling](#compiling)
@@ -52,6 +53,24 @@ Always code in specific branches like ```feature/yourFeature``` where ```yourFea
  * ```git flow init``` (use standard settings)
  * ```git flow feature start yourFeature```
  * ```git flow feature finish yourFeature```
+
+## Example installation
+If ```YourGitHubUserName``` is your github username, you've forked na62-trigger-algorithms and ```YourFeature``` is the name of the detector or special feature you'd like to write code for, following should be the right commands for you:
+
+```
+mkdir ~/workspace
+cd ~/workspace
+git clone https://github.com/NA62/na62-trigger-test.git
+git clone https://github.com/NA62/na62-farm-lib.git
+git clone git@github.com:YourGitHubUserName/na62-trigger-algorithms.git
+cd na62-trigger-algorithms
+git flow feature start YourFeature
+git push --all
+# Write your code
+# Commit as often as possible (typically O(10) times a day)
+git commit -am "Your commit message"
+git push
+```
 
 # Dependencies
 The trigger-algorithms project is only a library linked by na62-trigger-test and linking another library called na62-farm-lib. To install these dependencies please do following:
