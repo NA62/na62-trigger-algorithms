@@ -6,8 +6,8 @@
   - [Forking within github](#forking-within-github)
   - [Cloning directly](#cloning-directly)
   - [git branches](#git-branches)
-  - [Example installation](#example-installation)
 - [Dependencies](#dependencies)
+  - [Example installation](#example-installation)
   - [Compiler](#compiler)
 - [Compiling](#compiling)
   - [Installing Eclipse](#installing-eclipse)
@@ -54,6 +54,18 @@ Always code in specific branches like ```feature/yourFeature``` where ```yourFea
  * ```git flow feature start yourFeature```
  * ```git flow feature finish yourFeature```
 
+# Dependencies
+The trigger-algorithms project is only a library linked by na62-trigger-test and linking another library called na62-farm-lib. To install these dependencies please do following:
+```
+git clone https://github.com/NA62/na62-farm-lib.git
+git clone https://github.com/NA62/na62-trigger-test.git
+```
+
+Additionally you need to have boost and tbb installed:
+```bash
+sudo apt-get install libboost-dev libtbb-dev
+```
+
 ## Example installation
 If ```YourGitHubUserName``` is your github username, you've forked na62-trigger-algorithms and ```YourFeature``` is the name of the detector or special feature you'd like to write code for, following should be the right commands for you:
 
@@ -70,18 +82,6 @@ git push --all
 # Commit as often as possible (typically O(10) times a day)
 git commit -am "Your commit message"
 git push
-```
-
-# Dependencies
-The trigger-algorithms project is only a library linked by na62-trigger-test and linking another library called na62-farm-lib. To install these dependencies please do following:
-```
-git clone https://github.com/NA62/na62-farm-lib.git
-git clone https://github.com/NA62/na62-trigger-test.git
-```
-
-Additionally you need to have boost and tbb installed:
-```bash
-sudo apt-get install libboost-dev libtbb-dev
 ```
 
 ## Compiler
@@ -142,4 +142,3 @@ After selecting the `na62-trigger-test` under `C/C++ Application` you need to se
 
 # Conventions
 Before starting to code please visit the Conventions page [[here|Conventions]]!
-
