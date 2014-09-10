@@ -9,6 +9,8 @@
 - [Dependencies](#dependencies)
   - [Example installation](#example-installation)
   - [Compiler](#compiler)
+    - [At Cern](#at-cern)
+    - [gcc 4.6](#gcc-46)
 - [Compiling](#compiling)
   - [Installing Eclipse](#installing-eclipse)
   - [Importing the projects](#importing-the-projects)
@@ -85,8 +87,9 @@ git push
 ```
 
 ## Compiler
-So far all na62-farm projects are tested with gcc 4.8 and 4.9. As c++11 is heavily used it is not to use any gcc compiler below 4.7.
+So far all na62-farm projects are tested with gcc 4.6, 4.8 and 4.9. As c++11 is heavily used it is not possible to use any gcc compiler below 4.6.
 
+### At CERN
 On SLC6 with AFS running you can activate gcc 4.9 as follows
 ```
 source /afs/cern.ch/sw/lcg/contrib/gcc/4.9.0/x86_64-slc6/setup.sh
@@ -96,6 +99,11 @@ It is recommended to add this to your .bashrc:
 ```
 echo "source /afs/cern.ch/sw/lcg/contrib/gcc/4.9.0/x86_64-slc6/setup.sh" >> ~/.bashrc
 ```
+
+### gcc 4.6
+To use gcc 4.6 you need to compile with ```--std=c++0x``` instead of ```--std=c++11```. This is easily possible by using the gcc4.6 configuration in eclipse:
+Just activate the gcc4.6 configuration by right-clicking the na62-trigger-test project and selecting ```Build Configurations -> Set Active -> gcc4.6```
+![](https://raw.githubusercontent.com/NA62/na62-farm-docs/master/wiki-images/eclipse/gcc4_6-build-configuration.png)
 
 # Compiling
 ## Installing Eclipse
