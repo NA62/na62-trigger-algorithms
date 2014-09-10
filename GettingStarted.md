@@ -65,7 +65,7 @@ git clone https://github.com/NA62/na62-trigger-test.git
 
 Additionally you need to have boost and tbb installed:
 ```bash
-sudo apt-get install libboost-dev libtbb-dev
+sudo apt-get install libboost-dev libtbb-dev libboost-timer-dev
 ```
 
 ## Example installation
