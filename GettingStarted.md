@@ -134,7 +134,7 @@ If you want to test trigger algorithms you have to execute the [[trigger-test pr
  Some of the available options for this program are:
 <dl>
   <dt>rawInputPath</dt>
-  <dd>Path to the directory containing all the raw binary files to be read</dd>
+  <dd>Path to the directory containing all the raw binary files to be read (see [[InputFileFormat|https://github.com/NA62/na62-trigger-test/wiki/InputFileFormat]])</dd>
   <dt>activeSourceIDs</dt>
   <dd>List of Source IDs to be used</dd>
   <dt>maxEventNum</dt>
