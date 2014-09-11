@@ -1,9 +1,12 @@
 /*
- * HitCoordinates.cpp
+ * ParticlePath.cpp
  *
  *  Created on: Aug 6, 2014
- *      Author: Thomas Hancock (Thomas.hancock@cern.ch)
- */
+ * 	Author: Thomas Hancock (Thomas.hancock.2012@my.bristol.ac.uk)
+ *
+ * 	Please Note: Thomas was a summer student who finished on the 12/09/14. 
+ * 	He is no longer working on the code, however can still answer questions.
+ */ 
 
 #include "ParticlePath.h"
 
@@ -66,25 +69,3 @@ void ParticlePath::calculatePathParameters() {
 }
 
 } /* namespace na62 */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,8 +1,11 @@
 /*
- * StrawViewm_vectors.cpp
+ * StrawViewVectors.cpp
  *
  *  Created on: Aug 20, 2014
- *      Author: Laura Rogers (laura.kathryn.rogers@cern.ch)
+ *  Author: Laura Rogers (lr12078@my.bristol.ac.uk)
+ *
+ * 	Please Note: Laura was a summer student who finished on the 12/09/14. 
+ * 	She is no longer working on the code, however can still answer questions.
  */
 
 #include "StrawViewVectors.h"

@@ -2,7 +2,11 @@
  * StrawData.cpp
  *
  *  Created on: Jul 29, 2014
- *      Author: Thomas Hancock (Thomas.hancock@cern.ch)
+ *	Author: Thomas Hancock (Thomas.hancock.2012@my.bristol.ac.uk)
+ *	Modified: Laura Rogers (lr12078@my.bristol.ac.uk)
+ *
+ *	Please Note: Thomas and Laura were both summer students, who finished on the 
+ *	12/09/14. They are no longer working on the code, however, can still answer questions.
  */
 
 #include "StrawData.h"
@@ -22,21 +26,34 @@ StrawData::StrawData(char* pointerToData) {
 	loadHit(0); // Loads the first hit automatically
 }
 
+/* 
+ * This function reads in the data for a specific hit, indicated by an arbitrary number 
+ * assigned to it based on it's position in the MEP (begins at 0 and counts up). 
+ * The data is stored in the member variables m_error, m_strawID, m_planeID, 
+ * m_edgeType and m_fineTime.
+ * 
+ * @param hitNum		the number of the hit in the MEP which is to be accessed
+ */
 void StrawData::loadHit(int hitNum) {
 	initialiseHitVariables();
 	if (hitNum > m_numberOfHits - 1) {
-		m_error = 255; // Used to determine if the hit was successfully loaded or not.
+		m_error = 255; // Used to determine if the hit was successfully loaded or not. The is encoded in the SRB in 2 bits, so setting all 8 bits of m_error to 1 clearly indicates something has gone wrong (in this case, the hit number accessed is greater than the number of hit stored).
 	} else {
 		readDataWord(hitNum);
-		separateStrawAndPlaneIDs();
+		separateStrawAndPlaneIDs(); // The strawID and planeID are encoded in the same number. This function separates them so that they can be accessed separately.
 	}
 }
 
+// This function calculates the SRB id from the chamber, view and half view IDs.
 inline int StrawData::getSrbID(uint8_t chamber, uint8_t view,
 		uint8_t halfView) {
 	return halfView + 2 * view + 8 * chamber;
 }
 
+/* 
+ * This function calculates the distance of the hit from the origin (set as the centre of the
+ * chamber) and returns the value in mm.
+ */
 double StrawData::getStrawDistance() {
 	// Note: This code was written when the straw mapping was not finalised, and so this function will need modifying once the final straw mapping is done
 	if (m_error == 255) { // Prevent the distance trying to be set when the hit did not load correctly.
@@ -88,6 +105,13 @@ void StrawData::printHit() {
 }
 
 // Private Functions
+/* 
+ * The readX functions read in the corresponding section of binary in the binary file
+ *  passed to the L1 framework and decode it back into decimal. The binary is stored 
+ * in a bitset and then converted as each byte of the binary file has been reversed 
+ * since being passed to the framework, and so storing it allows the ordering to be 
+ * manipulated to deal with this.  
+ */
 void StrawData::readL0TriggerDecision() {
 	std::bitset<8> tempByte;
 	uint8_t L0TriggerDecision = 0;
@@ -193,6 +217,11 @@ void StrawData::initialiseHitVariables() {
 	m_fineTime = 0;
 }
 
+/* 
+ * The finetime is stored by dividing the time window into 32 and storing which fraction 
+ * of the time window the time fall into. This function converts this fraction back into a 
+ * time in seconds.
+ */
 double StrawData::decodeFineTime(int tempFineTime) {
 	return 25 * (tempFineTime / 32.0);
 }

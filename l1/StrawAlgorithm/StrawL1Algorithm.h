@@ -2,7 +2,11 @@
  * StrawL1Algorithm.h
  *
  *  Created on: Aug 7, 2014
- *      Author: Thomas Hancock (Thomas.hancock@cern.ch)
+ *	Author: Thomas Hancock (Thomas.hancock.2012@my.bristol.ac.uk)
+ *	Modified: Laura Rogers (lr12078@my.bristol.ac.uk)
+ *
+ *	Please Note: Thomas and Laura were both summer students, who finished on the 
+ *	12/09/14. They are no longer working on the code, however, can still answer questions.
  */
 
 #pragma once
@@ -12,9 +16,7 @@
 #include <sys/types.h>
 #include <cstdint>
 #include <iostream>
-#include <cstring> // Allows the use of memcpy#include <bitset> // Allows the bitset type to be used#include <cmath> // Allows the use of the pow function#include <vector>
-
-#include "StrawData.h"
+#include <cstring> // Allows the use of memcpy#include <bitset> // Allows the bitset type to be used#include <cmath> // Allows the use of the pow function#include <vector>#include "StrawData.h"
 #include "../HitCoordinates.h"
 #include "../ParticlePath.h"
 #include "StrawViewVectors.h"

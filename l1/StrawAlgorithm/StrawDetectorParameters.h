@@ -2,7 +2,11 @@
  * StrawDetectorParameters.h
  *
  *  Created on: Jul 30, 2014
- *      Author: Thomas Hancock (Thomas.hancock@cern.ch)
+ *	Author: Thomas Hancock (Thomas.hancock.2012@my.bristol.ac.uk)
+ *	Modified: Laura Rogers (lr12078@my.bristol.ac.uk)
+ *
+ *	Please Note: Thomas and Laura were both summer students, who finished on the 
+ *	12/09/14. They are no longer working on the code, however, can still answer questions.
  */
 
 #pragma once
