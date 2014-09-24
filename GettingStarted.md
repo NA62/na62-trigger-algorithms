@@ -63,9 +63,13 @@ git clone https://github.com/NA62/na62-farm-lib.git
 git clone https://github.com/NA62/na62-trigger-test.git
 ```
 
-Additionally you need to have boost and tbb installed:
+Additionally you need to have boost 1.55 and tbb installed:
 ```bash
+# Debian:
 sudo apt-get install libtbb-dev libboost1.55-all-dev
+
+# SLC6@CERN
+export LD_LIBRARY_PATH=/afs/cern.ch/sw/lcg/external/Boost/1.55.0_python2.7/x86_64-slc6-gcc47-opt/lib/:$LD_LIBRARY_PATH
 ```
 
 ## Example installation
