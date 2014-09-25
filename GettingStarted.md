@@ -67,8 +67,10 @@ Additionally you need to have boost 1.55 and tbb installed:
 ```bash
 # Debian:
 sudo apt-get install libtbb-dev libboost1.55-all-dev
+```
 
-# SLC6@CERN
+Running on lxplus.cern.ch you can use the ```lxplus``` configuration of na62-trigger-test and add following to your ```.bashrc```:
+```bash
 export LD_LIBRARY_PATH=/afs/cern.ch/sw/lcg/external/Boost/1.55.0_python2.7/x86_64-slc6-gcc47-opt/lib/:$LD_LIBRARY_PATH
 ```
 
