@@ -8,18 +8,20 @@
 #include "L1TriggerProcessor.h"
 
 #include <eventBuilding/Event.h>
-#include <eventBuilding/SourceIDManager.h>
-#include <l0/MEPFragment.h>
-#include <l0/Subevent.h>
+
+#include "straw_algorithm/StrawHits.h"
+
 
 namespace na62 {
-
-uint L1TriggerProcessor::L1_DOWNSCALE_FACTOR = 0;
-std::atomic<int> L1TriggerProcessor::rr(0);
 
 int counter;
 uint16_t L1TriggerProcessor::compute(Event* event) {
 	using namespace l0;
+
+	StrawHits strawPacket;
+	strawPacket.SetHits(event);
+	std::cout<<"nhit in the packet = "<<strawPacket.nhits<<std::endl;
+	std::cout<<"coarse time = "<<strawPacket.strawHeader->coarseTime<<std::endl;
 
 //	long sum = 0;
 //	for (int sourceIDNum = 0;
@@ -59,10 +61,6 @@ uint16_t L1TriggerProcessor::compute(Event* event) {
 
 //	return (sum%2)+1;
 
-	if (rr++ % L1_DOWNSCALE_FACTOR == 0) {
-		// Accept event
-		return 0x0101;
-	}
 	return 0;
 }
 } /* namespace na62 */

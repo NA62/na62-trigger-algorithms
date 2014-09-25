@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <atomic>
 #include <cstdint>
+#include <iostream>
 
 namespace na62 {
 
@@ -31,11 +32,8 @@ public:
 	static uint16_t compute(Event* event);
 
 	static void Initialize(const uint L1_DOWNSCALE_FACTOR) {
-		L1TriggerProcessor::L1_DOWNSCALE_FACTOR = L1_DOWNSCALE_FACTOR;
 	}
 
-	static std::atomic<int> rr;
-	static uint L1_DOWNSCALE_FACTOR;
 };
 
 } /* namespace na62 */
