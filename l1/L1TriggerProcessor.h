@@ -29,13 +29,6 @@ public:
 	 * 								   trigger type word should be taken from the L0TP subevent
 	 */
 	static uint16_t compute(Event* event);
-
-	static void Initialize(const uint L1_DOWNSCALE_FACTOR) {
-		L1TriggerProcessor::L1_DOWNSCALE_FACTOR = L1_DOWNSCALE_FACTOR;
-	}
-
-	static std::atomic<int> rr;
-	static uint L1_DOWNSCALE_FACTOR;
 };
 
 } /* namespace na62 */

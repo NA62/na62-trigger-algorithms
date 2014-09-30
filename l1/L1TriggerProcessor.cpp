@@ -14,10 +14,6 @@
 
 namespace na62 {
 
-uint L1TriggerProcessor::L1_DOWNSCALE_FACTOR = 0;
-std::atomic<int> L1TriggerProcessor::rr(0);
-
-int counter;
 uint16_t L1TriggerProcessor::compute(Event* event) {
 	using namespace l0;
 
@@ -57,12 +53,7 @@ uint16_t L1TriggerProcessor::compute(Event* event) {
 //	event->setFinetime(L0TPData->fineTime);
 	event->setProcessingID(0); // 0 indicates raw data as collected from the detector
 
-//	return (sum%2)+1;
-
-	if (rr++ % L1_DOWNSCALE_FACTOR == 0) {
-		// Accept event
-		return 0x0101;
-	}
-	return 0;
+	// Accept event
+	return 0x0101;
 }
 } /* namespace na62 */

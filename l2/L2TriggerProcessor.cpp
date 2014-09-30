@@ -12,9 +12,6 @@
 
 namespace na62 {
 
-uint L2TriggerProcessor::L2_DOWNSCALE_FACTOR = 0;
-std::atomic<int> L2TriggerProcessor::rr(0);
-
 uint8_t L2TriggerProcessor::compute(Event* event) {
 	using namespace cream;
 
@@ -30,11 +27,8 @@ uint8_t L2TriggerProcessor::compute(Event* event) {
 
 //	async_requestNonZSuppressedLKrData(localCreamIDsToRequestNonZSuppressedData, event);
 
-	if (rr++ % L2_DOWNSCALE_FACTOR == 0) {
-		// Accept event
-		return 3;
-	}
-	return 0;
+// Accept event
+	return 3;
 }
 
 uint8_t L2TriggerProcessor::onNonZSuppressedLKrDataReceived(Event* event) {
