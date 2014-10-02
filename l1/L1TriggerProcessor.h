@@ -36,5 +36,6 @@ public:
 
 };
 
+
 } /* namespace na62 */
 #endif /* TRIGGERPROCESSOR_H_ */
