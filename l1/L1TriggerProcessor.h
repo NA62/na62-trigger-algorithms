@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <atomic>
 #include <cstdint>
+#include <iostream>
 
 namespace na62 {
 
@@ -30,6 +31,7 @@ public:
 	 */
 	static uint16_t compute(Event* event);
 };
+
 
 } /* namespace na62 */
 #endif /* TRIGGERPROCESSOR_H_ */
