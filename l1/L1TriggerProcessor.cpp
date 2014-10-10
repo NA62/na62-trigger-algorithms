@@ -12,48 +12,25 @@
 #include <l0/MEPFragment.h>
 #include <l0/Subevent.h>
 
+#include "../common/headers/L0TPHeader.h"
+
 namespace na62 {
 
 uint16_t L1TriggerProcessor::compute(Event* event) {
 	using namespace l0;
 
-//	long sum = 0;
-//	for (int sourceIDNum = 0;
-//			sourceIDNum != SourceIDManager::NUMBER_OF_L0_DATA_SOURCES; sourceIDNum++) {
-//		Subevent* subevent = event->getL0SubeventBySourceIDNum(sourceIDNum);
-
-//		Subevent* lav = event->getLAVSubevent();
-//		for (int p = lav->getNumberOfParts() - 1; p >= 0; p--) {
-//			MEPFragment* fragment = lav->getPart(p);
-//			const MEPFragment_HDR* data = fragment->getData();
-//
-//			for(int i=0; i<fragment->getDataLength(); i++){
-//				sum+=((char*)data)[i];
-//			}
-//		}
-
-//	}
 	/*
-	 * Accessing the raw data of one Detector (MUV):
+	 * Store
 	 */
-//	Subevent* muv = event->getMUVSubevent();
-//	for (int p = muv->getNumberOfParts() - 1; p >= 0; p--) {
-//		MEPEvent* mepData = muv->getPart(p);
-//		mepData->getSourceID();
-//		mepData->getData()
-//		mepData->getEventLength()
-//		mepData->getSourceIDNum()
-//	}
-	/*
-	 * The following values have to be calculated by the L0TP-packet
-	 * L0TP_RAW is to be defined
-	 */
-//	l0::MEPEvent* L0TPEvent = event->getL0TPSubevent()->getPart(0);
-//	L0TP_RAW* L0TPData = (L0TP_RAW*) L0TPEvent->getData();
-//	event->setFinetime(L0TPData->fineTime);
+	l0::MEPFragment* L0TPEvent = event->getL0TPSubevent()->getFragment(0);
+	L0TpHeader* L0TPData = (L0TpHeader*) L0TPEvent->getPayload();
+	event->setFinetime(L0TPData->refFineTime);
+
 	event->setProcessingID(0); // 0 indicates raw data as collected from the detector
 
-	// Accept event
-	return 0x0101;
+	uint8_t l0TriggerTypeWord = L0TPData->l0TriggerType;
+	uint8_t l1TriggerTypeWord = 1; // Accept event
+
+	return (l0TriggerTypeWord | l1TriggerTypeWord << 8);
 }
 } /* namespace na62 */
