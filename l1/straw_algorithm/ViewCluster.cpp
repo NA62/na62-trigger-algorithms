@@ -19,9 +19,9 @@ namespace na62
 	{
 	// TODO Auto-generated constructor stub
 	ncluster = 0;
-	coordinate = (float*) calloc(maxnhit, sizeof(float));
-	trailing = (float*) calloc(maxnhit, sizeof(float));
-	used = (int*) calloc(maxnhit, sizeof(int));
+	coordinate = (float*) calloc(maxNhit, sizeof(float));
+	trailing = (float*) calloc(maxNhit, sizeof(float));
+	used = (int*) calloc(maxNhit, sizeof(int));
 
 	}
 
@@ -70,7 +70,7 @@ namespace na62
 	return posizione;
 	}
 
-    void ViewCluster::SetCluster(StrawHits firstPlane, StrawHits secondPlane)
+    void ViewCluster::SetCluster(StrawHits* firstPlane, StrawHits* secondPlane)
 	{
 
 	ncluster = 0;
@@ -80,21 +80,21 @@ namespace na62
 	float meanDistance = 0.0;
 	float deltaDistance = 0.0;
 
-	for (int j = 0; j < secondPlane.nhit; j++) //hit loop
+	for (int j = 0; j < secondPlane->nhit; j++) //hit loop
 	    {
-	    for (int h = 0; h < firstPlane.nhit && secondPlane.used[j] == 0; h++) //I take an hit belonged to plane 2 o 3
+	    for (int h = 0; h < firstPlane->nhit && secondPlane->used[j] == 0; h++) //I take an hit belonged to plane 2 o 3
 		{
 
-		float wireDistance1 = RadiusReconstructed(firstPlane.leading[h] / 1000);
-		float wireDistance2 = RadiusReconstructed(secondPlane.leading[j] / 1000);
+		float wireDistance1 = RadiusReconstructed(firstPlane->leading[h] / 1000);
+		float wireDistance2 = RadiusReconstructed(secondPlane->leading[j] / 1000);
 
-		if (secondPlane.strawID[j] < 1000) //To know the real condiction: plane 0 of second half plane
+		if (secondPlane->strawID[j] < 1000) //To know the real condiction: plane 0 of second half plane
 		    {
-		    if (firstPlane.strawID[h] < 1000 && firstPlane.strawID[h] == secondPlane.strawID[j] && firstPlane.used[h] == 0)
+		    if (firstPlane->strawID[h] < 1000 && firstPlane->strawID[h] == secondPlane->strawID[j] && firstPlane->used[h] == 0)
 			{
 
-			position1 = StrawPos1(firstPlane.strawID[h]) + wireDistance1;
-			position2 = StrawPos2(secondPlane.strawID[j]) - wireDistance2;
+			position1 = StrawPos1(firstPlane->strawID[h]) + wireDistance1;
+			position2 = StrawPos2(secondPlane->strawID[j]) - wireDistance2;
 			meanDistance = (position2 + position1) / 2.0;
 
 			deltaDistance = wireDistance1 + wireDistance2 - 4.4;
@@ -102,18 +102,18 @@ namespace na62
 			if (deltaDistance < highDeltaDistance && deltaDistance > lowDeltaDistance)
 			    {
 			    coordinate[ncluster] = meanDistance;
-			    trailing[ncluster] = (firstPlane.trailing[h] + secondPlane.trailing[j]) / 2.0;
+			    trailing[ncluster] = (firstPlane->trailing[h] + secondPlane->trailing[j]) / 2.0;
 
 			    ncluster++;
-			    secondPlane.used[j] = 1;
-			    firstPlane.used[h] = 1;
+			    secondPlane->used[j] = 1;
+			    firstPlane->used[h] = 1;
 			    }
 			}
-		    else if (firstPlane.strawID[h] > 1000 && firstPlane.strawID[h] == (secondPlane.strawID[j] + 1) && firstPlane.used[h] == 0)
+		    else if (firstPlane->strawID[h] > 1000 && firstPlane->strawID[h] == (secondPlane->strawID[j] + 1) && firstPlane->used[h] == 0)
 			{
 
-			position1 = StrawPos1(firstPlane.strawID[h]) - wireDistance1;
-			position2 = StrawPos2(secondPlane.strawID[j]) + wireDistance2;
+			position1 = StrawPos1(firstPlane->strawID[h]) - wireDistance1;
+			position2 = StrawPos2(secondPlane->strawID[j]) + wireDistance2;
 			meanDistance = (position1 + position2) / 2.0;
 
 			deltaDistance = wireDistance1 + wireDistance2 - 4.4;
@@ -121,11 +121,11 @@ namespace na62
 			if (deltaDistance < highDeltaDistance && deltaDistance > lowDeltaDistance)
 			    {
 			    coordinate[ncluster] = meanDistance;
-			    trailing[ncluster] = (firstPlane.trailing[h] + secondPlane.trailing[j]) / 2.0;
+			    trailing[ncluster] = (firstPlane->trailing[h] + secondPlane->trailing[j]) / 2.0;
 
 			    ncluster++;
-			    secondPlane.used[j] = 1;
-			    firstPlane.used[h] = 1;
+			    secondPlane->used[j] = 1;
+			    firstPlane->used[h] = 1;
 			    }
 
 			}
@@ -133,11 +133,11 @@ namespace na62
 		    }
 		else
 		    {
-		    if (firstPlane.strawID[h] < 1000 && firstPlane.strawID[h] == secondPlane.strawID[j] && firstPlane.used[h] == 0)
+		    if (firstPlane->strawID[h] < 1000 && firstPlane->strawID[h] == secondPlane->strawID[j] && firstPlane->used[h] == 0)
 			{
 
-			position1 = StrawPos1(firstPlane.strawID[h]) - wireDistance1;
-			position2 = StrawPos2(secondPlane.strawID[j]) + wireDistance2;
+			position1 = StrawPos1(firstPlane->strawID[h]) - wireDistance1;
+			position2 = StrawPos2(secondPlane->strawID[j]) + wireDistance2;
 			meanDistance = (position1 + position2) / 2;
 
 			deltaDistance = wireDistance1 + wireDistance2 - 4.4;
@@ -145,18 +145,18 @@ namespace na62
 			if (deltaDistance < highDeltaDistance && deltaDistance > lowDeltaDistance)
 			    {
 			    coordinate[ncluster] = meanDistance;
-			    trailing[ncluster] = (firstPlane.trailing[h] + secondPlane.trailing[j]) / 2.0;
+			    trailing[ncluster] = (firstPlane->trailing[h] + secondPlane->trailing[j]) / 2.0;
 
 			    ncluster++;
-			    secondPlane.used[j] = 1;
-			    firstPlane.used[h] = 1;
+			    secondPlane->used[j] = 1;
+			    firstPlane->used[h] = 1;
 			    }
 			}
-		    else if (firstPlane.strawID[h] > 1000 && firstPlane.strawID[h] == secondPlane.strawID[j] && firstPlane.used[h] == 0)
+		    else if (firstPlane->strawID[h] > 1000 && firstPlane->strawID[h] == secondPlane->strawID[j] && firstPlane->used[h] == 0)
 			{
 
-			position1 = StrawPos1(firstPlane.strawID[h]) + wireDistance1;
-			position2 = StrawPos2(secondPlane.strawID[j]) - wireDistance2;
+			position1 = StrawPos1(firstPlane->strawID[h]) + wireDistance1;
+			position2 = StrawPos2(secondPlane->strawID[j]) - wireDistance2;
 			meanDistance = (position1 + position2) / 2;
 
 			deltaDistance = wireDistance1 + wireDistance2 - 4.4;
@@ -164,11 +164,11 @@ namespace na62
 			if (deltaDistance < highDeltaDistance && deltaDistance > lowDeltaDistance)
 			    {
 			    coordinate[ncluster] = meanDistance;
-			    trailing[ncluster] = (firstPlane.trailing[h] + secondPlane.trailing[j]) / 2.0;
+			    trailing[ncluster] = (firstPlane->trailing[h] + secondPlane->trailing[j]) / 2.0;
 
 			    ncluster++;
-			    secondPlane.used[j] = 1;
-			    firstPlane.used[h] = 1;
+			    secondPlane->used[j] = 1;
+			    firstPlane->used[h] = 1;
 			    }
 			}
 		    }

@@ -36,4 +36,10 @@
 #define HighPz 45000
 
 
+//cte
+
+#define maxNhit 200
+#define strawSeparator 60
+
+
 #endif /* CUT_H_ */

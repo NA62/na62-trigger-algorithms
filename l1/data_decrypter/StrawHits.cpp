@@ -7,64 +7,121 @@
 
 #include "StrawHits.h"
 #include "StrawData.h"
+#include "../straw_algorithm/cut.h"
 #include <stdlib.h>
 
-namespace na62 {
+namespace na62
+    {
 
-StrawHits::StrawHits() {
+    PlaneHit::PlaneHit()
+	{
+	halfViewZero = new StrawHits[1];
+	halfViewOne = new StrawHits[1];
+	}
+    PlaneHit::~PlaneHit()
+	{
+	delete halfViewZero;
+	delete halfViewOne;
+	}
+
+    void PlaneHit::SetHits(StrawData data, uint32_t triggerCoarse, uint8_t triggerFine)
+	{
+
+	if (data.nhits > 0)
+	    {
+	    int ncounters = 0;
+	    uint nhits_temp = 0;
+	    uint16_t triggerCombined = 0;
+	    uint16_t timeTemp = 0;
+
+	    for (int nslot = 0; nslot < 16; nslot++)
+		{
+		ncounters = (int) (data.hitCounters[nslot]);
+		triggerCombined = (uint16_t) ((triggerCoarse << 5) | (triggerFine >> 3));
+		timeTemp = ((data.strawHeader->coarseTime) + nslot)<<5;
+
+		if (((data.strawHeader->coarseTime) + nslot - triggerCoarse) > 0 && ((data.strawHeader->coarseTime) + nslot - triggerCoarse) < 11)
+		    {
+		    for (int i = 0; i < ncounters; i++)
+			{
+			if (data.hits[nhits_temp].strawID < strawSeparator)
+			    halfViewZero->SetHits(data.hits[nhits_temp], triggerCombined, timeTemp);
+			else
+			    halfViewOne->SetHits(data.hits[nhits_temp], triggerCombined, timeTemp);
+
+			nhits_temp++;
+			}
+		    }
+
+		}
+
+	    }
+	}
+
+    StrawHits::StrawHits()
+	{
 	nhit = 0;
-	strawID = (int*) calloc (maxnhit,sizeof(int));
-	leading = (int*) calloc (maxnhit,sizeof(int));
-	trailing = (int*) calloc (maxnhit,sizeof(int));
-	used = (int*) calloc (maxnhit,sizeof(int));
+	strawID = (uint8_t*) calloc(maxNhit, sizeof(uint8_t));
+	leading = (uint16_t*) calloc(maxNhit, sizeof(uint16_t));
+	trailing = (uint16_t*) calloc(maxNhit, sizeof(uint16_t));
+	used = (uint*) calloc(maxNhit, sizeof(uint16_t));
 
-}
+	}
 
-StrawHits::~StrawHits() {
+    StrawHits::~StrawHits()
+	{
 	// TODO Auto-generated destructor stub
 	free(strawID);
 	free(leading);
 	free(trailing);
 	free(used);
-}
+	}
 
-void StrawHits::SetHits(StrawData data) {
+    void StrawHits::SetHits(SrbHits hit, uint16_t trigger, uint16_t timeTemp)
+	{
 
-	if (data.nhits > 0) {
-		strawID[0] = (int) data.hits[0].strawID;
+	int temp=0;
+	int initialNhit = nhit;
 
-		if ((int) data.hits[0].edge == 0) //0 leading, 1 trailing
-			leading[0] = (int) data.hits[0].fineTime;
+	if (nhit == 0)
+	    {
+	    strawID[0] =hit.strawID;
+	    if ((int) hit.edge == 0) //0 leading, 1 trailing
+		leading[0] = (uint16_t) ((timeTemp | hit.fineTime)-trigger);
+	    else
+		trailing[0] = (uint16_t) ((timeTemp | hit.fineTime)-trigger);
+
+	    nhit++;
+
+	    }
+	else
+	    {
+	    temp = 0;
+	    for (int j = initialNhit; j < nhit; j++)
+		{
+		if ((int) hit.strawID == strawID[j])
+		    {
+		    temp = 1;
+		    if ((int) hit.edge == 0 && (hit.fineTime < leading[j] || leading[j] == 0)) //0 leading
+			leading[j] = (uint16_t) ((timeTemp | hit.fineTime)-trigger);
+		    else if (hit.fineTime > trailing[j]) //1 trailing
+			trailing[j] = (uint16_t) ((timeTemp | hit.fineTime)-trigger);
+		    }
+		}
+	    if (temp == 0)
+		{
+		strawID[nhit] = (int) hit.strawID;
+
+		if ((int) hit.edge == 0)
+		    leading[nhit] = (uint16_t) ((timeTemp | hit.fineTime)-trigger);
 		else
-			trailing[0] = (int) data.hits[0].fineTime;
+		    trailing[nhit] = (uint16_t) ((timeTemp | hit.fineTime)-trigger);
 
 		nhit++;
-	}
-
-	for (int i = 1; i < (int)data.nhits; i++) {
-		int temp = 0;
-		for (int j = 0; j < nhit; j++) {
-			if ((int) data.hits[i].strawID == strawID[j]) {
-				temp = 1;
-				if ((int) data.hits[i].edge == 0 && (data.hits[i].fineTime < leading[j] || leading[j] == 0)) //0 leading
-					leading[j] = (int) data.hits[i].fineTime;
-				else if(data.hits[i].fineTime > trailing[j]) //1 trailing
-					trailing[j] = (int) data.hits[i].fineTime;
-			}
 		}
-		if (temp == 0) {
-			strawID[nhit] = (int) data.hits[i].strawID;
 
-			if ((int) data.hits[i].edge == 0)
-				leading[nhit] = (int) data.hits[i].fineTime;
-			else
-				trailing[nhit] = (int) data.hits[i].fineTime;
-
-			nhit++;
-		}
+	    }
 
 	}
 
-}
-
-}
+    }

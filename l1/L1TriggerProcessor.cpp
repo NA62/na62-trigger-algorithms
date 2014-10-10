@@ -13,6 +13,7 @@
 #include "data_decrypter/StrawData.h"
 #include "data_decrypter/StrawHits.h"
 #include "straw_algorithm/ViewCluster.h"
+#include "straw_algorithm/cut.h"
 
 namespace na62
     {
@@ -23,7 +24,7 @@ namespace na62
 	using namespace l0;
 
 	StrawData strawPacket[32];
-	StrawHits hitPlane[32];
+	PlaneHit hitPlane[16];
 //	ViewCluster ViewC_0V,ViewC_0U,ViewC_0X,ViewC_0Y;
 //	ViewCluster ViewC_1V,ViewC_1U,ViewC_1X,ViewC_2Y;
 //	ViewCluster ViewC_2V,ViewC_2U,ViewC_2X,ViewC_3Y;
@@ -35,6 +36,8 @@ namespace na62
 	ViewCluster ViewC_3[4];
 
 	uint chkmax = 0;
+	uint32_t triggerCoarse = event->getTimestamp();
+	uint8_t triggerFine = event->getFinetime();
 
 	std::cout << "event number = " << event->getEventNumber() << std::endl;
 	std::cout << "timestamp = " << event->getTimestamp() << std::endl;
@@ -43,7 +46,7 @@ namespace na62
 
 	for (int srbNum = 0; srbNum != strawSubevent->getNumberOfFragments() && chkmax == 0; srbNum++)
 	    {
-	    l0::MEPFragment* srbDataFragment = strawSubevent->getFragment(srbNum); //to add counter reading
+	    l0::MEPFragment* srbDataFragment = strawSubevent->getFragment(srbNum);
 
 	    strawPacket[srbNum].SetHits(srbDataFragment);
 
@@ -54,10 +57,10 @@ namespace na62
 	    std::cout << "hit1: err= " << (int) strawPacket[srbNum].hits[1].err << " straw id= " << (int) strawPacket[srbNum].hits[1].strawID << " edge= " << (int) strawPacket[srbNum].hits[1].edge
 		    << " fine time= " << (int) strawPacket[srbNum].hits[1].fineTime << std::endl;
 
-	    if (strawPacket[srbNum].nhits < maxnhit)
+	    if (strawPacket[srbNum].nhits < maxNhit)
 		{
 
-		hitPlane[srbNum].SetHits(strawPacket[srbNum]); //To add subtraction with trigger time and temporal shift plane position dependent and leading time windows cut, what do we do about the hits with only a leading o a trailing
+		hitPlane[srbNum / 2].SetHits(strawPacket[srbNum], triggerCoarse, triggerFine); //To add subtraction  with temporal shift plane position dependent, what do we do about the hits with only a leading or a trailing
 
 		}
 	    else
@@ -66,15 +69,14 @@ namespace na62
 	    if (chkmax == 0)
 		{
 
-		for(int view=0;view < 4; view ++)
-		ViewC_0[view].SetCluster(hitPlane[2*view], hitPlane[2*view+1]);
-		for(int view=0;view < 4; view ++)
-		ViewC_1[view].SetCluster(hitPlane[2*view+8], hitPlane[2*view+9]);
-		for(int view=0;view < 4; view ++)
-		ViewC_2[view].SetCluster(hitPlane[2*view+16], hitPlane[2*view+17]);
-		for(int view=0;view < 4; view ++)
-		ViewC_3[view].SetCluster(hitPlane[2*view+24], hitPlane[2*view+25]);
-
+		for (int view = 0; view < 4; view++)
+		    ViewC_0[view].SetCluster(hitPlane[view].halfViewZero, hitPlane[view].halfViewOne);
+		for (int view = 0; view < 4; view++)
+		    ViewC_1[view].SetCluster(hitPlane[view + 4].halfViewZero, hitPlane[view + 4].halfViewOne);
+		for (int view = 0; view < 4; view++)
+		    ViewC_2[view].SetCluster(hitPlane[view + 8].halfViewZero, hitPlane[view + 8].halfViewOne);
+		for (int view = 0; view < 4; view++)
+		    ViewC_3[view].SetCluster(hitPlane[view + 12].halfViewZero, hitPlane[view + 12].halfViewOne);
 
 		}
 

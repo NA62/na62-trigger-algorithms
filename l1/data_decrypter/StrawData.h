@@ -38,6 +38,7 @@ public:
 	uint nhits;
 	SrbHits* hits;
 	SrbDataHeader* strawHeader;
+	uint8_t* hitCounters;
 
 	StrawData();
 	void SetHits(l0::MEPFragment* );
