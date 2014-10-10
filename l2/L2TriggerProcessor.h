@@ -20,9 +20,6 @@ class EventBuilder;
 class Event;
 
 class L2TriggerProcessor {
-private:
-	static std::atomic<int> rr;
-
 public:
 	/**
 	 * The event pointer may not be deleted by this method as it is deleted by the EventBuilder
@@ -43,12 +40,6 @@ public:
 	 * @return uint8_t <0> if the event is rejected, the L2 trigger type word in other cases
 	 */
 	static uint8_t onNonZSuppressedLKrDataReceived(Event* event);
-
-	static void Initialize(const uint L2_DOWNSCALE_FACTOR) {
-		L2TriggerProcessor::L2_DOWNSCALE_FACTOR = L2_DOWNSCALE_FACTOR;
-	}
-
-	static uint L2_DOWNSCALE_FACTOR;
 };
 
 } /* namespace na62 */

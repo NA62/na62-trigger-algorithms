@@ -25,17 +25,10 @@ public:
 	 *
 	 * The event pointer may not be deleted by this method as it is deleted by the EventBuilder
 	 *
-	 * @return uint16_t <0> if the event is rejected, the L0 and L1 trigger type word (L0 + L1<<8) in other cases. The L0
+	 * @return uint16_t <0> if the event is rejected, the L0 and L1 trigger type word (L0 | L1<<8) in other cases. The L0
 	 * 								   trigger type word should be taken from the L0TP subevent
 	 */
 	static uint16_t compute(Event* event);
-
-	static void Initialize(const uint L1_DOWNSCALE_FACTOR) {
-		L1TriggerProcessor::L1_DOWNSCALE_FACTOR = L1_DOWNSCALE_FACTOR;
-	}
-
-	static std::atomic<int> rr;
-	static uint L1_DOWNSCALE_FACTOR;
 };
 
 } /* namespace na62 */
