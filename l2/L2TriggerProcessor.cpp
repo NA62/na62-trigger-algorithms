@@ -7,6 +7,7 @@
 
 #include "L2TriggerProcessor.h"
 
+#include <options/Logging.h>
 #include <eventBuilding/Event.h>
 #include <iostream>
 
@@ -32,7 +33,7 @@ uint8_t L2TriggerProcessor::compute(Event* event) {
 }
 
 uint8_t L2TriggerProcessor::onNonZSuppressedLKrDataReceived(Event* event) {
-	std::cout << "onNonZSuppressedLKrDataReceived!!!!!!!!!!!!" << std::endl;
+	LOG_INFO << "onNonZSuppressedLKrDataReceived!!!!!!!!!!!!" << ENDL;
 	return 1;
 }
 
