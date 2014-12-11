@@ -17,6 +17,7 @@ namespace na62 {
 
 class EventBuilder;
 class Event;
+class CedarData;
 
 class L1TriggerProcessor {
 public:
@@ -27,7 +28,13 @@ public:
 	 *
 	 * @return uint8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
+
+	L1TriggerProcessor();
+	//virtual ~L1TriggerProcessor();
 	static uint8_t compute(Event* event);
+
+private:
+
 };
 
 } /* namespace na62 */
