@@ -10,7 +10,7 @@
 #define TRIGGERPROCESSOR_H_
 
 #include <sys/types.h>
-#include <random>
+#include <atomic>
 #include <cstdint>
 
 namespace na62 {
@@ -18,7 +18,6 @@ namespace na62 {
 class EventBuilder;
 class Event;
 class CedarData;
-class KtagAlgo;
 
 class L1TriggerProcessor {
 public:
@@ -30,24 +29,12 @@ public:
 	 * @return uint8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 
+	L1TriggerProcessor();
+	//virtual ~L1TriggerProcessor();
 	static uint8_t compute(Event* event);
 
-	/**
-	 * Returns true if the current event should be bypassed instead of being processed
-	 */
-	static inline bool bypassEvent() {
-		if (bypassProbability == 0.0) {
-			return false;
-		}
-		double randomNr = ((double) rand() / (double) RAND_MAX);
-		return randomNr <= bypassProbability;
-	}
-
-	static void initialize(double _bypassProbability, uint _bypassTriggerWord);
-
 private:
-	static uint_fast8_t bypassTriggerWord;
-	static double bypassProbability;
+
 };
 
 } /* namespace na62 */
