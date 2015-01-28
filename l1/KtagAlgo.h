@@ -1,26 +1,24 @@
 /*
- * TriggerProcessor.h
+ * KtagAlgo.h
  *
- *  Created on: Nov 17, 2011
- *      Author: Jonas Kunze (kunze.jonas@gmail.com)
+ *  Created on: Jan 25, 2015
+ *      Author: angela romano
+ *      Email: axr@hep.ph.bham.ac.uk
  */
 
 #pragma once
-#ifndef TRIGGERPROCESSOR_H_
-#define TRIGGERPROCESSOR_H_
+#ifndef KTAGALGORITHM_H_
+#define KTAGALGORITHM_H_
 
 #include <sys/types.h>
 #include <atomic>
 #include <cstdint>
 
 namespace na62 {
-  
-  class EventBuilder;
-  class Event;
-  class CedarData;
-  class KtagAlgo;
 
-  class L1TriggerProcessor {
+class Event;
+
+class KtagAlgo {
 public:
 	/**
 	 * @param event Event* This is a pointer to the built Event containing all subevents (except those from the LKr)
@@ -30,13 +28,13 @@ public:
 	 * @return uint8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 
-	//L1TriggerProcessor();
-	//virtual ~L1TriggerProcessor();
-	static uint8_t compute(Event* event);
+	KtagAlgo();
+	//virtual ~KtagAlgo();
+	static uint8_t checkKtagTrigger(Event* event);
 
 private:
 
 };
 
 } /* namespace na62 */
-#endif /* TRIGGERPROCESSOR_H_ */
+#endif /* KTAGALGORITHM_H_ */
