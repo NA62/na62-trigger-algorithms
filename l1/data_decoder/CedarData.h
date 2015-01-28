@@ -13,17 +13,13 @@
 #include <cstdint>
 #include <l0/MEPFragment.h>
 
-//namespace na62 {
-//class l0::MEPFragment;
-//} /* namespace na62 */
-
 namespace na62 {
 
-struct TrbDataHeader //Board header
+struct TrbDataHeader //Tel62 readout board header
 {
 	uint8_t flags :8;
 	uint8_t triggerType :8;
-	uint8_t sourceSubID :8; //Tel Readout Board ID
+	uint8_t sourceSubID :8; //Tel62 readout board ID
 	uint8_t format :8;
 }__attribute__ ((__packed__));
 
@@ -42,7 +38,6 @@ struct FrameDataHeader //Frame header
 }__attribute__ ((__packed__));
 
 struct TrbData {
-	//uint32_t tdcWord :32;
 	uint32_t Time :19; //hit time measurement (100ps LSB)
 	uint8_t chID :5;   //TDC channel ID
 	uint8_t tdcID :4;  //TDC chip ID
@@ -50,6 +45,7 @@ struct TrbData {
 }__attribute__ ((__packed__));
 
 class CedarData {
+
 public:
 	CedarData();
 	virtual ~CedarData();
@@ -62,6 +58,7 @@ public:
 	FPGADataHeader** cedar_fpgaHeader;    //array maxNFPGA size
 	FrameDataHeader*** cedar_frameHeader; //array maxNFrame size
 	TrbData** tdc_data;
+
 	//uint8_t* noFrame;                   //array maxNFPGA size
 	//uint8_t* noNonEmptyFrame;           //array maxNFPGA size
 	//uint8_t* FPGAID;                    //array maxNFPGA size
