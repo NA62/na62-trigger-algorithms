@@ -17,52 +17,49 @@
 //class l0::MEPFragment;
 //} /* namespace na62 */
 
-namespace na62
-    {
+namespace na62 {
 
-    struct TrbDataHeader //Board header
-	{
+struct TrbDataHeader //Board header
+{
 	uint8_t flags :8;
 	uint8_t triggerType :8;
 	uint8_t sourceSubID :8; //Tel Readout Board ID
 	uint8_t format :8;
-	}__attribute__ ((__packed__));
+}__attribute__ ((__packed__));
 
-    struct FPGADataHeader //FPGA header
-	{
+struct FPGADataHeader //FPGA header
+{
 	uint8_t noFrame :8;
 	uint8_t noNonEmptyFrame :8;
 	uint8_t FPGAID :8;
 	uint8_t errFlags :8;
-	}__attribute__ ((__packed__));
+}__attribute__ ((__packed__));
 
-    struct FrameDataHeader //Frame header
-	{
+struct FrameDataHeader //Frame header
+{
 	uint16_t coarseFrameTime :16;
 	uint16_t nWordsPerFrame :16;
-	}__attribute__ ((__packed__));
+}__attribute__ ((__packed__));
 
-    struct TrbData
-    {
+struct TrbData {
 	//uint32_t tdcWord :32;
 	uint32_t Time :19; //hit time measurement (100ps LSB)
 	uint8_t chID :5;   //TDC channel ID
 	uint8_t tdcID :4;  //TDC chip ID
 	uint8_t ID :4;     //0x4 (leading time), 0x5 (trailing time)
-	}__attribute__ ((__packed__));
+}__attribute__ ((__packed__));
 
-    class CedarData
-	{
-    public:
+class CedarData {
+public:
 	CedarData();
 	virtual ~CedarData();
 	void SetHits(l0::MEPFragment*);
 
 	uint nhits;
 	uint nhits_tot;
-	uint nWords; //tot - must be 193 for empty events 
-	TrbDataHeader* cedarHeader;         //array maxNTEL size
-	FPGADataHeader** cedar_fpgaHeader;   //array maxNFPGA size
+	uint nWords;
+	TrbDataHeader* cedarHeader;           //array maxNTEL size
+	FPGADataHeader** cedar_fpgaHeader;    //array maxNFPGA size
 	FrameDataHeader*** cedar_frameHeader; //array maxNFrame size
 	TrbData** tdc_data;
 	//uint8_t* noFrame;                   //array maxNFPGA size
@@ -79,10 +76,10 @@ namespace na62
 	//uint16_t** GetCoarseFrameTime();
 	//uint16_t** GetNWordsPerFrame();
 
-	private:
+private:
 
-	};
+};
 
-    }
+}
 
 #endif /* CEDARALGORITM_H_ */
