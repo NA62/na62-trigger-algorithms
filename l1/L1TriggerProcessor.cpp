@@ -27,11 +27,11 @@ uint8_t L1TriggerProcessor::compute(Event* event) {
 
   uint8_t trigger = KtagAlgo::checkKtagTrigger(event);
   if(trigger){
-    LOG_INFO  << "event number = " << event->getEventNumber() << endl;
-    cout  << "GOOD EVENT! " << endl;
+		LOG_INFO<<"event number = " << event->getEventNumber() << ENDL;
+    LOG_INFO  << "GOOD EVENT! " << ENDL;
     return trigger;
   }
-  else cout  << "BAD EVENT! " << endl;
+  else LOG_INFO  << "BAD EVENT! " << ENDL;
 
   //event->setProcessingID(0); // 0 indicates raw data as collected from the detector 
   //return 1;
