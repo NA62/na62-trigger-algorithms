@@ -35,7 +35,6 @@
 #define NUMBER_OF_FRAME_MASK 0x000000ff
 #define NUMBER_OF_FRAME_MASK_RSHIFT 0
 
-
 // Definitions in frame header only:
 
 #define NUMBER_OF_WORDS 0xffff0000
@@ -80,8 +79,12 @@
 #define SPECIAL_TRIGGER_DIMEOB_NUMBER_OF_WORDS_RSHIFT 0
 
 #define maxNhit 200
+// to run header_ktag_ke3MC/beampions.txt
 #define maxNFrame 11
+// to run header_ktag_ke3MC/beampions.txt
 #define maxNFPGA 16
-#define maxNTRB 6
+//#define maxNTRB 6
+//#define maxNFrame 7
+#define maxNFPGA 4
 
 #endif /* TDCB_BUFFER_H_ */
