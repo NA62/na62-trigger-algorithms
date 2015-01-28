@@ -258,8 +258,6 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 	} else
 		return 0;
 
-	event->setProcessingID(0); // 0 indicates raw data as collected from the detector
-	//return trigger;
 }
 
 } /* namespace na62 */
