@@ -34,7 +34,8 @@ CedarData::~CedarData() {
 }
 
 void CedarData::SetHits(l0::MEPFragment* trbDataFragment) {
-	cedarHeader = (TrbDataHeader*) trbDataFragment->getPayload();
+	char * payload = trbDataFragment->getPayload();
+	cedarHeader = (TrbDataHeader*) payload;
 
 	//printf("Flags %d\n",(int)cedarHeader->flags);
 	//printf("L0 trigger type %d\n",(int)cedarHeader->triggerType);
@@ -43,7 +44,7 @@ void CedarData::SetHits(l0::MEPFragment* trbDataFragment) {
 
 	for (int iFPGA = 0; iFPGA < maxNFPGA; iFPGA++) {
 		//printf ("writing getpayload() + %d\n",1+iFPGA+nWords);
-		cedar_fpgaHeader[iFPGA] = (FPGADataHeader*) trbDataFragment->getPayload() + 1 + iFPGA + nWords;
+		cedar_fpgaHeader[iFPGA] = (FPGADataHeader*) payload + 1 + iFPGA + nWords;
 
 		//printf("noFrame %x\n", (int)cedar_fpgaHeader[iFPGA]->noFrame);
 		//printf("noNonEmptyFrame %d\n", (int)cedar_fpgaHeader[iFPGA]->noNonEmptyFrame);
@@ -62,7 +63,7 @@ void CedarData::SetHits(l0::MEPFragment* trbDataFragment) {
 
 		for (int iFrame = 0; iFrame < maxNFrame; iFrame++) {
 			//printf ("writing getpayload() + %d\n",2+iFPGA+nWords);
-			cedar_frameHeader[iFPGA][iFrame] = (FrameDataHeader*) trbDataFragment->getPayload() + 2 + iFPGA + nWords;
+			cedar_frameHeader[iFPGA][iFrame] = (FrameDataHeader*) payload + 2 + iFPGA + nWords;
 
 			//printf("coarseFrameTime %08x\n", (uint16_t) cedar_frameHeader[iFPGA][iFrame]->coarseFrameTime);
 			//printf("nWordsPerFrame %08x\n", (uint16_t) cedar_frameHeader[iFPGA][iFrame]->nWordsPerFrame);
@@ -84,7 +85,7 @@ void CedarData::SetHits(l0::MEPFragment* trbDataFragment) {
 					//printf("ihit %d",ihit);
 					//printf ("................writing getpayload() + %d\n",2+iFPGA+nWords-nhits+ihit);
 					//printf ("tdc_data[%d]\n",ihit+nhits_tot);
-					tdc_data[ihit + nhits_tot] = (TrbData*) trbDataFragment->getPayload() + 2 + iFPGA + nWords - nhits + ihit;
+					tdc_data[ihit + nhits_tot] = (TrbData*) payload + 2 + iFPGA + nWords - nhits + ihit;
 					//printf("tdc word %08x \n",(uint32_t) tdc_data->tdcWord);
 					//printf("Time %d %08x \n",ihit+nhits_tot,(uint32_t) tdc_data[ihit+nhits_tot]->Time);
 					//printf("ChID %d %x \n",ihit+nhits_tot,(uint8_t) tdc_data[ihit+nhits_tot]->chID);
