@@ -14,12 +14,13 @@
 #include <cstdint>
 
 namespace na62 {
+  
+  class EventBuilder;
+  class Event;
+  class CedarData;
+  class KtagAlgo;
 
-class EventBuilder;
-class Event;
-class CedarData;
-
-class L1TriggerProcessor {
+  class L1TriggerProcessor {
 public:
 	/**
 	 * @param event Event* This is a pointer to the built Event containing all subevents (except those from the LKr)
@@ -29,7 +30,7 @@ public:
 	 * @return uint8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 
-	L1TriggerProcessor();
+	//L1TriggerProcessor();
 	//virtual ~L1TriggerProcessor();
 	static uint8_t compute(Event* event);
 
