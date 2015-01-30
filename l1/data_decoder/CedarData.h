@@ -38,6 +38,7 @@ struct FrameDataHeader //Frame header
 }__attribute__ ((__packed__));
 
 struct TrbData {
+//  uint32_t tdcWord :32;
 	uint32_t Time :19; //hit time measurement (100ps LSB)
 	uint8_t chID :5;   //TDC channel ID
 	uint8_t tdcID :4;  //TDC chip ID
