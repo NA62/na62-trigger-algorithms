@@ -31,6 +31,7 @@ public:
 	KtagAlgo();
 	//virtual ~KtagAlgo();
 	static uint8_t checkKtagTrigger(Event* event);
+	static uint searchPMT(uint tel62ID, uint fpgaID);
 
 private:
 
