@@ -12,7 +12,7 @@
 #include <eventBuilding/SourceIDManager.h>
 #include <l0/MEPFragment.h>
 #include <l0/Subevent.h>
-
+#include <options/Logging.h>
 #include "data_decoder/CedarData.h"
 //#include "data_decoder/CedarHits.h"
 #include "cedar_algorithm/tdcb_buffer.h"
@@ -97,9 +97,9 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 
 	uint chkmax = 0;
 
-	//std::cout << std::endl;
-	//std::cout << "........................event number = " << event->getEventNumber() << std::endl;
-	//printf("timestamp = %x\n",event->getTimestamp());
+//	LOG_INFO << ENDL;
+//	LOG_INFO << "Event number = " << event->getEventNumber() << ENDL;
+	printf("timestamp = %x\n", event->getTimestamp());
 
 	l0::Subevent* cedarSubevent = event->getCEDARSubevent();
 
@@ -111,12 +111,18 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 		cedarPacket[trbNum].SetHits(trbDataFragment);
 		nhits_perTrb[trbNum] = 0;
 
-		//if(nWords>=250){
-		//std::cout << "Flags = " << (int) cedarPacket[trbNum].cedarHeader->flags << std::endl;
-		//std::cout << "L0 trigger type = " << (int) cedarPacket[trbNum].cedarHeader->triggerType << std::endl;
-		//std::cout << "Source sub-ID = " << (int) cedarPacket[trbNum].cedarHeader->sourceSubID << std::endl;
-		//std::cout << "Format = " << (int) cedarPacket[trbNum].cedarHeader->format << std::endl;
-		//}
+//		if(nWords>=250){
+//		std::cout << "Flags = " << (int) cedarPacket[trbNum].cedarHeader->flags
+//				<< std::endl;
+//		std::cout << "L0 trigger type = "
+//				<< (int) cedarPacket[trbNum].cedarHeader->triggerType
+//				<< std::endl;
+//		std::cout << "Source sub-ID = "
+//				<< (int) cedarPacket[trbNum].cedarHeader->sourceSubID
+//				<< std::endl;
+//		std::cout << "Format = "
+//				<< (int) cedarPacket[trbNum].cedarHeader->format << std::endl;
+//		}
 
 		for (int iFPGA = 0; iFPGA < maxNFPGA; iFPGA++) {
 			//noFrame[iFPGA] = (uint8_t) (cedarPacket[trbNum].cedar_fpgaHeader[iFPGA]->noFrame);
@@ -125,10 +131,10 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 			//errFlags[iFPGA] = (uint8_t) cedarPacket[trbNum].cedar_fpgaHeader[iFPGA]->errFlags;
 
 			//if(nWords>=250){
-			//printf("noFrame[%d] %08x\n",iFPGA,noFrame[iFPGA]);
-			//printf("noNonEmptyFrame[%d] %08x\n",iFPGA,noNonEmptyFrame[iFPGA]);
-			//printf("FPGAID[%d] %08x\n",iFPGA,FPGAID[iFPGA]);
-			//printf("errFlags[%d] %08x\n",iFPGA,errFlags[iFPGA]);
+//			printf("noFrame[%d] %08x\n", iFPGA, noFrame[iFPGA]);
+//			printf("noNonEmptyFrame[%d] %08x\n", iFPGA, noNonEmptyFrame[iFPGA]);
+//			printf("FPGAID[%d] %08x\n", iFPGA, FPGAID[iFPGA]);
+//			printf("errFlags[%d] %08x\n", iFPGA, errFlags[iFPGA]);
 			//}
 			for (int iFrame = 0; iFrame < maxNFrame; iFrame++) {
 
@@ -149,16 +155,19 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 				nWordsPerFPGA[iFPGA] += nWordsPerFrame[iFPGA][iFrame];
 				nWords += nWordsPerFrame[iFPGA][iFrame];
 
-				//if(nWords>=250){
-				//	printf("Frame TimeStamp[%d][%d] = %04x\n",iFPGA,iFrame,coarseFrameTime[iFPGA][iFrame]);
-				//	printf("nWordsPerFrame[%d][%d] %d\n",iFPGA,iFrame,(int)nWordsPerFrame[iFPGA][iFrame]);
-				//	printf("nWordsPerFPGA[%d] %d\n",iFPGA,(int)nWordsPerFPGA[iFPGA]);
-				//	printf("nWords %d\n",(int)nWords);
-				//}
+//				if(nWords>=250){
+//				printf("Frame TimeStamp[%d][%d] = %04x\n", iFPGA, iFrame,
+//						coarseFrameTime[iFPGA][iFrame]);
+//				printf("nWordsPerFrame[%d][%d] %d\n", iFPGA, iFrame,
+//						(int) nWordsPerFrame[iFPGA][iFrame]);
+//				printf("nWordsPerFPGA[%d] %d\n", iFPGA,
+//						(int) nWordsPerFPGA[iFPGA]);
+//				printf("nWords %d\n", (int) nWords);
+//				}
 
 				nhits = nWordsPerFrame[iFPGA][iFrame] - 1;
 				if (nhits) {
-					for (int ihit = 0; ihit < nhits; ihit++) {
+					for (uint ihit = 0; ihit < nhits; ihit++) {
 						time[ihit + nhits_tot] =
 								(uint32_t) cedarPacket[trbNum].tdc_data[ihit
 										+ nhits_perTrb[trbNum]]->Time;
@@ -172,11 +181,16 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 								(uint8_t) cedarPacket[trbNum].tdc_data[ihit
 										+ nhits_perTrb[trbNum]]->ID;
 
-						//printf("ID[%d] %x \n",ihit+nhits_tot,ID[ihit+nhits_tot]);
-						//printf("Time[%d] %08x \n",ihit+nhits_tot,time[ihit+nhits_tot]);
-						//printf("ChID[%d] %x \n",ihit+nhits_tot,chID[ihit+nhits_tot]);
-						//printf("TDCID[%d] %x \n",ihit+nhits_tot,tdcID[ihit+nhits_tot]);
-						//printf("TrbNum %d\n",trbNum);
+//						printf("tdc word %08x\n",(uint32_t) cedarPacket[trbNum].tdc_data[ihit+ nhits_perTrb[trbNum]]->tdcWord);
+//						printf("ID[%d] %x \n", ihit + nhits_tot,
+//								ID[ihit + nhits_tot]);
+//						printf("Time[%d] %08x \n", ihit + nhits_tot,
+//								time[ihit + nhits_tot]);
+//						printf("ChID[%d] %x \n", ihit + nhits_tot,
+//								chID[ihit + nhits_tot]);
+//						printf("TDCID[%d] %x \n", ihit + nhits_tot,
+//								tdcID[ihit + nhits_tot]);
+//						printf("TrbNum %d\n",trbNum);
 
 						if (ihit == (nhits - 1)) {
 							nhits_tot += nhits;
@@ -189,56 +203,25 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 
 		for (uint ihit = nhits_tot_check; ihit < maxNhit; ihit++) {
 			if (ID[ihit]) {
-				//printf("hit[%d] ID %d\n",ihit,(uint) ID[ihit]);
-				//printf("hit[%d] time %08x\n",ihit,(uint32_t) time[ihit]);
-				//printf("hit[%d] chID %d\n",ihit,(uint) chID[ihit]);
-				//printf("hit[%d] tdcID %x\n",ihit,(uint8_t) tdcID[ihit]);
+//				printf("hit[%d] ID %d\n", ihit, (uint) ID[ihit]);
+//				printf("hit[%d] time %08x\n", ihit, (uint32_t) time[ihit]);
+//				printf("hit[%d] chID %d\n", ihit, (uint) chID[ihit]);
+//				printf("hit[%d] tdcID %x\n", ihit, (uint8_t) tdcID[ihit]);
 				pp[ihit] = tdcID[ihit] / 4;
 				tdc[ihit] = tdcID[ihit] % 4;
-				//printf("pp[%d] %d\n",ihit,pp[ihit]);
-				//printf("tdc[%d] %d\n",ihit,tdc[ihit]);
+//				printf("pp[%d] %d\n", ihit, pp[ihit]);
+//				printf("tdc[%d] %d\n", ihit, tdc[ihit]);
 
-				if ((trbNum == 0)
-						&& ((pp[ihit] == 0) || (pp[ihit] == 1)
-								|| (pp[ihit] == 2)))
-					box[ihit] = 1;
-				else if ((trbNum == 0) && (pp[ihit] == 3))
-					box[ihit] = 2;
-				else if ((trbNum == 1) && ((pp[ihit] == 0) || (pp[ihit] == 1)))
-					box[ihit] = 2;
-				else if ((trbNum == 1) && ((pp[ihit] == 2) || (pp[ihit] == 3)))
-					box[ihit] = 3;
-				else if ((trbNum == 2) && (pp[ihit] == 0))
-					box[ihit] = 3;
-				else if ((trbNum == 2)
-						&& ((pp[ihit] == 1) || (pp[ihit] == 2)
-								|| (pp[ihit] == 3)))
-					box[ihit] = 4;
-				else if ((trbNum == 3)
-						&& ((pp[ihit] == 0) || (pp[ihit] == 1)
-								|| (pp[ihit] == 2)))
-					box[ihit] = 5;
-				else if ((trbNum == 3) && (pp[ihit] == 3))
-					box[ihit] = 6;
-				else if ((trbNum == 4) && ((pp[ihit] == 0) || (pp[ihit] == 1)))
-					box[ihit] = 6;
-				else if ((trbNum == 4) && ((pp[ihit] == 2) || (pp[ihit] == 3)))
-					box[ihit] = 7;
-				else if ((trbNum == 5) && (pp[ihit] == 0))
-					box[ihit] = 7;
-				else if ((trbNum == 5)
-						&& ((pp[ihit] == 1) || (pp[ihit] == 2)
-								|| (pp[ihit] == 3)))
-					box[ihit] = 8;
-				else
-					printf("Combination KTAG %d, PP %d not found \n", trbNum,
-							pp[ihit]);
-				//printf("Found Sector %d\n",box[ihit]);
+				box[ihit] = searchPMT(trbNum, pp[ihit]);
+
+//				printf("Found Sector %d\n", box[ihit]);
 
 				sector_occupancy[box[ihit] - 1]++;
 				nhits_tot_check++;
 
-				//printf("%d\t%d\t%d\t%d\t%d\t%d\n",event->getEventNumber(),event->getTimestamp(),ID[ihit],chID[ihit],tdcID[ihit],box[ihit]);
+				printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n", event->getEventNumber(),
+						event->getTimestamp(), ID[ihit], trbNum, tdcID[ihit],
+						pp[ihit], chID[ihit], box[ihit]);
 
 			}
 		}
@@ -260,4 +243,39 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 
 }
 
+uint KtagAlgo::searchPMT(uint tel62ID, uint fpgaID) {
+	uint sectorID;
+	if ((tel62ID == 0) && ((fpgaID == 0) || (fpgaID == 1) || (fpgaID == 2)))
+		sectorID = 1;
+	else if ((tel62ID == 0) && (fpgaID == 3))
+		sectorID = 2;
+	else if ((tel62ID == 1) && ((fpgaID == 0) || (fpgaID == 1)))
+		sectorID = 2;
+	else if ((tel62ID == 1) && ((fpgaID == 2) || (fpgaID == 3)))
+		sectorID = 3;
+	else if ((tel62ID == 2) && (fpgaID == 0))
+		sectorID = 3;
+	else if ((tel62ID == 2)
+			&& ((fpgaID == 1) || (fpgaID == 2) || (fpgaID == 3)))
+		sectorID = 4;
+	else if ((tel62ID == 3)
+			&& ((fpgaID == 0) || (fpgaID == 1) || (fpgaID == 2)))
+		sectorID = 5;
+	else if ((tel62ID == 3) && (fpgaID == 3))
+		sectorID = 6;
+	else if ((tel62ID == 4) && ((fpgaID == 0) || (fpgaID == 1)))
+		sectorID = 6;
+	else if ((tel62ID == 4) && ((fpgaID == 2) || (fpgaID == 3)))
+		sectorID = 7;
+	else if ((tel62ID == 5) && (fpgaID == 0))
+		sectorID = 7;
+	else if ((tel62ID == 5)
+			&& ((fpgaID == 1) || (fpgaID == 2) || (fpgaID == 3)))
+		sectorID = 8;
+	else
+		printf("Combination KTAG %d, PP %d not found \n", tel62ID, fpgaID);
+	return sectorID;
+}
+
 } /* namespace na62 */
+
