@@ -11,12 +11,17 @@
 
 #include <options/Options.h>
 #include <string>
-#include <boost/thread.hpp>
 
 /*
  * Dynamic Options
  */
 #define OPTION_TRIGGER_CONFIG_FILE (char*)"triggerConfigFile"
+
+#define OPTION_L1_BYPASS_PROBABILITY (char*)"L1BypassProbability"
+#define OPTION_L1_BYPASS_TRIGGER_WORD (char*)"L1BypassTriggerWord"
+
+#define OPTION_L2_BYPASS_PROBABILITY (char*)"L2BypassProbability"
+#define OPTION_L2_BYPASS_TRIGGER_WORD (char*)"L2BypassTriggerWord"
 
 // Here you can add your Options like e.g.
 // #define OPTION_YOUR_OPTION_NAME (char*)"nameUsedAs--Flag"
@@ -37,6 +42,15 @@ public:
 				po::value<std::string>()->default_value(
 						"/etc/na62-trigger.conf"),
 				"Config file for trigger specific options")
+
+				(OPTION_L1_BYPASS_PROBABILITY, po::value<double>()->default_value(0.), "Probability for every event to bypass L1 processing")
+
+				(OPTION_L1_BYPASS_TRIGGER_WORD, po::value<uint>()->default_value(0xFF), "L1 trigger type word for events that were passed by")
+
+				(OPTION_L2_BYPASS_PROBABILITY, po::value<double>()->default_value(0.), "Probability for every event to bypass L2 processing")
+
+				(OPTION_L2_BYPASS_TRIGGER_WORD, po::value<uint>()->default_value(0xFF), "L2 trigger type word for events that were passed by")
+
 
 				/*
 				 * Add your Option here like following:

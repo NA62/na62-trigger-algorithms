@@ -13,8 +13,24 @@
 
 namespace na62 {
 
+uint_fast8_t L2TriggerProcessor::bypassTriggerWord;
+double L2TriggerProcessor::bypassProbability;
+
+void L2TriggerProcessor::initialize(double _bypassProbability,
+		uint _bypassTriggerWord) {
+	bypassProbability = _bypassProbability;
+	bypassTriggerWord = _bypassTriggerWord;
+}
+
 uint8_t L2TriggerProcessor::compute(Event* event) {
 	using namespace cream;
+
+	/*
+	 * Check if the event should bypass the processing
+	 */
+	if (bypassEvent()) {
+		return bypassTriggerWord;
+	}
 
 //	std::vector<uint16_t> localCreamIDsToRequestNonZSuppressedData;
 //	for (int localCreamID = event->getNumberOfZSuppressedLkrFragments() - 1;
@@ -33,7 +49,9 @@ uint8_t L2TriggerProcessor::compute(Event* event) {
 }
 
 uint8_t L2TriggerProcessor::onNonZSuppressedLKrDataReceived(Event* event) {
-	LOG_INFO << "onNonZSuppressedLKrDataReceived!!!!!!!!!!!!" << ENDL;
+	LOG_INFO
+			<< "onNonZSuppressedLKrDataReceived - Trigger method not yet implemented!!!!!!!!!!!!"
+			<< ENDL;
 	return 1;
 }
 
@@ -43,4 +61,5 @@ void L2TriggerProcessor::async_requestNonZSuppressedLKrData(
 //	cream::L1DistributionHandler::Async_RequestLKRDataUnicast(event,
 //	true, crateCREAMIDs);
 }
+
 } /* namespace na62 */
