@@ -10,7 +10,7 @@
 #define TRIGGERPROCESSOR_H_
 
 #include <sys/types.h>
-#include <atomic>
+#include <random>
 #include <cstdint>
 
 namespace na62 {
@@ -32,8 +32,22 @@ public:
 
 	static uint8_t compute(Event* event);
 
-private:
+	/**
+	 * Returns true if the current event should be bypassed instead of being processed
+	 */
+	static inline bool bypassEvent() {
+		if (bypassProbability == 0.0) {
+			return false;
+		}
+		double randomNr = ((double) rand() / (double) RAND_MAX);
+		return randomNr <= bypassProbability;
+	}
 
+	static void initialize(double _bypassProbability, uint _bypassTriggerWord);
+
+private:
+	static uint_fast8_t bypassTriggerWord;
+	static double bypassProbability;
 };
 
 } /* namespace na62 */
