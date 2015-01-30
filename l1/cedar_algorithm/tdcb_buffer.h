@@ -78,13 +78,8 @@
 #define SPECIAL_TRIGGER_DIMEOB_DATABLOCK_RSHIFT 16
 #define SPECIAL_TRIGGER_DIMEOB_NUMBER_OF_WORDS_RSHIFT 0
 
-#define maxNhit 200
-// to run header_ktag_ke3MC/beampions.txt
-#define maxNFrame 11
-// to run header_ktag_ke3MC/beampions.txt
-#define maxNFPGA 16
-//#define maxNTRB 6
-//#define maxNFrame 7
+#define maxNhit 500
+#define maxNFrame 7
 #define maxNFPGA 4
 
 #endif /* TDCB_BUFFER_H_ */
