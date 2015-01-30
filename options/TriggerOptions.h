@@ -44,11 +44,11 @@ public:
 						"/etc/na62-trigger.conf"),
 				"Config file for trigger specific options")
 
-				(OPTION_L1_BYPASS_PROBABILITY, po::value<double>()->default_value(0.), "Probability for every event to bypass L1 processing")
+				(OPTION_L1_BYPASS_PROBABILITY, po::value<double>()->default_value(0.), "Probability for every event to bypass L1 and L2 processing")
 
 				(OPTION_L1_BYPASS_TRIGGER_WORD, po::value<int>()->default_value(0xFF), "L1 trigger type word for events that were passed by")
 
-				(OPTION_L2_BYPASS_PROBABILITY, po::value<double>()->default_value(0.), "Probability for every event to bypass L2 processing")
+				(OPTION_L2_BYPASS_PROBABILITY, po::value<double>()->default_value(0.), "Probability for every event to bypass L2 processing if it did not bypass L1 already")
 
 				(OPTION_L2_BYPASS_TRIGGER_WORD, po::value<int>()->default_value(0xFF), "L2 trigger type word for events that were passed by")
 
