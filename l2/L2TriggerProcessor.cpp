@@ -30,11 +30,7 @@ uint8_t L2TriggerProcessor::compute(Event* event) {
 	/*
 	 * Check if the event should bypass the processing
 	 */
-	if (event->getTriggerTypeWord() == L1bypassTriggerWord) {
-		return L1bypassTriggerWord;
-	}
-
-	if (bypassEvent()) {
+	if (event->getTriggerTypeWord() == L1bypassTriggerWord || bypassEvent()) {
 		return bypassTriggerWord;
 	}
 
