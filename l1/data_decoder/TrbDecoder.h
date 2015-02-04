@@ -1,13 +1,13 @@
 /*
- * CedarData.h
+ * TrbDecoder.h
  *
  *  Created on: Nov 24, 2014
  *      Author: angela romano
  *      Email: axr@hep.ph.bham.ac.uk
  */
 
-#ifndef CEDARALGORITM_H_
-#define CEDARALGORITM_H_
+#ifndef TRBDECODER_H_
+#define TRBDECODER_H_
 
 #include <sys/types.h>
 #include <cstdint>
@@ -45,19 +45,19 @@ struct TrbData {
 	uint ID :4;     //0x4 (leading time), 0x5 (trailing time)
 }__attribute__ ((__packed__));
 
-class CedarData {
+class TrbDecoder {
 
 public:
-	CedarData();
-	virtual ~CedarData();
+	TrbDecoder();
+	virtual ~TrbDecoder();
 	void SetHits(l0::MEPFragment*);
 
 	uint nhits;
 	uint nhits_tot;
 	uint nWords;
-	TrbDataHeader* cedarHeader;           //array maxNTEL size
-	FPGADataHeader** cedar_fpgaHeader;    //array maxNFPGA size
-	FrameDataHeader*** cedar_frameHeader; //array maxNFrame size
+	TrbDataHeader* boardHeader;           //array maxNTEL size
+	FPGADataHeader** fpgaHeader;    //array maxNFPGA size
+	FrameDataHeader*** frameHeader; //array maxNFrame size
 	TrbData** tdc_data;
 
 	uint* noFrame;                   //array maxNFPGA size
@@ -163,4 +163,4 @@ private:
 
 }
 
-#endif /* CEDARALGORITM_H_ */
+#endif /* TRBDATA_H_ */
