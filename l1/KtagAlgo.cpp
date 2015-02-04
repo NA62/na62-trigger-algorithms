@@ -13,14 +13,13 @@
 #include <l0/MEPFragment.h>
 #include <l0/Subevent.h>
 #include <options/Logging.h>
-#include "data_decoder/CedarData.h"
+#include "data_decoder/TrbDecoder.h"
 //#include "data_decoder/CedarHits.h"
 #include "cedar_algorithm/tdcb_buffer.h"
 
 namespace na62 {
 
-KtagAlgo::KtagAlgo() {
-}
+KtagAlgo::KtagAlgo() {}
 
 KtagAlgo::~KtagAlgo() {
 // TODO Auto-generated destructor stub
@@ -30,7 +29,7 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 
 	using namespace l0;
 
-	CedarData* cedarPacket = new CedarData[32];
+	TrbDecoder* cedarPacket = new TrbDecoder[32];
 
 	int nhits_perTrb[32];
 	int sector_occupancy[8];
@@ -121,34 +120,14 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 
 		nhits_perTrb[trbNum] = 0;
 
-//		if(nWords>=250){
-//		std::cout << "Flags = " << (int) cedarPacket[trbNum].cedarHeader->flags
-//				<< std::endl;
-//		std::cout << "L0 trigger type = "
-//				<< (int) cedarPacket[trbNum].cedarHeader->triggerType
-//				<< std::endl;
-//		std::cout << "Source sub-ID = "
-//				<< (int) cedarPacket[trbNum].cedarHeader->sourceSubID
-//				<< std::endl;
-//		std::cout << "Format = "
-//				<< (int) cedarPacket[trbNum].cedarHeader->format << std::endl;
-//		}
-
 		for (int iFPGA = 0; iFPGA < maxNFPGA; iFPGA++) {
-			//noFrame[iFPGA] = (uint8_t) (cedarPacket[trbNum].cedar_fpgaHeader[iFPGA]->noFrame);
-			//noNonEmptyFrame[iFPGA] = (uint8_t)cedarPacket[trbNum].cedar_fpgaHeader[iFPGA]->noNonEmptyFrame;
-			//FPGAID[iFPGA] = (uint8_t) cedarPacket[trbNum].cedar_fpgaHeader[iFPGA]->FPGAID;
-			//errFlags[iFPGA] = (uint8_t) cedarPacket[trbNum].cedar_fpgaHeader[iFPGA]->errFlags;
+//			noFrame[iFPGA] = (uint8_t) (cedarPacket[trbNum].fpgaHeader[iFPGA]->noFrame);
+//			noNonEmptyFrame[iFPGA] = (uint8_t)cedarPacket[trbNum].fpgaHeader[iFPGA]->noNonEmptyFrame;
+//			FPGAID[iFPGA] = (uint8_t) cedarPacket[trbNum].fpgaHeader[iFPGA]->FPGAID;
+//			errFlags[iFPGA] = (uint8_t) cedarPacket[trbNum].fpgaHeader[iFPGA]->errFlags;
 
-			//if(nWords>=250){
-//			printf("noFrame[%d] %08x\n", iFPGA, noFrame[iFPGA]);
-//			printf("noNonEmptyFrame[%d] %08x\n", iFPGA, noNonEmptyFrame[iFPGA]);
-//			printf("FPGAID[%d] %08x\n", iFPGA, FPGAID[iFPGA]);
-//			printf("errFlags[%d] %08x\n", iFPGA, errFlags[iFPGA]);
-			//}
 			printf("KtagAlgo.cpp: noFrame[%d] %d\n", iFPGA, noFrame[iFPGA]);
-			printf("KtagAlgo.cpp: noNonEmptyFrame[%d] %d\n", iFPGA,
-					noNonEmptyFrame[iFPGA]);
+			printf("KtagAlgo.cpp: noNonEmptyFrame[%d] %d\n", iFPGA,noNonEmptyFrame[iFPGA]);
 			printf("KtagAlgo.cpp: FPGAID[%d] %d\n", iFPGA, FPGAID[iFPGA]);
 			printf("KtagAlgo.cpp: errFlags[%d] %d\n", iFPGA, errFlags[iFPGA]);
 
@@ -159,10 +138,10 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 				printf("KtagAlgo.cpp: nWordsPerFrame[%d][%d] %d\n", iFPGA,
 						iFrame, nWordsPerFrame[iFPGA][iFrame]);
 
-				//coarseFrameTime[iFPGA][iFrame] =
-				//	(uint16_t) cedarPacket[trbNum].cedar_frameHeader[iFPGA][iFrame]->coarseFrameTime;
+//				coarseFrameTime[iFPGA][iFrame] =
+//					(uint16_t) cedarPacket[trbNum].frameHeader[iFPGA][iFrame]->coarseFrameTime;
 //				nWordsPerFrame[iFPGA][iFrame] =
-//						(uint16_t) cedarPacket[trbNum].cedar_frameHeader[iFPGA][iFrame]->nWordsPerFrame;
+//						(uint16_t) cedarPacket[trbNum].frameHeader[iFPGA][iFrame]->nWordsPerFrame;
 
 				coarseFrameTime[iFPGA][iFrame] += (event->getTimestamp()
 						& 0xFFFF0000);
@@ -175,16 +154,6 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 
 				nWordsPerFPGA[iFPGA] += nWordsPerFrame[iFPGA][iFrame];
 				nWords += nWordsPerFrame[iFPGA][iFrame];
-
-//				if(nWords>=250){
-//				printf("Frame TimeStamp[%d][%d] = %04x\n", iFPGA, iFrame,
-//						coarseFrameTime[iFPGA][iFrame]);
-//				printf("nWordsPerFrame[%d][%d] %d\n", iFPGA, iFrame,
-//						(int) nWordsPerFrame[iFPGA][iFrame]);
-//				printf("nWordsPerFPGA[%d] %d\n", iFPGA,
-//						(int) nWordsPerFPGA[iFPGA]);
-//				printf("nWords %d\n", (int) nWords);
-//				}
 
 				nhits = nWordsPerFrame[iFPGA][iFrame] - 1;
 				if (nhits) {
@@ -201,7 +170,6 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 //						ID[ihit + nhits_tot] =
 //								(uint8_t) cedarPacket[trbNum].tdc_data[ihit
 //										+ nhits_perTrb[trbNum]]->ID;
-
 //						printf("tdc word %08x\n",(uint32_t) cedarPacket[trbNum].tdc_data[ihit+ nhits_perTrb[trbNum]]->tdcWord);
 						if (ID[ihit + nhits_tot]) {
 							printf("ID[%d] %x \n", ihit + nhits_tot,

@@ -50,38 +50,28 @@ class TrbDecoder {
 public:
 	TrbDecoder();
 	virtual ~TrbDecoder();
-	void SetHits(uint, l0::MEPFragment*);
+	void SetHits(l0::MEPFragment*);
 
 	uint nhits;
 	uint nhits_tot;
 	uint nWords;
-	TrbDataHeader* boardHeader;     //array maxNTEL62s size
-	FPGADataHeader** fpgaHeader;    //array maxNFPGAs size
-	FrameDataHeader*** frameHeader; //array maxNFrames size
+	TrbDataHeader* boardHeader;           //array maxNTEL size
+	FPGADataHeader** fpgaHeader;    //array maxNFPGA size
+	FrameDataHeader*** frameHeader; //array maxNFrame size
 	TrbData** tdc_data;
 
-//	uint noHitsPerTrb;				 //array maxNTEL62s size
-	uint* noFrame;                   //array maxNFPGAs size
-	uint* noNonEmptyFrame;           //array maxNFPGAs size
-	uint* FPGAID;                    //array maxNFPGAs size
-	uint* errFlags;                  //array maxNFPGAs size
-	uint16_t** coarseFrameTime;      //array maxNFrames size
-	uint** nWordsPerFrame;           //array maxNFrames size
+	uint* noFrame;                   //array maxNFPGA size
+	uint* noNonEmptyFrame;           //array maxNFPGA size
+	uint* FPGAID;                    //array maxNFPGA size
+	uint* errFlags;                  //array maxNFPGA size
+	uint16_t** coarseFrameTime;      //array maxNFrame size
+	uint** nWordsPerFrame;       //array maxNFrame size
 
 	uint32_t* time;
 	uint* chID;
 	uint* tdcID;
 	uint* ID;
-	uint* trbID;
 
-	uint GetNoHitsPerTrb() {
-		return nhits_tot;
-	}
-	;
-	void SetnoHitsPerTrb(uint value) {
-		nhits_tot = value;
-	}
-	;
 	uint* GetNoFrame() {
 		return noFrame;
 	}
@@ -164,14 +154,6 @@ public:
 	;
 	void SetID(uint* buffer) {
 		ID = buffer;
-	}
-	;
-	uint* GetTrbID() {
-		return trbID;
-	}
-	;
-	void SetTrbID(uint* buffer) {
-		trbID = buffer;
 	}
 	;
 

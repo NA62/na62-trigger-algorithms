@@ -21,30 +21,29 @@ TrbDecoder::TrbDecoder() {
 	nhits_tot = 0;
 	nWords = 0;
 	boardHeader = 0;
-	fpgaHeader = new FPGADataHeader*[maxNFPGAs];
-	frameHeader = new FrameDataHeader**[maxNFPGAs];
-	tdc_data = new TrbData*[maxNhits];
-	for (int i = 0; i < maxNFPGAs; i++) {
-		frameHeader[i] = new FrameDataHeader*[maxNFrames];
+	fpgaHeader = new FPGADataHeader*[maxNFPGA];
+	frameHeader = new FrameDataHeader**[maxNFPGA];
+	tdc_data = new TrbData*[maxNhit];
+	for (int i = 0; i < maxNFPGA; i++) {
+		frameHeader[i] = new FrameDataHeader*[maxNFrame];
 	}
 
-//	noHitsPerTrb = new uint[maxNTEL62s];
-	noFrame = new uint[maxNFPGAs];
-	noNonEmptyFrame = new uint[maxNFPGAs];
-	FPGAID = new uint[maxNFPGAs];
-	errFlags = new uint[maxNFPGAs];
-	coarseFrameTime = new uint16_t*[maxNFPGAs];
-	nWordsPerFrame = new uint*[maxNFPGAs];
-	for (int i = 0; i < maxNFPGAs; i++) {
-		coarseFrameTime[i] = new uint16_t[maxNFrames];
-		nWordsPerFrame[i] = new uint[maxNFrames];
+	noFrame = new uint[maxNFPGA];
+	noNonEmptyFrame = new uint[maxNFPGA];
+	FPGAID = new uint[maxNFPGA];
+	errFlags = new uint[maxNFPGA];
+	coarseFrameTime = new uint16_t*[maxNFPGA];
+	nWordsPerFrame = new uint*[maxNFPGA];
+	for (int i = 0; i < maxNFPGA; i++) {
+		coarseFrameTime[i] = new uint16_t[maxNFrame];
+		nWordsPerFrame[i] = new uint[maxNFrame];
 	}
 
-	time = new uint32_t[maxNhits];
-	chID = new uint[maxNhits];
-	tdcID = new uint[maxNhits];
-	ID = new uint[maxNhits];
-	trbID = new uint[maxNhits];
+	time = new uint32_t[maxNhit];
+	chID = new uint[maxNhit];
+	tdcID = new uint[maxNhit];
+	ID = new uint[maxNhit];
+
 }
 
 TrbDecoder::~TrbDecoder() {
@@ -52,7 +51,6 @@ TrbDecoder::~TrbDecoder() {
 	delete fpgaHeader;
 	delete frameHeader;
 	delete tdc_data;
-//	delete noHitsPerTrb;
 	delete noFrame;
 	delete noNonEmptyFrame;
 	delete FPGAID;
@@ -63,62 +61,79 @@ TrbDecoder::~TrbDecoder() {
 	delete chID;
 	delete tdcID;
 	delete ID;
-	delete trbID;
 }
 
-void TrbDecoder::SetHits(uint trbNum, l0::MEPFragment* trbDataFragment) {
+void TrbDecoder::SetHits(l0::MEPFragment* trbDataFragment) {
 	char * payload = trbDataFragment->getPayload();
 	boardHeader = (TrbDataHeader*) payload;
 
 //	LOG_INFO << "maxNFPGA " << maxNFPGA << ENDL;
 //	LOG_INFO << "maxNFrame " << maxNFrame << ENDL;
+//
 //	LOG_INFO << "Flags " << ((int) cedarHeader->flags) << ENDL;
 //	LOG_INFO << "L0 trigger type " << ((int) cedarHeader->triggerType) << ENDL;
 //	LOG_INFO << "Source (Tel62) sub-ID " << ((int) cedarHeader->sourceSubID) << ENDL;
 //	LOG_INFO << "Format " << ((int) cedarHeader->format) << ENDL;
 
-	for (int iFPGA = 0; iFPGA < maxNFPGAs; iFPGA++) {
+	for (int iFPGA = 0; iFPGA < maxNFPGA; iFPGA++) {
 //		printf ("writing getpayload() + %d\n",1+iFPGA+nWords);
 		fpgaHeader[iFPGA] = (FPGADataHeader*) payload + 1 + iFPGA + nWords;
+
+		LOG_INFO<< "noFrame " << ((uint) fpgaHeader[iFPGA]->noFrame) << ENDL;
+		LOG_INFO<< "noNonEmptyFrame " << ((uint) fpgaHeader[iFPGA]->noNonEmptyFrame) << ENDL;
+		LOG_INFO<< "FPGAID[" << iFPGA<< "] " << ((uint) fpgaHeader[iFPGA]->FPGAID) << ENDL;
+		LOG_INFO<< "errFlags[iFPGA] " << ((uint) fpgaHeader[iFPGA]->errFlags) << ENDL;
 
 		noFrame[iFPGA] = (uint) fpgaHeader[iFPGA]->noFrame;
 		noNonEmptyFrame[iFPGA] = (uint) fpgaHeader[iFPGA]->noNonEmptyFrame;
 		FPGAID[iFPGA] = (uint) fpgaHeader[iFPGA]->FPGAID;
 		errFlags[iFPGA] = (uint) fpgaHeader[iFPGA]->errFlags;
 
-		//LOG_INFO<< "noFrame[" << iFPGA << "] " << noFrame[iFPGA] << ENDL;
-		//LOG_INFO<< "noNonEmptyFrame[" << iFPGA << "] " << noNonEmptyFrame[iFPGA] << ENDL;
-		//LOG_INFO<< "FPGAID[" << iFPGA << "] " << FPGAID[iFPGA] << ENDL;
-		//LOG_INFO<< "errFlags[" << iFPGA << "] " << errFlags[iFPGA] << ENDL;
+		printf("noFrame[%d] %d\n", iFPGA, noFrame[iFPGA]);
+		printf("noNonEmptyFrame[%d] %d\n", iFPGA, noNonEmptyFrame[iFPGA]);
+		printf("FPGAID[%d] %d\n", iFPGA, FPGAID[iFPGA]);
+		printf("errFlags[%d] %d\n", iFPGA, errFlags[iFPGA]);
 
-		for (int iFrame = 0; iFrame < maxNFrames; iFrame++) {
+		for (int iFrame = 0; iFrame < maxNFrame; iFrame++) {
 //			printf ("writing getpayload() + %d\n",2+iFPGA+nWords);
 			frameHeader[iFPGA][iFrame] = (FrameDataHeader*) payload + 2 + iFPGA
 					+ nWords;
+
+			LOG_INFO<< "coarseFrameTime " << ((uint16_t) frameHeader[iFPGA][iFrame]->coarseFrameTime) << ENDL;
+			LOG_INFO<< "nWordsPerFrame " << ((uint) frameHeader[iFPGA][iFrame]->nWordsPerFrame) << ENDL;
 
 			coarseFrameTime[iFPGA][iFrame] =
 					(uint16_t) frameHeader[iFPGA][iFrame]->coarseFrameTime;
 			nWordsPerFrame[iFPGA][iFrame] =
 					(uint) frameHeader[iFPGA][iFrame]->nWordsPerFrame;
+//nWordsPerFPGA[iFPGA] += nWordsPerFrame[iFPGA][iFrame];
 			nWords += (uint) frameHeader[iFPGA][iFrame]->nWordsPerFrame;
 
-			//LOG_INFO<< "FrameTimestamp[" << iFPGA << "][" << iFrame << "] " << std::hex << coarseFrameTime[iFPGA][iFrame] << std::dec << ENDL;
-			//LOG_INFO<< "nWordsPerFrame[" << iFPGA << "][" << iFrame << "] " << nWordsPerFrame[iFPGA][iFrame] << ENDL;
-			//LOG_INFO<< "nWords " << nWords << ENDL;
+			printf("Frame TimeStamp[%d][%d] = %04x\n", iFPGA, iFrame,
+					coarseFrameTime[iFPGA][iFrame]);
+			printf("nWordsPerFrame[%d][%d] %d\n", iFPGA, iFrame,
+					(uint) nWordsPerFrame[iFPGA][iFrame]);
+			//printf("nWordsPerFPGA[%d] %d\n",iFPGA,(int)nWordsPerFPGA[iFPGA]);
+//			printf("nWords %d\n", (int) nWords);
 
-			if (nWordsPerFrame[iFPGA][iFrame])
+			if (nWordsPerFrame)
 				nhits = nWordsPerFrame[iFPGA][iFrame] - 1;
 			else
-				LOG_INFO<< "TrbDecoder.cpp: Number of Words in Frame is Null !" << ENDL;
-
-				//LOG_INFO<< "nhits " << nhits << ENDL;
+				LOG_INFO<< "CedarData.cpp: Number of Words in Frame is Null !" << ENDL;
+			printf("nhits %d\n", nhits);
 			if (nhits) {
 				for (uint ihit = 0; ihit < nhits; ihit++) {
-//					printf("writing getpayload() + %d\n",2 + iFPGA + nWords - nhits + ihit);
+//					printf("ihit %d", ihit);
+//					printf("................writing getpayload() + %d\n",
+//							2 + iFPGA + nWords - nhits + ihit);
+//					printf("tdc_data[%d]\n", ihit + nhits_tot);
 					tdc_data[ihit + nhits_tot] = (TrbData*) payload + 2 + iFPGA
 							+ nWords - nhits + ihit;
-
 //					printf("tdc word %08x\n",(uint32_t) tdc_data[ihit + nhits_tot]->tdcWord);
+					LOG_INFO<< "Time " << (uint32_t) tdc_data[ihit+nhits_tot]->Time << ENDL;
+					LOG_INFO<< "ChID " << (uint) tdc_data[ihit+nhits_tot]->chID << ENDL;
+					LOG_INFO<< "TDCID " << (uint) tdc_data[ihit+nhits_tot]->tdcID << ENDL;
+					LOG_INFO<< "ID " << (uint) tdc_data[ihit+nhits_tot]->ID << ENDL;
 
 					time[ihit + nhits_tot] = (uint32_t) tdc_data[ihit
 							+ nhits_tot]->Time;
@@ -128,22 +143,24 @@ void TrbDecoder::SetHits(uint trbNum, l0::MEPFragment* trbDataFragment) {
 							(uint) tdc_data[ihit + nhits_tot]->tdcID;
 					ID[ihit + nhits_tot] =
 							(uint) tdc_data[ihit + nhits_tot]->ID;
-					trbID[ihit + nhits_tot] = trbNum;
 
-//					LOG_INFO<< "time[" << ihit + nhits_tot << "] " << std::hex << time[ihit + nhits_tot] << std::dec << ENDL;
-//					LOG_INFO<< "chID[" << ihit + nhits_tot << "] " << chID[ihit + nhits_tot] << ENDL;
-//					LOG_INFO<< "tdcID["<< ihit + nhits_tot << "] " << tdcID[ihit + nhits_tot] << ENDL;
-//					LOG_INFO<< "ID[" << ihit + nhits_tot << "] " << ID[ihit + nhits_tot] << ENDL;
-//					LOG_INFO<< "trbID[" << ihit + nhits_tot << "] " << trbID[ihit + nhits_tot] << ENDL;
+					printf("time[%d] %08x\n", ihit + nhits_tot,
+							time[ihit + nhits_tot]);
+					printf("chID[%d] %d\n", ihit + nhits_tot,
+							chID[ihit + nhits_tot]);
+					printf("tdcID[%d] %d\n", ihit + nhits_tot,
+							tdcID[ihit + nhits_tot]);
+					printf("ID[%d] %d\n", ihit + nhits_tot,
+							ID[ihit + nhits_tot]);
 
 					if (ihit == (nhits - 1)) {
 						nhits_tot += nhits;
+//						printf("nhits_tot %d\n", nhits_tot);
 					}
 				}
 			}
 		}
 	}
-//	LOG_INFO<<"Analysing Tel62 " << trbNum << " Number of hits found " << nhits_tot << ENDL;
 }
 
 }
