@@ -78,8 +78,10 @@
 #define SPECIAL_TRIGGER_DIMEOB_DATABLOCK_RSHIFT 16
 #define SPECIAL_TRIGGER_DIMEOB_NUMBER_OF_WORDS_RSHIFT 0
 
-#define maxNhit 500
-#define maxNFrame 7
-#define maxNFPGA 4
+#define maxNhits 500
+#define maxNFrames 7
+#define maxNFPGAs 4
+#define maxNTEL62s 12
+
 
 #endif /* TDCB_BUFFER_H_ */
