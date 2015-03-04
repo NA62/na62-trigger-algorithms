@@ -13,6 +13,7 @@
 #include <l0/MEPFragment.h>
 #include <l0/Subevent.h>
 
+#include "L1Downscaling.h"
 #include "KtagAlgo.h"
 
 namespace na62 {
@@ -20,13 +21,19 @@ namespace na62 {
 uint_fast8_t L1TriggerProcessor::bypassTriggerWord;
 double L1TriggerProcessor::bypassProbability;
 
+void L1TriggerProcessor::initializeDownscaling() {
+	L1Downscaling::registerAlgorithm("CEDAR");
+}
+
 void L1TriggerProcessor::initialize(double _bypassProbability,
 		uint _bypassTriggerWord) {
 	// Seed for rand()
-	srand (time(NULL));
+	srand(time(NULL));
 
 	bypassProbability = _bypassProbability;
 	bypassTriggerWord = _bypassTriggerWord;
+
+//	L1Downscaling::initialize();
 }
 
 uint8_t L1TriggerProcessor::compute(Event* event) {
@@ -39,17 +46,14 @@ uint8_t L1TriggerProcessor::compute(Event* event) {
 		return bypassTriggerWord;
 	}
 
-	uint8_t trigger = KtagAlgo::checkKtagTrigger(event);
-	if (trigger) {
-//		LOG_INFO << "event number = " << event->getEventNumber() << ENDL;
-//		LOG_INFO << "GOOD EVENT! " << ENDL;
-		return trigger;
-	} else
-//		LOG_INFO << "BAD EVENT! " << ENDL;
+	int ktagTrigger = 0;
+
+	if (SourceIDManager::isCedarActive()) {
+		ktagTrigger = KtagAlgo::checkKtagTrigger(event);
+	}
 
 	//event->setProcessingID(0); // 0 indicates raw data as collected from the detector
-	return 0;
-
+	return ktagTrigger;
 }
 
 } /* namespace na62 */

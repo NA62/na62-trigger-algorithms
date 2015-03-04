@@ -43,6 +43,11 @@ public:
 		return randomNr <= bypassProbability;
 	}
 
+	/**
+	 * Registers all downscaling algorithms. Must be called before Options::Load is executed!
+	 */
+	static void initializeDownscaling();
+
 	static void initialize(double _bypassProbability, uint _bypassTriggerWord);
 
 private:
