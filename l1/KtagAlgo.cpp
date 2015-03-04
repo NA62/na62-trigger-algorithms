@@ -154,7 +154,7 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 
 	uint8_t kaontrigger = 0;
 
-	if (nSectors > 3) {
+	if (nSectors > 1) {
 		kaontrigger = 1;
 		return kaontrigger;
 	} else

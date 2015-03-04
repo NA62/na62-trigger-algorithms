@@ -23,7 +23,7 @@ double L1TriggerProcessor::bypassProbability;
 void L1TriggerProcessor::initialize(double _bypassProbability,
 		uint _bypassTriggerWord) {
 	// Seed for rand()
-	srand (time(NULL));
+	srand(time(NULL));
 
 	bypassProbability = _bypassProbability;
 	bypassTriggerWord = _bypassTriggerWord;
@@ -35,21 +35,12 @@ uint8_t L1TriggerProcessor::compute(Event* event) {
 	/*
 	 * Check if the event should bypass the processing
 	 */
-	if (bypassEvent()) {
+	if (bypassEvent() || event->isSpecialTriggerEvent()) {
 		return bypassTriggerWord;
 	}
 
 	uint8_t trigger = KtagAlgo::checkKtagTrigger(event);
-	if (trigger) {
-//		LOG_INFO << "event number = " << event->getEventNumber() << ENDL;
-//		LOG_INFO << "GOOD EVENT! " << ENDL;
-		return trigger;
-	} else
-//		LOG_INFO << "BAD EVENT! " << ENDL;
-
-	//event->setProcessingID(0); // 0 indicates raw data as collected from the detector
-	return 0;
-
+	return trigger;
 }
 
 } /* namespace na62 */
