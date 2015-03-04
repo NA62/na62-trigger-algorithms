@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <cstdint>
 #include <l0/MEPFragment.h>
+#include <eventBuilding/Event.h>
 
 #define maxNhits 500
 
@@ -66,7 +67,7 @@ public:
 	virtual ~TrbDecoder();
 
 	int SetNFPGAs(uint);
-	void GetData(uint, l0::MEPFragment*);
+	void GetData(uint, l0::MEPFragment*, Event*);
 
 	/**
 	 * Method returning the total number of edges found per Tel62 board
@@ -80,7 +81,7 @@ public:
 	 * Method returning an array of edge times
 	 *
 	 */
-	uint32_t* GetTimes() {
+	double* GetTimes() {
 		return edge_times;
 	}
 	;
@@ -118,6 +119,8 @@ public:
 	;
 
 private:
+	uint64_t frameTS;
+	uint64_t time;
 	uint nFPGAs;
 	uint nFrames;
 	uint nWordsPerFrame;
@@ -133,7 +136,7 @@ private:
 	 * Arrays with edge info
 	 *
 	 */
-	uint32_t* edge_times;
+	double* edge_times;
 	uint* edge_chIDs;
 	uint* edge_tdcIDs;
 	uint* edge_IDs;

@@ -16,6 +16,8 @@
 namespace na62 {
 
 TrbDecoder::TrbDecoder() {
+	frameTS = 0;
+	time = 0;
 	nFPGAs = 0;
 	nFrames = 0;
 	nWordsPerFrame = 0;
@@ -27,7 +29,7 @@ TrbDecoder::TrbDecoder() {
 	frameHeader = 0;
 	tdcData = 0;
 
-	edge_times = new uint32_t[maxNhits];
+	edge_times = new double[maxNhits];
 	edge_chIDs = new uint[maxNhits];
 	edge_tdcIDs = new uint[maxNhits];
 	edge_IDs = new uint[maxNhits];
@@ -68,7 +70,8 @@ int TrbDecoder::SetNFPGAs(uint fpgaFlags) {
  *
  */
 
-void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment) {
+void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment,
+		Event* event) {
 	char * payload = trbDataFragment->getPayload();
 	boardHeader = (TrbDataHeader*) payload;
 
@@ -101,8 +104,18 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment) {
 
 			nWordsPerFrame = (uint) frameHeader->nWords;
 			nWords_tot += nWordsPerFrame;
-
 			//LOG_INFO<< "Number of Words  " << nWords_tot << ENDL;
+
+			frameTS = (frameHeader->frameTimeStamp & 0x0000ffff) + (event->getTimestamp() & 0xffff0000);
+			//LOG_INFO<< "Event Timestamp " << std::hex << event->getTimestamp() << std::dec << ENDL;
+			//LOG_INFO<< "FrameTS " << std::hex << frameTS << std::dec << ENDL;
+
+			if ((event->getTimestamp() & 0xf000) == 0xf000
+					&& (frameTS & 0xf000) == 0x0000)
+				frameTS += 0x10000; //16 bits overflow
+			if ((event->getTimestamp() & 0xf000) == 0x0000
+					&& (frameTS & 0xf000) == 0xf000)
+				frameTS -= 0x10000; //16 bits overflow
 
 			if (nWordsPerFrame)
 				nEdges = nWordsPerFrame - 1;
@@ -112,18 +125,23 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment) {
 			if (nEdges) {
 				for (uint iEdge = 0; iEdge < nEdges; iEdge++) {
 					//printf("writing getpayload() + %d\n",2 + iFPGA + nWords_tot - nEdges + iEdge);
-					tdcData = (TrbData*) payload + 2 + iFPGA + nWords_tot - nEdges + iEdge;
+					tdcData = (TrbData*) payload + 2 + iFPGA + nWords_tot
+							- nEdges + iEdge;
 
-					edge_times[iEdge + nEdges_tot] = (uint32_t) tdcData->time;
+					time = (tdcData->time & 0x0007ffff) + ((frameTS & 0xfffff800)*0x100);
+					//LOG_INFO<< "Time " << std::hex << time << std::dec << ENDL;
+
+					edge_times[iEdge + nEdges_tot] = ((time
+							- event->getTimestamp() * 256.) * 0.097464731802);
 					edge_chIDs[iEdge + nEdges_tot] = (uint) tdcData->chID;
 					edge_tdcIDs[iEdge + nEdges_tot] = (uint) tdcData->tdcID;
 					edge_IDs[iEdge + nEdges_tot] = (uint) tdcData->ID;
 					edge_trbIDs[iEdge + nEdges_tot] = trbNum;
 
-					//LOG_INFO<< "edge_times[" << iEdge + nEdges_tot << "] " << std::hex << edge_times[iEdge + nEdges_tot] << std::dec << ENDL;
+					//LOG_INFO<< "edge_IDs[" << iEdge + nEdges_tot << "] " << edge_IDs[iEdge + nEdges_tot] << ENDL;
 					//LOG_INFO<< "edge_chIDs[" << iEdge + nEdges_tot << "] " << edge_chIDs[iEdge + nEdges_tot] << ENDL;
 					//LOG_INFO<< "edge_tdcIDs["<< iEdge + nEdges_tot << "] " << edge_tdcIDs[iEdge + nEdges_tot] << ENDL;
-					//LOG_INFO<< "edge_IDs[" << iEdge + nEdges_tot << "] " << edge_IDs[iEdge + nEdges_tot] << ENDL;
+					//LOG_INFO<< "edge_times[" << iEdge + nEdges_tot << "] " << edge_times[iEdge + nEdges_tot] << ENDL;
 					//LOG_INFO<< "edge_trbIDs[" << iEdge + nEdges_tot << "] " << edge_trbIDs[iEdge + nEdges_tot] << ENDL;
 
 					if (iEdge == (nEdges - 1)) {

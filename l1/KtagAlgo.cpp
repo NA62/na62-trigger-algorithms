@@ -14,7 +14,6 @@
 #include <l0/Subevent.h>
 #include <options/Logging.h>
 #include "data_decoder/TrbDecoder.h"
-#include "cedar_algorithm/tdcb_buffer.h"
 
 namespace na62 {
 
@@ -41,7 +40,7 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 	uint sector_occupancy[8];
 	uint nSectors = 0;
 
-	uint32_t* edge_times;
+	double* edge_times;
 	uint* edge_chIDs;
 	uint* edge_tdcIDs;
 	uint* edge_IDs;
@@ -72,7 +71,7 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 
 		l0::MEPFragment* trbDataFragment = cedarSubevent->getFragment(trbNum);
 
-		cedarPacket[trbNum].GetData(trbNum, trbDataFragment);
+		cedarPacket[trbNum].GetData(trbNum, trbDataFragment, event);
 
 		/**
 		 * Get Arrays with hit Info
@@ -86,56 +85,29 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 
 		noEdgesPerTrb[trbNum] = cedarPacket[trbNum].GetNoEdgesPerTrb();
 
-//		for (uint iFPGA = 0; iFPGA < maxNFPGAs; iFPGA++) {
-//			printf("KtagAlgo.cpp: noFrame[%d] %d\n", iFPGA, noFrame[iFPGA]);
-//			printf("KtagAlgo.cpp: noNonEmptyFrame[%d] %d\n", iFPGA,
-//					noNonEmptyFrame[iFPGA]);
-//			printf("KtagAlgo.cpp: FPGAID[%d] %d\n", iFPGA, FPGAID[iFPGA]);
-//			printf("KtagAlgo.cpp: errFlags[%d] %d\n", iFPGA, errFlags[iFPGA]);
-//			for (uint iFrame = 0; iFrame < maxNFrames; iFrame++) {
-//				printf("KtagAlgo.cpp: coarseFrameTime[%d][%d] %04x\n", iFPGA,
-//						iFrame, coarseFrameTime[iFPGA][iFrame]);
-//				printf("KtagAlgo.cpp: nWordsPerFrame[%d][%d] %d\n", iFPGA,
-//						iFrame, nWordsPerFrame[iFPGA][iFrame]);
-
-//				coarseFrameTime[iFPGA][iFrame] += (event->getTimestamp()
-//						& 0xFFFF0000);
-//				if ((event->getTimestamp() & 0xf000) == 0xf000
-//						&& (coarseFrameTime[iFPGA][iFrame] & 0xf000) == 0x0000)
-//					coarseFrameTime[iFPGA][iFrame] += 0x10000; //16 bits overflow
-//				if ((event->getTimestamp() & 0xf000) == 0x0000
-//						&& (coarseFrameTime[iFPGA][iFrame] & 0xf000) == 0xf000)
-//					coarseFrameTime[iFPGA][iFrame] -= 0x10000; //16 bits overflow
-
-//				nWordsPerFPGA[iFPGA] += nWordsPerFrame[iFPGA][iFrame];
-//				nWords += nWordsPerFrame[iFPGA][iFrame];
-//				if (nWordsPerFrame[iFPGA][iFrame])
-//					nhits_tot_check += (nWordsPerFrame[iFPGA][iFrame] - 1);
-//				else
-//					LOG_INFO<< "KtagAlgo.cpp::nWordsPerFrame is zero!"<< ENDL;
-//			}
-//		}
+		//LOG_INFO<< "Tel62 ID " << trbNum << " - Number of Edges found " << noEdgesPerTrb[trbNum] << ENDL;
 
 		for (uint iEdge = 0; iEdge < noEdgesPerTrb[trbNum]; iEdge++) {
 			if (edge_IDs[iEdge]) {
 
 				//LOG_INFO<< "Edge " << iEdge + nEdges_tot << " ID " << edge_IDs[iEdge] << ENDL;
-				//LOG_INFO<< "Edge " << iEdge + nEdges_tot << " time " << std::hex << edge_times[iEdge] << std::dec << ENDL;
 				//LOG_INFO<< "Edge " << iEdge + nEdges_tot << " chID " << edge_chIDs[iEdge] << ENDL;
 				//LOG_INFO<< "Edge " << iEdge + nEdges_tot << " tdcID " << edge_tdcIDs[iEdge] << ENDL;
+				//LOG_INFO<< "Edge " << iEdge + nEdges_tot << " time " << edge_times[iEdge] << ENDL;
 				//LOG_INFO<< "Edge " << iEdge + nEdges_tot << " trbID " << edge_trbIDs[iEdge] << ENDL;
 
 				pp[iEdge + nEdges_tot] = edge_tdcIDs[iEdge] / 4;
-				tdc[iEdge + nEdges_tot] = edge_tdcIDs[iEdge] % 4;
+//				tdc[iEdge + nEdges_tot] = edge_tdcIDs[iEdge] % 4;
 				//LOG_INFO<< "pp[" << iEdge + nEdges_tot << "] " << pp[iEdge + nEdges_tot] << ENDL;
-				//LOG_INFO<< "tdc[" << iEdge + nEdges_tot << "] " << tdc[iEdge + nEdges_tot] << ENDL;
+//				LOG_INFO<< "tdc[" << iEdge + nEdges_tot << "] " << tdc[iEdge + nEdges_tot] << ENDL;
 
-				box[iEdge + nEdges_tot] = searchPMT(trbNum, pp[iEdge + nEdges_tot]);
+				box[iEdge + nEdges_tot] = searchPMT(trbNum,
+						pp[iEdge + nEdges_tot]);
 				//LOG_INFO << "box[" << iEdge + nEdges_tot << "] " << box[iEdge + nEdges_tot] << ENDL;
 
 				sector_occupancy[box[iEdge + nEdges_tot] - 1]++;
 
-				//LOG_INFO << event->getEventNumber() << "\t" << event->getTimestamp() << "\t" << edge_IDs[iEdge] << "\t" << edge_chIDs[iEdge] << "\t" << edge_tdcIDs[iEdge] << "\t" << box[iEdge+nEdges_tot] << ENDL;
+				//LOG_INFO<< "ANGELA-L1" << "\t" << event->getEventNumber() << "\t" << event->getTimestamp() << "\t" << edge_IDs[iEdge] << "\t" << edge_chIDs[iEdge]<< "\t" << edge_tdcIDs[iEdge] << "\t" << edge_times[iEdge] << "\t" << edge_trbIDs[iEdge] << "\t" << box[iEdge+nEdges_tot] << ENDL;
 
 			}
 			if (iEdge == (noEdgesPerTrb[trbNum] - 1)) {
@@ -193,7 +165,7 @@ uint KtagAlgo::searchPMT(uint tel62ID, uint fpgaID) {
 			&& ((fpgaID == 1) || (fpgaID == 2) || (fpgaID == 3)))
 		sectorID = 8;
 	else
-		LOG_ERROR << "Combination KTAG Tel62 ID " << tel62ID << " and PP " << fpgaID << " not found !" << ENDL;
+		LOG_ERROR<< "Combination KTAG Tel62 ID " << tel62ID << " and PP " << fpgaID << " not found !" << ENDL;
 	return sectorID;
 }
 
