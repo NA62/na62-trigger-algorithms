@@ -38,7 +38,7 @@ uint8_t L1TriggerProcessor::compute(Event* event) {
 	}
 
 	event->setProcessingID(0); // 0 indicates raw data as collected from the detector
-	return 0;
+	return 1;
 
 }
 
