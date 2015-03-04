@@ -13,36 +13,50 @@
 #include <cstdint>
 #include <l0/MEPFragment.h>
 
+#define maxNhits 500
+
 namespace na62 {
 
-struct TrbDataHeader //Tel62 readout board header
+/**
+ * struct containing Tel62 board header
+ */
+struct TrbDataHeader
 {
-	uint8_t flags :8;
+	uint8_t fpgaFlags :8;
 	uint8_t triggerType :8;
 	uint8_t sourceSubID :8; //Tel62 readout board ID
 	uint8_t format :8;
 }__attribute__ ((__packed__));
 
-struct FPGADataHeader //FPGA header
+/**
+ * struct containing FPGA header
+ */
+struct FPGADataHeader
 {
-	uint noFrame :8;
-	uint noNonEmptyFrame :8;
+	uint noFrames :8;
+	uint noNonEmptyFrames :8;
 	uint FPGAID :8;
 	uint errFlags :8;
 }__attribute__ ((__packed__));
 
+/**
+ * struct containing Frame header
+ */
 struct FrameDataHeader //Frame header
 {
-	uint16_t coarseFrameTime :16;
-	uint nWordsPerFrame :16;
+	uint16_t frameTimeStamp :16;
+	uint nWords :16;
 }__attribute__ ((__packed__));
 
+/**
+ * struct containing Tel62 board data
+ */
 struct TrbData {
 //  uint32_t tdcWord :32;
-	uint32_t Time :19; //hit time measurement (100ps LSB)
-	uint chID :5;   //TDC channel ID
-	uint tdcID :4;  //TDC chip ID
-	uint ID :4;     //0x4 (leading time), 0x5 (trailing time)
+	uint32_t time :19; //hit time measurement (100ps LSB)
+	uint chID :5;      //TDC channel ID
+	uint tdcID :4;     //TDC chip ID
+	uint ID :4;        //0x4 (leading time), 0x5 (trailing time)
 }__attribute__ ((__packed__));
 
 class TrbDecoder {
@@ -50,132 +64,80 @@ class TrbDecoder {
 public:
 	TrbDecoder();
 	virtual ~TrbDecoder();
-	void SetHits(uint, l0::MEPFragment*);
 
-	uint nhits;
-	uint nhits_tot;
-	uint nWords;
-	TrbDataHeader* boardHeader;     //array maxNTEL62s size
-	FPGADataHeader** fpgaHeader;    //array maxNFPGAs size
-	FrameDataHeader*** frameHeader; //array maxNFrames size
-	TrbData** tdc_data;
+	int SetNFPGAs(uint);
+	void GetData(uint, l0::MEPFragment*);
 
-//	uint noHitsPerTrb;				 //array maxNTEL62s size
-	uint* noFrame;                   //array maxNFPGAs size
-	uint* noNonEmptyFrame;           //array maxNFPGAs size
-	uint* FPGAID;                    //array maxNFPGAs size
-	uint* errFlags;                  //array maxNFPGAs size
-	uint16_t** coarseFrameTime;      //array maxNFrames size
-	uint** nWordsPerFrame;           //array maxNFrames size
-
-	uint32_t* time;
-	uint* chID;
-	uint* tdcID;
-	uint* ID;
-	uint* trbID;
-
-	uint GetNoHitsPerTrb() {
-		return nhits_tot;
+	/**
+	 * Method returning the total number of edges found per Tel62 board
+	 *
+	 */
+	uint GetNoEdgesPerTrb() {
+		return nEdges_tot;
 	}
 	;
-	void SetnoHitsPerTrb(uint value) {
-		nhits_tot = value;
+	/**
+	 * Method returning an array of edge times
+	 *
+	 */
+	uint32_t* GetTimes() {
+		return edge_times;
 	}
 	;
-	uint* GetNoFrame() {
-		return noFrame;
+	/**
+	 * Method returning an array of edge channel IDs
+	 *
+	 */
+	uint* GetChIDs() {
+		return edge_chIDs;
 	}
 	;
-	void SetNoFrame(uint* buffer) {
-		noFrame = buffer;
+	/**
+	 * Method returning an array of edge TDC IDs
+	 *
+	 */
+	uint* GetTdcIDs() {
+		return edge_tdcIDs;
 	}
 	;
-	uint* GetNoNonEmptyFrame() {
-		return noNonEmptyFrame;
+	/**
+	 * Method returning an array of edge IDs (ID=4 for leading, ID=5 for trailing)
+	 *
+	 */
+	uint* GetIDs() {
+		return edge_IDs;
 	}
 	;
-	void SetNoNonEmptyFrame(uint* buffer) {
-		noNonEmptyFrame = buffer;
-	}
-	;
-
-	uint* GetFPGAID() {
-		return FPGAID;
-	}
-	;
-	void SetFPGAID(uint* buffer) {
-		FPGAID = buffer;
-	}
-	;
-
-	uint* GetErrFlags() {
-		return errFlags;
-	}
-	;
-	void SetErrFlags(uint* buffer) {
-		errFlags = buffer;
-	}
-	;
-	uint16_t** GetCoarseFrameTime() {
-		return coarseFrameTime;
-	}
-	;
-	void SetCoarseFrameTime(uint16_t** buffer) {
-		coarseFrameTime = buffer;
-	}
-	;
-
-	uint** GetNWordsPerFrame() {
-		return nWordsPerFrame;
-	}
-	;
-	void SetNWordsPerFrame(uint** buffer) {
-		nWordsPerFrame = buffer;
-	}
-	;
-
-	uint32_t* GetTime() {
-		return time;
-	}
-	;
-	void SetTime(uint32_t* buffer) {
-		time = buffer;
-	}
-	;
-	uint* GetChID() {
-		return chID;
-	}
-	;
-	void SetChID(uint* buffer) {
-		chID = buffer;
-	}
-	;
-	uint* GetTdcID() {
-		return tdcID;
-	}
-	;
-	void SetTdcID(uint* buffer) {
-		tdcID = buffer;
-	}
-	;
-	uint* GetID() {
-		return ID;
-	}
-	;
-	void SetID(uint* buffer) {
-		ID = buffer;
-	}
-	;
-	uint* GetTrbID() {
-		return trbID;
-	}
-	;
-	void SetTrbID(uint* buffer) {
-		trbID = buffer;
+	/**
+	 * Method returning an array of edge Tel62 board ID
+	 *
+	 */
+	uint* GetTrbIDs() {
+		return edge_trbIDs;
 	}
 	;
 
 private:
+	uint nFPGAs;
+	uint nFrames;
+	uint nWordsPerFrame;
+	uint nWords_tot;
+	uint nEdges;
+	uint nEdges_tot;	//total number of edges per Tel62 board
+	TrbDataHeader* boardHeader;
+	FPGADataHeader* fpgaHeader;
+	FrameDataHeader* frameHeader;
+	TrbData* tdcData;
+
+	/**
+	 * Arrays with edge info
+	 *
+	 */
+	uint32_t* edge_times;
+	uint* edge_chIDs;
+	uint* edge_tdcIDs;
+	uint* edge_IDs;
+	uint* edge_trbIDs;
 
 };
 

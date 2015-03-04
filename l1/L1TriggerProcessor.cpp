@@ -23,7 +23,7 @@ double L1TriggerProcessor::bypassProbability;
 void L1TriggerProcessor::initialize(double _bypassProbability,
 		uint _bypassTriggerWord) {
 	// Seed for rand()
-	srand (time(NULL));
+	srand(time(NULL));
 
 	bypassProbability = _bypassProbability;
 	bypassTriggerWord = _bypassTriggerWord;
@@ -40,11 +40,7 @@ uint8_t L1TriggerProcessor::compute(Event* event) {
 	}
 
 	uint8_t trigger = KtagAlgo::checkKtagTrigger(event);
-	if (trigger) {
-		return trigger;
-	}
-
-	return 0;
+	return trigger;
 }
 
 } /* namespace na62 */
