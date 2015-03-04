@@ -14,7 +14,6 @@
 #include <l0/Subevent.h>
 #include <options/Logging.h>
 #include "data_decoder/TrbDecoder.h"
-#include "cedar_algorithm/tdcb_buffer.h"
 
 namespace na62 {
 
@@ -155,7 +154,7 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 
 	uint8_t kaontrigger = 0;
 
-	if (nSectors > 3) {
+	if (nSectors > 1) {
 		kaontrigger = 1;
 		return kaontrigger;
 	} else
