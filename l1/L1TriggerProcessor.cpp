@@ -14,6 +14,7 @@
 #include <l0/Subevent.h>
 
 #include "KtagAlgo.h"
+#include "MultiDetAlgo.h"
 
 namespace na62 {
 
@@ -23,7 +24,7 @@ double L1TriggerProcessor::bypassProbability;
 void L1TriggerProcessor::initialize(double _bypassProbability,
 		uint _bypassTriggerWord) {
 	// Seed for rand()
-	srand (time(NULL));
+	srand(time(NULL));
 
 	bypassProbability = _bypassProbability;
 	bypassTriggerWord = _bypassTriggerWord;
@@ -39,13 +40,22 @@ uint8_t L1TriggerProcessor::compute(Event* event) {
 		return bypassTriggerWord;
 	}
 
-	uint8_t trigger = KtagAlgo::checkKtagTrigger(event);
-	if (trigger) {
-//		LOG_INFO << "event number = " << event->getEventNumber() << ENDL;
-//		LOG_INFO << "GOOD EVENT! " << ENDL;
-		return trigger;
-	} else
-//		LOG_INFO << "BAD EVENT! " << ENDL;
+	LOG_INFO<< "L1Triggerprocessor: event number = " << event->getEventNumber() << ENDL;
+
+	uint8_t trigger1 = KtagAlgo::checkKtagTrigger(event);
+	if (trigger1) {
+		LOG_INFO << "KTAG: GOOD EVENT! " << ENDL;
+	}
+	else LOG_INFO << "KTAG: BAD EVENT! " << ENDL;
+	uint8_t trigger2 = MultiDetAlgo::checkMultiDetTrigger(event);
+	if (trigger2) {
+		LOG_INFO << "KTAG-CHOD: GOOD EVENT! " << ENDL;
+	}
+	else LOG_INFO << "KTAG-CHOD: BAD EVENT! " << ENDL;
+	if (trigger1 && trigger2) {
+		LOG_INFO << "!!! YES, GOOD EVENT !!!" << ENDL;
+	}
+	else LOG_INFO<< "NOOOOOOO -> BAD EVENT! " << ENDL;
 
 	//event->setProcessingID(0); // 0 indicates raw data as collected from the detector
 	return 0;
