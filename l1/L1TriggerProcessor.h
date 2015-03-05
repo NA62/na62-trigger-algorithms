@@ -43,11 +43,18 @@ public:
 		return randomNr <= bypassProbability;
 	}
 
+	/**
+	 * Registers all downscaling algorithms. Must be called before Options::Load is executed!
+	 */
+	static void registerDownscalingAlgorithms();
+
 	static void initialize(double _bypassProbability, uint _bypassTriggerWord);
 
 private:
 	static uint_fast8_t bypassTriggerWord;
 	static double bypassProbability;
+
+	static uint cedarAlgorithmId;
 };
 
 } /* namespace na62 */
