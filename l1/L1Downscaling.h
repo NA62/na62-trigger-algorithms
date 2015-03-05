@@ -15,7 +15,6 @@
 #include <algorithm>
 #include <iostream>
 
-
 namespace na62 {
 
 class L1Downscaling {
@@ -57,13 +56,13 @@ public:
 			exit(1);
 		}
 #endif
-		return ++eventCountersByAlgoID_[algorithmID]
+		return ++(eventCountersByAlgoID_[algorithmID])
 				% downscaleFactors_[algorithmID] != 0;
 	}
 
 private:
 	static std::vector<std::string> algorithmTitles_;
-	static std::vector<std::atomic<int> > eventCountersByAlgoID_;
+	static std::atomic<int>* eventCountersByAlgoID_; // cannot store atomics in vector->use simple array
 	static std::vector<uint> downscaleFactors_;
 };
 
