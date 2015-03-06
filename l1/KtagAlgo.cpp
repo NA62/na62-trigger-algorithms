@@ -14,6 +14,7 @@
 #include <l0/Subevent.h>
 #include <options/Logging.h>
 #include "data_decoder/TrbDecoder.h"
+#include <string.h>
 
 #define maxNhits 500
 

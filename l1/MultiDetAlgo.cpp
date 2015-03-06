@@ -12,6 +12,8 @@
 #include <eventBuilding/SourceIDManager.h>
 #include <l0/MEPFragment.h>
 #include <l0/Subevent.h>
+#include <string.h>
+
 #include <options/Logging.h>
 #include "data_decoder/TrbDecoder.h"
 

@@ -50,16 +50,16 @@ uint8_t L1TriggerProcessor::compute(Event* event) {
 
 	uint8_t cedarTrigger = 0;
 
-	cedarTrigger = KtagAlgo::processKtagTrigger(event);
+//	cedarTrigger = KtagAlgo::processKtagTrigger(event);
 
-//	if (L1Downscaling::processAlgorithm(cedarAlgorithmId)) {
-//		cedarTrigger = KtagAlgo::checkKtagTrigger(event);
-//		if (!cedarTrigger) {
-//			return 0;
-//		}
-//	} else {
-//		return 0;
-//	}
+	if (L1Downscaling::processAlgorithm(cedarAlgorithmId)) {
+		cedarTrigger = KtagAlgo::processKtagTrigger(event);
+		if (!cedarTrigger) {
+			return 0;
+		}
+	} else {
+		return 0;
+	}
 
 	//event->setProcessingID(0); // 0 indicates raw data as collected from the detector
 	return cedarTrigger;
