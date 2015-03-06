@@ -8,7 +8,6 @@
 
 #include "TrbDecoder.h"
 #include <options/Logging.h>
-#include <eventBuilding/Event.h>
 #include <l0/MEPFragment.h>
 #include <stdlib.h>
 #include <cstdint>
@@ -24,16 +23,10 @@ TrbDecoder::TrbDecoder() {
 	nWords_tot = 0;
 	nEdges = 0;
 	nEdges_tot = 0;
-	boardHeader = 0;
-	fpgaHeader = 0;
-	frameHeader = 0;
-	tdcData = 0;
-
-	edge_times = new double[maxNhits];
-	edge_chIDs = new uint[maxNhits];
-	edge_tdcIDs = new uint[maxNhits];
-	edge_IDs = new uint[maxNhits];
-	edge_trbIDs = new uint[maxNhits];
+	boardHeader = nullptr;
+	fpgaHeader = nullptr;
+	frameHeader = nullptr;
+	tdcData = nullptr;
 }
 
 TrbDecoder::~TrbDecoder() {
@@ -45,23 +38,6 @@ TrbDecoder::~TrbDecoder() {
 	delete edge_trbIDs;
 }
 
-int TrbDecoder::SetNFPGAs(uint fpgaFlags) {
-	int nFPGAs = 0;
-
-	if (fpgaFlags == 15)
-		nFPGAs = 4;
-	else if (fpgaFlags == 7)
-		nFPGAs = 3;
-	else if (fpgaFlags == 3)
-		nFPGAs = 2;
-	else if (fpgaFlags == 1)
-		nFPGAs = 1;
-	else
-		LOG_ERROR<<"TrbDecoder.cpp: Number of FPGAs not identified !" << ENDL;
-
-	return nFPGAs;
-}
-
 /**
  *
  * @params uint trbNum This is an index running on the Tel62 boards used by the sub-detector
@@ -70,8 +46,19 @@ int TrbDecoder::SetNFPGAs(uint fpgaFlags) {
  *
  */
 
-void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment,
-		Event* event) {
+void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment, uint32_t timestamp) {
+
+	/*
+	 * Each word is 4 bytes: there is 1 board header and at least 1 FPGA header and 1 Frame header
+	 *
+	 */
+	const uint maxNwords = (trbDataFragment->getPayloadLength()/4) - 3;
+	edge_times = new uint64_t[maxNwords];
+	edge_chIDs = new uint[maxNwords];
+	edge_tdcIDs = new uint[maxNwords];
+	edge_IDs = new uint[maxNwords];
+	edge_trbIDs = new uint[maxNwords];
+
 	char * payload = trbDataFragment->getPayload();
 	boardHeader = (TrbDataHeader*) payload;
 
@@ -80,7 +67,7 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment,
 	//LOG_INFO<< "Source (Tel62) sub-ID " << (uint) boardHeader->sourceSubID << ENDL;
 	//LOG_INFO<< "Format " << (uint) boardHeader->format << ENDL;
 
-	nFPGAs = SetNFPGAs((uint) boardHeader->fpgaFlags);
+	nFPGAs = fls((uint) boardHeader->fpgaFlags);
 	//LOG_INFO<< "Number of FPGAs (from boardHeader) " << nFPGAs << ENDL;
 
 	for (int iFPGA = 0; iFPGA < nFPGAs; iFPGA++) {
@@ -106,14 +93,14 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment,
 			nWords_tot += nWordsPerFrame;
 			//LOG_INFO<< "Number of Words  " << nWords_tot << ENDL;
 
-			frameTS = (frameHeader->frameTimeStamp & 0x0000ffff) + (event->getTimestamp() & 0xffff0000);
-			//LOG_INFO<< "Event Timestamp " << std::hex << event->getTimestamp() << std::dec << ENDL;
+			frameTS = (frameHeader->frameTimeStamp & 0x0000ffff) + (timestamp & 0xffff0000);
+			//LOG_INFO<< "Event Timestamp " << std::hex << timestamp << std::dec << ENDL;
 			//LOG_INFO<< "FrameTS " << std::hex << frameTS << std::dec << ENDL;
 
-			if ((event->getTimestamp() & 0xf000) == 0xf000
+			if ((timestamp & 0xf000) == 0xf000
 					&& (frameTS & 0xf000) == 0x0000)
 				frameTS += 0x10000; //16 bits overflow
-			if ((event->getTimestamp() & 0xf000) == 0x0000
+			if ((timestamp & 0xf000) == 0x0000
 					&& (frameTS & 0xf000) == 0xf000)
 				frameTS -= 0x10000; //16 bits overflow
 
@@ -128,11 +115,11 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment,
 					tdcData = (TrbData*) payload + 2 + iFPGA + nWords_tot
 							- nEdges + iEdge;
 
-					time = (tdcData->time & 0x0007ffff) + ((frameTS & 0xfffff800)*0x100);
-					//LOG_INFO<< "Time " << std::hex << time << std::dec << ENDL;
-
-					edge_times[iEdge + nEdges_tot] = ((time
-							- event->getTimestamp() * 256.) * 0.097464731802);
+					/*
+					 * TODO: let the user decide if he what data he needs and remove in compile time the unwanted
+					 */
+//					edge_times[iEdge + nEdges_tot] = ((time - timestamp * 256.) * 0.097464731802);
+					edge_times[iEdge + nEdges_tot] = (tdcData->time & 0x0007ffff) + ((frameTS & 0xfffff800)*0x100);
 					edge_chIDs[iEdge + nEdges_tot] = (uint) tdcData->chID;
 					edge_tdcIDs[iEdge + nEdges_tot] = (uint) tdcData->tdcID;
 					edge_IDs[iEdge + nEdges_tot] = (uint) tdcData->ID;
@@ -141,7 +128,7 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment,
 					//LOG_INFO<< "edge_IDs[" << iEdge + nEdges_tot << "] " << edge_IDs[iEdge + nEdges_tot] << ENDL;
 					//LOG_INFO<< "edge_chIDs[" << iEdge + nEdges_tot << "] " << edge_chIDs[iEdge + nEdges_tot] << ENDL;
 					//LOG_INFO<< "edge_tdcIDs["<< iEdge + nEdges_tot << "] " << edge_tdcIDs[iEdge + nEdges_tot] << ENDL;
-					//LOG_INFO<< "edge_times[" << iEdge + nEdges_tot << "] " << edge_times[iEdge + nEdges_tot] << ENDL;
+					//LOG_INFO<< "edge_times[" << iEdge + nEdges_tot << "] " << std::hex << edge_times[iEdge + nEdges_tot] << std::dec << ENDL;
 					//LOG_INFO<< "edge_trbIDs[" << iEdge + nEdges_tot << "] " << edge_trbIDs[iEdge + nEdges_tot] << ENDL;
 
 					if (iEdge == (nEdges - 1)) {

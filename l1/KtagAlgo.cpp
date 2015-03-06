@@ -15,6 +15,8 @@
 #include <options/Logging.h>
 #include "data_decoder/TrbDecoder.h"
 
+#define maxNhits 500
+
 namespace na62 {
 
 KtagAlgo::KtagAlgo() {
@@ -24,23 +26,23 @@ KtagAlgo::~KtagAlgo() {
 // TODO Auto-generated destructor stub
 }
 
-uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
+uint8_t KtagAlgo::processKtagTrigger(Event* event) {
 
 	using namespace l0;
 
-	uint nTEL62s = 0;
-
 	l0::Subevent* cedarSubevent = event->getCEDARSubevent();
 
-	nTEL62s = cedarSubevent->getNumberOfFragments();
+	const uint nTEL62s = cedarSubevent->getNumberOfFragments();
 
-	TrbDecoder* cedarPacket = new TrbDecoder[nTEL62s]; //max NTel62 boards
+	TrbDecoder *cedarPacket = new TrbDecoder[nTEL62s]; //max NTel62 boards
 
 	uint noEdgesPerTrb[nTEL62s];
-	uint sector_occupancy[8];
-	uint nSectors = 0;
+	memset(noEdgesPerTrb, 0, nTEL62s);
 
-	double* edge_times;
+	uint sector_occupancy[8];
+	memset(sector_occupancy, 0, 8);
+
+	uint64_t* edge_times;
 	uint* edge_chIDs;
 	uint* edge_tdcIDs;
 	uint* edge_IDs;
@@ -50,16 +52,9 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 	uint tdc[maxNhits];
 	uint box[maxNhits];
 
-	for (uint i = 0; i < nTEL62s; i++) {
-		noEdgesPerTrb[i] = 0;
-	}
-	for (uint i = 0; i < maxNhits; i++) {
-		if (i < 8)
-			sector_occupancy[i] = 0;
-		pp[i] = 999;
-		tdc[i] = 999;
-		box[i] = 999;
-	}
+	memset(pp,999,maxNhits);
+	memset(tdc,999,maxNhits);
+	memset(box,999,maxNhits);
 
 	uint nEdges_tot = 0;
 	uint chkmax = 0;
@@ -67,11 +62,13 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 	//LOG_INFO<< "Event number = " << event->getEventNumber() << ENDL;
 	//LOG_INFO<< "Timestamp = " << std::hex << event->getTimestamp() << std::dec << ENDL;
 
+	//TODO: chkmax need to be USED
+
 	for (uint trbNum = 0; trbNum != nTEL62s && chkmax == 0; trbNum++) {
 
 		l0::MEPFragment* trbDataFragment = cedarSubevent->getFragment(trbNum);
 
-		cedarPacket[trbNum].GetData(trbNum, trbDataFragment, event);
+		cedarPacket[trbNum].GetData(trbNum, trbDataFragment, event->getTimestamp());
 
 		/**
 		 * Get Arrays with hit Info
@@ -87,19 +84,17 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 
 		//LOG_INFO<< "Tel62 ID " << trbNum << " - Number of Edges found " << noEdgesPerTrb[trbNum] << ENDL;
 
-		for (uint iEdge = 0; iEdge < noEdgesPerTrb[trbNum]; iEdge++) {
+		for (uint iEdge = 0; iEdge != noEdgesPerTrb[trbNum]; iEdge++) {
 			if (edge_IDs[iEdge]) {
 
 				//LOG_INFO<< "Edge " << iEdge + nEdges_tot << " ID " << edge_IDs[iEdge] << ENDL;
 				//LOG_INFO<< "Edge " << iEdge + nEdges_tot << " chID " << edge_chIDs[iEdge] << ENDL;
 				//LOG_INFO<< "Edge " << iEdge + nEdges_tot << " tdcID " << edge_tdcIDs[iEdge] << ENDL;
-				//LOG_INFO<< "Edge " << iEdge + nEdges_tot << " time " << edge_times[iEdge] << ENDL;
+				//LOG_INFO<< "Edge " << iEdge + nEdges_tot << " time " << std::hex << edge_times[iEdge] << std::dec << ENDL;
 				//LOG_INFO<< "Edge " << iEdge + nEdges_tot << " trbID " << edge_trbIDs[iEdge] << ENDL;
 
 				pp[iEdge + nEdges_tot] = edge_tdcIDs[iEdge] / 4;
-//				tdc[iEdge + nEdges_tot] = edge_tdcIDs[iEdge] % 4;
 				//LOG_INFO<< "pp[" << iEdge + nEdges_tot << "] " << pp[iEdge + nEdges_tot] << ENDL;
-//				LOG_INFO<< "tdc[" << iEdge + nEdges_tot << "] " << tdc[iEdge + nEdges_tot] << ENDL;
 
 				box[iEdge + nEdges_tot] = searchPMT(trbNum,
 						pp[iEdge + nEdges_tot]);
@@ -118,12 +113,15 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 
 	//LOG_INFO<<"KtagAlgo.cpp: Analysing Event " << event->getEventNumber() << " - Total Number of edges found " << nEdges_tot << ENDL;
 
+	uint nSectors = 0;
 	for (int iSec = 0; iSec < 8; iSec++) {
 		if (sector_occupancy[iSec])
 			nSectors++;
 	}
 
 	//LOG_INFO<< "Angela: " << event->getEventNumber() << "\t" << event->getTimestamp() << "\t" << nSectors << ENDL;
+
+	delete [] cedarPacket;
 
 	uint8_t kaontrigger = 0;
 
@@ -135,6 +133,10 @@ uint8_t KtagAlgo::checkKtagTrigger(Event* event) {
 
 }
 
+/*
+ * TODO: try to remove ifs: options are an algorithm or a look-up table
+ *
+ */
 uint KtagAlgo::searchPMT(uint tel62ID, uint fpgaID) {
 	uint sectorID = 0;
 	if ((tel62ID == 0) && ((fpgaID == 0) || (fpgaID == 1) || (fpgaID == 2)))
