@@ -50,8 +50,7 @@ uint8_t L1TriggerProcessor::compute(Event* event) {
 
 	uint8_t cedarTrigger = 0;
 
-//	cedarTrigger = KtagAlgo::processKtagTrigger(event);
-	cedarTrigger = MultiDetAlgo::processMultiDetTrigger(event);
+	cedarTrigger = KtagAlgo::processKtagTrigger(event);
 
 //	if (L1Downscaling::processAlgorithm(cedarAlgorithmId)) {
 //		cedarTrigger = KtagAlgo::checkKtagTrigger(event);
