@@ -30,7 +30,7 @@ public:
 
 	MultiDetAlgo();
 	~MultiDetAlgo();
-	static uint8_t checkMultiDetTrigger(Event* event);
+	static uint8_t processMultiDetTrigger(Event* event);
 
 private:
 
