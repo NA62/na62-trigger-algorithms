@@ -14,7 +14,9 @@
 
 namespace na62 {
 
-TrbDecoder::TrbDecoder() {
+TrbDecoder::TrbDecoder() :
+		edge_times(nullptr), edge_chIDs(nullptr), edge_tdcIDs(nullptr), edge_IDs(
+				nullptr), edge_trbIDs(nullptr) {
 	frameTS = 0;
 	time = 0;
 	nFPGAs = 0;
@@ -23,14 +25,10 @@ TrbDecoder::TrbDecoder() {
 	nWords_tot = 0;
 	nEdges = 0;
 	nEdges_tot = 0;
-	boardHeader = nullptr;
-	fpgaHeader = nullptr;
-	frameHeader = nullptr;
-	tdcData = nullptr;
+
 }
 
 TrbDecoder::~TrbDecoder() {
-	// TODO Auto-generated destructor stub
 	delete edge_times;
 	delete edge_chIDs;
 	delete edge_tdcIDs;
@@ -45,14 +43,14 @@ TrbDecoder::~TrbDecoder() {
  * @params l0::MEPFragment* trbDataFragment This is a pointer to the data fragment received by the selected Tel62 board
  *
  */
-
-void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment, uint32_t timestamp) {
+void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment,
+		uint32_t timestamp) {
 
 	/*
 	 * Each word is 4 bytes: there is 1 board header and at least 1 FPGA header and 1 Frame header
 	 *
 	 */
-	const uint maxNwords = (trbDataFragment->getPayloadLength()/4) - 3;
+	const uint maxNwords = (trbDataFragment->getPayloadLength() / 4) - 3;
 	edge_times = new uint64_t[maxNwords];
 	edge_chIDs = new uint[maxNwords];
 	edge_tdcIDs = new uint[maxNwords];
@@ -60,7 +58,8 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment, uint32_t
 	edge_trbIDs = new uint[maxNwords];
 
 	char * payload = trbDataFragment->getPayload();
-	boardHeader = (TrbDataHeader*) payload;
+
+	TrbDataHeader* boardHeader = (TrbDataHeader*) payload;
 
 	//LOG_INFO<< "FPGA Flags " << (uint) boardHeader->fpgaFlags << ENDL;
 	//LOG_INFO<< "L0 trigger type " << (uint) boardHeader->triggerType << ENDL;
@@ -73,7 +72,8 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment, uint32_t
 
 	for (uint iFPGA = 0; iFPGA != nFPGAs; iFPGA++) {
 		//printf("writing getpayload() + %d\n", 1 + iFPGA + nWords_tot);
-		fpgaHeader = (FPGADataHeader*) payload + 1 + iFPGA + nWords_tot;
+		FPGADataHeader* fpgaHeader = (FPGADataHeader*) payload + 1 + iFPGA
+				+ nWords_tot;
 
 		//LOG_INFO<< "Number of (25ns long) Frames " << (uint) fpgaHeader->noFrames << ENDL;
 		//LOG_INFO<< "Number of non-empty Frames " << (uint) fpgaHeader->noNonEmptyFrames<< ENDL;
@@ -85,7 +85,8 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment, uint32_t
 
 		for (uint iFrame = 0; iFrame != nFrames; iFrame++) {
 			//printf("writing getpayload() + %d\n", 2 + iFPGA + nWords_tot);
-			frameHeader = (FrameDataHeader*) payload + 2 + iFPGA + nWords_tot;
+			FrameDataHeader* frameHeader = (FrameDataHeader*) payload + 2
+					+ iFPGA + nWords_tot;
 
 			//LOG_INFO<< "Number of Words in Frame " << (uint) frameHeader->nWords<< ENDL;
 			//LOG_INFO<< "Frame Timestamp " << (uint) frameHeader->frameTimeStamp<< ENDL;
@@ -94,15 +95,14 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment, uint32_t
 			nWords_tot += nWordsPerFrame;
 			//LOG_INFO<< "Number of Words  " << nWords_tot << ENDL;
 
-			frameTS = (frameHeader->frameTimeStamp & 0x0000ffff) + (timestamp & 0xffff0000);
+			frameTS = (frameHeader->frameTimeStamp & 0x0000ffff)
+					+ (timestamp & 0xffff0000);
 			//LOG_INFO<< "Event Timestamp " << std::hex << timestamp << std::dec << ENDL;
 			//LOG_INFO<< "FrameTS " << std::hex << frameTS << std::dec << ENDL;
 
-			if ((timestamp & 0xf000) == 0xf000
-					&& (frameTS & 0xf000) == 0x0000)
+			if ((timestamp & 0xf000) == 0xf000 && (frameTS & 0xf000) == 0x0000)
 				frameTS += 0x10000; //16 bits overflow
-			if ((timestamp & 0xf000) == 0x0000
-					&& (frameTS & 0xf000) == 0xf000)
+			if ((timestamp & 0xf000) == 0x0000 && (frameTS & 0xf000) == 0xf000)
 				frameTS -= 0x10000; //16 bits overflow
 
 			if (nWordsPerFrame)
@@ -113,14 +113,16 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment, uint32_t
 			if (nEdges) {
 				for (uint iEdge = 0; iEdge < nEdges; iEdge++) {
 					//printf("writing getpayload() + %d\n",2 + iFPGA + nWords_tot - nEdges + iEdge);
-					tdcData = (TrbData*) payload + 2 + iFPGA + nWords_tot
-							- nEdges + iEdge;
+					TrbData* tdcData = (TrbData*) payload + 2 + iFPGA
+							+ nWords_tot - nEdges + iEdge;
 
 					/*
-					 * TODO: let the user decide if he what data he needs and remove in compile time the unwanted
+					 * TODO: let the user decide what data he needs and remove the unwanted parts in compile time
 					 */
 //					edge_times[iEdge + nEdges_tot] = ((time - timestamp * 256.) * 0.097464731802);
-					edge_times[iEdge + nEdges_tot] = (tdcData->time & 0x0007ffff) + ((frameTS & 0xfffff800)*0x100);
+					edge_times[iEdge + nEdges_tot] =
+							(tdcData->time & 0x0007ffff)
+									+ ((frameTS & 0xfffff800) * 0x100);
 					edge_chIDs[iEdge + nEdges_tot] = (uint) tdcData->chID;
 					edge_tdcIDs[iEdge + nEdges_tot] = (uint) tdcData->tdcID;
 					edge_IDs[iEdge + nEdges_tot] = (uint) tdcData->ID;

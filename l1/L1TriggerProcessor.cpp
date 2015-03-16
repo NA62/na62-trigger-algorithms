@@ -38,7 +38,7 @@ void L1TriggerProcessor::initialize(double _bypassProbability) {
 bool L1TriggerProcessor::isRequestZeroSuppressedCreamData(
 		uint_fast8_t l1TriggerTypeWord) {
 	// add any special trigger here
-	return l1TriggerTypeWord == TRIGGER_L1_BYPASS;
+	return l1TriggerTypeWord != TRIGGER_L1_BYPASS;
 }
 
 uint_fast8_t L1TriggerProcessor::compute(Event* event) {

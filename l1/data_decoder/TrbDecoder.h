@@ -129,10 +129,6 @@ private:
 	uint nWords_tot;
 	uint nEdges;
 	uint nEdges_tot;	//total number of edges per Tel62 board
-	TrbDataHeader* boardHeader;
-	FPGADataHeader* fpgaHeader;
-	FrameDataHeader* frameHeader;
-	TrbData* tdcData;
 
 	/**
 	 * Arrays with edge info
