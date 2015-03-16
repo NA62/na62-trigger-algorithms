@@ -109,6 +109,18 @@ public:
 		return edge_trbIDs;
 	}
 
+	/**
+	 * Sets the number of FPGAs corresponding to the given FPGA flag. fpgaFlag must be element of [1,8]
+	 * flag    	nFGPA
+	 * 1		1
+	 * 2		2
+	 * 4		3
+	 * 8		4
+	 */
+	static uint calculateNumberOfFPGAs(uint_fast8_t fpgaFlag) {
+		return 32 - __builtin_clz(fpgaFlag);
+	}
+
 private:
 	uint64_t frameTS;
 	uint64_t time;

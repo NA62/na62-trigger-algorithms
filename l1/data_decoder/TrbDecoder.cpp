@@ -76,7 +76,8 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment, uint32_t
 	//LOG_INFO<< "Source (Tel62) sub-ID " << (uint) boardHeader->sourceSubID << ENDL;
 	//LOG_INFO<< "Format " << (uint) boardHeader->format << ENDL;
 
-	nFPGAs = GetNFPGAs(boardHeader->fpgaFlags);
+	nFPGAs = calculateNumberOfFPGAs(boardHeader->fpgaFlags);
+
 	//LOG_INFO<< "Number of FPGAs (from boardHeader) " << nFPGAs << ENDL;
 
 	for (int iFPGA = 0; iFPGA < nFPGAs; iFPGA++) {

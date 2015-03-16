@@ -19,7 +19,6 @@
 
 namespace na62 {
 
-uint_fast8_t L1TriggerProcessor::bypassTriggerWord;
 double L1TriggerProcessor::bypassProbability;
 uint L1TriggerProcessor::cedarAlgorithmId;
 
@@ -27,13 +26,11 @@ void L1TriggerProcessor::registerDownscalingAlgorithms() {
 	cedarAlgorithmId = L1Downscaling::registerAlgorithm("CEDAR");
 }
 
-void L1TriggerProcessor::initialize(double _bypassProbability,
-		uint _bypassTriggerWord) {
+void L1TriggerProcessor::initialize(double _bypassProbability) {
 	// Seed for rand()
 	srand(time(NULL));
 
 	bypassProbability = _bypassProbability;
-	bypassTriggerWord = _bypassTriggerWord;
 
 	L1Downscaling::initialize();
 }
@@ -45,23 +42,20 @@ uint8_t L1TriggerProcessor::compute(Event* event) {
 	 * Check if the event should bypass the processing
 	 */
 	if (bypassEvent() || event->isSpecialTriggerEvent()) {
-		return bypassTriggerWord;
+		return TRIGGER_L1_BYPASS;
 	}
 
 	uint8_t cedarTrigger = 0;
 
-//	cedarTrigger = KtagAlgo::processKtagTrigger(event);
-
 	if (L1Downscaling::processAlgorithm(cedarAlgorithmId)) {
-		cedarTrigger = KtagAlgo::processKtagTrigger(event);
-		if (!cedarTrigger) {
-			return 0;
+		if (SourceIDManager::isCedarActive()) {
+			cedarTrigger = KtagAlgo::processKtagTrigger(event);
 		}
 	} else {
-		return 0;
+		cedarTrigger = 0xFF;
 	}
 
-	//event->setProcessingID(0); // 0 indicates raw data as collected from the detector
+	event->setProcessingID(0); // 0 indicates raw data as collected from the detector
 	return cedarTrigger;
 }
 

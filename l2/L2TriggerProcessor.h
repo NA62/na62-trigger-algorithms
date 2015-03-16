@@ -51,11 +51,9 @@ public:
 		double randomNr = ((double) rand() / (double) RAND_MAX);
 		return randomNr <= bypassProbability;
 	}
-	static void initialize(double _bypassProbability, uint _bypassTriggerWord, uint _L1bypassTriggerWord);
+	static void initialize(double _bypassProbability);
 
 private:
-	static uint_fast8_t L1bypassTriggerWord;
-	static uint_fast8_t bypassTriggerWord;
 	static double bypassProbability;
 };
 

@@ -13,15 +13,10 @@
 
 namespace na62 {
 
-uint_fast8_t L2TriggerProcessor::L1bypassTriggerWord;
-uint_fast8_t L2TriggerProcessor::bypassTriggerWord;
 double L2TriggerProcessor::bypassProbability;
 
-void L2TriggerProcessor::initialize(double _bypassProbability,
-		uint _bypassTriggerWord, uint _L1bypassTriggerWord) {
+void L2TriggerProcessor::initialize(double _bypassProbability) {
 	bypassProbability = _bypassProbability;
-	bypassTriggerWord = _bypassTriggerWord;
-	L1bypassTriggerWord = _L1bypassTriggerWord;
 }
 
 uint8_t L2TriggerProcessor::compute(Event* event) {
@@ -30,8 +25,8 @@ uint8_t L2TriggerProcessor::compute(Event* event) {
 	/*
 	 * Check if the event should bypass the processing
 	 */
-	if (event->getTriggerTypeWord() == L1bypassTriggerWord || bypassEvent()) {
-		return bypassTriggerWord;
+	if (event->isL1Bypassed() || bypassEvent()) {
+		return TRIGGER_L2_BYPASS;
 	}
 
 //	std::vector<uint16_t> localCreamIDsToRequestNonZSuppressedData;
