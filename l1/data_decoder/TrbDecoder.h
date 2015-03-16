@@ -63,6 +63,7 @@ public:
 	TrbDecoder();
 	virtual ~TrbDecoder();
 
+	uint GetNFPGAs(uint);
 	void GetData(uint, l0::MEPFragment*, uint32_t);
 
 	/**

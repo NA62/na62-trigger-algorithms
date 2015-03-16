@@ -37,13 +37,22 @@ TrbDecoder::~TrbDecoder() {
 	delete edge_IDs;
 	delete edge_trbIDs;
 }
+/**
+ * TODO: documentation in TrbDecoder.h and test unit
+ *
+ */
+uint TrbDecoder::GetNFPGAs(uint fpgaFlags){
+	uint nFPGAs = 32-__builtin_clz(fpgaFlags);
+	return nFPGAs;
+}
 
 /**
- *
+ * TODO: move GetData documentation in TrbDecoder.h and update it
  * @params uint trbNum This is an index running on the Tel62 boards used by the sub-detector
  *
  * @params l0::MEPFragment* trbDataFragment This is a pointer to the data fragment received by the selected Tel62 board
- *
+ * TODO: try and create a unit test for Decoder!!!
+ * TODO: have you thought about corrupted data?
  */
 
 void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment, uint32_t timestamp) {
@@ -67,7 +76,7 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment, uint32_t
 	//LOG_INFO<< "Source (Tel62) sub-ID " << (uint) boardHeader->sourceSubID << ENDL;
 	//LOG_INFO<< "Format " << (uint) boardHeader->format << ENDL;
 
-	nFPGAs = 32-__builtin_clz(boardHeader->fpgaFlags);
+	nFPGAs = GetNFPGAs(boardHeader->fpgaFlags);
 	//LOG_INFO<< "Number of FPGAs (from boardHeader) " << nFPGAs << ENDL;
 
 	for (int iFPGA = 0; iFPGA < nFPGAs; iFPGA++) {
@@ -119,6 +128,10 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment, uint32_t
 					 * TODO: let the user decide if he what data he needs and remove in compile time the unwanted
 					 */
 //					edge_times[iEdge + nEdges_tot] = ((time - timestamp * 256.) * 0.097464731802);
+					/*
+					 * TODO: edge_times is still a uint64_t*: is this necessary?
+					 *
+					 */
 					edge_times[iEdge + nEdges_tot] = (tdcData->time & 0x0007ffff) + ((frameTS & 0xfffff800)*0x100);
 					edge_chIDs[iEdge + nEdges_tot] = (uint) tdcData->chID;
 					edge_tdcIDs[iEdge + nEdges_tot] = (uint) tdcData->tdcID;
