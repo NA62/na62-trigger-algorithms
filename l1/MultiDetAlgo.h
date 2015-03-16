@@ -1,14 +1,14 @@
 /*
- * KtagAlgo.h
+ * MultiDetAlgo.h
  *
- *  Created on: Jan 25, 2015
+ *  Created on: March 05, 2015
  *      Author: angela romano
  *      Email: axr@hep.ph.bham.ac.uk
  */
 
 #pragma once
-#ifndef KTAGALGORITHM_H_
-#define KTAGALGORITHM_H_
+#ifndef MULTIALGORITHM_H_
+#define MULTIALGORITHM_H_
 
 #include <sys/types.h>
 #include <atomic>
@@ -18,7 +18,7 @@ namespace na62 {
 
 class Event;
 
-class KtagAlgo {
+class MultiDetAlgo {
 public:
 	/**
 	 * @param event Event* This is a pointer to the built Event containing all subevents (except those from the LKr)
@@ -28,14 +28,13 @@ public:
 	 * @return uint8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 
-	KtagAlgo();
-	~KtagAlgo();
-	static uint8_t processKtagTrigger(Event* event);
-	static uint searchPMT(uint tel62ID, uint fpgaID);
+	MultiDetAlgo();
+	~MultiDetAlgo();
+	static uint8_t processMultiDetTrigger(Event* event);
 
 private:
 
 };
 
 } /* namespace na62 */
-#endif /* KTAGALGORITHM_H_ */
+#endif /* MULTIALGORITHM_H_ */

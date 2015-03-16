@@ -15,6 +15,7 @@
 
 #include "L1Downscaling.h"
 #include "KtagAlgo.h"
+#include "MultiDetAlgo.h"
 
 namespace na62 {
 
@@ -46,17 +47,15 @@ uint8_t L1TriggerProcessor::compute(Event* event) {
 
 	uint8_t cedarTrigger = 0;
 
-//	cedarTrigger = KtagAlgo::processKtagTrigger(event);
-
 	if (L1Downscaling::processAlgorithm(cedarAlgorithmId)) {
 		if (SourceIDManager::isCedarActive()) {
-			cedarTrigger = KtagAlgo::checkKtagTrigger(event);
+			cedarTrigger = KtagAlgo::processKtagTrigger(event);
 		}
 	} else {
 		cedarTrigger = 0xFF;
 	}
 
-	//event->setProcessingID(0); // 0 indicates raw data as collected from the detector
+	event->setProcessingID(0); // 0 indicates raw data as collected from the detector
 	return cedarTrigger;
 }
 

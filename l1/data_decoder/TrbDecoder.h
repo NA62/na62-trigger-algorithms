@@ -13,8 +13,6 @@
 #include <cstdint>
 #include <l0/MEPFragment.h>
 
-#define maxNhits 500
-
 namespace na62 {
 
 /**
@@ -65,8 +63,7 @@ public:
 	TrbDecoder();
 	virtual ~TrbDecoder();
 
-	int SetNFPGAs(uint);
-	void GetData(uint, l0::MEPFragment*);
+	void GetData(uint, l0::MEPFragment*, uint32_t);
 
 	/**
 	 * Method returning the total number of edges found per Tel62 board
@@ -75,15 +72,13 @@ public:
 	uint GetNoEdgesPerTrb() {
 		return nEdges_tot;
 	}
-	;
 	/**
 	 * Method returning an array of edge times
 	 *
 	 */
-	uint32_t* GetTimes() {
+	uint64_t* GetTimes() {
 		return edge_times;
 	}
-	;
 	/**
 	 * Method returning an array of edge channel IDs
 	 *
@@ -91,7 +86,6 @@ public:
 	uint* GetChIDs() {
 		return edge_chIDs;
 	}
-	;
 	/**
 	 * Method returning an array of edge TDC IDs
 	 *
@@ -99,7 +93,6 @@ public:
 	uint* GetTdcIDs() {
 		return edge_tdcIDs;
 	}
-	;
 	/**
 	 * Method returning an array of edge IDs (ID=4 for leading, ID=5 for trailing)
 	 *
@@ -107,7 +100,6 @@ public:
 	uint* GetIDs() {
 		return edge_IDs;
 	}
-	;
 	/**
 	 * Method returning an array of edge Tel62 board ID
 	 *
@@ -115,9 +107,10 @@ public:
 	uint* GetTrbIDs() {
 		return edge_trbIDs;
 	}
-	;
 
 private:
+	uint64_t frameTS;
+	uint64_t time;
 	uint nFPGAs;
 	uint nFrames;
 	uint nWordsPerFrame;
@@ -133,7 +126,7 @@ private:
 	 * Arrays with edge info
 	 *
 	 */
-	uint32_t* edge_times;
+	uint64_t* edge_times;
 	uint* edge_chIDs;
 	uint* edge_tdcIDs;
 	uint* edge_IDs;
