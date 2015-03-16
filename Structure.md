@@ -58,7 +58,7 @@ for (int i = 0; i != SourceIDManager::NUMBER_OF_L0_DATA_SOURCES; i++) {
 
 #### Accessing LKr data
 ```C++
-std::vector<uint16_t> localCreamIDsToRequestNonZSuppressedData;
+std::vector<uint_fast16_t> localCreamIDsToRequestNonZSuppressedData;
 for (int localCreamID = event->getNumberOfZSuppressedLkrFragments() - 1;
 		localCreamID != -1; localCreamID--) {
 	LkrFragment* fragment = event->getZSuppressedLkrFragment(localCreamID);

@@ -26,7 +26,7 @@ MultiDetAlgo::~MultiDetAlgo() {
 // TODO Auto-generated destructor stub
 }
 
-uint8_t MultiDetAlgo::processMultiDetTrigger(Event* event) {
+uint_fast8_t MultiDetAlgo::processMultiDetTrigger(Event* event) {
 
 	using namespace l0;
 
@@ -80,7 +80,7 @@ uint8_t MultiDetAlgo::processMultiDetTrigger(Event* event) {
 	delete [] cedarPacket;
 	delete [] chodPacket;
 
-	uint8_t multi_det_trigger = 0;
+	uint_fast8_t multi_det_trigger = 0;
 
 	if (nEdges_cedar_tot > 3 && nEdges_chod_tot > 10) {
 		return multi_det_trigger = 1;

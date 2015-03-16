@@ -25,12 +25,12 @@ public:
 	 *
 	 * The event pointer may not be deleted by this method as it is deleted by the EventBuilder
 	 *
-	 * @return uint8_t <0> if the event is rejected, the L1 trigger type word in other cases.
+	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 
 	KtagAlgo();
 	~KtagAlgo();
-	static uint8_t processKtagTrigger(Event* event);
+	static uint_fast8_t processKtagTrigger(Event* event);
 	static uint searchPMT(uint tel62ID, uint fpgaID);
 
 private:

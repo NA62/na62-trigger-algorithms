@@ -71,7 +71,7 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment, uint32_t
 
 	//LOG_INFO<< "Number of FPGAs (from boardHeader) " << nFPGAs << ENDL;
 
-	for (int iFPGA = 0; iFPGA < nFPGAs; iFPGA++) {
+	for (uint iFPGA = 0; iFPGA != nFPGAs; iFPGA++) {
 		//printf("writing getpayload() + %d\n", 1 + iFPGA + nWords_tot);
 		fpgaHeader = (FPGADataHeader*) payload + 1 + iFPGA + nWords_tot;
 
@@ -83,7 +83,7 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment, uint32_t
 		nFrames = (uint) fpgaHeader->noFrames;
 		//LOG_INFO<< "Number of Frames (from fpgaHeader) " << nFrames << ENDL;
 
-		for (int iFrame = 0; iFrame < nFrames; iFrame++) {
+		for (uint iFrame = 0; iFrame != nFrames; iFrame++) {
 			//printf("writing getpayload() + %d\n", 2 + iFPGA + nWords_tot);
 			frameHeader = (FrameDataHeader*) payload + 2 + iFPGA + nWords_tot;
 

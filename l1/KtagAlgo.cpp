@@ -27,7 +27,7 @@ KtagAlgo::~KtagAlgo() {
 // TODO Auto-generated destructor stub
 }
 
-uint8_t KtagAlgo::processKtagTrigger(Event* event) {
+uint_fast8_t KtagAlgo::processKtagTrigger(Event* event) {
 
 	using namespace l0;
 
@@ -124,7 +124,7 @@ uint8_t KtagAlgo::processKtagTrigger(Event* event) {
 
 	delete [] cedarPacket;
 
-	uint8_t kaontrigger = 0;
+	uint_fast8_t kaontrigger = 0;
 
 	if (nSectors > 3) {
 		kaontrigger = 1;

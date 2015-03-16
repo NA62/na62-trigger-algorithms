@@ -20,10 +20,10 @@ namespace na62 {
  */
 struct TrbDataHeader
 {
-	uint8_t fpgaFlags :8;
-	uint8_t triggerType :8;
-	uint8_t sourceSubID :8; //Tel62 readout board ID
-	uint8_t format :8;
+	uint_fast8_t fpgaFlags :8;
+	uint_fast8_t triggerType :8;
+	uint_fast8_t sourceSubID :8; //Tel62 readout board ID
+	uint_fast8_t format :8;
 }__attribute__ ((__packed__));
 
 /**
@@ -42,7 +42,7 @@ struct FPGADataHeader
  */
 struct FrameDataHeader //Frame header
 {
-	uint16_t frameTimeStamp :16;
+	uint_fast16_t frameTimeStamp :16;
 	uint nWords :16;
 }__attribute__ ((__packed__));
 
