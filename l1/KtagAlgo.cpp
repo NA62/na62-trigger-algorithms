@@ -53,9 +53,9 @@ uint_fast8_t KtagAlgo::processKtagTrigger(Event* event) {
 	uint tdc[maxNhits];
 	uint box[maxNhits];
 
-	memset(pp,999,maxNhits);
-	memset(tdc,999,maxNhits);
-	memset(box,999,maxNhits);
+	memset(pp, 999, maxNhits);
+	memset(tdc, 999, maxNhits);
+	memset(box, 999, maxNhits);
 
 	uint nEdges_tot = 0;
 	uint chkmax = 0;
@@ -69,7 +69,8 @@ uint_fast8_t KtagAlgo::processKtagTrigger(Event* event) {
 
 		l0::MEPFragment* trbDataFragment = cedarSubevent->getFragment(trbNum);
 
-		cedarPacket[trbNum].GetData(trbNum, trbDataFragment, event->getTimestamp());
+		cedarPacket[trbNum].GetData(trbNum, trbDataFragment,
+				event->getTimestamp());
 
 		/**
 		 * Get Arrays with hit Info
@@ -122,7 +123,7 @@ uint_fast8_t KtagAlgo::processKtagTrigger(Event* event) {
 
 	//LOG_INFO<< "Angela: " << event->getEventNumber() << "\t" << event->getTimestamp() << "\t" << nSectors << ENDL;
 
-	delete [] cedarPacket;
+	delete[] cedarPacket;
 
 	uint_fast8_t kaontrigger = 0;
 

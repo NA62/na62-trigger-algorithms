@@ -18,8 +18,7 @@ namespace na62 {
 /**
  * struct containing Tel62 board header
  */
-struct TrbDataHeader
-{
+struct TrbDataHeader {
 	uint_fast8_t fpgaFlags :8;
 	uint_fast8_t triggerType :8;
 	uint_fast8_t sourceSubID :8; //Tel62 readout board ID
@@ -29,8 +28,7 @@ struct TrbDataHeader
 /**
  * struct containing FPGA header
  */
-struct FPGADataHeader
-{
+struct FPGADataHeader {
 	uint noFrames :8;
 	uint noNonEmptyFrames :8;
 	uint FPGAID :8;
