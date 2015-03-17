@@ -12,7 +12,7 @@
 #include <sys/types.h>
 #include <cstdint>
 #include <l0/MEPFragment.h>
-
+#include <boost/noncopyable.hpp>
 namespace na62 {
 
 /**
@@ -55,54 +55,54 @@ struct TrbData {
 	uint ID :4;        //0x4 (leading time), 0x5 (trailing time)
 }__attribute__ ((__packed__));
 
-class TrbDecoder {
+class TrbDecoder: private boost::noncopyable /* prevent accidental copies */ {
 
 public:
 	TrbDecoder();
 	virtual ~TrbDecoder();
 
-	void GetData(uint, l0::MEPFragment*, uint32_t);
+	void getData(uint, l0::MEPFragment*, uint32_t);
 
 	/**
 	 * Method returning the total number of edges found per Tel62 board
 	 *
 	 */
-	uint GetNoEdgesPerTrb() {
+	uint getNoEdgesPerTrb() const  {
 		return nEdges_tot;
 	}
 	/**
 	 * Method returning an array of edge times
 	 *
 	 */
-	uint64_t* GetTimes() {
+	const uint64_t* getTimes() const  {
 		return edge_times;
 	}
 	/**
 	 * Method returning an array of edge channel IDs
 	 *
 	 */
-	uint* GetChIDs() {
+	const uint* getChIDs() const  {
 		return edge_chIDs;
 	}
 	/**
 	 * Method returning an array of edge TDC IDs
 	 *
 	 */
-	uint* GetTdcIDs() {
+	const uint* getTdcIDs() const  {
 		return edge_tdcIDs;
 	}
 	/**
 	 * Method returning an array of edge IDs (ID=4 for leading, ID=5 for trailing)
 	 *
 	 */
-	uint* GetIDs() {
+	const uint* getIDs() const  {
 		return edge_IDs;
 	}
 	/**
 	 * Method returning an array of edge Tel62 board ID
 	 *
 	 */
-	uint* GetTrbIDs() {
+	const uint* getTrbIDs() const {
 		return edge_trbIDs;
 	}
 

@@ -37,14 +37,14 @@ TrbDecoder::~TrbDecoder() {
 }
 
 /**
- * TODO: move GetData documentation in TrbDecoder.h and update it
+ * TODO: move getData documentation in TrbDecoder.h and update it
  * @params uint trbNum This is an index running on the Tel62 boards used by the sub-detector
  *
  * @params l0::MEPFragment* trbDataFragment This is a pointer to the data fragment received by the selected Tel62 board
  * TODO: try and create a unit test for Decoder!!!
  * TODO: have you thought about corrupted data?
  */
-void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment,
+void TrbDecoder::getData(uint trbNum, l0::MEPFragment* trbDataFragment,
 		uint32_t timestamp) {
 
 	/*
@@ -61,7 +61,7 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment,
 	const char* const payload = trbDataFragment->getPayload();
 
 	const TrbDataHeader* const boardHeader =
-			reinterpret_cast<TrbDataHeader*>(payload);
+			reinterpret_cast<const TrbDataHeader*>(payload);
 
 	//LOG_INFO<< "FPGA Flags " << (uint) boardHeader->fpgaFlags << ENDL;
 	//LOG_INFO<< "L0 trigger type " << (uint) boardHeader->triggerType << ENDL;

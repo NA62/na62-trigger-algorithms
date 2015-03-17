@@ -35,19 +35,11 @@ uint_fast8_t KtagAlgo::processKtagTrigger(Event* event) {
 
 	const uint nTEL62s = cedarSubevent->getNumberOfFragments();
 
-	TrbDecoder *cedarPacket = new TrbDecoder[nTEL62s]; //max NTel62 boards
-
 	uint noEdgesPerTrb[nTEL62s];
-	memset(noEdgesPerTrb, 0, nTEL62s);
+	// memset(noEdgesPerTrb, 0, nTEL62s); // No need as anyways all values will be overwritten
 
 	uint sector_occupancy[8];
 	memset(sector_occupancy, 0, 8);
-
-	uint64_t* edge_times;
-	uint* edge_chIDs;
-	uint* edge_tdcIDs;
-	uint* edge_IDs;
-	uint* edge_trbIDs;
 
 	uint pp[maxNhits];
 	uint tdc[maxNhits];
@@ -69,20 +61,21 @@ uint_fast8_t KtagAlgo::processKtagTrigger(Event* event) {
 
 		l0::MEPFragment* trbDataFragment = cedarSubevent->getFragment(trbNum);
 
-		cedarPacket[trbNum].GetData(trbNum, trbDataFragment,
-				event->getTimestamp());
+		TrbDecoder cedarPacket; //max NTel62 boards
+
+		cedarPacket.getData(trbNum, trbDataFragment, event->getTimestamp());
 
 		/**
 		 * Get Arrays with hit Info
 		 *
 		 */
-		edge_times = cedarPacket[trbNum].GetTimes();
-		edge_chIDs = cedarPacket[trbNum].GetChIDs();
-		edge_tdcIDs = cedarPacket[trbNum].GetTdcIDs();
-		edge_IDs = cedarPacket[trbNum].GetIDs();
-		edge_trbIDs = cedarPacket[trbNum].GetTrbIDs();
+		const uint64_t* const edge_times = cedarPacket.getTimes();
+		const uint* const edge_chIDs = cedarPacket.getChIDs();
+		const uint* const edge_tdcIDs = cedarPacket.getTdcIDs();
+		const uint* const edge_IDs = cedarPacket.getIDs();
+		const uint* const edge_trbIDs = cedarPacket.getTrbIDs();
 
-		noEdgesPerTrb[trbNum] = cedarPacket[trbNum].GetNoEdgesPerTrb();
+		noEdgesPerTrb[trbNum] = cedarPacket.getNoEdgesPerTrb();
 
 		//LOG_INFO<< "Tel62 ID " << trbNum << " - Number of Edges found " << noEdgesPerTrb[trbNum] << ENDL;
 
@@ -116,23 +109,14 @@ uint_fast8_t KtagAlgo::processKtagTrigger(Event* event) {
 	//LOG_INFO<<"KtagAlgo.cpp: Analysing Event " << event->getEventNumber() << " - Total Number of edges found " << nEdges_tot << ENDL;
 
 	uint nSectors = 0;
-	for (int iSec = 0; iSec < 8; iSec++) {
+	for (int iSec = 0; iSec != 8; iSec++) {
 		if (sector_occupancy[iSec])
 			nSectors++;
 	}
 
 	//LOG_INFO<< "Angela: " << event->getEventNumber() << "\t" << event->getTimestamp() << "\t" << nSectors << ENDL;
 
-	delete[] cedarPacket;
-
-	uint_fast8_t kaontrigger = 0;
-
-	if (nSectors > 3) {
-		kaontrigger = 1;
-		return kaontrigger;
-	} else
-		return 0;
-
+	return nSectors > 3;
 }
 
 /*
