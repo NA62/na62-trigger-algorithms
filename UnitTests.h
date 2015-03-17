@@ -26,7 +26,8 @@
 #ifndef UNITTESTS_H_
 #define UNITTESTS_H_
 
-#include "l1/unittests/TrbDecoderTest.h"
+#include "common/unittests/DecoderTest.h"
+#include "common/unittests/TrbDecoderTest.h"
 #include "l1/unittests/CedarTest.h"
 
 #endif /* UNITTESTS_H_ */

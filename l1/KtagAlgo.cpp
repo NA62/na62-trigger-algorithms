@@ -13,29 +13,20 @@
 #include <l0/MEPFragment.h>
 #include <l0/Subevent.h>
 #include <options/Logging.h>
-#include "data_decoder/TrbDecoder.h"
 #include <string.h>
+
+#include "../common/decoding/TrbDecoder.h"
 
 #define maxNhits 500
 
 namespace na62 {
 
-KtagAlgo::KtagAlgo() {
-}
-
-KtagAlgo::~KtagAlgo() {
-// TODO Auto-generated destructor stub
-}
-
-uint_fast8_t KtagAlgo::processKtagTrigger(Event* event) {
+uint_fast8_t KtagAlgo::processKtagTrigger(const Decoder& decoder) {
 
 	using namespace l0;
 
-	l0::Subevent* cedarSubevent = event->getCEDARSubevent();
 
-	const uint nTEL62s = cedarSubevent->getNumberOfFragments();
-
-	uint noEdgesPerTrb[nTEL62s];
+	uint noEdgesPerTrb[decoder.getNumberOfCEDARFragments()];
 	// memset(noEdgesPerTrb, 0, nTEL62s); // No need as anyways all values will be overwritten
 
 	uint sector_occupancy[8];
@@ -57,25 +48,18 @@ uint_fast8_t KtagAlgo::processKtagTrigger(Event* event) {
 
 	//TODO: chkmax need to be USED
 
-	for (uint trbNum = 0; trbNum != nTEL62s && chkmax == 0; trbNum++) {
-
-		l0::MEPFragment* trbDataFragment = cedarSubevent->getFragment(trbNum);
-
-		TrbDecoder cedarPacket; //max NTel62 boards
-
-		cedarPacket.getData(trbNum, trbDataFragment, event->getTimestamp());
+	uint trbNum = 0;
+	for (TrbDecoder& cedarPacket: decoder.getAllCEDARDecodedFragments()) {
 
 		/**
 		 * Get Arrays with hit Info
-		 *
 		 */
 		const uint64_t* const edge_times = cedarPacket.getTimes();
-		const uint* const edge_chIDs = cedarPacket.getChIDs();
-		const uint* const edge_tdcIDs = cedarPacket.getTdcIDs();
-		const uint* const edge_IDs = cedarPacket.getIDs();
-		const uint* const edge_trbIDs = cedarPacket.getTrbIDs();
+		const uint_fast8_t* const edge_chIDs = cedarPacket.getChIDs();
+		const uint_fast8_t* const edge_tdcIDs = cedarPacket.getTdcIDs();
+		const uint_fast8_t* const edge_IDs = cedarPacket.getIDs();
 
-		noEdgesPerTrb[trbNum] = cedarPacket.getNoEdgesPerTrb();
+		noEdgesPerTrb[trbNum] = cedarPacket.getNumberOfEdgesPerTrb();
 
 		//LOG_INFO<< "Tel62 ID " << trbNum << " - Number of Edges found " << noEdgesPerTrb[trbNum] << ENDL;
 
@@ -104,6 +88,7 @@ uint_fast8_t KtagAlgo::processKtagTrigger(Event* event) {
 				nEdges_tot += noEdgesPerTrb[trbNum];
 			}
 		}
+		trbNum++;
 	}
 
 	//LOG_INFO<<"KtagAlgo.cpp: Analysing Event " << event->getEventNumber() << " - Total Number of edges found " << nEdges_tot << ENDL;

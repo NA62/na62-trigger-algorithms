@@ -6,7 +6,8 @@
  *      Email: axr@hep.ph.bham.ac.uk
  */
 
-#include "TrbDecoder.h"
+#include "../decoding/TrbDecoder.h"
+
 #include <options/Logging.h>
 #include <l0/MEPFragment.h>
 #include <stdlib.h>
@@ -15,8 +16,8 @@
 namespace na62 {
 
 TrbDecoder::TrbDecoder() :
-		edge_times(nullptr), edge_chIDs(nullptr), edge_tdcIDs(nullptr), edge_IDs(
-				nullptr), edge_trbIDs(nullptr) {
+		edgeTimes(nullptr), edgeChIDs(nullptr), edgeTdcIDs(nullptr), edgeIDs(
+				nullptr) {
 	frameTS = 0;
 	time = 0;
 	nFPGAs = 0;
@@ -25,15 +26,13 @@ TrbDecoder::TrbDecoder() :
 	nWords_tot = 0;
 	nEdges = 0;
 	nEdges_tot = 0;
-
 }
 
 TrbDecoder::~TrbDecoder() {
-	delete edge_times;
-	delete edge_chIDs;
-	delete edge_tdcIDs;
-	delete edge_IDs;
-	delete edge_trbIDs;
+	delete edgeTimes;
+	delete edgeChIDs;
+	delete edgeTdcIDs;
+	delete edgeIDs;
 }
 
 /**
@@ -44,19 +43,18 @@ TrbDecoder::~TrbDecoder() {
  * TODO: try and create a unit test for Decoder!!!
  * TODO: have you thought about corrupted data?
  */
-void TrbDecoder::getData(uint trbNum, l0::MEPFragment* trbDataFragment,
-		uint32_t timestamp) {
+void TrbDecoder::readData(const l0::MEPFragment* const trbDataFragment,
+		const uint_fast32_t timestamp) {
 
 	/*
 	 * Each word is 4 bytes: there is 1 board header and at least 1 FPGA header and 1 Frame header
 	 * -> use this to estimate the maximum number of words
 	 */
 	const uint maxNwords = (trbDataFragment->getPayloadLength() / 4) - 3;
-	edge_times = new uint64_t[maxNwords];
-	edge_chIDs = new uint[maxNwords];
-	edge_tdcIDs = new uint[maxNwords];
-	edge_IDs = new uint[maxNwords];
-	edge_trbIDs = new uint[maxNwords];
+	edgeTimes = new uint64_t[maxNwords];
+	edgeChIDs = new uint_fast8_t[maxNwords];
+	edgeTdcIDs = new uint_fast8_t[maxNwords];
+	edgeIDs = new uint_fast8_t[maxNwords];
 
 	const char* const payload = trbDataFragment->getPayload();
 
@@ -68,7 +66,7 @@ void TrbDecoder::getData(uint trbNum, l0::MEPFragment* trbDataFragment,
 	//LOG_INFO<< "Source (Tel62) sub-ID " << (uint) boardHeader->sourceSubID << ENDL;
 	//LOG_INFO<< "Format " << (uint) boardHeader->format << ENDL;
 
-	nFPGAs = calculateNumberOfFPGAs(boardHeader->fpgaFlags);
+	nFPGAs = boardHeader->getNumberOfFPGAs();
 
 	//LOG_INFO<< "Number of FPGAs (from boardHeader) " << nFPGAs << ENDL;
 
@@ -126,14 +124,12 @@ void TrbDecoder::getData(uint trbNum, l0::MEPFragment* trbDataFragment,
 					 * TODO: edge_times is still a uint64_t*: is this necessary?
 					 *
 					 */
-					edge_times[iEdge + nEdges_tot] =
-							(tdcData->time & 0x0007ffff)
-									+ ((frameTS & 0xfffff800) * 0x100);
+					edgeTimes[iEdge + nEdges_tot] = (tdcData->time & 0x0007ffff)
+							+ ((frameTS & 0xfffff800) * 0x100);
 
-					edge_chIDs[iEdge + nEdges_tot] = (uint) tdcData->chID;
-					edge_tdcIDs[iEdge + nEdges_tot] = (uint) tdcData->tdcID;
-					edge_IDs[iEdge + nEdges_tot] = (uint) tdcData->ID;
-					edge_trbIDs[iEdge + nEdges_tot] = trbNum;
+					edgeChIDs[iEdge + nEdges_tot] = (uint) tdcData->chID;
+					edgeTdcIDs[iEdge + nEdges_tot] = (uint) tdcData->tdcID;
+					edgeIDs[iEdge + nEdges_tot] = (uint) tdcData->ID;
 
 					//LOG_INFO<< "edge_IDs[" << iEdge + nEdges_tot << "] " << edge_IDs[iEdge + nEdges_tot] << ENDL;
 					//LOG_INFO<< "edge_chIDs[" << iEdge + nEdges_tot << "] " << edge_chIDs[iEdge + nEdges_tot] << ENDL;
