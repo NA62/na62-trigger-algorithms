@@ -48,7 +48,7 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment,
 
 	/*
 	 * Each word is 4 bytes: there is 1 board header and at least 1 FPGA header and 1 Frame header
-	 *
+	 * -> use this to estimate the maximum number of words
 	 */
 	const uint maxNwords = (trbDataFragment->getPayloadLength() / 4) - 3;
 	edge_times = new uint64_t[maxNwords];
@@ -57,9 +57,9 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment,
 	edge_IDs = new uint[maxNwords];
 	edge_trbIDs = new uint[maxNwords];
 
-	char * payload = trbDataFragment->getPayload();
+	const char* const payload = trbDataFragment->getPayload();
 
-	TrbDataHeader* boardHeader = (TrbDataHeader*) payload;
+	const TrbDataHeader* const boardHeader = reinterpret_cast<TrbDataHeader*>(payload);
 
 	//LOG_INFO<< "FPGA Flags " << (uint) boardHeader->fpgaFlags << ENDL;
 	//LOG_INFO<< "L0 trigger type " << (uint) boardHeader->triggerType << ENDL;
