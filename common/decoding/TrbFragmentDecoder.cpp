@@ -6,7 +6,7 @@
  *      Email: axr@hep.ph.bham.ac.uk
  */
 
-#include "../decoding/TrbDecoder.h"
+#include "TrbFragmentDecoder.h"
 
 #include <options/Logging.h>
 #include <l0/MEPFragment.h>
@@ -15,7 +15,7 @@
 
 namespace na62 {
 
-TrbDecoder::TrbDecoder() :
+TrbFragmentDecoder::TrbFragmentDecoder() :
 		edgeTimes(nullptr), edgeChIDs(nullptr), edgeTdcIDs(nullptr), edgeIDs(
 				nullptr) {
 	frameTS = 0;
@@ -28,11 +28,13 @@ TrbDecoder::TrbDecoder() :
 	nEdges_tot = 0;
 }
 
-TrbDecoder::~TrbDecoder() {
-	delete edgeTimes;
-	delete edgeChIDs;
-	delete edgeTdcIDs;
-	delete edgeIDs;
+TrbFragmentDecoder::~TrbFragmentDecoder() {
+	if (isReady()) {
+		delete edgeTimes;
+		delete edgeChIDs;
+		delete edgeTdcIDs;
+		delete edgeIDs;
+	}
 }
 
 /**
@@ -43,9 +45,10 @@ TrbDecoder::~TrbDecoder() {
  * TODO: try and create a unit test for Decoder!!!
  * TODO: have you thought about corrupted data?
  */
-void TrbDecoder::readData(const l0::MEPFragment* const trbDataFragment,
+void TrbFragmentDecoder::readData(const uint_fast16_t fragmentNumber, const l0::MEPFragment* const trbDataFragment,
 		const uint_fast32_t timestamp) {
 
+	fragmentNumber_ = fragmentNumber;
 	/*
 	 * Each word is 4 bytes: there is 1 board header and at least 1 FPGA header and 1 Frame header
 	 * -> use this to estimate the maximum number of words

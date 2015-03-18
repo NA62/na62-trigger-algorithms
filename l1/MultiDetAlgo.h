@@ -10,13 +10,12 @@
 #ifndef MULTIALGORITHM_H_
 #define MULTIALGORITHM_H_
 
-#include <sys/types.h>
-#include <atomic>
 #include <cstdint>
+
+#include "../common/decoding/DecoderHandler.h"
 
 namespace na62 {
 
-class Event;
 
 class MultiDetAlgo {
 public:
@@ -30,7 +29,7 @@ public:
 
 	MultiDetAlgo();
 	~MultiDetAlgo();
-	static uint_fast8_t processMultiDetTrigger(Event* event);
+	static uint_fast8_t processMultiDetTrigger(DecoderHandler& decoder);
 
 private:
 

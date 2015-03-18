@@ -7,11 +7,14 @@
 
 #pragma once
 
-#include "../decoding/Decoder.h"
+#include "../decoding/DecoderHandler.h"
 
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test_suite.hpp>
-#include <options/Logging.h>
+#include <sys/types.h>
+#include <iostream>
+
+#include "../decoding/DecoderRange.h"
 
 
 namespace na62 {

@@ -71,59 +71,72 @@ struct TrbData {
 	uint ID :4;        //0x4 (leading time), 0x5 (trailing time)
 }__attribute__ ((__packed__));
 
-class TrbDecoder {
-
-public:
-	TrbDecoder();
-	virtual ~TrbDecoder();
-
-	/**
-	 * Reads the raw data and fills the edge arrays
-	 */
-	void readData(const l0::MEPFragment* const trbDataFragment,
-			const uint_fast32_t timestamp);
-
-	/**
-	 * Method returning the total number of edges found per Tel62 board
-	 *
-	 */
-	uint getNumberOfEdgesPerTrb() const {
-		return nEdges_tot;
-	}
-	/**
-	 * Method returning an array of edge times
-	 *
-	 */
-	const uint64_t* getTimes() const {
-		return edgeTimes;
-	}
-	/**
-	 * Method returning an array of edge channel IDs
-	 *
-	 */
-	const uint_fast8_t* getChIDs() const {
-		return edgeChIDs;
-	}
-	/**
-	 * Method returning an array of edge TDC IDs
-	 *
-	 */
-	const uint_fast8_t* getTdcIDs() const {
-		return edgeTdcIDs;
-	}
-	/**
-	 * Method returning an array of edge IDs (ID=4 for leading, ID=5 for trailing)
-	 *
-	 */
-	const uint_fast8_t* getIDs() const {
-		return edgeIDs;
-	}
+class TrbFragmentDecoder {
+	friend class DecoderHandler; // Only Decoder may access readData and isReady
 
 	/**
 	 * Returns true if readData has already been called an the getter functions are ready to be called
 	 */
 	bool isReady() const {
 		return edgeTimes != nullptr;
+	}
+
+	/**
+	 * Reads the raw data and fills the edge arrays
+	 */
+	void readData(const uint_fast16_t,
+			const l0::MEPFragment* const trbDataFragment,
+			const uint_fast32_t timestamp);
+
+public:
+	TrbFragmentDecoder();
+	virtual ~TrbFragmentDecoder();
+
+	/**
+	 * Method returning the total number of edges found per Tel62 board
+	 *
+	 */
+	inline uint getNumberOfEdgesPerTrb() const {
+		return nEdges_tot;
+	}
+
+	/**
+	 * Method returning an array of edge times
+	 *
+	 */
+	inline const uint64_t* getTimes() const {
+		return edgeTimes;
+	}
+
+	/**
+	 * Method returning an array of edge channel IDs
+	 *
+	 */
+	inline const uint_fast8_t* getChIDs() const {
+		return edgeChIDs;
+	}
+
+	/**
+	 * Method returning an array of edge TDC IDs
+	 *
+	 */
+	inline const uint_fast8_t* getTdcIDs() const {
+		return edgeTdcIDs;
+	}
+
+	/**
+	 * Method returning an array of edge IDs (ID=4 for leading, ID=5 for trailing)
+	 *
+	 */
+	inline const uint_fast8_t* getIDs() const {
+		return edgeIDs;
+	}
+
+	/**
+	 * Returns the subdetector specific ID of the fragment decoded by this object
+	 */
+	inline const uint_fast16_t getFragmentNumber() const {
+		return fragmentNumber_;
 	}
 
 private:
@@ -144,6 +157,8 @@ private:
 	uint_fast8_t * edgeChIDs;
 	uint_fast8_t* edgeTdcIDs;
 	uint_fast8_t* edgeIDs;
+
+	uint_fast16_t fragmentNumber_;
 };
 
 }

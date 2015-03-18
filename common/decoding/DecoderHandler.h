@@ -1,0 +1,110 @@
+/*
+ * Decoder.h
+ *
+ *  Created on: Mar 17, 2015
+ *      Author: Jonas Kunze (kunze.jonas@gmail.com)
+ * Description: This class stores all decoders potentially used for one single event. It provides one
+ * 				iterator for every detector that can be used in range based loops that automatically
+ * 				trigger the decoding on demand (lazy decoding)
+ */
+
+#ifndef COMMON_DECODING_DECODERHANDLER_H_
+#define COMMON_DECODING_DECODERHANDLER_H_
+
+#include <vector>
+#include <boost/noncopyable.hpp>
+#include <eventBuilding/Event.h>
+#include <l0/Subevent.h>
+#include <sys/types.h>
+
+#include "DecoderRange.h"
+#include "TrbFragmentDecoder.h"
+
+namespace na62 {
+class Event;
+} /* namespace na62 */
+
+#define ADD_TRB(DETECTOR)																										\
+private:																														\
+																																\
+	std::vector<TrbFragmentDecoder> DETECTOR##Decoders; /* One TrbFragmentDecoder for every MEP fragment 	*/					\
+																																\
+public:																															\
+																																\
+	/**																															\
+	 * This method must be called before you call any getter method like get##DETECTOR##NumberOfEdgesPerTrb						\
+	 * It prepares the decoding if it has not already been done (idempotence)													\
+	 */																															\
+	void register##DETECTOR##Usage() {																							\
+		if ( DETECTOR##Decoders.empty() ) {																						\
+			const l0::Subevent* const subevent = event_->get##DETECTOR##Subevent();												\
+			/* initialize all Decoders. They will be in "unready" state for now so you still									\
+			 * have to call readData() for all of them before accessing the decoded data										\
+			 */ 																												\
+			DETECTOR##Decoders.resize(subevent->getNumberOfFragments());														\
+		}																														\
+	}																															\
+	/**																															\
+	 * Returns the decoded data of the <fragmentNumber>th fragment of ##DETECTOR##	data										\
+	 */																															\
+	TrbFragmentDecoder getDecoded##DETECTOR##Fragment(const uint fragmentNumber) {												\
+		if (!DETECTOR##Decoders[fragmentNumber].isReady()) {																	\
+			const l0::Subevent* const subevent = event_->get##DETECTOR##Subevent();												\
+			DETECTOR##Decoders[fragmentNumber].readData( fragmentNumber,														\
+					subevent->getFragment(fragmentNumber),																		\
+					event_->getTimestamp());																					\
+		}																														\
+		return DETECTOR##Decoders[fragmentNumber];																				\
+	} 																															\
+																																\
+	/**																															\
+	 * Returns the number of available fragments for the ##DETECTOR##															\
+	 */																															\
+	uint getNumberOf##DETECTOR##Fragments() const { 																			\
+		const l0::Subevent* const subevent = event_->get##DETECTOR##Subevent(); 												\
+		return subevent->getNumberOfFragments(); 																				\
+	} 																															\
+	  																															\
+	/**  																														\
+	 * Returns an iterator for range based loops which automatically decodes data in a lazy way 								\
+	 */   																														\
+	DecoderRange<TrbFragmentDecoder> get##DETECTOR##DecoderRange() {															\
+		TrbFragmentDecoder* first = &DETECTOR##Decoders[0];																		\
+																																\
+		return DecoderRange<TrbFragmentDecoder>(first, first + DETECTOR##Decoders.size(), 										\
+				[this, first](TrbFragmentDecoder* decoder)																		\
+				{																												\
+					if(!decoder->isReady()) {																					\
+						const uint_fast16_t fragmentID = decoder - first;														\
+						const l0::Subevent* const subevent = event_->get##DETECTOR##Subevent();									\
+						DETECTOR##Decoders[fragmentID].readData(fragmentID, 													\
+									subevent->getFragment(fragmentID), event_->getTimestamp());									\
+					} 																											\
+				}); 																											\
+	}
+
+namespace na62 {
+
+class DecoderHandler {
+	friend class DecoderTest;
+
+public:
+	DecoderHandler(Event* const event);
+	virtual ~DecoderHandler();
+
+	/*
+	 * Define a macro to add functionality for a detector
+	 */
+
+ADD_TRB(CEDAR)
+
+ADD_TRB(CHOD)
+
+private:
+	Event* const event_;
+
+};
+
+} /* namespace na62 */
+
+#endif /* COMMON_DECODING_DECODERHANDLER_H_ */

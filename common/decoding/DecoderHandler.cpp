@@ -5,12 +5,16 @@
  *      Author: Jonas Kunze (kunze.jonas@gmail.com)
  */
 
-#include "Decoder.h"
+#include "DecoderHandler.h"
 
 namespace na62 {
 
-Decoder::Decoder(Event* const event) :
+DecoderHandler::DecoderHandler(Event* const event) :
 		event_(event) {
+
+}
+
+DecoderHandler::~DecoderHandler() {
 
 }
 

@@ -13,7 +13,7 @@
 #include <l0/MEPFragment.h>
 #include <l0/Subevent.h>
 
-#include "../common/decoding/Decoder.h"
+#include "../common/decoding/DecoderHandler.h"
 #include "L1Downscaling.h"
 #include "KtagAlgo.h"
 #include "MultiDetAlgo.h"
@@ -44,7 +44,7 @@ bool L1TriggerProcessor::isRequestZeroSuppressedCreamData(
 
 uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	using namespace l0;
-	const Decoder decoder(event);
+	DecoderHandler decoder(event);
 
 	/*
 	 * Check if the event should bypass the processing
@@ -62,6 +62,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	uint_fast8_t cedarTrigger = 0;
 	if (L1Downscaling::processAlgorithm(cedarAlgorithmId)) {
 		if (SourceIDManager::isCedarActive()) {
+			decoder.registerCEDARUsage();
 			cedarTrigger = KtagAlgo::processKtagTrigger(decoder);
 		}
 	} else {

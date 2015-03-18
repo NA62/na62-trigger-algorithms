@@ -16,7 +16,7 @@
 
 #include <options/Logging.h>
 
-#include "../common/decoding/TrbDecoder.h"
+#include "../common/decoding/TrbFragmentDecoder.h"
 
 namespace na62 {
 
@@ -27,49 +27,33 @@ MultiDetAlgo::~MultiDetAlgo() {
 // TODO Auto-generated destructor stub
 }
 
-uint_fast8_t MultiDetAlgo::processMultiDetTrigger(Event* event) {
+uint_fast8_t MultiDetAlgo::processMultiDetTrigger(DecoderHandler& decoder) {
 
 	using namespace l0;
 
-	const l0::Subevent* const cedarSubevent = event->getCEDARSubevent();
-	const l0::Subevent* const chodSubevent = event->getCHODSubevent();
-
-	uint nTEL62s_cedar = cedarSubevent->getNumberOfFragments();
-	uint nTEL62s_chod = chodSubevent->getNumberOfFragments();
-
-	uint noEdgesPerTrb_cedar[nTEL62s_cedar];
-	uint noEdgesPerTrb_chod[nTEL62s_chod];
+	uint noEdgesPerTrb_cedar[decoder.getNumberOfCEDARFragments()];
+	uint noEdgesPerTrb_chod[decoder.getNumberOfCHODFragments()];
 
 	uint nEdges_cedar_tot = 0;
 	uint nEdges_chod_tot = 0;
 
-	uint chkmax = 0;
-
 //	LOG_INFO<< "Event number = " << event->getEventNumber() << ENDL;
 //	LOG_INFO<< "Timestamp = " << std::hex << event->getTimestamp() << std::dec << ENDL;
 
-	for (uint trbNum = 0; trbNum != nTEL62s_cedar && chkmax == 0; trbNum++) {
+	for (TrbFragmentDecoder* cedarPacket : decoder.getCEDARDecoderRange()) {
 
-		l0::MEPFragment* trbDataFragment = cedarSubevent->getFragment(trbNum);
-		TrbDecoder cedarPacket;
-		cedarPacket.readData(trbDataFragment, event->getTimestamp());
-
-		noEdgesPerTrb_cedar[trbNum] = cedarPacket.getNumberOfEdgesPerTrb();
+		noEdgesPerTrb_cedar[cedarPacket->getFragmentNumber()] = cedarPacket->getNumberOfEdgesPerTrb();
 //		LOG_INFO<< "KTAG: Tel62 ID " << trbNum << " - Number of Edges found " << noEdgesPerTrb_cedar[trbNum] << ENDL;
 
-		nEdges_cedar_tot += noEdgesPerTrb_cedar[trbNum];
+		nEdges_cedar_tot += noEdgesPerTrb_cedar[cedarPacket->getFragmentNumber()];
 	}
 
-	for (uint trbNum = 0; trbNum != nTEL62s_chod && chkmax == 0; trbNum++) {
+	for (TrbFragmentDecoder* chodPacket : decoder.getCHODDecoderRange()) {
 
-		l0::MEPFragment* trbDataFragment = chodSubevent->getFragment(trbNum);
-		TrbDecoder chodPacket;
-		chodPacket.readData(trbDataFragment, event->getTimestamp());
-
-		noEdgesPerTrb_chod[trbNum] = chodPacket.getNumberOfEdgesPerTrb();
+		noEdgesPerTrb_chod[chodPacket->getFragmentNumber()] = chodPacket->getNumberOfEdgesPerTrb();
 //		LOG_INFO<< "CHOD: Tel62 ID " << trbNum << " - Number of Edges found " << noEdgesPerTrb_chod[trbNum] << ENDL;
 
-		nEdges_chod_tot += noEdgesPerTrb_chod[trbNum];
+		nEdges_chod_tot += noEdgesPerTrb_chod[chodPacket->getFragmentNumber()];
 	}
 
 	//LOG_INFO<<"MultiDetAlgo.cpp: Analysed Event " << event->getEventNumber() << " - Total Number of edges found (KTAG) " << nEdges_cedar_tot << ENDL;
