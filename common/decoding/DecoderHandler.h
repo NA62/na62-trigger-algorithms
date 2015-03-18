@@ -24,6 +24,9 @@ namespace na62 {
 class Event;
 } /* namespace na62 */
 
+/*
+ * Define a macro to add functionality for a detector
+ */
 #define ADD_TRB(DETECTOR)																										\
 private:																														\
 																																\
@@ -93,9 +96,8 @@ public:
 	virtual ~DecoderHandler();
 
 	/*
-	 * Define a macro to add functionality for a detector
+	 * Add functionality for all detectors
 	 */
-
 ADD_TRB(CEDAR)
 
 ADD_TRB(CHOD)
