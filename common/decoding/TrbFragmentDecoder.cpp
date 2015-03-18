@@ -6,7 +6,8 @@
  *      Email: axr@hep.ph.bham.ac.uk
  */
 
-#include "TrbDecoder.h"
+#include "TrbFragmentDecoder.h"
+
 #include <options/Logging.h>
 #include <l0/MEPFragment.h>
 #include <stdlib.h>
@@ -14,7 +15,9 @@
 
 namespace na62 {
 
-TrbDecoder::TrbDecoder() {
+TrbFragmentDecoder::TrbFragmentDecoder() :
+		edgeTimes(nullptr), edgeChIDs(nullptr), edgeTdcIDs(nullptr), edgeIDs(
+				nullptr), fragmentNumber_(UINT_FAST16_MAX) {
 	frameTS = 0;
 	time = 0;
 	nFPGAs = 0;
@@ -23,57 +26,58 @@ TrbDecoder::TrbDecoder() {
 	nWords_tot = 0;
 	nEdges = 0;
 	nEdges_tot = 0;
-	boardHeader = nullptr;
-	fpgaHeader = nullptr;
-	frameHeader = nullptr;
-	tdcData = nullptr;
 }
 
-TrbDecoder::~TrbDecoder() {
-	// TODO Auto-generated destructor stub
-	delete edge_times;
-	delete edge_chIDs;
-	delete edge_tdcIDs;
-	delete edge_IDs;
-	delete edge_trbIDs;
+TrbFragmentDecoder::~TrbFragmentDecoder() {
+	if (isReady()) {
+		delete edgeTimes;
+		delete edgeChIDs;
+		delete edgeTdcIDs;
+		delete edgeIDs;
+	}
 }
 
 /**
- *
+ * TODO: move getData documentation in TrbDecoder.h and update it
  * @params uint trbNum This is an index running on the Tel62 boards used by the sub-detector
  *
  * @params l0::MEPFragment* trbDataFragment This is a pointer to the data fragment received by the selected Tel62 board
- *
+ * TODO: try and create a unit test for Decoder!!!
+ * TODO: have you thought about corrupted data?
  */
+void TrbFragmentDecoder::readData(const uint_fast16_t fragmentNumber,
+		const l0::MEPFragment* const trbDataFragment,
+		const uint_fast32_t timestamp) {
 
-void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment, uint32_t timestamp) {
-
+	fragmentNumber_ = fragmentNumber;
 	/*
 	 * Each word is 4 bytes: there is 1 board header and at least 1 FPGA header and 1 Frame header
-	 *
+	 * -> use this to estimate the maximum number of words
 	 */
-	const uint maxNwords = (trbDataFragment->getPayloadLength()/4) - 3;
-	edge_times = new uint64_t[maxNwords];
-	edge_chIDs = new uint[maxNwords];
-	edge_tdcIDs = new uint[maxNwords];
-	edge_IDs = new uint[maxNwords];
-	edge_trbIDs = new uint[maxNwords];
+	const uint maxNwords = (trbDataFragment->getPayloadLength() / 4) - 3;
+	edgeTimes = new uint64_t[maxNwords];
+	edgeChIDs = new uint_fast8_t[maxNwords];
+	edgeTdcIDs = new uint_fast8_t[maxNwords];
+	edgeIDs = new uint_fast8_t[maxNwords];
 
-	char * payload = trbDataFragment->getPayload();
-	boardHeader = (TrbDataHeader*) payload;
+	const char* const payload = trbDataFragment->getPayload();
+
+	const TrbDataHeader* const boardHeader =
+			reinterpret_cast<const TrbDataHeader*>(payload);
 
 	//LOG_INFO<< "FPGA Flags " << (uint) boardHeader->fpgaFlags << ENDL;
 	//LOG_INFO<< "L0 trigger type " << (uint) boardHeader->triggerType << ENDL;
 	//LOG_INFO<< "Source (Tel62) sub-ID " << (uint) boardHeader->sourceSubID << ENDL;
 	//LOG_INFO<< "Format " << (uint) boardHeader->format << ENDL;
 
-	nFPGAs = calculateNumberOfFPGAs(boardHeader->fpgaFlags);
+	nFPGAs = boardHeader->getNumberOfFPGAs();
 
 	//LOG_INFO<< "Number of FPGAs (from boardHeader) " << nFPGAs << ENDL;
 
 	for (uint iFPGA = 0; iFPGA != nFPGAs; iFPGA++) {
 		//printf("writing getpayload() + %d\n", 1 + iFPGA + nWords_tot);
-		fpgaHeader = (FPGADataHeader*) payload + 1 + iFPGA + nWords_tot;
+		FPGADataHeader* fpgaHeader = (FPGADataHeader*) payload + 1 + iFPGA
+				+ nWords_tot;
 
 		//LOG_INFO<< "Number of (25ns long) Frames " << (uint) fpgaHeader->noFrames << ENDL;
 		//LOG_INFO<< "Number of non-empty Frames " << (uint) fpgaHeader->noNonEmptyFrames<< ENDL;
@@ -85,7 +89,8 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment, uint32_t
 
 		for (uint iFrame = 0; iFrame != nFrames; iFrame++) {
 			//printf("writing getpayload() + %d\n", 2 + iFPGA + nWords_tot);
-			frameHeader = (FrameDataHeader*) payload + 2 + iFPGA + nWords_tot;
+			FrameDataHeader* frameHeader = (FrameDataHeader*) payload + 2
+					+ iFPGA + nWords_tot;
 
 			//LOG_INFO<< "Number of Words in Frame " << (uint) frameHeader->nWords<< ENDL;
 			//LOG_INFO<< "Frame Timestamp " << (uint) frameHeader->frameTimeStamp<< ENDL;
@@ -94,15 +99,14 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment, uint32_t
 			nWords_tot += nWordsPerFrame;
 			//LOG_INFO<< "Number of Words  " << nWords_tot << ENDL;
 
-			frameTS = (frameHeader->frameTimeStamp & 0x0000ffff) + (timestamp & 0xffff0000);
+			frameTS = (frameHeader->frameTimeStamp & 0x0000ffff)
+					+ (timestamp & 0xffff0000);
 			//LOG_INFO<< "Event Timestamp " << std::hex << timestamp << std::dec << ENDL;
 			//LOG_INFO<< "FrameTS " << std::hex << frameTS << std::dec << ENDL;
 
-			if ((timestamp & 0xf000) == 0xf000
-					&& (frameTS & 0xf000) == 0x0000)
+			if ((timestamp & 0xf000) == 0xf000 && (frameTS & 0xf000) == 0x0000)
 				frameTS += 0x10000; //16 bits overflow
-			if ((timestamp & 0xf000) == 0x0000
-					&& (frameTS & 0xf000) == 0xf000)
+			if ((timestamp & 0xf000) == 0x0000 && (frameTS & 0xf000) == 0xf000)
 				frameTS -= 0x10000; //16 bits overflow
 
 			if (nWordsPerFrame)
@@ -113,18 +117,23 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment, uint32_t
 			if (nEdges) {
 				for (uint iEdge = 0; iEdge < nEdges; iEdge++) {
 					//printf("writing getpayload() + %d\n",2 + iFPGA + nWords_tot - nEdges + iEdge);
-					tdcData = (TrbData*) payload + 2 + iFPGA + nWords_tot
-							- nEdges + iEdge;
+					TrbData* tdcData = (TrbData*) payload + 2 + iFPGA
+							+ nWords_tot - nEdges + iEdge;
 
 					/*
-					 * TODO: let the user decide if he what data he needs and remove in compile time the unwanted
+					 * TODO: let the user decide what data he needs and remove the unwanted parts in compile time
 					 */
 //					edge_times[iEdge + nEdges_tot] = ((time - timestamp * 256.) * 0.097464731802);
-					edge_times[iEdge + nEdges_tot] = (tdcData->time & 0x0007ffff) + ((frameTS & 0xfffff800)*0x100);
-					edge_chIDs[iEdge + nEdges_tot] = (uint) tdcData->chID;
-					edge_tdcIDs[iEdge + nEdges_tot] = (uint) tdcData->tdcID;
-					edge_IDs[iEdge + nEdges_tot] = (uint) tdcData->ID;
-					edge_trbIDs[iEdge + nEdges_tot] = trbNum;
+					/*
+					 * TODO: edge_times is still a uint64_t*: is this necessary?
+					 *
+					 */
+					edgeTimes[iEdge + nEdges_tot] = (tdcData->time & 0x0007ffff)
+							+ ((frameTS & 0xfffff800) * 0x100);
+
+					edgeChIDs[iEdge + nEdges_tot] = (uint) tdcData->chID;
+					edgeTdcIDs[iEdge + nEdges_tot] = (uint) tdcData->tdcID;
+					edgeIDs[iEdge + nEdges_tot] = (uint) tdcData->ID;
 
 					//LOG_INFO<< "edge_IDs[" << iEdge + nEdges_tot << "] " << edge_IDs[iEdge + nEdges_tot] << ENDL;
 					//LOG_INFO<< "edge_chIDs[" << iEdge + nEdges_tot << "] " << edge_chIDs[iEdge + nEdges_tot] << ENDL;

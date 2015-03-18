@@ -24,7 +24,7 @@
 
 // Here you can add your Options like e.g.
 // #define OPTION_YOUR_OPTION_NAME (char*)"nameUsedAs--Flag"
-// Then add your option to the desc opbject in Load below
+// Then add your option to the desc object in Load below
 
 namespace na62 {
 class TriggerOptions: public Options {
