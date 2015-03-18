@@ -16,6 +16,7 @@
 #include <eventBuilding/Event.h>
 #include <l0/Subevent.h>
 #include <sys/types.h>
+#include <functional>
 
 #include "DecoderRange.h"
 #include "TrbFragmentDecoder.h"
@@ -27,66 +28,6 @@ class Event;
 /*
  * Define a macro to add functionality for a detector
  */
-#define ADD_TRB(DETECTOR)																										\
-private:																														\
-																																\
-	std::vector<TrbFragmentDecoder> DETECTOR##Decoders; /* One TrbFragmentDecoder for every MEP fragment 	*/					\
-																																\
-																																\
-	/**																															\
-	 * This method must be called before you access the DETECTOR##Decoders														\
-	 * It prepares the decoding if it has not already been done (idempotence)													\
-	 */																															\
-	void prepare##DETECTOR##Usage() {																							\
-		if ( DETECTOR##Decoders.empty() ) {																						\
-			/* initialize all Decoders. They will be in "unready" state for now so you still									\
-			 * have to call readData() for all of them before accessing the decoded data										\
-			 */ 																												\
-			DETECTOR##Decoders.resize(getNumberOf##DETECTOR##Fragments());														\
-		}																														\
-	}																															\
-																																\
-public:																															\
-	/**																															\
-	 * Returns the decoded data of the <fragmentNumber>th fragment of ##DETECTOR##	data										\
-	 */																															\
-	const TrbFragmentDecoder getDecoded##DETECTOR##Fragment(const uint fragmentNumber) {										\
-		prepare##DETECTOR##Usage();																								\
-		if (!DETECTOR##Decoders[fragmentNumber].isReady()) {																	\
-			const l0::Subevent* const subevent = event_->get##DETECTOR##Subevent();												\
-			DETECTOR##Decoders[fragmentNumber].readData( fragmentNumber,														\
-					subevent->getFragment(fragmentNumber),																		\
-					event_->getTimestamp());																					\
-		}																														\
-		return DETECTOR##Decoders[fragmentNumber];																				\
-	} 																															\
-																																\
-	/**																															\
-	 * Returns the number of available fragments for the ##DETECTOR##															\
-	 */																															\
-	uint getNumberOf##DETECTOR##Fragments() const { 																			\
-		const l0::Subevent* const subevent = event_->get##DETECTOR##Subevent(); 												\
-		return subevent->getNumberOfFragments(); 																				\
-	} 																															\
-	  																															\
-	/**  																														\
-	 * Returns an iterator for range based loops which automatically decodes data in a lazy way 								\
-	 */   																														\
-	DecoderRange<TrbFragmentDecoder> get##DETECTOR##DecoderRange() {															\
-		prepare##DETECTOR##Usage();																								\
-		TrbFragmentDecoder* first = &DETECTOR##Decoders[0];																		\
-																																\
-		return DecoderRange<TrbFragmentDecoder>(first, first + DETECTOR##Decoders.size(), 										\
-				[this, first](TrbFragmentDecoder* decoder)																		\
-				{																												\
-					if(!decoder->isReady()) {																					\
-						const uint_fast16_t fragmentID = decoder - first;														\
-						const l0::Subevent* const subevent = event_->get##DETECTOR##Subevent();									\
-						DETECTOR##Decoders[fragmentID].readData(fragmentID, 													\
-									subevent->getFragment(fragmentID), event_->getTimestamp());									\
-					} 																											\
-				}); 																											\
-	}
 
 namespace na62 {
 
@@ -100,9 +41,84 @@ public:
 	/*
 	 * Add functionality for all detectors
 	 */
-ADD_TRB(CEDAR)
+//ADD_TRB(CEDAR)
 
-ADD_TRB(CHOD)
+
+private:																														// #\#
+																																// #\#
+	std::vector<TrbFragmentDecoder> CEDARDecoders; /* One TrbFragmentDecoder for every MEP fragment 	*/					// #\#
+																																// #\#
+																																// #\#
+	/**																															// #\#
+	 * This method must be called before you access the CEDARDecoders														// #\#
+	 * It prepares the decoding if it has not already been done (idempotence)													// #\#
+	 */																															// #\#
+	void prepareCEDARUsage() {																							// #\#
+		if ( CEDARDecoders.empty() ) {																						// #\#
+			/* initialize all Decoders. They will be in "unready" state for now so you still									// #\#
+			 * have to call readData() for all of them before accessing the decoded data										// #\#
+			 */ 																												// #\#
+			CEDARDecoders.resize(getNumberOfCEDARFragments());														// #\#
+		}																														// #\#
+	}																															// #\#
+																																// #\#
+public:																															// #\#
+	/**																															// #\#
+	 * Returns the decoded data of the <fragmentNumber>th fragment of CEDAR	data										// #\#
+	 */																															// #\#
+	const TrbFragmentDecoder getDecodedCEDARFragment(const uint fragmentNumber) {										// #\#
+		prepareCEDARUsage();																								// #\#
+		if (!CEDARDecoders[fragmentNumber].isReady()) {																	// #\#
+			const l0::Subevent* const subevent = event_->getCEDARSubevent();												// #\#
+			CEDARDecoders[fragmentNumber].readData( fragmentNumber,														// #\#
+					subevent->getFragment(fragmentNumber),																		// #\#
+					event_->getTimestamp());																					// #\#
+		}																														// #\#
+		return CEDARDecoders[fragmentNumber];																				// #\#
+	} 																															// #\#
+																																// #\#
+	/**																															// #\#
+	 * Returns the number of available fragments for the CEDAR															// #\#
+	 */																															// #\#
+	uint getNumberOfCEDARFragments() const { 																			// #\#
+		const l0::Subevent* const subevent = event_->getCEDARSubevent(); 												// #\#
+		return subevent->getNumberOfFragments(); 																				// #\#
+	} 																															// #\#
+	  																															// #\#
+	/**  																														// #\#
+	 * Returns an iterator for range based loops which automatically decodes data in a lazy way 								// #\#
+	 */   																														// #\#
+	DecoderRange<TrbFragmentDecoder> getCEDARDecoderRange() {															// #\#
+		prepareCEDARUsage();																								// #\#
+		TrbFragmentDecoder* first = &CEDARDecoders[0];																		// #\#
+
+		return DecoderRange<TrbFragmentDecoder>(first, first + CEDARDecoders.size(), this);
+		// #\#
+//		return DecoderRange<TrbFragmentDecoder>(first, first + CEDARDecoders.size(), 										// #\#
+//				[this, first](TrbFragmentDecoder* decoder)																		// #\#
+//				{																												// #\#
+//					if(!decoder->isReady()) {																					// #\#
+//						const uint_fast16_t fragmentID = decoder - first;														// #\#
+//						const l0::Subevent* const subevent = event_->getCEDARSubevent();									// #\#
+//						CEDARDecoders[fragmentID].readData(fragmentID, 													// #\#
+//									subevent->getFragment(fragmentID), event_->getTimestamp());									// #\#
+//					} 																											// #\#
+//				}); 																											// #\#
+	}
+
+	void onNextCEDARElement(TrbFragmentDecoder* decoder) {
+		if(!decoder->isReady()) {
+			TrbFragmentDecoder* first = &CEDARDecoders[0];							// #\#
+			const uint_fast16_t fragmentID = decoder - first;														// #\#
+			const l0::Subevent* const subevent = event_->getCEDARSubevent();									// #\#
+			CEDARDecoders[fragmentID].readData(fragmentID, 													// #\#
+						subevent->getFragment(fragmentID), event_->getTimestamp());									// #\#
+		}
+	}
+
+
+
+//ADD_TRB(CHOD)
 
 private:
 	Event* const event_;

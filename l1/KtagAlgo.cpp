@@ -15,6 +15,8 @@
 #include <options/Logging.h>
 #include <string.h>
 
+#include "../common/decoding/DecoderRange.h"
+#include "../common/decoding/DecoderHandler.h"
 #include "../common/decoding/TrbFragmentDecoder.h"
 
 #define maxNhits 500
