@@ -62,7 +62,6 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	uint_fast8_t cedarTrigger = 0;
 	if (L1Downscaling::processAlgorithm(cedarAlgorithmId)) {
 		if (SourceIDManager::isCedarActive()) {
-			decoder.registerCEDARUsage();
 			cedarTrigger = KtagAlgo::processKtagTrigger(decoder);
 		}
 	} else {

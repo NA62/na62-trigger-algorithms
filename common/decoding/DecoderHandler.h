@@ -32,25 +32,26 @@ private:																														\
 																																\
 	std::vector<TrbFragmentDecoder> DETECTOR##Decoders; /* One TrbFragmentDecoder for every MEP fragment 	*/					\
 																																\
-public:																															\
 																																\
 	/**																															\
 	 * This method must be called before you call any getter method like get##DETECTOR##NumberOfEdgesPerTrb						\
 	 * It prepares the decoding if it has not already been done (idempotence)													\
 	 */																															\
-	void register##DETECTOR##Usage() {																							\
+	void prepare##DETECTOR##Usage() {																							\
 		if ( DETECTOR##Decoders.empty() ) {																						\
-			const l0::Subevent* const subevent = event_->get##DETECTOR##Subevent();												\
 			/* initialize all Decoders. They will be in "unready" state for now so you still									\
 			 * have to call readData() for all of them before accessing the decoded data										\
 			 */ 																												\
-			DETECTOR##Decoders.resize(subevent->getNumberOfFragments());														\
+			DETECTOR##Decoders.resize(getNumberOf##DETECTOR##Fragments());														\
 		}																														\
 	}																															\
+																																\
+public:																															\
 	/**																															\
 	 * Returns the decoded data of the <fragmentNumber>th fragment of ##DETECTOR##	data										\
 	 */																															\
-	TrbFragmentDecoder getDecoded##DETECTOR##Fragment(const uint fragmentNumber) {												\
+	const TrbFragmentDecoder getDecoded##DETECTOR##Fragment(const uint fragmentNumber) {										\
+		prepare##DETECTOR##Usage();																								\
 		if (!DETECTOR##Decoders[fragmentNumber].isReady()) {																	\
 			const l0::Subevent* const subevent = event_->get##DETECTOR##Subevent();												\
 			DETECTOR##Decoders[fragmentNumber].readData( fragmentNumber,														\
@@ -72,6 +73,7 @@ public:																															\
 	 * Returns an iterator for range based loops which automatically decodes data in a lazy way 								\
 	 */   																														\
 	DecoderRange<TrbFragmentDecoder> get##DETECTOR##DecoderRange() {															\
+		prepare##DETECTOR##Usage();																								\
 		TrbFragmentDecoder* first = &DETECTOR##Decoders[0];																		\
 																																\
 		return DecoderRange<TrbFragmentDecoder>(first, first + DETECTOR##Decoders.size(), 										\

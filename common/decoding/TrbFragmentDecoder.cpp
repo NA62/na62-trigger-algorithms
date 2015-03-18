@@ -17,7 +17,7 @@ namespace na62 {
 
 TrbFragmentDecoder::TrbFragmentDecoder() :
 		edgeTimes(nullptr), edgeChIDs(nullptr), edgeTdcIDs(nullptr), edgeIDs(
-				nullptr) {
+				nullptr), fragmentNumber_(UINT_FAST16_MAX) {
 	frameTS = 0;
 	time = 0;
 	nFPGAs = 0;
@@ -45,7 +45,8 @@ TrbFragmentDecoder::~TrbFragmentDecoder() {
  * TODO: try and create a unit test for Decoder!!!
  * TODO: have you thought about corrupted data?
  */
-void TrbFragmentDecoder::readData(const uint_fast16_t fragmentNumber, const l0::MEPFragment* const trbDataFragment,
+void TrbFragmentDecoder::readData(const uint_fast16_t fragmentNumber,
+		const l0::MEPFragment* const trbDataFragment,
 		const uint_fast32_t timestamp) {
 
 	fragmentNumber_ = fragmentNumber;
