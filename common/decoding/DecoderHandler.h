@@ -34,7 +34,7 @@ private:																														\
 																																\
 																																\
 	/**																															\
-	 * This method must be called before you call any getter method like get##DETECTOR##NumberOfEdgesPerTrb						\
+	 * This method must be called before you access the DETECTOR##Decoders														\
 	 * It prepares the decoding if it has not already been done (idempotence)													\
 	 */																															\
 	void prepare##DETECTOR##Usage() {																							\
