@@ -18,7 +18,6 @@ std::vector<uint> L1Downscaling::downscaleFactors_;
 void L1Downscaling::initialize() {
 	for (auto& algoTitle : algorithmTitles_) {
 		downscaleFactors_.push_back(Options::GetInt((char*) algoTitle.c_str()));
-		std::cout << downscaleFactors_[0] << "!!!!!!!!!!" << std::endl;
 	}
 	eventCountersByAlgoID_ = new std::atomic<int>(downscaleFactors_.size());
 }

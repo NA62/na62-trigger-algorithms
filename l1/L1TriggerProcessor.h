@@ -30,7 +30,7 @@ public:
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 
-	static uint_fast8_t compute(Event* event);
+	static uint_fast8_t compute(Event* const event);
 
 	/**
 	 * Returns true if the current event should be bypassed instead of being processed

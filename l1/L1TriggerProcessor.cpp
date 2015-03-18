@@ -13,6 +13,7 @@
 #include <l0/MEPFragment.h>
 #include <l0/Subevent.h>
 
+#include "../common/decoding/DecoderHandler.h"
 #include "L1Downscaling.h"
 #include "KtagAlgo.h"
 #include "MultiDetAlgo.h"
@@ -41,15 +42,17 @@ bool L1TriggerProcessor::isRequestZeroSuppressedCreamData(
 	return l1TriggerTypeWord != TRIGGER_L1_BYPASS;
 }
 
-uint_fast8_t L1TriggerProcessor::compute(Event* event) {
+uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	using namespace l0;
+	DecoderHandler decoder(event);
 
 	/*
 	 * Check if the event should bypass the processing
 	 */
 	if (bypassEvent() || event->isSpecialTriggerEvent()) {
 		// Request zero suppressed CREAM data for bypassed events?
-		event->setRrequestZeroSuppressedCreamData(isRequestZeroSuppressedCreamData(TRIGGER_L1_BYPASS));
+		event->setRrequestZeroSuppressedCreamData(
+				isRequestZeroSuppressedCreamData(TRIGGER_L1_BYPASS));
 
 		return TRIGGER_L1_BYPASS;
 	}
@@ -59,7 +62,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* event) {
 	uint_fast8_t cedarTrigger = 0;
 	if (L1Downscaling::processAlgorithm(cedarAlgorithmId)) {
 		if (SourceIDManager::isCedarActive()) {
-			cedarTrigger = KtagAlgo::processKtagTrigger(event);
+			cedarTrigger = KtagAlgo::processKtagTrigger(decoder);
 		}
 	} else {
 		cedarTrigger = 0xFF;
@@ -73,7 +76,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* event) {
 	/*
 	 * Decision whether or not to request zero suppressed data from the creams
 	 */
-	event->setRrequestZeroSuppressedCreamData(isRequestZeroSuppressedCreamData(l1Trigger));
+	event->setRrequestZeroSuppressedCreamData(
+			isRequestZeroSuppressedCreamData(l1Trigger));
 	event->setProcessingID(0); // 0 indicates raw data as collected from the detector
 	return l1Trigger;
 }

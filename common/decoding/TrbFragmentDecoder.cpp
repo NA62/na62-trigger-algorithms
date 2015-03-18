@@ -6,7 +6,8 @@
  *      Email: axr@hep.ph.bham.ac.uk
  */
 
-#include "TrbDecoder.h"
+#include "TrbFragmentDecoder.h"
+
 #include <options/Logging.h>
 #include <l0/MEPFragment.h>
 #include <stdlib.h>
@@ -14,9 +15,9 @@
 
 namespace na62 {
 
-TrbDecoder::TrbDecoder() :
-		edge_times(nullptr), edge_chIDs(nullptr), edge_tdcIDs(nullptr), edge_IDs(
-				nullptr), edge_trbIDs(nullptr) {
+TrbFragmentDecoder::TrbFragmentDecoder() :
+		edgeTimes(nullptr), edgeChIDs(nullptr), edgeTdcIDs(nullptr), edgeIDs(
+				nullptr), fragmentNumber_(UINT_FAST16_MAX) {
 	frameTS = 0;
 	time = 0;
 	nFPGAs = 0;
@@ -25,48 +26,51 @@ TrbDecoder::TrbDecoder() :
 	nWords_tot = 0;
 	nEdges = 0;
 	nEdges_tot = 0;
-
 }
 
-TrbDecoder::~TrbDecoder() {
-	delete edge_times;
-	delete edge_chIDs;
-	delete edge_tdcIDs;
-	delete edge_IDs;
-	delete edge_trbIDs;
+TrbFragmentDecoder::~TrbFragmentDecoder() {
+	if (isReady()) {
+		delete edgeTimes;
+		delete edgeChIDs;
+		delete edgeTdcIDs;
+		delete edgeIDs;
+	}
 }
 
 /**
- *
+ * TODO: move getData documentation in TrbDecoder.h and update it
  * @params uint trbNum This is an index running on the Tel62 boards used by the sub-detector
  *
  * @params l0::MEPFragment* trbDataFragment This is a pointer to the data fragment received by the selected Tel62 board
- *
+ * TODO: try and create a unit test for Decoder!!!
+ * TODO: have you thought about corrupted data?
  */
-void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment,
-		uint32_t timestamp) {
+void TrbFragmentDecoder::readData(const uint_fast16_t fragmentNumber,
+		const l0::MEPFragment* const trbDataFragment,
+		const uint_fast32_t timestamp) {
 
+	fragmentNumber_ = fragmentNumber;
 	/*
 	 * Each word is 4 bytes: there is 1 board header and at least 1 FPGA header and 1 Frame header
-	 *
+	 * -> use this to estimate the maximum number of words
 	 */
 	const uint maxNwords = (trbDataFragment->getPayloadLength() / 4) - 3;
-	edge_times = new uint64_t[maxNwords];
-	edge_chIDs = new uint[maxNwords];
-	edge_tdcIDs = new uint[maxNwords];
-	edge_IDs = new uint[maxNwords];
-	edge_trbIDs = new uint[maxNwords];
+	edgeTimes = new uint64_t[maxNwords];
+	edgeChIDs = new uint_fast8_t[maxNwords];
+	edgeTdcIDs = new uint_fast8_t[maxNwords];
+	edgeIDs = new uint_fast8_t[maxNwords];
 
-	char * payload = trbDataFragment->getPayload();
+	const char* const payload = trbDataFragment->getPayload();
 
-	TrbDataHeader* boardHeader = (TrbDataHeader*) payload;
+	const TrbDataHeader* const boardHeader =
+			reinterpret_cast<const TrbDataHeader*>(payload);
 
 	//LOG_INFO<< "FPGA Flags " << (uint) boardHeader->fpgaFlags << ENDL;
 	//LOG_INFO<< "L0 trigger type " << (uint) boardHeader->triggerType << ENDL;
 	//LOG_INFO<< "Source (Tel62) sub-ID " << (uint) boardHeader->sourceSubID << ENDL;
 	//LOG_INFO<< "Format " << (uint) boardHeader->format << ENDL;
 
-	nFPGAs = calculateNumberOfFPGAs(boardHeader->fpgaFlags);
+	nFPGAs = boardHeader->getNumberOfFPGAs();
 
 	//LOG_INFO<< "Number of FPGAs (from boardHeader) " << nFPGAs << ENDL;
 
@@ -120,13 +124,16 @@ void TrbDecoder::GetData(uint trbNum, l0::MEPFragment* trbDataFragment,
 					 * TODO: let the user decide what data he needs and remove the unwanted parts in compile time
 					 */
 //					edge_times[iEdge + nEdges_tot] = ((time - timestamp * 256.) * 0.097464731802);
-					edge_times[iEdge + nEdges_tot] =
-							(tdcData->time & 0x0007ffff)
-									+ ((frameTS & 0xfffff800) * 0x100);
-					edge_chIDs[iEdge + nEdges_tot] = (uint) tdcData->chID;
-					edge_tdcIDs[iEdge + nEdges_tot] = (uint) tdcData->tdcID;
-					edge_IDs[iEdge + nEdges_tot] = (uint) tdcData->ID;
-					edge_trbIDs[iEdge + nEdges_tot] = trbNum;
+					/*
+					 * TODO: edge_times is still a uint64_t*: is this necessary?
+					 *
+					 */
+					edgeTimes[iEdge + nEdges_tot] = (tdcData->time & 0x0007ffff)
+							+ ((frameTS & 0xfffff800) * 0x100);
+
+					edgeChIDs[iEdge + nEdges_tot] = (uint) tdcData->chID;
+					edgeTdcIDs[iEdge + nEdges_tot] = (uint) tdcData->tdcID;
+					edgeIDs[iEdge + nEdges_tot] = (uint) tdcData->ID;
 
 					//LOG_INFO<< "edge_IDs[" << iEdge + nEdges_tot << "] " << edge_IDs[iEdge + nEdges_tot] << ENDL;
 					//LOG_INFO<< "edge_chIDs[" << iEdge + nEdges_tot << "] " << edge_chIDs[iEdge + nEdges_tot] << ENDL;
