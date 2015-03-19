@@ -16,6 +16,7 @@
 #include <eventBuilding/Event.h>
 #include <l0/Subevent.h>
 #include <sys/types.h>
+#include <functional>
 
 #include "DecoderRange.h"
 #include "TrbFragmentDecoder.h"
@@ -97,18 +98,72 @@ public:
 	DecoderHandler(Event* const event);
 	virtual ~DecoderHandler();
 
-	Event* getDecodedEvent(){
+	Event* getDecodedEvent() {
 		return event_;
 	}
 
 	/*
 	 * Add functionality for all detectors
 	 */
-ADD_TRB(CEDAR)
+//ADD_TRB(CEDAR)
+private:
+	// #\#
+	// #\#
+	TrbFragmentDecoder* CEDARDecoders = nullptr; /* One TrbFragmentDecoder for every MEP fragment 	*/// #\#
+																									 // #\#
+	/**																															// #\#
+	 * This method must be called before you access the CEDARDecoders														// #\#
+	 * It prepares the decoding if it has not already been done (idempotence)													// #\#
+	 */																								 // #\#
+	void prepareCEDARUsage() {											// #\#
+		if (CEDARDecoders == nullptr) {									// #\#
+			/* initialize all Decoders. They will be in "unready" state for now so you still									// #\#
+			 * have to call readData() for all of them before accessing the decoded data										// #\#
+			 */ 															// #\#
+			CEDARDecoders = new TrbFragmentDecoder[getNumberOfCEDARFragments()]; // #\#
+			const l0::Subevent* const subevent = event_->getCEDARSubevent(); // #\#
+			for (uint i = 0; i != getNumberOfCEDARFragments(); i++) {
+				CEDARDecoders[i].setDataSource(subevent, i);
+			}
+		}																// #\#
+	}																	// #\#
+																		// #\#
+public:
+	// #\#
+	/**																															// #\#
+	 * Returns the decoded data of the <fragmentNumber>th fragment of CEDAR	data										// #\#
+	 */// #\#
+	const TrbFragmentDecoder& getDecodedCEDARFragment(
+			const uint fragmentNumber) {								// #\#
+		prepareCEDARUsage();											// #\#
 
-ADD_TRB(CHOD)
+		// readData is idempotent so just call it every time
+		CEDARDecoders[fragmentNumber].readData(event_->getTimestamp());	// #\#
+		return CEDARDecoders[fragmentNumber];							// #\#
+	} 																	// #\#
+																		// #\#
+	/**																															// #\#
+	 * Returns the number of available fragments for the CEDAR															// #\#
+	 */																	// #\#
+	uint getNumberOfCEDARFragments() const { 							// #\#
+		const l0::Subevent* const subevent = event_->getCEDARSubevent(); // #\#
+		return subevent->getNumberOfFragments(); 						// #\#
+	} 																	// #\#
+																		// #\#
+	/**  																														// #\#
+	 * Returns an iterator for range based loops which automatically decodes data in a lazy way 								// #\#
+	 */																	// #\#
+	DecoderRange<TrbFragmentDecoder> getCEDARDecoderRange() {			// #\#
+		prepareCEDARUsage();											// #\#
+		TrbFragmentDecoder* first = &CEDARDecoders[0];					// #\#
 
+		return DecoderRange<TrbFragmentDecoder>(first,
+				first + getNumberOfCEDARFragments(), this);
+		// #\#
+	}		// #\#
+	// #\#
 
+//ADD_TRB(CHOD)
 
 private:
 	Event* const event_;

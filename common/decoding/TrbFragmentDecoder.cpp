@@ -8,22 +8,19 @@
 
 #include "TrbFragmentDecoder.h"
 
-#include <options/Logging.h>
-#include <l0/MEPFragment.h>
 #include <stdlib.h>
 #include <cstdint>
+#include <options/Logging.h>
+#include <l0/MEPFragment.h>
+#include <l0/Subevent.h>
 
 namespace na62 {
 
 TrbFragmentDecoder::TrbFragmentDecoder() :
-		edgeTimes(nullptr), edgeChIDs(nullptr), edgeTdcIDs(nullptr), edgeIDs(
-				nullptr), fragmentNumber_(UINT_FAST16_MAX) {
+		edgeTimes(nullptr), edgeChIDs(nullptr), edgeTdcIDs(nullptr), edgeIsLeading(
+				nullptr), subevent_(nullptr), fragmentNumber_(UINT_FAST16_MAX) {
 	frameTS = 0;
 	time = 0;
-	nFPGAs = 0;
-	nFrames = 0;
-	nWordsPerFrame = 0;
-	nWords_tot = 0;
 	nEdges_tot = 0;
 }
 
@@ -32,7 +29,7 @@ TrbFragmentDecoder::~TrbFragmentDecoder() {
 		delete edgeTimes;
 		delete edgeChIDs;
 		delete edgeTdcIDs;
-		delete edgeIDs;
+		delete edgeIsLeading;
 	}
 }
 
@@ -44,11 +41,14 @@ TrbFragmentDecoder::~TrbFragmentDecoder() {
  * TODO: try and create a unit test for Decoder!!!
  * TODO: have you thought about corrupted data?
  */
-void TrbFragmentDecoder::readData(const uint_fast16_t fragmentNumber,
-		const l0::MEPFragment* const trbDataFragment,
-		const uint_fast32_t timestamp) {
+void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
+	// Don't run again if we already read the data
+	if (edgeTimes != nullptr) {
+		return;
+	}
 
-	fragmentNumber_ = fragmentNumber;
+	const l0::MEPFragment* const trbDataFragment = subevent_->getFragment(
+			fragmentNumber_);
 	/*
 	 * Each word is 4 bytes: there is 1 board header and at least 1 FPGA header and 1 Frame header
 	 * -> use this to estimate the maximum number of words
@@ -57,7 +57,7 @@ void TrbFragmentDecoder::readData(const uint_fast16_t fragmentNumber,
 	edgeTimes = new uint64_t[maxNwords];
 	edgeChIDs = new uint_fast8_t[maxNwords];
 	edgeTdcIDs = new uint_fast8_t[maxNwords];
-	edgeIDs = new uint_fast8_t[maxNwords];
+	edgeIsLeading = new bool[maxNwords];
 
 	const char* const payload = trbDataFragment->getPayload();
 
@@ -69,10 +69,11 @@ void TrbFragmentDecoder::readData(const uint_fast16_t fragmentNumber,
 	//LOG_INFO<< "Source (Tel62) sub-ID " << (uint) boardHeader->sourceSubID << ENDL;
 	//LOG_INFO<< "Format " << (uint) boardHeader->format << ENDL;
 
-	nFPGAs = boardHeader->getNumberOfFPGAs();
+	const uint nFPGAs = boardHeader->getNumberOfFPGAs();
 
 	//LOG_INFO<< "Number of FPGAs (from boardHeader) " << nFPGAs << ENDL;
 
+	uint_fast16_t nWords_tot = 0;
 	for (uint iFPGA = 0; iFPGA != nFPGAs; iFPGA++) {
 		//printf("writing getpayload() + %d\n", 1 + iFPGA + nWords_tot);
 		FPGADataHeader* fpgaHeader = (FPGADataHeader*) payload + 1 + iFPGA
@@ -83,7 +84,7 @@ void TrbFragmentDecoder::readData(const uint_fast16_t fragmentNumber,
 		//LOG_INFO<< "FPGA ID " << (uint) fpgaHeader->FPGAID<< ENDL;
 		//LOG_INFO<< "Error Flags " << (uint) fpgaHeader->errFlags<< ENDL;
 
-		nFrames = (uint) fpgaHeader->noFrames;
+		const uint_fast8_t nFrames = fpgaHeader->noFrames;
 		//LOG_INFO<< "Number of Frames (from fpgaHeader) " << nFrames << ENDL;
 
 		for (uint iFrame = 0; iFrame != nFrames; iFrame++) {
@@ -94,8 +95,8 @@ void TrbFragmentDecoder::readData(const uint_fast16_t fragmentNumber,
 			//LOG_INFO<< "Number of Words in Frame " << (uint) frameHeader->nWords<< ENDL;
 			//LOG_INFO<< "Frame Timestamp " << (uint) frameHeader->frameTimeStamp<< ENDL;
 
-			nWordsPerFrame = (uint) frameHeader->nWords;
-			nWords_tot += nWordsPerFrame;
+			const uint_fast16_t nWordsOfCurrentFrame = (uint) frameHeader->nWords;
+			nWords_tot += nWordsOfCurrentFrame;
 			//LOG_INFO<< "Number of Words  " << nWords_tot << ENDL;
 
 			frameTS = (frameHeader->frameTimeStamp & 0x0000ffff)
@@ -108,8 +109,8 @@ void TrbFragmentDecoder::readData(const uint_fast16_t fragmentNumber,
 			if ((timestamp & 0xf000) == 0x0000 && (frameTS & 0xf000) == 0xf000)
 				frameTS -= 0x10000; //16 bits overflow
 
-			const uint nEdges = nWordsPerFrame - 1;
-			if (!nWordsPerFrame)
+			const uint nEdges = nWordsOfCurrentFrame - 1;
+			if (!nWordsOfCurrentFrame)
 				LOG_ERROR<< "TrbDecoder.cpp: Number of Words in Frame is Null !" << ENDL;
 
 				//LOG_INFO<< "nEdges " << nEdges << ENDL;
@@ -132,7 +133,7 @@ void TrbFragmentDecoder::readData(const uint_fast16_t fragmentNumber,
 
 					edgeChIDs[iEdge + nEdges_tot] = (uint) tdcData->chID;
 					edgeTdcIDs[iEdge + nEdges_tot] = (uint) tdcData->tdcID;
-					edgeIDs[iEdge + nEdges_tot] = (uint) tdcData->ID;
+					edgeIsLeading[iEdge + nEdges_tot] = tdcData->ID == 0x4;
 
 					//LOG_INFO<< "edge_IDs[" << iEdge + nEdges_tot << "] " << edge_IDs[iEdge + nEdges_tot] << ENDL;
 					//LOG_INFO<< "edge_chIDs[" << iEdge + nEdges_tot << "] " << edge_chIDs[iEdge + nEdges_tot] << ENDL;
