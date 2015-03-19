@@ -36,11 +36,8 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 
 	//TODO: chkmax need to be USED
 
-//	for (TrbFragmentDecoder* cedarPacket : decoder.getCEDARDecoderRange()) {
+	for (TrbFragmentDecoder* cedarPacket : decoder.getCEDARDecoderRange()) {
 
-	for (uint i = 0; i != decoder.getNumberOfCEDARFragments(); i++) {
-		const TrbFragmentDecoder& tmp = decoder.getDecodedCEDARFragment(i);
-		const TrbFragmentDecoder* cedarPacket = &tmp;
 		/**
 		 * Get Arrays with hit Info
 		 */
