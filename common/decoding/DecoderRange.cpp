@@ -7,12 +7,11 @@ namespace na62 {
 
 template<class T>
 T* ElementIterator<T>::operator *() const {
-	//onNextElement_(current_);
-	handler_->onNextCEDARElement(current_);
+	current_->readData(handler_->getDecodedEvent()->getTimestamp());
 	return current_;
 }
 
 // Explicit template instantiation
-template class ElementIterator<TrbFragmentDecoder>;
+template class ElementIterator<TrbFragmentDecoder> ;
 
 }

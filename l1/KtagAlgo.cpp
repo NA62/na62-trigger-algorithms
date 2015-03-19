@@ -36,15 +36,18 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 
 	//TODO: chkmax need to be USED
 
-	for (TrbFragmentDecoder* cedarPacket : decoder.getCEDARDecoderRange()) {
+//	for (TrbFragmentDecoder* cedarPacket : decoder.getCEDARDecoderRange()) {
 
+	for (uint i = 0; i != decoder.getNumberOfCEDARFragments(); i++) {
+		const TrbFragmentDecoder& tmp = decoder.getDecodedCEDARFragment(i);
+		const TrbFragmentDecoder* cedarPacket = &tmp;
 		/**
 		 * Get Arrays with hit Info
 		 */
-		const uint64_t* const edge_times = cedarPacket->getTimes();
-		const uint_fast8_t* const edge_chIDs = cedarPacket->getChIDs();
+//		const uint64_t* const edge_times = cedarPacket->getTimes();
+//		const uint_fast8_t* const edge_chIDs = cedarPacket->getChIDs();
+//		const bool* const edge_IDs = cedarPacket->getIsLeadings();
 		const uint_fast8_t* const edge_tdcIDs = cedarPacket->getTdcIDs();
-		const uint_fast8_t* const edge_IDs = cedarPacket->getIDs();
 
 		uint noEdgesPerTrb = cedarPacket->getNumberOfEdgesStored();
 
