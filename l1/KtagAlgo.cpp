@@ -56,7 +56,7 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 		const uint_fast8_t* const edge_IDs = cedarPacket->getIDs();
 
 		noEdgesPerTrb[cedarPacket->getFragmentNumber()] =
-				cedarPacket->getNumberOfEdgesPerTrb();
+				cedarPacket->getNumberOfEdgesStored();
 
 		//LOG_INFO<< "Tel62 ID " << trbNum << " - Number of Edges found " << noEdgesPerTrb[trbNum] << ENDL;
 

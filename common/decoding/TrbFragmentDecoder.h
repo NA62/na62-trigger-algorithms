@@ -96,7 +96,7 @@ public:
 	 * Method returning the total number of edges found per Tel62 board
 	 *
 	 */
-	inline uint getNumberOfEdgesPerTrb() const {
+	inline uint getNumberOfEdgesStored() const {
 		return nEdges_tot;
 	}
 
@@ -146,7 +146,6 @@ private:
 	uint nFrames;
 	uint nWordsPerFrame;
 	uint nWords_tot;
-	uint nEdges;
 	uint nEdges_tot;	//total number of edges per Tel62 board
 
 	/**

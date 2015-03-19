@@ -24,7 +24,6 @@ TrbFragmentDecoder::TrbFragmentDecoder() :
 	nFrames = 0;
 	nWordsPerFrame = 0;
 	nWords_tot = 0;
-	nEdges = 0;
 	nEdges_tot = 0;
 }
 
@@ -109,10 +108,10 @@ void TrbFragmentDecoder::readData(const uint_fast16_t fragmentNumber,
 			if ((timestamp & 0xf000) == 0x0000 && (frameTS & 0xf000) == 0xf000)
 				frameTS -= 0x10000; //16 bits overflow
 
-			if (nWordsPerFrame)
-				nEdges = nWordsPerFrame - 1;
-			else
+			const uint nEdges = nWordsPerFrame - 1;
+			if (!nWordsPerFrame)
 				LOG_ERROR<< "TrbDecoder.cpp: Number of Words in Frame is Null !" << ENDL;
+
 				//LOG_INFO<< "nEdges " << nEdges << ENDL;
 			if (nEdges) {
 				for (uint iEdge = 0; iEdge < nEdges; iEdge++) {
