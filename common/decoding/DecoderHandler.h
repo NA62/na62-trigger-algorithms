@@ -59,7 +59,7 @@ public:																															\
 					event_->getTimestamp());																					\
 		}																														\
 		return DETECTOR##Decoders[fragmentNumber];																				\
-	} 																															\
+	}																															\
 																																\
 	/**																															\
 	 * Returns the number of available fragments for the ##DETECTOR##															\
@@ -97,12 +97,18 @@ public:
 	DecoderHandler(Event* const event);
 	virtual ~DecoderHandler();
 
+	Event* getDecodedEvent(){
+		return event_;
+	}
+
 	/*
 	 * Add functionality for all detectors
 	 */
 ADD_TRB(CEDAR)
 
 ADD_TRB(CHOD)
+
+
 
 private:
 	Event* const event_;
