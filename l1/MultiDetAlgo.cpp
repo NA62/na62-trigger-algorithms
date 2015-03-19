@@ -42,7 +42,7 @@ uint_fast8_t MultiDetAlgo::processMultiDetTrigger(DecoderHandler& decoder) {
 //
 //	for (TrbFragmentDecoder* cedarPacket : decoder.getCEDARDecoderRange()) {
 //
-//		noEdgesPerTrb_cedar[cedarPacket->getFragmentNumber()] = cedarPacket->getNumberOfEdgesPerTrb();
+//		noEdgesPerTrb_cedar[cedarPacket->getFragmentNumber()] = cedarPacket->getNumberOfEdgesStored();
 ////		LOG_INFO<< "KTAG: Tel62 ID " << trbNum << " - Number of Edges found " << noEdgesPerTrb_cedar[trbNum] << ENDL;
 //
 //		nEdges_cedar_tot += noEdgesPerTrb_cedar[cedarPacket->getFragmentNumber()];
@@ -50,7 +50,7 @@ uint_fast8_t MultiDetAlgo::processMultiDetTrigger(DecoderHandler& decoder) {
 //
 //	for (TrbFragmentDecoder* chodPacket : decoder.getCHODDecoderRange()) {
 //
-//		noEdgesPerTrb_chod[chodPacket->getFragmentNumber()] = chodPacket->getNumberOfEdgesPerTrb();
+//		noEdgesPerTrb_chod[chodPacket->getFragmentNumber()] = chodPacket->getNumberOfEdgesStored();
 ////		LOG_INFO<< "CHOD: Tel62 ID " << trbNum << " - Number of Edges found " << noEdgesPerTrb_chod[trbNum] << ENDL;
 //
 //		nEdges_chod_tot += noEdgesPerTrb_chod[chodPacket->getFragmentNumber()];
