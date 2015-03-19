@@ -13,79 +13,56 @@
 #include <l0/MEPFragment.h>
 #include <l0/Subevent.h>
 #include <options/Logging.h>
-#include "data_decoder/TrbDecoder.h"
 #include <string.h>
+
+#include "../common/decoding/TrbFragmentDecoder.h"
 
 #define maxNhits 500
 
 namespace na62 {
 
-KtagAlgo::KtagAlgo() {
-}
-
-KtagAlgo::~KtagAlgo() {
-// TODO Auto-generated destructor stub
-}
-
-uint8_t KtagAlgo::processKtagTrigger(Event* event) {
-
+uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 	using namespace l0;
 
-	l0::Subevent* cedarSubevent = event->getCEDARSubevent();
-
-	const uint nTEL62s = cedarSubevent->getNumberOfFragments();
-
-	TrbDecoder *cedarPacket = new TrbDecoder[nTEL62s]; //max NTel62 boards
-
-	uint noEdgesPerTrb[nTEL62s];
-	memset(noEdgesPerTrb, 0, nTEL62s);
+	uint noEdgesPerTrb[decoder.getNumberOfCEDARFragments()];
+	// memset(noEdgesPerTrb, 0, nTEL62s); // No need as anyways all values will be overwritten
 
 	uint sector_occupancy[8];
 	memset(sector_occupancy, 0, 8);
-
-	uint64_t* edge_times;
-	uint* edge_chIDs;
-	uint* edge_tdcIDs;
-	uint* edge_IDs;
-	uint* edge_trbIDs;
 
 	uint pp[maxNhits];
 	uint tdc[maxNhits];
 	uint box[maxNhits];
 
-	memset(pp,999,maxNhits);
-	memset(tdc,999,maxNhits);
-	memset(box,999,maxNhits);
+	memset(pp, 999, maxNhits);
+	memset(tdc, 999, maxNhits);
+	memset(box, 999, maxNhits);
 
 	uint nEdges_tot = 0;
-	uint chkmax = 0;
 
 	//LOG_INFO<< "Event number = " << event->getEventNumber() << ENDL;
 	//LOG_INFO<< "Timestamp = " << std::hex << event->getTimestamp() << std::dec << ENDL;
 
 	//TODO: chkmax need to be USED
 
-	for (uint trbNum = 0; trbNum != nTEL62s && chkmax == 0; trbNum++) {
-
-		l0::MEPFragment* trbDataFragment = cedarSubevent->getFragment(trbNum);
-
-		cedarPacket[trbNum].GetData(trbNum, trbDataFragment, event->getTimestamp());
+	for (TrbFragmentDecoder* cedarPacket : decoder.getCEDARDecoderRange()) {
 
 		/**
 		 * Get Arrays with hit Info
-		 *
 		 */
-		edge_times = cedarPacket[trbNum].GetTimes();
-		edge_chIDs = cedarPacket[trbNum].GetChIDs();
-		edge_tdcIDs = cedarPacket[trbNum].GetTdcIDs();
-		edge_IDs = cedarPacket[trbNum].GetIDs();
-		edge_trbIDs = cedarPacket[trbNum].GetTrbIDs();
+//		const uint64_t* const edge_times = cedarPacket->getTimes();
+//		const uint_fast8_t* const edge_chIDs = cedarPacket->getChIDs();
+		const uint_fast8_t* const edge_tdcIDs = cedarPacket->getTdcIDs();
+		const uint_fast8_t* const edge_IDs = cedarPacket->getIDs();
 
-		noEdgesPerTrb[trbNum] = cedarPacket[trbNum].GetNoEdgesPerTrb();
+		noEdgesPerTrb[cedarPacket->getFragmentNumber()] =
+				cedarPacket->getNumberOfEdgesPerTrb();
 
 		//LOG_INFO<< "Tel62 ID " << trbNum << " - Number of Edges found " << noEdgesPerTrb[trbNum] << ENDL;
 
-		for (uint iEdge = 0; iEdge != noEdgesPerTrb[trbNum]; iEdge++) {
+		for (uint iEdge = 0;
+				iEdge != noEdgesPerTrb[cedarPacket->getFragmentNumber()];
+				iEdge++) {
 			if (edge_IDs[iEdge]) {
 
 				//LOG_INFO<< "Edge " << iEdge + nEdges_tot << " ID " << edge_IDs[iEdge] << ENDL;
@@ -97,7 +74,8 @@ uint8_t KtagAlgo::processKtagTrigger(Event* event) {
 				pp[iEdge + nEdges_tot] = edge_tdcIDs[iEdge] / 4;
 				//LOG_INFO<< "pp[" << iEdge + nEdges_tot << "] " << pp[iEdge + nEdges_tot] << ENDL;
 
-				box[iEdge + nEdges_tot] = searchPMT(trbNum,
+				box[iEdge + nEdges_tot] = searchPMT(
+						cedarPacket->getFragmentNumber(),
 						pp[iEdge + nEdges_tot]);
 				//LOG_INFO << "box[" << iEdge + nEdges_tot << "] " << box[iEdge + nEdges_tot] << ENDL;
 
@@ -106,8 +84,9 @@ uint8_t KtagAlgo::processKtagTrigger(Event* event) {
 				//LOG_INFO<< "ANGELA-L1" << "\t" << event->getEventNumber() << "\t" << event->getTimestamp() << "\t" << edge_IDs[iEdge] << "\t" << edge_chIDs[iEdge]<< "\t" << edge_tdcIDs[iEdge] << "\t" << edge_times[iEdge] << "\t" << edge_trbIDs[iEdge] << "\t" << box[iEdge+nEdges_tot] << ENDL;
 
 			}
-			if (iEdge == (noEdgesPerTrb[trbNum] - 1)) {
-				nEdges_tot += noEdgesPerTrb[trbNum];
+			if (iEdge
+					== (noEdgesPerTrb[cedarPacket->getFragmentNumber()] - 1)) {
+				nEdges_tot += noEdgesPerTrb[cedarPacket->getFragmentNumber()];
 			}
 		}
 	}
@@ -115,23 +94,14 @@ uint8_t KtagAlgo::processKtagTrigger(Event* event) {
 	//LOG_INFO<<"KtagAlgo.cpp: Analysing Event " << event->getEventNumber() << " - Total Number of edges found " << nEdges_tot << ENDL;
 
 	uint nSectors = 0;
-	for (int iSec = 0; iSec < 8; iSec++) {
+	for (int iSec = 0; iSec != 8; iSec++) {
 		if (sector_occupancy[iSec])
 			nSectors++;
 	}
 
 	//LOG_INFO<< "Angela: " << event->getEventNumber() << "\t" << event->getTimestamp() << "\t" << nSectors << ENDL;
 
-	delete [] cedarPacket;
-
-	uint8_t kaontrigger = 0;
-
-	if (nSectors > 3) {
-		kaontrigger = 1;
-		return kaontrigger;
-	} else
-		return 0;
-
+	return nSectors > 3;
 }
 
 /*

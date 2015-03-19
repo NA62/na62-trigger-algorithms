@@ -11,26 +11,40 @@
 
 #include <sys/types.h>
 #include <cstdint>
-#include <l0/MEPFragment.h>
 
 namespace na62 {
+
+// forward declarations
+namespace l0 {
+class MEPFragment;
+}
 
 /**
  * struct containing Tel62 board header
  */
-struct TrbDataHeader
-{
+struct TrbDataHeader {
 	uint8_t fpgaFlags :8;
 	uint8_t triggerType :8;
 	uint8_t sourceSubID :8; //Tel62 readout board ID
 	uint8_t format :8;
+
+	/**
+	 * Sets the number of FPGAs corresponding to the given FPGA flag. fpgaFlag must be element of [1,8]
+	 * flag    	nFGPA
+	 * 1		1
+	 * 2		2
+	 * 4		3
+	 * 8		4
+	 */
+	uint getNumberOfFPGAs() const {
+		return 32 - __builtin_clz(fpgaFlags);
+	}
 }__attribute__ ((__packed__));
 
 /**
  * struct containing FPGA header
  */
-struct FPGADataHeader
-{
+struct FPGADataHeader {
 	uint noFrames :8;
 	uint noNonEmptyFrames :8;
 	uint FPGAID :8;
@@ -43,7 +57,7 @@ struct FPGADataHeader
 struct FrameDataHeader //Frame header
 {
 	uint16_t frameTimeStamp :16;
-	uint nWords :16;
+	uint16_t nWords :16;
 }__attribute__ ((__packed__));
 
 /**
@@ -51,74 +65,78 @@ struct FrameDataHeader //Frame header
  */
 struct TrbData {
 //  uint32_t tdcWord :32;
-	uint32_t time :19; //hit time measurement (100ps LSB)
+	uint time :19; //hit time measurement (100ps LSB)
 	uint chID :5;      //TDC channel ID
 	uint tdcID :4;     //TDC chip ID
 	uint ID :4;        //0x4 (leading time), 0x5 (trailing time)
 }__attribute__ ((__packed__));
 
-class TrbDecoder {
+class TrbFragmentDecoder {
+	friend class DecoderHandler; // Only Decoder may access readData and isReady
+
+	/**
+	 * Returns true if readData has already been called an the getter functions are ready to be called
+	 */
+	bool isReady() const {
+		return edgeTimes != nullptr;
+	}
+
+	/**
+	 * Reads the raw data and fills the edge arrays
+	 */
+	void readData(const uint_fast16_t,
+			const l0::MEPFragment* const trbDataFragment,
+			const uint_fast32_t timestamp);
 
 public:
-	TrbDecoder();
-	virtual ~TrbDecoder();
-
-	uint GetNFPGAs(uint);
-	void GetData(uint, l0::MEPFragment*, uint32_t);
+	TrbFragmentDecoder();
+	virtual ~TrbFragmentDecoder();
 
 	/**
 	 * Method returning the total number of edges found per Tel62 board
 	 *
 	 */
-	uint GetNoEdgesPerTrb() {
+	inline uint getNumberOfEdgesPerTrb() const {
 		return nEdges_tot;
 	}
+
 	/**
 	 * Method returning an array of edge times
 	 *
 	 */
-	uint64_t* GetTimes() {
-		return edge_times;
+	inline const uint64_t* getTimes() const {
+		return edgeTimes;
 	}
+
 	/**
 	 * Method returning an array of edge channel IDs
 	 *
 	 */
-	uint* GetChIDs() {
-		return edge_chIDs;
+	inline const uint_fast8_t* getChIDs() const {
+		return edgeChIDs;
 	}
+
 	/**
 	 * Method returning an array of edge TDC IDs
 	 *
 	 */
-	uint* GetTdcIDs() {
-		return edge_tdcIDs;
+	inline const uint_fast8_t* getTdcIDs() const {
+		return edgeTdcIDs;
 	}
+
 	/**
 	 * Method returning an array of edge IDs (ID=4 for leading, ID=5 for trailing)
 	 *
 	 */
-	uint* GetIDs() {
-		return edge_IDs;
-	}
-	/**
-	 * Method returning an array of edge Tel62 board ID
-	 *
-	 */
-	uint* GetTrbIDs() {
-		return edge_trbIDs;
+	inline const uint_fast8_t* getIDs() const {
+		return edgeIDs;
 	}
 
 	/**
-	 * Sets the number of FPGAs corresponding to the given FPGA flag. fpgaFlag must be element of [1,8]
-	 * flag    	nFGPA
-	 * 1		1
-	 * 2		2
-	 * 4		3
-	 * 8		4
+	 * Returns the subdetector specific ID of the fragment decoded by this object
 	 */
-	static uint calculateNumberOfFPGAs(uint_fast8_t fpgaFlag) {
-		return 32 - __builtin_clz(fpgaFlag);
+	inline const uint_fast16_t getFragmentNumber() const {
+		return fragmentNumber_;
 	}
 
 private:
@@ -130,21 +148,17 @@ private:
 	uint nWords_tot;
 	uint nEdges;
 	uint nEdges_tot;	//total number of edges per Tel62 board
-	TrbDataHeader* boardHeader;
-	FPGADataHeader* fpgaHeader;
-	FrameDataHeader* frameHeader;
-	TrbData* tdcData;
 
 	/**
 	 * Arrays with edge info
 	 *
 	 */
-	uint64_t* edge_times;
-	uint* edge_chIDs;
-	uint* edge_tdcIDs;
-	uint* edge_IDs;
-	uint* edge_trbIDs;
+	uint64_t* edgeTimes;
+	uint_fast8_t * edgeChIDs;
+	uint_fast8_t* edgeTdcIDs;
+	uint_fast8_t* edgeIDs;
 
+	uint_fast16_t fragmentNumber_;
 };
 
 }
