@@ -26,10 +26,10 @@ TrbFragmentDecoder::TrbFragmentDecoder() :
 
 TrbFragmentDecoder::~TrbFragmentDecoder() {
 	if (isReady()) {
-		delete edgeTimes;
-		delete edgeChIDs;
-		delete edgeTdcIDs;
-		delete edgeIsLeading;
+		delete[] edgeTimes;
+		delete[] edgeChIDs;
+		delete[] edgeTdcIDs;
+		delete[] edgeIsLeading;
 	}
 }
 
