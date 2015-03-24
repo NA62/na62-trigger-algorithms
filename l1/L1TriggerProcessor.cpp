@@ -13,33 +13,59 @@
 #include <l0/MEPFragment.h>
 #include <l0/Subevent.h>
 
+#include "../common/decoding/DecoderHandler.h"
+#include "L1Downscaling.h"
+#include "KtagAlgo.h"
+#include "MultiDetAlgo.h"
+
 namespace na62 {
 
-uint_fast8_t L1TriggerProcessor::bypassTriggerWord;
 double L1TriggerProcessor::bypassProbability;
 
-void L1TriggerProcessor::initialize(double _bypassProbability,
-		uint _bypassTriggerWord) {
-	// Seed for rand()
-	srand (time(NULL));
-
-	bypassProbability = _bypassProbability;
-	bypassTriggerWord = _bypassTriggerWord;
+void L1TriggerProcessor::registerDownscalingAlgorithms() {
+	//yourDetectorAlgoID = L1Downscaling::registerAlgorithm("CEDAR");
 }
 
-uint8_t L1TriggerProcessor::compute(Event* event) {
+void L1TriggerProcessor::initialize(double _bypassProbability) {
+	// Seed for rand()
+	srand(time(NULL));
+
+	bypassProbability = _bypassProbability;
+
+	L1Downscaling::initialize();
+}
+
+bool L1TriggerProcessor::isRequestZeroSuppressedCreamData(
+		uint_fast8_t l1TriggerTypeWord) {
+	// add any special trigger here
+	return l1TriggerTypeWord != TRIGGER_L1_BYPASS;
+}
+
+uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	using namespace l0;
+	DecoderHandler decoder(event);
 
 	/*
 	 * Check if the event should bypass the processing
 	 */
-	if (bypassEvent()) {
-		return bypassTriggerWord;
+	if (bypassEvent() || event->isSpecialTriggerEvent()) {
+		// Request zero suppressed CREAM data for bypassed events?
+		event->setRrequestZeroSuppressedCreamData(
+				isRequestZeroSuppressedCreamData(TRIGGER_L1_BYPASS));
+
+		return TRIGGER_L1_BYPASS;
 	}
 
-	event->setProcessingID(0); // 0 indicates raw data as collected from the detector
-	return 1;
+	// dummy trigger word
+	uint_fast8_t l1Trigger = 1;
 
+	/*
+	 * Decision whether or not to request zero suppressed data from the creams
+	 */
+	event->setRrequestZeroSuppressedCreamData(
+			isRequestZeroSuppressedCreamData(l1Trigger));
+	event->setProcessingID(0); // 0 indicates raw data as collected from the detector
+	return l1Trigger;
 }
 
 } /* namespace na62 */
