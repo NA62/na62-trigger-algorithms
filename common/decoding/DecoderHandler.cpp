@@ -15,7 +15,7 @@ DecoderHandler::DecoderHandler(Event* const event) :
 }
 
 DecoderHandler::~DecoderHandler() {
-
+	delete[] CEDARDecoders;
 }
 
 } /* namespace na62 */
