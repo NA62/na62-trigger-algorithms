@@ -13,28 +13,23 @@
 
 namespace na62 {
 
-uint_fast8_t L2TriggerProcessor::L1bypassTriggerWord;
-uint_fast8_t L2TriggerProcessor::bypassTriggerWord;
 double L2TriggerProcessor::bypassProbability;
 
-void L2TriggerProcessor::initialize(double _bypassProbability,
-		uint _bypassTriggerWord, uint _L1bypassTriggerWord) {
+void L2TriggerProcessor::initialize(double _bypassProbability) {
 	bypassProbability = _bypassProbability;
-	bypassTriggerWord = _bypassTriggerWord;
-	L1bypassTriggerWord = _L1bypassTriggerWord;
 }
 
-uint8_t L2TriggerProcessor::compute(Event* event) {
+uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 	using namespace cream;
 
 	/*
 	 * Check if the event should bypass the processing
 	 */
-	if (event->getTriggerTypeWord() == L1bypassTriggerWord || bypassEvent()) {
-		return bypassTriggerWord;
+	if (event->isL1Bypassed() || bypassEvent()) {
+		return TRIGGER_L2_BYPASS;
 	}
 
-//	std::vector<uint16_t> localCreamIDsToRequestNonZSuppressedData;
+//	std::vector<uint_fast16_t> localCreamIDsToRequestNonZSuppressedData;
 //	for (int localCreamID = event->getNumberOfZSuppressedLkrFragments() - 1;
 //			localCreamID != -1; localCreamID--) {
 //		LkrFragment* fragment = event->getZSuppressedLkrFragment(localCreamID);
@@ -50,7 +45,7 @@ uint8_t L2TriggerProcessor::compute(Event* event) {
 	return 3;
 }
 
-uint8_t L2TriggerProcessor::onNonZSuppressedLKrDataReceived(Event* event) {
+uint_fast8_t L2TriggerProcessor::onNonZSuppressedLKrDataReceived(Event* event) {
 	LOG_INFO
 			<< "onNonZSuppressedLKrDataReceived - Trigger method not yet implemented!!!!!!!!!!!!"
 			<< ENDL;
@@ -58,8 +53,8 @@ uint8_t L2TriggerProcessor::onNonZSuppressedLKrDataReceived(Event* event) {
 }
 
 void L2TriggerProcessor::async_requestNonZSuppressedLKrData(
-		const std::vector<uint16_t> crateCREAMIDs, Event* event) {
-//	event->setNonZSuppressedDataRequestedNum((uint16_t) crateCREAMIDs.size());
+		const std::vector<uint_fast16_t> crateCREAMIDs, Event* event) {
+//	event->setNonZSuppressedDataRequestedNum((uint_fast16_t) crateCREAMIDs.size());
 //	cream::L1DistributionHandler::Async_RequestLKRDataUnicast(event,
 //	true, crateCREAMIDs);
 }

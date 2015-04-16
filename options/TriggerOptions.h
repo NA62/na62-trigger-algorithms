@@ -19,14 +19,12 @@
 #define OPTION_TRIGGER_CONFIG_FILE (char*)"triggerConfigFile"
 
 #define OPTION_L1_BYPASS_PROBABILITY (char*)"L1BypassProbability"
-#define OPTION_L1_BYPASS_TRIGGER_WORD (char*)"L1BypassTriggerWord"
 
 #define OPTION_L2_BYPASS_PROBABILITY (char*)"L2BypassProbability"
-#define OPTION_L2_BYPASS_TRIGGER_WORD (char*)"L2BypassTriggerWord"
 
 // Here you can add your Options like e.g.
 // #define OPTION_YOUR_OPTION_NAME (char*)"nameUsedAs--Flag"
-// Then add your option to the desc opbject in Load below
+// Then add your option to the desc object in Load below
 
 namespace na62 {
 class TriggerOptions: public Options {
@@ -46,12 +44,7 @@ public:
 
 				(OPTION_L1_BYPASS_PROBABILITY, po::value<double>()->default_value(0.), "Probability for every event to bypass L1 and L2 processing")
 
-				(OPTION_L1_BYPASS_TRIGGER_WORD, po::value<int>()->default_value(0xFF), "L1 trigger type word for events that were passed by")
-
 				(OPTION_L2_BYPASS_PROBABILITY, po::value<double>()->default_value(0.), "Probability for every event to bypass L2 processing if it did not bypass L1 already")
-
-				(OPTION_L2_BYPASS_TRIGGER_WORD, po::value<int>()->default_value(0xFF), "L2 trigger type word for events that were passed by")
-
 
 				/*
 				 * Add your Option here like following:

@@ -27,10 +27,10 @@ public:
 	 *
 	 * The event pointer may not be deleted by this method as it is deleted by the EventBuilder
 	 *
-	 * @return uint8_t <0> if the event is rejected, the L1 trigger type word in other cases.
+	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 
-	static uint8_t compute(Event* event);
+	static uint_fast8_t compute(Event* const event);
 
 	/**
 	 * Returns true if the current event should be bypassed instead of being processed
@@ -43,11 +43,24 @@ public:
 		return randomNr <= bypassProbability;
 	}
 
-	static void initialize(double _bypassProbability, uint _bypassTriggerWord);
+	/**
+	 * Registers all downscaling algorithms. Must be called before Options::Load is executed!
+	 */
+	static void registerDownscalingAlgorithms();
+
+	/**
+	 * Placeholder for deciding whether or not to request ZS CREAM data
+	 */
+	static bool isRequestZeroSuppressedCreamData(uint_fast8_t l1TriggerTypeWord);
+
+	static void initialize(double _bypassProbability);
+
+
 
 private:
-	static uint_fast8_t bypassTriggerWord;
 	static double bypassProbability;
+
+	static uint cedarAlgorithmId;
 };
 
 } /* namespace na62 */
