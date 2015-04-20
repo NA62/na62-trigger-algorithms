@@ -31,13 +31,14 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 
 	LOG_INFO<<"===== RICHAlgo.cpp: Analysing Event ===" << decoder.getDecodedEvent()->getEventNumber() << ENDL;
 
-    //ParsConfFile::ParsConfFile();
-    //vector<int> geoMap = ParsConfFile::getChannelMap();
+	ParsConfFile* mapsChs = ParsConfFile::GetInstance();
 
-	ParsConfFile prova;
-    vector <int> chGeos = prova.getChannelMap();
+	// vector to switch from ROch <-> geometricCh(chGeo) and from ROch<-> geographicalCh (chPos)
 
-	LOG_INFO<< "Channel Remap " << chGeos.at(1)<<ENDL;
+	vector<int> chGeo = mapsChs->getGeoChannelMap();
+	vector<double> chPos = mapsChs->getPosChannelMap();
+
+	//LOG_INFO << "Geographical Channel " << chPos.at(1951) << ENDL;
 
 	uint nEdges_tot = 0;
 	uint* chRO = new uint[maxNhits];   // to be deleted
@@ -69,15 +70,10 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 //			//LOG_INFO<< "Edge " << iEdge + nEdges_tot << " time " << std::hex << edge_times[iEdge] << std::dec << ENDL;
 
 			chRO[iEdge] = edge_trbIDs * 512 + edge_tdcIDs[iEdge] * 32
-					+ edge_chIDs[iEdge];
+			+ edge_chIDs[iEdge];
 
-			//LOG_INFO << "chRO " << chRO[iEdge] <<" chGEO " << handlerChMap.getChannelRemap(chRO[iEdge]) << ENDL;
-
-			//const uint box = calculateSector(cedarPacket->getFragmentNumber(),
-			//	trbID);
-			//LOG_INFO << "box[" << iEdge + nEdges_tot << "] " << box[iEdge + nEdges_tot] << ENDL;
-
-			//sector_occupancy[box]++;
+			LOG_INFO << "chRO " << chRO[iEdge] <<" chGEO " << chGeo.at(chRO[iEdge]) << ENDL;
+			LOG_INFO << "X Position " << chPos.at(chRO[iEdge]) << " Y Position " << chPos.at(chRO[iEdge]+1) << ENDL;
 
 		}
 		//LOG_INFO<< "Number of edges of current board " << numberOfEdgesOfCurrentBoard << ENDL;
