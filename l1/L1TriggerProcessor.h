@@ -19,6 +19,7 @@ class EventBuilder;
 class Event;
 class CedarData;
 class KtagAlgo;
+class RICHAlgo;
 
 class L1TriggerProcessor {
 public:
@@ -61,6 +62,7 @@ private:
 	static double bypassProbability;
 
 	static uint cedarAlgorithmId;
+
 };
 
 } /* namespace na62 */

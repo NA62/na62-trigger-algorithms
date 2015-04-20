@@ -106,6 +106,8 @@ public:
 	 */
 ADD_TRB(CEDAR)
 
+ADD_TRB(RICH)
+
 ADD_TRB(CHOD)
 
 private:

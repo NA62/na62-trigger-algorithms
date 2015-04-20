@@ -136,7 +136,7 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 					edgeIsLeading[iEdge + nEdges_tot] = tdcData->ID == 0x4;
 
 					//LOG_INFO<< "edge_IDs[" << iEdge + nEdges_tot << "] " << edge_IDs[iEdge + nEdges_tot] << ENDL;
-					//LOG_INFO<< "edge_chIDs[" << iEdge + nEdges_tot << "] " << edge_chIDs[iEdge + nEdges_tot] << ENDL;
+					//LOG_INFO<< "TrbFragment: edge_chIDs  "<< edgeChIDs[iEdge + nEdges_tot] << ENDL;
 					//LOG_INFO<< "edge_tdcIDs["<< iEdge + nEdges_tot << "] " << edge_tdcIDs[iEdge + nEdges_tot] << ENDL;
 					//LOG_INFO<< "edge_times[" << iEdge + nEdges_tot << "] " << std::hex << edge_times[iEdge + nEdges_tot] << std::dec << ENDL;
 					//LOG_INFO<< "edge_trbIDs[" << iEdge + nEdges_tot << "] " << edge_trbIDs[iEdge + nEdges_tot] << ENDL;
