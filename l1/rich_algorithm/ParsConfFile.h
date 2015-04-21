@@ -24,13 +24,18 @@ public:
 	static ParsConfFile* GetInstance();
 
 	//int getChannelRemap(int);
-	vector<int> getGeoChannelMap();
-	vector<double> getPosChannelMap();
+	int* getGeoPmsMap();
+	double* getPosPmsMap();
+	int* getFocalCenterSaleve();
+	int* getFocalCenterJura();
 
 	int nChannels;
 	int nroChannels;
-	vector<int> geoChannelMap;
-	vector<double> posChannelMap;
+	int focalCenterSaleve[2];
+	int focalCenterJura[2];
+	int geoPmsMap[2560];
+	double posPmsMap[3904];
+
 
 
 private:

@@ -19,7 +19,7 @@ ParsConfFile::ParsConfFile() {
 
 	LOG_INFO<< "In ParseConfFile" << ENDL;
 
-	ConfFileReader fileName("/Users/vfascian/Documents/workspace/na62-trigger-algorithms/l1/rich_algorithm/RICH.conf");
+	ConfFileReader fileName("/Users/vfascian/Documents/workspace/na62-trigger-algorithms/l1/rich_algorithm/config/RICH.conf");
 
 	if (!fileName.isValid()) LOG_INFO << "Config file not found" << ENDL;
 
@@ -33,12 +33,31 @@ ParsConfFile::ParsConfFile() {
 				continue;
 			}
 			if (fileName.getField<string>(1) == "NROChannels=") {
+				nroChannels = fileName.getField<int>(2);
+				//LOG_INFO << "nChannels " << nChannels << ENDL;
+			}
+
+			if (fileName.getField<string>(1) == "NChannels=") {
 				nChannels = fileName.getField<int>(2);
 				//LOG_INFO << "nChannels " << nChannels << ENDL;
 			}
 
+			if (fileName.getField<string>(1) == "JuraRotation=") {
+				focalCenterJura[0] = fileName.getField<int>(2);
+				focalCenterJura[1] = fileName.getField<int>(3);
+				//LOG_INFO << "Jura shift " << focalCenterJura[0] << " " << focalCenterJura[1] << ENDL;
+
+			}
+
+			if (fileName.getField<string>(1) == "SaleveRotation=") {
+				focalCenterSaleve[0] = fileName.getField<int>(2);
+				focalCenterSaleve[1] = fileName.getField<int>(3);
+				//LOG_INFO << "Saleve shift " << focalCenterSaleve[0] << " " << focalCenterSaleve[1] << ENDL;
+
+			}
+
 			if (fileName.getField<string>(1).find("ChRemap_") != string::npos) {
-				for (int iCh = 0; iCh < nChannels / 16; iCh++) {
+				for (int iCh = 0; iCh < nroChannels / 16; iCh++) {
 					char name[1000];
 					sprintf(name, "ChRemap_%d=", iCh);
 					string remap = (string) name;
@@ -47,7 +66,7 @@ ParsConfFile::ParsConfFile() {
 
 					if (fileName.getField<string>(1) == remap) {
 						for (int jCh = 0; jCh < 16; jCh++) {
-							geoChannelMap.push_back(fileName.getField<int>(jCh + 2));
+							geoPmsMap[iCh*16+jCh] = fileName.getField<int>(jCh + 2);
 						}
 					}
 				}
@@ -63,7 +82,8 @@ ParsConfFile::ParsConfFile() {
 
 					if (fileName.getField<string>(1) == position) {
 						for (int jCh = 0; jCh < 16; jCh++) {
-							posChannelMap.push_back(fileName.getField<double>(jCh + 2));
+							posPmsMap[iCh*16+jCh] = fileName.getField<double>(jCh + 2);
+							posPmsMap[iCh*16+jCh+nChannels/2] = fileName.getField<double>(jCh + 2);
 						}
 					}
 				}
@@ -95,10 +115,11 @@ ParsConfFile* ParsConfFile::GetInstance() {
 //
 //}
 
-vector<int> ParsConfFile::getGeoChannelMap() {
-	return geoChannelMap;
-}
-vector<double> ParsConfFile::getPosChannelMap() {
-	return posChannelMap;
-}
+int* ParsConfFile::getGeoPmsMap() {return geoPmsMap;}
+
+double* ParsConfFile::getPosPmsMap() {return posPmsMap;}
+
+int* ParsConfFile::getFocalCenterJura(){return focalCenterJura;}
+
+int* ParsConfFile::getFocalCenterSaleve(){return focalCenterSaleve;}
 

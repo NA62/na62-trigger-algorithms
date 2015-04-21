@@ -20,7 +20,6 @@ class Event;
 class RICHAlgo {
 public:
 
-
 	/**
 	 * @param event Event* This is a pointer to the built Event containing all subevents (except those from the LKr)
 	 *
@@ -29,8 +28,16 @@ public:
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 	static uint_fast8_t processRICHTrigger(DecoderHandler& decoder);
+	int const evaluateXDistribution(vector<double>);
+	int* getChPosFocalCorr(int diskID);
 
 private:
+
+	static int* pmsGeo;
+	static double* pmsPos;
+	static int* focalCenterJura;
+	static int* focalCenterSaleve;
+
 
 };
 
