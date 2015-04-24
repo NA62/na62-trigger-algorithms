@@ -82,8 +82,10 @@ ParsConfFile::ParsConfFile() {
 
 					if (fileName.getField<string>(1) == position) {
 						for (int jCh = 0; jCh < 16; jCh++) {
+							LOG_INFO << "i1 " << iCh*16+jCh << " i1 Pos " << fileName.getField<double>(jCh + 2) << ENDL;
+							//LOG_INFO << "i2 " << iCh*16+jCh + nChannels << " i2 Pos " << fileName.getField<double>(jCh + 2) << ENDL;
 							posPmsMap[iCh*16+jCh] = fileName.getField<double>(jCh + 2);
-							posPmsMap[iCh*16+jCh+nChannels/2] = fileName.getField<double>(jCh + 2);
+							//posPmsMap[iCh*16+jCh+nChannels] = fileName.getField<double>(jCh + 2);
 						}
 					}
 				}

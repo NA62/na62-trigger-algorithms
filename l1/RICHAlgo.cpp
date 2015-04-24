@@ -33,24 +33,21 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 	LOG_INFO<<"===== RICHAlgo.cpp: Analysing Event ===" << decoder.getDecodedEvent()->getEventNumber() << ENDL;
 
 	ParsConfFile* mapsChs = ParsConfFile::GetInstance();
+	int nHits = 0;
+	int* pmsGeo = mapsChs->getGeoPmsMap();
+	double* pmsPos = mapsChs->getPosPmsMap();
 
-	pmsGeo = mapsChs->getGeoPmsMap();
-	pmsPos = mapsChs->getPosPmsMap();
-	focalCenterJura = mapsChs->getFocalCenterJura();
-	focalCenterSaleve = mapsChs->getFocalCenterSaleve();
+	double* fitPositionX = new double[maxNhits];
+	double* fitPositionY = new double[maxNhits];
 
-
-	//LOG_INFO << "Geographical Channel " << chPos.at(1951) << ENDL;
+	//LOG_INFO << "Geof CH " << pmsPos[20] << endl;
 
 	uint nEdges_tot = 0;
 	uint chRO[maxNhits];
 
-	vector<double> fitPositionX;
-	vector<double> fitPositionY;
-
 	for (TrbFragmentDecoder* richPacket : decoder.getRICHDecoderRange()) {
 
-		LOG_INFO<< "Number of RICH Tel62s = " << decoder.getNumberOfRICHFragments() << ENDL;
+		//LOG_INFO<< "Number of RICH Tel62s = " << decoder.getNumberOfRICHFragments() << ENDL;
 
 		LOG_INFO<< "TEL62 ID = " << richPacket->getFragmentNumber() << ENDL;
 
@@ -78,22 +75,32 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 
 			if (edge_IDs[iEdge]) {
 
-				chRO[iEdge] = edge_trbIDs * 512 + edge_tdcIDs[iEdge] * 32
+				chRO[nHits] = edge_trbIDs * 512 + edge_tdcIDs[iEdge] * 32
 				+ edge_chIDs[iEdge];
 
-				RICHChannelID channel(pmsGeo[chRO[iEdge]]);
+				RICHChannelID channel(pmsGeo[chRO[nHits]]);
 
 				int chSeqID = channel.getChannelSeqID();
 				if (chSeqID == -1) continue;
 				LOG_INFO << " Seq ID " << chSeqID << ENDL;
+				int newSeqID = chSeqID%976;
+				LOG_INFO<< "new SeqID " << newSeqID << ENDL;
 
-				//RICHAlgo prova;
-				//int* focalCorrection = prova.getChPosFocalCorr(channel.getDiskID(pmsGeo[chRO[iEdge]]));
-				//fitPositionX.push_back(pmsPos[chSeqID*2] - focalCorrection[0]);
-				//fitPositionY.push_back(pmsPos[chSeqID*2+1] - focalCorrection[1]);
+				int* focalCorrection = new int[2];
+				getChPosFocalCorr(channel.getDiskID(pmsGeo[chRO[nHits]]), focalCorrection);
 
-				LOG_INFO << "chRO " << chRO[iEdge] <<" chGEO " << pmsGeo[chRO[iEdge]] << ENDL;
-				LOG_INFO << "X Position " << pmsPos[chSeqID*2] << " Y Position " << pmsPos[chSeqID*2+1] << ENDL;
+				LOG_INFO << "Disk ID " << channel.getDiskID(pmsGeo[chRO[nHits]]) << " X correction "<<focalCorrection[0] << ENDL;
+
+				fitPositionX[nHits] = pmsPos[newSeqID*2] - focalCorrection[0];
+				fitPositionY[nHits] = pmsPos[newSeqID*2+1] - focalCorrection[1];
+
+				//LOG_INFO << "chRO " << chRO[iEdge] <<" chGEO " << pmsGeo[chRO[iEdge]] << ENDL;
+
+				LOG_INFO << "X Position " << pmsPos[newSeqID*2] << " X fit Position " << fitPositionX[nHits] << ENDL;
+				LOG_INFO<< " Y position " << pmsPos[newSeqID*2+1] << " Y fit Position " << fitPositionY[nHits] << ENDL;
+
+				nHits++;
+
 			}
 		}
 		//LOG_INFO<< "Number of edges of current board " << numberOfEdgesOfCurrentBoard << ENDL;
@@ -101,39 +108,77 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 		nEdges_tot += numberOfEdgesOfCurrentBoard;
 	}
 
-	//LOG_INFO<< " ----- Total Number of edges found -----  " << nEdges_tot << ENDL;
+	LOG_INFO<< "NHits " << nHits << ENDL;
+	cout << " DeltaX value " << evalDeltaX(fitPositionX, nHits) << ENDL;
+	cout << " DeltaY value " << evalDeltaY(fitPositionY, nHits) << ENDL;
+
+
+	// ************** 1 RING TO BE STUDIED ***********************
+	double deltaX = evalDeltaX(fitPositionX, nHits);
+	if (nHits < 20 && deltaX < 300) {
+		LOG_INFO<< "1 Ring " << ENDL;
+		return 1;
+	}
+	//*************************************************************
+
+
 
 	uint nRings = 0;
-
-	//RICHAlgo algo;
-	//LOG_INFO << "X distribution "<< xHitDistribution.at(3) << ENDL;
 
 	return nRings;
 
 }
 
-int* RICHAlgo::getChPosFocalCorr(int diskID) {
+int* RICHAlgo::getChPosFocalCorr(int diskID, int* focalCorrection) {
 
-	int corrections[2];
+	ParsConfFile* mapsChs = ParsConfFile::GetInstance();
+
+	int* focalCenterJura = mapsChs->getFocalCenterJura();
+	int* focalCenterSaleve = mapsChs->getFocalCenterSaleve();
 
 	if (diskID == 0) {
-		corrections[0] = focalCenterJura[0];
-		corrections[1] = focalCenterJura[1];
+		focalCorrection[0] = focalCenterJura[0];
+		focalCorrection[1] = focalCenterJura[1];
 	} else {
-		corrections[0] = focalCenterSaleve[0];
-		corrections[1] = focalCenterSaleve[1];
+		focalCorrection[0] = focalCenterSaleve[0];
+		focalCorrection[1] = focalCenterSaleve[1];
 	}
-	return corrections;
+	return focalCorrection;
 }
 
-int const RICHAlgo::evaluateXDistribution(vector<double> xHitDistribution) {
+double RICHAlgo::evalDeltaX(double* fitPositionX, int nHits) {
 
-	//LOG_INFO << "Test  X distribution method " << xHitDistribution.at(3) << ENDL;
-	//auto iter = max_element(xHitDistribution.begin(), xHitDistribution.end());
-	//int const max = *iter;
-	return 1;
+	double max = fitPositionX[0];
+	double min = fitPositionX[0];
+
+	for (int i = 0; i < nHits; i++) {
+		if (fitPositionX[i] > max) {
+			max = fitPositionX[i];
+		}
+
+		if (fitPositionX[i] < min) {
+			min = fitPositionX[i];
+		}
+	}
+	return (max - min);
 }
 
+double RICHAlgo::evalDeltaY(double* fitPositionY, int nHits) {
+
+	double max = fitPositionY[0];
+	double min = fitPositionY[0];
+
+	for (int i = 0; i < nHits; i++) {
+		if (fitPositionY[i] > max) {
+			max = fitPositionY[i];
+		}
+		if (fitPositionY[i] < min) {
+			min = fitPositionY[i];
+		}
+	}
+
+	return (max - min);
+}
 }
 /* namespace na62 */
 

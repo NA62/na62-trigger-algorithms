@@ -28,15 +28,17 @@ public:
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 	static uint_fast8_t processRICHTrigger(DecoderHandler& decoder);
-	int const evaluateXDistribution(vector<double>);
-	int* getChPosFocalCorr(int diskID);
+	static double evalDeltaX(double* fitPositionX, int nHits);
+	static double evalDeltaY(double* fitPositionY, int nHits);
+	static int* getChPosFocalCorr(int diskID, int* focalCorrection);
 
 private:
-
-	static int* pmsGeo;
-	static double* pmsPos;
-	static int* focalCenterJura;
-	static int* focalCenterSaleve;
+	//static int nHits;
+//	static ParsConfFile* mapsChs;
+//	int* pmsGeo;
+//	static double* pmsPos;
+//	static int* focalCenterJura;
+//	static int* focalCenterSaleve;
 
 
 };

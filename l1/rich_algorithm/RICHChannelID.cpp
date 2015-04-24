@@ -44,7 +44,7 @@ int RICHChannelID::getPmtID(int geoID) {
 
 int RICHChannelID::getChannelSeqID() {
 
-	if (orSuperCellID == 0) {
+	if (orSuperCellID<1) {
 		return superCellID * 8 + pmtID + upDownDiskID * 61 * 8
 				+ diskID * 61 * 8 * 2;
 	}
