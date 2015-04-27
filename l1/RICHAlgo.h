@@ -12,6 +12,7 @@
 #include <cstdint>
 
 #include "../common/decoding/DecoderHandler.h"
+#include "rich_algorithm/TimeCandidate.h"
 
 namespace na62 {
 
@@ -31,6 +32,7 @@ public:
 	static double evalDeltaX(double* fitPositionX, int nHits);
 	static double evalDeltaY(double* fitPositionY, int nHits);
 	static int* getChPosFocalCorr(int diskID, int* focalCorrection);
+	static void timeClustering(double* leadTime, int nHits, TimeCandidate* timeCands);
 
 private:
 	//static int nHits;

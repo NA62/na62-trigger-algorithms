@@ -26,8 +26,10 @@ public:
 	//int getChannelRemap(int);
 	int* getGeoPmsMap();
 	double* getPosPmsMap();
+	double* getT0();
 	int* getFocalCenterSaleve();
 	int* getFocalCenterJura();
+	void readT0();
 
 	int nChannels;
 	int nroChannels;
@@ -35,6 +37,8 @@ public:
 	int focalCenterJura[2];
 	int geoPmsMap[2560];
 	double posPmsMap[3904];
+	double timeT0[1952];
+	string fileT0;
 
 
 

@@ -8,9 +8,9 @@
 #ifndef L1_RICH_ALGORITHM_TIMECANDIDATE_H_
 #define L1_RICH_ALGORITHM_TIMECANDIDATE_H_
 
-#define maxNHits 250
+#define maxNCandHits 50
 
-
+namespace na62{
 class TimeCandidate {
 
 public:
@@ -18,16 +18,19 @@ public:
 	~TimeCandidate();
 
 
-	void AddEdgeIndexes(int edgeIndex, int nTotEdge);
-	void AddCandTime(double candTime);
-	double* GetEdgeIndexes();
-	double GetCandTime();
+	void addEdgeIndexes(int edgeIndex, int nTotEdge);
+	void addCandTime(double time);
+
+	int* getEdgeIndexes();
+	double getCandTime();
+	int getNHits();
 
 private:
 
-	double edgeCandIndexes[maxNHits];
+	int edgeCandIndexes[maxNCandHits];
 	double candTime;
+	int nHits;
 
 };
-
+}
 #endif /* L1_RICH_ALGORITHM_TIMECANDIDATE_H_ */

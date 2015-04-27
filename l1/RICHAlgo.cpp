@@ -15,14 +15,19 @@
 #include <options/Logging.h>
 #include <string.h>
 #include <vector>
+#include <cmath>
 
 #include "../common/decoding/DecoderRange.h"
 #include "../common/decoding/DecoderHandler.h"
 #include "../common/decoding/TrbFragmentDecoder.h"
+
 #include "rich_algorithm/ParsConfFile.h"
 #include "rich_algorithm/RICHChannelID.h"
+#include "rich_algorithm/TimeCandidate.h"
 
 #define maxNhits 500
+#define maxNCands 10
+#define ns 1E-9
 
 namespace na62 {
 
@@ -30,15 +35,24 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 
 	using namespace l0;
 
-	LOG_INFO<<"===== RICHAlgo.cpp: Analysing Event ===" << decoder.getDecodedEvent()->getEventNumber() << ENDL;
+	LOG_INFO<<"===== RICHAlgo.cpp: Analysing Event === " << decoder.getDecodedEvent()->getEventNumber() << ENDL;
 
-	ParsConfFile* mapsChs = ParsConfFile::GetInstance();
+	ParsConfFile* infoRICH_ = ParsConfFile::GetInstance();
+
 	int nHits = 0;
-	int* pmsGeo = mapsChs->getGeoPmsMap();
-	double* pmsPos = mapsChs->getPosPmsMap();
+	int* pmsGeo = infoRICH_->getGeoPmsMap();
+	double* pmsPos = infoRICH_->getPosPmsMap();
+	infoRICH_->readT0();
+	LOG_INFO << "time T0 " << infoRICH_->timeT0[20] << ENDL;
+
+	//LOG_INFO << "T0 file " << infoRICH->fileT0<<ENDL;
 
 	double* fitPositionX = new double[maxNhits];
 	double* fitPositionY = new double[maxNhits];
+
+	uint64_t* leadTime = new uint64_t[maxNhits];
+
+	double* edge_times_ns = new double[maxNhits]; // to be delated, just for time-check!
 
 	//LOG_INFO << "Geof CH " << pmsPos[20] << endl;
 
@@ -49,13 +63,14 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 
 		//LOG_INFO<< "Number of RICH Tel62s = " << decoder.getNumberOfRICHFragments() << ENDL;
 
-		LOG_INFO<< "TEL62 ID = " << richPacket->getFragmentNumber() << ENDL;
+		LOG_INFO<< "RICHAlgo::TEL62 ID = " << richPacket->getFragmentNumber() << ENDL;
 
 		/**
 		 * Get Arrays with hit Info
 		 */
 
 		const uint64_t* const edge_times = richPacket->getTimes();
+
 		const uint_fast8_t* const edge_chIDs = richPacket->getChIDs();
 		const bool* const edge_IDs = richPacket->getIsLeadings();
 		const uint_fast8_t* const edge_tdcIDs = richPacket->getTdcIDs();
@@ -63,18 +78,22 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 
 		uint numberOfEdgesOfCurrentBoard = richPacket->getNumberOfEdgesStored();
 
-		for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
+		for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; ++iEdge) {
 
-			LOG_INFO<< "Edge " << iEdge + nEdges_tot << " ID " << (uint)edge_IDs[iEdge] << ENDL;
-			LOG_INFO<< "Edge " << iEdge + nEdges_tot << " chID " << (uint)edge_chIDs[iEdge] << ENDL;
-			LOG_INFO<< "Edge " << iEdge + nEdges_tot << " tdcID " << (uint)edge_tdcIDs[iEdge] << ENDL;
-			LOG_INFO<< "Edge " << iEdge + nEdges_tot << " trbID " << (uint)edge_trbIDs << ENDL;
-//			//LOG_INFO<< "Edge " << iEdge + nEdges_tot << " time " << std::hex << edge_times[iEdge] << std::dec << ENDL;
+			edge_times_ns[iEdge] = (edge_times[iEdge] - decoder.getDecodedEvent()->getTimestamp()*256.)*0.097464731802;
 
-//==== Working with leading time only====
+			LOG_INFO<<"RichAlgo::ID " << (uint)edge_IDs[iEdge] << ENDL;
+			LOG_INFO<< "RichAlgo::chID " << (uint)edge_chIDs[iEdge] << ENDL;
+			LOG_INFO<<"RichAlgo::tdcID " << (uint)edge_tdcIDs[iEdge] << ENDL;
+			LOG_INFO<< "RichAlgo::time " << std::hex << edge_times[iEdge] << std::dec <<" time [ns]" << edge_times_ns[iEdge]<< ENDL;
+
+//=============== Working with leading time only===================
 
 			if (edge_IDs[iEdge]) {
 
+				leadTime[nHits] = edge_times_ns[iEdge]; // choose edge_times! ns is just for check!
+
+				//		LOG_INFO <<"Lead " << leadTime[nHits] << " times "<< edge_times[iEdge] << ENDL;
 				chRO[nHits] = edge_trbIDs * 512 + edge_tdcIDs[iEdge] * 32
 				+ edge_chIDs[iEdge];
 
@@ -82,22 +101,23 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 
 				int chSeqID = channel.getChannelSeqID();
 				if (chSeqID == -1) continue;
-				LOG_INFO << " Seq ID " << chSeqID << ENDL;
+				//	LOG_INFO << "Seq ID " << chSeqID << ENDL;
 				int newSeqID = chSeqID%976;
-				LOG_INFO<< "new SeqID " << newSeqID << ENDL;
+				//	LOG_INFO<< "new SeqID " << newSeqID << ENDL;
 
 				int* focalCorrection = new int[2];
 				getChPosFocalCorr(channel.getDiskID(pmsGeo[chRO[nHits]]), focalCorrection);
 
-				LOG_INFO << "Disk ID " << channel.getDiskID(pmsGeo[chRO[nHits]]) << " X correction "<<focalCorrection[0] << ENDL;
+//				LOG_INFO << "Disk ID " << channel.getDiskID(pmsGeo[chRO[nHits]]) << " X correction "<<focalCorrection[0] << ENDL;
 
 				fitPositionX[nHits] = pmsPos[newSeqID*2] - focalCorrection[0];
 				fitPositionY[nHits] = pmsPos[newSeqID*2+1] - focalCorrection[1];
 
-				//LOG_INFO << "chRO " << chRO[iEdge] <<" chGEO " << pmsGeo[chRO[iEdge]] << ENDL;
+//LOG_INFO << "chRO " << chRO[iEdge] <<" chGEO " << pmsGeo[chRO[iEdge]] << ENDL;
 
-				LOG_INFO << "X Position " << pmsPos[newSeqID*2] << " X fit Position " << fitPositionX[nHits] << ENDL;
-				LOG_INFO<< " Y position " << pmsPos[newSeqID*2+1] << " Y fit Position " << fitPositionY[nHits] << ENDL;
+//LOG_INFO << "X Position " << pmsPos[newSeqID*2] << " X fit Position " << fitPositionX[nHits] << ENDL;
+//LOG_INFO<< "Y position " << pmsPos[newSeqID*2+1] << " Y fit Position " << fitPositionY[nHits] << ENDL;
+//LOG_INFO<< " Leading Time " << leadTime[nHits] << ENDL;
 
 				nHits++;
 
@@ -108,22 +128,33 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 		nEdges_tot += numberOfEdgesOfCurrentBoard;
 	}
 
-	LOG_INFO<< "NHits " << nHits << ENDL;
-	cout << " DeltaX value " << evalDeltaX(fitPositionX, nHits) << ENDL;
-	cout << " DeltaY value " << evalDeltaY(fitPositionY, nHits) << ENDL;
+//	LOG_INFO<< "NHits " << nHits << ENDL;
+//	LOG_INFO << "DeltaX value " << evalDeltaX(fitPositionX, nHits) << ENDL;
+//	LOG_INFO<< "DeltaY value " << evalDeltaY(fitPositionY, nHits) << ENDL;
 
-
-	// ************** 1 RING TO BE STUDIED ***********************
-	double deltaX = evalDeltaX(fitPositionX, nHits);
-	if (nHits < 20 && deltaX < 300) {
-		LOG_INFO<< "1 Ring " << ENDL;
-		return 1;
-	}
+// ************** 1 RING TO BE STUDIED ***********************
+//	double deltaX = evalDeltaX(fitPositionX, nHits);
+//	if (nHits < 20 && deltaX < 300) {
+//		LOG_INFO<< "1 Ring " << ENDL;
+//		return 1;
+//	}
 	//*************************************************************
 
+	TimeCandidate timeCandidates[maxNCands];
+	//timeClustering(leadTime, nHits, timeCandidates);
 
+//	if (deltaX >= 300) {
+//		TimeCandidate timeCandidates[maxNCands];
+//
+//		//==========Starting time clustering: Time Candidate=======
+//		timeClustering(leadTime, nHits, timeCandidates);
+//	}
 
 	uint nRings = 0;
+
+	delete[] fitPositionX;
+	delete[] fitPositionY;
+	delete[] leadTime;
 
 	return nRings;
 
@@ -160,7 +191,7 @@ double RICHAlgo::evalDeltaX(double* fitPositionX, int nHits) {
 			min = fitPositionX[i];
 		}
 	}
-	return (max - min);
+	return fabs(max - min);
 }
 
 double RICHAlgo::evalDeltaY(double* fitPositionY, int nHits) {
@@ -177,8 +208,80 @@ double RICHAlgo::evalDeltaY(double* fitPositionY, int nHits) {
 		}
 	}
 
-	return (max - min);
+	return fabs(max - min);
 }
+
+void RICHAlgo::timeClustering(double* leadTime, int nHits,
+		TimeCandidate* timeCandidates) {
+
+	int nCandidates = 0;
+	int nCandClusteringIterations = 2;
+
+	for (int iIter = 0; iIter < nCandClusteringIterations; ++iIter) { // loop on iterator for time clustering
+
+		for (int iEdge = 0; iEdge < nHits; iEdge++) {
+
+			bool flagNewCluster = true;
+			double edgeTime = leadTime[iEdge];
+			double edgeCandidateTime = 9999 * ns;
+			int candidateID = -1;
+			int timeWindow = 10 * ns;
+
+			for (int iCand = 0; iCand < nCandidates; iCand++) {
+
+				if (fabs(timeCandidates[iCand].getCandTime() - edgeTime)
+						< edgeCandidateTime) {
+					edgeCandidateTime = fabs(
+							timeCandidates[iCand].getCandTime() - edgeTime);
+					candidateID = iCand;
+				}
+			}
+			if (candidateID >= 0) {
+
+				if (fabs(timeCandidates[candidateID].getCandTime() - edgeTime)
+						< 0.5 * timeWindow)
+					flagNewCluster = false;
+			}
+
+			if (flagNewCluster) {
+				candidateID = nCandidates;
+				++nCandidates;
+				//timeCandidates[nCandidates].addCandTime(edgeTime);
+			}
+
+			bool flagMissingHit = true;
+			if (iIter > 0) {
+				int* indexes = timeCandidates[candidateID].getEdgeIndexes();
+				for (int i = 0; i < maxNhits / 2; ++i) {
+					if (indexes[i] > -1)
+						if (indexes[i] == iEdge)
+							flagMissingHit = false;
+				}
+			}
+
+			if (!flagMissingHit)
+				continue;
+
+			if (flagNewCluster)
+				timeCandidates[candidateID].addCandTime(edgeTime);
+			else {
+				edgeTime = (timeCandidates[candidateID].getCandTime()
+						* (timeCandidates[candidateID].getNHits() - 1)
+						/ timeCandidates[candidateID].getNHits());
+				timeCandidates[candidateID].addCandTime(edgeTime);
+			}
+			//LOG_INFO<<"nCandidates " << nCandidates << " time " << timeCandidates[candidateID].getCandTime() << ENDL;
+		} // end loop of hits for time clustering
+
+		//calculate time candidates info
+
+	}
+}
+
+
+
+
+
 }
 /* namespace na62 */
 

@@ -17,6 +17,8 @@ public:
 	ConfFileReader(const char* filename);
 	ConfFileReader(const std::string& filename);
 
+	~ConfFileReader();
+
 	bool nextLine();
 
 	template<typename T>
@@ -29,9 +31,6 @@ public:
 	bool isValid() const;
 
 private:
-	ConfFileReader(const ConfFileReader& rhs); // not implemented!
-	ConfFileReader& operator=(const ConfFileReader& rhs); // not implemented!
-
 	void skip_fields(std::istringstream& ist, const int n);
 
 	std::ifstream file;

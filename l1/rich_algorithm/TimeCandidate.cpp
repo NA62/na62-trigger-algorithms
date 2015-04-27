@@ -7,27 +7,48 @@
 
 #include "TimeCandidate.h"
 
+namespace na62 {
+
 TimeCandidate::TimeCandidate() {
+
 	candTime = 0;
+	nHits = 0;
+
+	for (int i = 0; i < maxNCandHits; ++i) {
+		edgeCandIndexes[i] = -1;
+	}
+
 }
 
 TimeCandidate::~TimeCandidate() {
 }
 
-void TimeCandidate::AddEdgeIndexes(int edgeIndex, int nTotEdge) {
+void TimeCandidate::addEdgeIndexes(int edgeIndex, int nTotEdge) {
 	edgeCandIndexes[nTotEdge] = edgeIndex; // Pay attention to the incrementation of nTotEdge in TimeClustering!!!!
 }
 
-//void AddCandTime(double time){
-//	candTime = time;
-//}
+void TimeCandidate::addCandTime(double time){
+	candTime = time;
+}
 
-double* TimeCandidate::GetEdgeIndexes() {
+int* TimeCandidate::getEdgeIndexes() {
 
 	return &edgeCandIndexes[0];
 }
 
-double TimeCandidate::GetCandTime(){
+double TimeCandidate::getCandTime() {
 
 	return candTime;
+}
+
+int TimeCandidate::getNHits() {
+
+	for (int i = 0; i < maxNCandHits; ++i) {
+
+		if (edgeCandIndexes[i] > -1)
+			nHits++;
+	}
+
+	return nHits;
+}
 }

@@ -8,13 +8,15 @@
 #include "ConfFileReader.h"
 #include "options/Logging.h"
 
-
 ConfFileReader::ConfFileReader(const char* filename) :
 		file(filename), line(), failed(false) {
 }
 
 ConfFileReader::ConfFileReader(const std::string& filename) :
 		file(filename.c_str()), line(), failed(false) {
+}
+
+ConfFileReader::~ConfFileReader() {
 }
 
 bool ConfFileReader::isValid() const {
