@@ -33,6 +33,11 @@ namespace na62 {
 
 uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 
+
+	for (int i = 0; i < 5000; ++i) {
+		chRO[i] = 0;
+	}
+
 	using namespace l0;
 
 	LOG_INFO<<"===== RICHAlgo.cpp: Analysing Event === " << decoder.getDecodedEvent()->getEventNumber() << ENDL;
@@ -42,22 +47,22 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 	int nHits = 0;
 	int* pmsGeo = infoRICH_->getGeoPmsMap();
 	double* pmsPos = infoRICH_->getPosPmsMap();
-	infoRICH_->readT0();
-	LOG_INFO << "time T0 " << infoRICH_->timeT0[20] << ENDL;
 
-	//LOG_INFO << "T0 file " << infoRICH->fileT0<<ENDL;
+	//infoRICH_->readT0();
+	//LOG_INFO << "time T0 " << (double)infoRICH_->timeT0[20] << ENDL;
+	//LOG_INFO << "T0 file " << infoRICH_->fileT0<<ENDL;
 
 	double* fitPositionX = new double[maxNhits];
 	double* fitPositionY = new double[maxNhits];
 
-	uint64_t* leadTime = new uint64_t[maxNhits];
+	double* leadTime = new double[maxNhits];
 
 	double* edge_times_ns = new double[maxNhits]; // to be delated, just for time-check!
 
 	//LOG_INFO << "Geof CH " << pmsPos[20] << endl;
 
 	uint nEdges_tot = 0;
-	uint chRO[maxNhits];
+	//uint chRO[maxNhits];
 
 	for (TrbFragmentDecoder* richPacket : decoder.getRICHDecoderRange()) {
 
@@ -82,10 +87,10 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 
 			edge_times_ns[iEdge] = (edge_times[iEdge] - decoder.getDecodedEvent()->getTimestamp()*256.)*0.097464731802;
 
-			LOG_INFO<<"RichAlgo::ID " << (uint)edge_IDs[iEdge] << ENDL;
-			LOG_INFO<< "RichAlgo::chID " << (uint)edge_chIDs[iEdge] << ENDL;
-			LOG_INFO<<"RichAlgo::tdcID " << (uint)edge_tdcIDs[iEdge] << ENDL;
-			LOG_INFO<< "RichAlgo::time " << std::hex << edge_times[iEdge] << std::dec <<" time [ns]" << edge_times_ns[iEdge]<< ENDL;
+//			LOG_INFO<<"RichAlgo::ID " << (uint)edge_IDs[iEdge] << ENDL;
+//			LOG_INFO<< "RichAlgo::chID " << (uint)edge_chIDs[iEdge] << ENDL;
+//			LOG_INFO<<"RichAlgo::tdcID " << (uint)edge_tdcIDs[iEdge] << ENDL;
+//			LOG_INFO<< "RichAlgo::time " << std::hex << edge_times[iEdge] << std::dec <<" time [ns]" << edge_times_ns[iEdge]<< ENDL;
 
 //=============== Working with leading time only===================
 
@@ -93,7 +98,7 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 
 				leadTime[nHits] = edge_times_ns[iEdge]; // choose edge_times! ns is just for check!
 
-				//		LOG_INFO <<"Lead " << leadTime[nHits] << " times "<< edge_times[iEdge] << ENDL;
+//				LOG_INFO <<"Lead " << leadTime[nHits] << " times "<< edge_times[iEdge] << ENDL;
 				chRO[nHits] = edge_trbIDs * 512 + edge_tdcIDs[iEdge] * 32
 				+ edge_chIDs[iEdge];
 
@@ -115,14 +120,16 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 
 //LOG_INFO << "chRO " << chRO[iEdge] <<" chGEO " << pmsGeo[chRO[iEdge]] << ENDL;
 
-//LOG_INFO << "X Position " << pmsPos[newSeqID*2] << " X fit Position " << fitPositionX[nHits] << ENDL;
-//LOG_INFO<< "Y position " << pmsPos[newSeqID*2+1] << " Y fit Position " << fitPositionY[nHits] << ENDL;
-//LOG_INFO<< " Leading Time " << leadTime[nHits] << ENDL;
+				LOG_INFO <<"X position " << pmsPos[newSeqID*2] << " X fit position " << fitPositionX[nHits] << ENDL;
+				LOG_INFO<< "Y position " << pmsPos[newSeqID*2+1] << " Y fit position " << fitPositionY[nHits] << ENDL;
+				LOG_INFO<< "Leading Time " << leadTime[nHits] << ENDL;
 
 				nHits++;
 
 			}
 		}
+
+		//getRecoTime(leadTime, nHits);
 		//LOG_INFO<< "Number of edges of current board " << numberOfEdgesOfCurrentBoard << ENDL;
 
 		nEdges_tot += numberOfEdgesOfCurrentBoard;
@@ -140,7 +147,7 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 //	}
 	//*************************************************************
 
-	TimeCandidate timeCandidates[maxNCands];
+	//TimeCandidate timeCandidates[maxNCands];
 	//timeClustering(leadTime, nHits, timeCandidates);
 
 //	if (deltaX >= 300) {
@@ -214,6 +221,8 @@ double RICHAlgo::evalDeltaY(double* fitPositionY, int nHits) {
 void RICHAlgo::timeClustering(double* leadTime, int nHits,
 		TimeCandidate* timeCandidates) {
 
+	getRecoTime(leadTime, nHits);
+
 	int nCandidates = 0;
 	int nCandClusteringIterations = 2;
 
@@ -278,9 +287,20 @@ void RICHAlgo::timeClustering(double* leadTime, int nHits,
 	}
 }
 
+double* RICHAlgo::getRecoTime(double* leadTime, int nHits) {
 
+	ParsConfFile* infoRICH_ = ParsConfFile::GetInstance();
 
+	double* timeT0 = infoRICH_->getT0();
+	double recoTime[nHits];
 
+	for (int i = 0; i < nHits; ++i) {
+
+		recoTime[i] = leadTime[i] - timeT0[i];
+		//LOG_INFO<< "Edge " << i<<" T0 time " << timeT0[i] << " leading time " << leadTime[i]<< " RecoTime " << recoTime[i] << ENDL;
+	}
+	return recoTime;
+}
 
 }
 /* namespace na62 */

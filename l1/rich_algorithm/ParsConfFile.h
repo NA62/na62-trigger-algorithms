@@ -31,6 +31,10 @@ public:
 	int* getFocalCenterJura();
 	void readT0();
 
+private:
+
+	static ParsConfFile* theInstance;  // singleton instance
+
 	int nChannels;
 	int nroChannels;
 	int focalCenterSaleve[2];
@@ -40,11 +44,6 @@ public:
 	double timeT0[1952];
 	string fileT0;
 
-
-
-private:
-
-	static ParsConfFile* theInstance;  // singleton instance
 };
 
 #endif /* L1_PARSCONFFILE_H_ */

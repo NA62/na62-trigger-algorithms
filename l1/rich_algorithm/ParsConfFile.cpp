@@ -84,7 +84,7 @@ ParsConfFile::ParsConfFile() {
 
 					if (fileName_.getField<string>(1) == position) {
 						for (int jCh = 0; jCh < 16; ++jCh) {
-							LOG_INFO << "i1 " << iCh*16+jCh << " i1 Pos " << fileName_.getField<double>(jCh + 2) << ENDL;
+							//LOG_INFO << "i1 " << iCh*16+jCh << " i1 Pos " << fileName_.getField<double>(jCh + 2) << ENDL;
 							//LOG_INFO << "i2 " << iCh*16+jCh + nChannels << " i2 Pos " << fileName.getField<double>(jCh + 2) << ENDL;
 							posPmsMap[iCh*16+jCh] = fileName_.getField<double>(jCh + 2);
 							//posPmsMap[iCh*16+jCh+nChannels] = fileName.getField<double>(jCh + 2);
@@ -141,10 +141,11 @@ int* ParsConfFile::getFocalCenterSaleve() {
 
 void ParsConfFile::readT0() {
 
-	ConfFileReader fileT0_("config/"+fileT0);
+	LOG_INFO<< "ParsFile::File T0 " << fileT0 << ENDL;
+	ConfFileReader fileT0_("/Users/vfascian/Documents/workspace/na62-trigger-algorithms/l1/rich_algorithm/" + fileT0);
 
 	if (!fileT0_.isValid())
-		LOG_INFO<< "T0 file not found" << ENDL;
+	LOG_INFO<< "T0 file not found" << ENDL;
 
 	if (fileT0_.isValid()) {
 
@@ -164,12 +165,16 @@ void ParsConfFile::readT0() {
 
 					if (fileT0_.getField<string>(1) == time) {
 						for (int jCh = 0; jCh < 16; jCh++) {
-							timeT0[iCh*16+jCh] = fileT0_.getField<int>(jCh + 2);
+							timeT0[iCh*16+jCh] = fileT0_.getField<double>(jCh + 2);
 						}
 					}
 				}
 			}
 		}
 	}
+}
+
+double* ParsConfFile::getT0() {
+	return timeT0;
 }
 

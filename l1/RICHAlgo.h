@@ -14,6 +14,8 @@
 #include "../common/decoding/DecoderHandler.h"
 #include "rich_algorithm/TimeCandidate.h"
 
+#define maxNhits 500
+
 namespace na62 {
 
 class Event;
@@ -28,13 +30,17 @@ public:
 	 *
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
+
 	static uint_fast8_t processRICHTrigger(DecoderHandler& decoder);
 	static double evalDeltaX(double* fitPositionX, int nHits);
 	static double evalDeltaY(double* fitPositionY, int nHits);
 	static int* getChPosFocalCorr(int diskID, int* focalCorrection);
 	static void timeClustering(double* leadTime, int nHits, TimeCandidate* timeCands);
+    static double* getRecoTime(double* leadTime, int nHits);
 
+    static uint chRO[maxNhits];
 private:
+    //static uint chRO[maxNhits];
 	//static int nHits;
 //	static ParsConfFile* mapsChs;
 //	int* pmsGeo;
