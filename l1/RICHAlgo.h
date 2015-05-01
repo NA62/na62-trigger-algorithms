@@ -13,8 +13,10 @@
 
 #include "../common/decoding/DecoderHandler.h"
 #include "rich_algorithm/TimeCandidate.h"
+#include "rich_algorithm/ParsConfFile.h"
 
 #define maxNhits 500
+#define maxNCands 100
 
 namespace na62 {
 
@@ -32,21 +34,27 @@ public:
 	 */
 
 	static uint_fast8_t processRICHTrigger(DecoderHandler& decoder);
-	static double evalDeltaX(double* fitPositionX, int nHits);
-	static double evalDeltaY(double* fitPositionY, int nHits);
-	static int* getChPosFocalCorr(int diskID, int* focalCorrection);
-	static void timeClustering(double* leadTime, int nHits, TimeCandidate* timeCands);
-    static double* getRecoTime(double* leadTime, int nHits);
+	static double evalDeltaX(double* fitPositionX);
+	static double evalDeltaY(double* fitPositionY);
+	static int* getChPosFocalCorr(int diskID);
+	static void timeClustering(double* leadTime);
 
-    static uint chRO[maxNhits];
 private:
-    //static uint chRO[maxNhits];
-	//static int nHits;
-//	static ParsConfFile* mapsChs;
-//	int* pmsGeo;
-//	static double* pmsPos;
-//	static int* focalCenterJura;
-//	static int* focalCenterSaleve;
+    static uint chRO[maxNhits];
+	static int nHits;
+	static double* t0Time;
+	static ParsConfFile* infoRICH_;
+	static int* pmsGeo;
+	static double* pmsPos;
+	static int* focalCenterJura;
+	static int* focalCenterSaleve;
+	static int minPMsForEvent;
+	static int nCandidates;
+	static TimeCandidate timeCandidates[maxNCands];
+	static double fitPositionX[maxNhits];
+	static double fitPositionY[maxNhits];
+	static double leadRecoTime[maxNhits];
+	static int focalCorrection[2];
 
 
 };

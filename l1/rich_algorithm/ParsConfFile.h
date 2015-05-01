@@ -30,6 +30,7 @@ public:
 	int* getFocalCenterSaleve();
 	int* getFocalCenterJura();
 	void readT0();
+	int getMinPMsForEvent();
 
 private:
 
@@ -43,6 +44,7 @@ private:
 	double posPmsMap[3904];
 	double timeT0[1952];
 	string fileT0;
+	int minPMsForEvent;
 
 };
 

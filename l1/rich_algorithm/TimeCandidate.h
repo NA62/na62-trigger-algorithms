@@ -8,28 +8,41 @@
 #ifndef L1_RICH_ALGORITHM_TIMECANDIDATE_H_
 #define L1_RICH_ALGORITHM_TIMECANDIDATE_H_
 
-#define maxNCandHits 50
+#define maxNCandHits 500
 
-namespace na62{
+namespace na62 {
 class TimeCandidate {
 
 public:
 	TimeCandidate();
 	~TimeCandidate();
 
-
 	void addEdgeIndexes(int edgeIndex, int nTotEdge);
+	void removeEdgeIndexes(int nEdgePos);
 	void addCandTime(double time);
 
 	int* getEdgeIndexes();
 	double getCandTime();
 	int getNHits();
+	bool getIsSelected();
+	bool getIsRemoved();
+	double getDeltaTimeClosestCandidate();
+	int getNHitsClosestCandidate();
+	void setDeltaTimeClosestCandidate(double time);
+	void setNHitsClosestCandidate(int hits);
+	void setNHits(int nTotEdges);
+	void setIsSelected(bool selection);
+	void setIsRemoved(bool removed);
 
 private:
 
 	int edgeCandIndexes[maxNCandHits];
 	double candTime;
-	int nHits;
+	int nCandHits;
+	bool isSelected;
+	double deltaTimeClosestCandidate;
+	int nHitsClosestCandidate;
+	bool isRemoved;
 
 };
 }

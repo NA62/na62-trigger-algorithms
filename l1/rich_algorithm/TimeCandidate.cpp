@@ -12,12 +12,15 @@ namespace na62 {
 TimeCandidate::TimeCandidate() {
 
 	candTime = 0;
-	nHits = 0;
+	nCandHits = 0;
+	deltaTimeClosestCandidate = 0;
+	nHitsClosestCandidate = -1;
+	isSelected = false;
+	isRemoved = false;
 
 	for (int i = 0; i < maxNCandHits; ++i) {
 		edgeCandIndexes[i] = -1;
 	}
-
 }
 
 TimeCandidate::~TimeCandidate() {
@@ -27,28 +30,61 @@ void TimeCandidate::addEdgeIndexes(int edgeIndex, int nTotEdge) {
 	edgeCandIndexes[nTotEdge] = edgeIndex; // Pay attention to the incrementation of nTotEdge in TimeClustering!!!!
 }
 
-void TimeCandidate::addCandTime(double time){
+void TimeCandidate::removeEdgeIndexes(int nEdgePos){
+	edgeCandIndexes[nEdgePos] = -1;
+}
+
+
+void TimeCandidate::addCandTime(double time) {
 	candTime = time;
 }
 
 int* TimeCandidate::getEdgeIndexes() {
-
-	return &edgeCandIndexes[0];
+	return edgeCandIndexes;
 }
 
 double TimeCandidate::getCandTime() {
-
 	return candTime;
 }
 
-int TimeCandidate::getNHits() {
-
-	for (int i = 0; i < maxNCandHits; ++i) {
-
-		if (edgeCandIndexes[i] > -1)
-			nHits++;
-	}
-
-	return nHits;
+void TimeCandidate::setNHits(int nTotEdges) {
+	nCandHits = nTotEdges;
 }
+
+int TimeCandidate::getNHits() {
+	return nCandHits;
+}
+
+void TimeCandidate::setIsSelected(bool selection) {
+	isSelected = selection;
+}
+
+bool TimeCandidate::getIsSelected() {
+	return isSelected;
+}
+
+void TimeCandidate::setDeltaTimeClosestCandidate(double time) {
+	deltaTimeClosestCandidate = time;
+}
+
+void TimeCandidate::setNHitsClosestCandidate(int hits) {
+	nHitsClosestCandidate = hits;
+}
+
+double TimeCandidate::getDeltaTimeClosestCandidate() {
+	return deltaTimeClosestCandidate;
+}
+
+int TimeCandidate::getNHitsClosestCandidate() {
+	return nHitsClosestCandidate;
+}
+
+void TimeCandidate::setIsRemoved(bool removed) {
+	isRemoved = removed;
+}
+
+bool TimeCandidate::getIsRemoved(){
+	return isRemoved;
+}
+
 }
