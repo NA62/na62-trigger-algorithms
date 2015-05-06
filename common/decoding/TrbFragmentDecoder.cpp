@@ -101,8 +101,8 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 
 			frameTS = (frameHeader->frameTimeStamp & 0x0000ffff)
 					+ (timestamp & 0xffff0000);
-			//LOG_INFO<< "Event Timestamp " << std::hex << timestamp << std::dec << ENDL;
-			//LOG_INFO<< "FrameTS " << std::hex << frameTS << std::dec << ENDL;
+//			LOG_INFO<< "Event Timestamp " << std::hex << timestamp << std::dec << ENDL;
+//			LOG_INFO<< "FrameTS " << std::hex << frameTS << std::dec << ENDL;
 
 			if ((timestamp & 0xf000) == 0xf000 && (frameTS & 0xf000) == 0x0000)
 				frameTS += 0x10000; //16 bits overflow
@@ -113,7 +113,7 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 			if (!nWordsOfCurrentFrame)
 				LOG_ERROR<< "TrbDecoder.cpp: Number of Words in Frame is Null !" << ENDL;
 
-				//LOG_INFO<< "nEdges " << nEdges << ENDL;
+//				LOG_INFO<< "nEdges " << nEdges << ENDL;
 			if (nEdges) {
 				for (uint iEdge = 0; iEdge < nEdges; iEdge++) {
 					//printf("writing getpayload() + %d\n",2 + iFPGA + nWords_tot - nEdges + iEdge);
@@ -135,11 +135,12 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 					edgeTdcIDs[iEdge + nEdges_tot] = (uint) tdcData->tdcID;
 					edgeIsLeading[iEdge + nEdges_tot] = tdcData->ID == 0x4;
 
-					//LOG_INFO<< "edge_IDs[" << iEdge + nEdges_tot << "] " << edge_IDs[iEdge + nEdges_tot] << ENDL;
-					//LOG_INFO<< "edge_chIDs[" << iEdge + nEdges_tot << "] " << edge_chIDs[iEdge + nEdges_tot] << ENDL;
-					//LOG_INFO<< "edge_tdcIDs["<< iEdge + nEdges_tot << "] " << edge_tdcIDs[iEdge + nEdges_tot] << ENDL;
-					//LOG_INFO<< "edge_times[" << iEdge + nEdges_tot << "] " << std::hex << edge_times[iEdge + nEdges_tot] << std::dec << ENDL;
-					//LOG_INFO<< "edge_trbIDs[" << iEdge + nEdges_tot << "] " << edge_trbIDs[iEdge + nEdges_tot] << ENDL;
+//					LOG_INFO<< "edgeChIDs[" << iEdge + nEdges_tot << "] " << (uint) edgeChIDs[iEdge + nEdges_tot] << ENDL;
+//					LOG_INFO<< "edgeTdcIDs[" << iEdge + nEdges_tot << "] " << (uint) edgeTdcIDs[iEdge + nEdges_tot] << ENDL;
+//					LOG_INFO<< "edgeIsLeading["<< iEdge + nEdges_tot << "] " << edgeIsLeading[iEdge + nEdges_tot] << ENDL;
+//					LOG_INFO<< "edgeTimes[" << iEdge + nEdges_tot << "] " << std::hex << edgeTimes[iEdge + nEdges_tot] << std::dec << ENDL;
+
+//					LOG_INFO<< "TIME (ns) " << ((edgeTimes[iEdge+nEdges_tot] - timestamp* 256.) * 0.097464731802) << ENDL;
 
 					if (iEdge == (nEdges - 1)) {
 						nEdges_tot += nEdges;
