@@ -15,6 +15,8 @@
 #include <options/Logging.h>
 #include <string.h>
 
+#include <sys/time.h>
+
 #include "../common/decoding/DecoderRange.h"
 #include "../common/decoding/DecoderHandler.h"
 #include "../common/decoding/TrbFragmentDecoder.h"
@@ -24,6 +26,11 @@
 namespace na62 {
 
 uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
+	struct timeval time[10];
+
+	gettimeofday(&time[0], 0);
+//  LOG_INFO<< "Initial Time " << time[0].tv_sec << " " << time[0].tv_usec << ENDL;
+
 	using namespace l0;
 
 	uint sector_occupancy[8] = { 0 };
@@ -36,6 +43,8 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 //TODO: chkmax need to be USED
 
 	for (TrbFragmentDecoder* cedarPacket : decoder.getCEDARDecoderRange()) {
+		gettimeofday(&time[1], 0);
+//      LOG_INFO<< "First time check (inside iterator) " << time[1].tv_sec << " " << time[1].tv_usec << ENDL;
 
 		/**
 		 * Get Arrays with hit Info
@@ -48,7 +57,9 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 		uint numberOfEdgesOfCurrentBoard =
 				cedarPacket->getNumberOfEdgesStored();
 
-		LOG_INFO<< "Tel62 ID " << cedarPacket->getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard << ENDL;
+//		LOG_INFO<< "Tel62 ID " << cedarPacket->getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard << ENDL;
+		gettimeofday(&time[2], 0);
+//      LOG_INFO<< "time check (inside iterator - end of retrieve) " << time[2].tv_sec << " " << time[2].tv_usec << ENDL;
 
 		for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
 //			LOG_INFO<< "Edge " << iEdge << " ID " << edge_IDs[iEdge] << ENDL;
@@ -68,10 +79,15 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 			}
 			//LOG_INFO<< "ANGELA-L1" << "\t" << decoder.getDecodedEvent()->getEventNumber() << "\t" << decoder.getDecodedEvent()->getTimestamp() << "\t" << (int)edge_IDs[iEdge] << "\t" << (int)edge_chIDs[iEdge]<< "\t" << (int)edge_tdcIDs[iEdge] << "\t" << edge_times[iEdge] << "\t" << trbID << "\t" << box << ENDL;
 		}
+		gettimeofday(&time[3], 0);
+//      LOG_INFO<< "time check (inside iterator - end of computations) " << time[3].tv_sec << " " << time[3].tv_usec << ENDL;
+
 		nEdges_tot += numberOfEdgesOfCurrentBoard;
 	}
 
-	LOG_INFO<<"KtagAlgo.cpp: Analysing Event " << decoder.getDecodedEvent()->getEventNumber() << " - Timestamp " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << " - Total Number of edges found " << nEdges_tot << ENDL;
+//	LOG_INFO<<"KtagAlgo.cpp: Analysing Event " << decoder.getDecodedEvent()->getEventNumber() << " - Timestamp " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << " - Total Number of edges found " << nEdges_tot << ENDL;
+	gettimeofday(&time[4], 0);
+//  LOG_INFO<< "time check (outside for - all Tel62s)" << time[4].tv_sec << " " << time[4].tv_usec << ENDL;
 
 	uint nSectors = 0;
 	for (uint iSec = 0; iSec != 8; iSec++) {
@@ -79,8 +95,15 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 			nSectors++;
 	}
 
-	LOG_INFO<< "Angela: " << decoder.getDecodedEvent()->getEventNumber() << "\t" << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << "\t" << nSectors << ENDL;
+//	LOG_INFO<< "Angela: " << decoder.getDecodedEvent()->getEventNumber() << "\t" << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << "\t" << nSectors << ENDL;
+	gettimeofday(&time[5], 0);
+//  LOG_INFO<< "time check (outside for - Nsector coincidences)" << time[5].tv_sec << " " << time[5].tv_usec << ENDL;
+	//for (int i = 0; i < 5; i++) {
+	//             if(i && i!=3) LOG_INFO<< ((time[i+1].tv_sec - time[i].tv_sec)*1e6 + time[i+1].tv_usec) - time[i].tv_usec << " ";
+	//     }
 
+//	LOG_INFO<< std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << " " << nEdges_tot << " " << nSectors << " " << ((time[4].tv_sec - time[0].tv_sec)*1e6 + time[4].tv_usec) - time[0].tv_usec << " " << ((time[5].tv_sec - time[0].tv_sec)*1e6 + time[5].tv_usec) - time[0].tv_usec << ENDL;
+//	LOG_INFO<< nEdges_tot << " " << ((time[4].tv_sec - time[0].tv_sec)*1e6 + time[4].tv_usec) - time[0].tv_usec << " " << ((time[5].tv_sec - time[0].tv_sec)*1e6 + time[5].tv_usec) - time[0].tv_usec << ENDL;
 	return nSectors > 3;
 }
 
