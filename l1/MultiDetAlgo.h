@@ -14,6 +14,8 @@
 
 #include "../common/decoding/DecoderHandler.h"
 
+#define maxNhits 500
+
 namespace na62 {
 
 
@@ -32,6 +34,15 @@ public:
 	static uint_fast8_t processMultiDetTrigger(DecoderHandler& decoder);
 
 private:
+
+	static uint nHits;
+	static uint nMaxSlabs;
+	static uint nCandidates;
+	static int chROID[maxNhits];
+	static int quadrantID[maxNhits];
+	static int planeID[maxNhits];
+	static uint64_t time[maxNhits];
+
 
 };
 

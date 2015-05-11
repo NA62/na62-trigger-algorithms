@@ -26,6 +26,7 @@
 namespace na62 {
 
 uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
+
 	struct timeval time[10];
 
 	gettimeofday(&time[0], 0);
@@ -36,9 +37,6 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 	uint sector_occupancy[8] = { 0 };
 
 	uint nEdges_tot = 0;
-
-//	LOG_INFO<< "Event number = " << event->getEventNumber() << ENDL;
-//	LOG_INFO<< "Timestamp = " << std::hex << event->getTimestamp() << std::dec << ENDL;
 
 //TODO: chkmax need to be USED
 
@@ -67,8 +65,6 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 //			LOG_INFO<< "Edge " << iEdge << " tdcID " << (uint) edge_tdcIDs[iEdge] << ENDL;
 //			LOG_INFO<< "Edge " << iEdge << " time " << std::hex << edge_times[iEdge] << std::dec << ENDL;
 
-//			LOG_INFO<< "pp[" << iEdge + nEdges_tot << "] " << pp[iEdge + nEdges_tot] << ENDL;
-
 			if (edge_IDs[iEdge]) {
 				const uint trbID = edge_tdcIDs[iEdge] / 4;
 				const uint box = calculateSector(
@@ -86,6 +82,9 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 	}
 
 //	LOG_INFO<<"KtagAlgo.cpp: Analysing Event " << decoder.getDecodedEvent()->getEventNumber() << " - Timestamp " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << " - Total Number of edges found " << nEdges_tot << ENDL;
+//	LOG_INFO<<decoder.getDecodedEvent()->getFinetime() << ENDL;
+//	LOG_INFO<<decoder.getDecodedEvent()->getBurstID() << ENDL;
+
 	gettimeofday(&time[4], 0);
 //  LOG_INFO<< "time check (outside for - all Tel62s)" << time[4].tv_sec << " " << time[4].tv_usec << ENDL;
 

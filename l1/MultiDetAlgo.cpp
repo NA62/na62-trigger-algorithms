@@ -20,6 +20,14 @@
 
 namespace na62 {
 
+uint MultiDetAlgo::nHits;
+uint MultiDetAlgo::nMaxSlabs;
+uint MultiDetAlgo::nCandidates;
+int MultiDetAlgo::chROID[maxNhits];
+int MultiDetAlgo::quadrantID[maxNhits];
+int MultiDetAlgo::planeID[maxNhits];
+uint64_t MultiDetAlgo::time[maxNhits];
+
 MultiDetAlgo::MultiDetAlgo() {
 }
 
@@ -29,43 +37,101 @@ MultiDetAlgo::~MultiDetAlgo() {
 
 uint_fast8_t MultiDetAlgo::processMultiDetTrigger(DecoderHandler& decoder) {
 
-//	using namespace l0;
-//
-//	uint noEdgesPerTrb_cedar[decoder.getNumberOfCEDARFragments()];
-//	uint noEdgesPerTrb_chod[decoder.getNumberOfCHODFragments()];
-//
-//	uint nEdges_cedar_tot = 0;
-//	uint nEdges_chod_tot = 0;
-//
-////	LOG_INFO<< "Event number = " << event->getEventNumber() << ENDL;
-////	LOG_INFO<< "Timestamp = " << std::hex << event->getTimestamp() << std::dec << ENDL;
-//
-//	for (TrbFragmentDecoder* cedarPacket : decoder.getCEDARDecoderRange()) {
-//
-//		noEdgesPerTrb_cedar[cedarPacket->getFragmentNumber()] = cedarPacket->getNumberOfEdgesStored();
-////		LOG_INFO<< "KTAG: Tel62 ID " << trbNum << " - Number of Edges found " << noEdgesPerTrb_cedar[trbNum] << ENDL;
-//
-//		nEdges_cedar_tot += noEdgesPerTrb_cedar[cedarPacket->getFragmentNumber()];
-//	}
-//
-//	for (TrbFragmentDecoder* chodPacket : decoder.getCHODDecoderRange()) {
-//
-//		noEdgesPerTrb_chod[chodPacket->getFragmentNumber()] = chodPacket->getNumberOfEdgesStored();
-////		LOG_INFO<< "CHOD: Tel62 ID " << trbNum << " - Number of Edges found " << noEdgesPerTrb_chod[trbNum] << ENDL;
-//
-//		nEdges_chod_tot += noEdgesPerTrb_chod[chodPacket->getFragmentNumber()];
-//	}
-//
-//	//LOG_INFO<<"MultiDetAlgo.cpp: Analysed Event " << event->getEventNumber() << " - Total Number of edges found (KTAG) " << nEdges_cedar_tot << ENDL;
-//	//LOG_INFO<<"MultiDetAlgo.cpp: Analysed Event " << event->getEventNumber() << " - Total Number of edges found (CHOD) " << nEdges_chod_tot << ENDL;
-//
-//	uint_fast8_t multi_det_trigger = 0;
-//
-//	if (nEdges_cedar_tot > 3 && nEdges_chod_tot > 10) {
-//		return multi_det_trigger = 1;
-//	} else
-		return 0;
+	using namespace l0;
 
+	uint nEdges_chod_tot = 0;
+	nHits = 0;
+	nMaxSlabs = 14;
+	nCandidates = 0;
+
+	LOG_INFO<< "Event number = " << decoder.getDecodedEvent()->getEventNumber() << ENDL;
+	LOG_INFO<< "Timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << ENDL;
+
+	for (TrbFragmentDecoder* chodPacket : decoder.getCHODDecoderRange()) {
+		/**
+		 * Get Arrays with hit Info
+		 */
+		const uint64_t* const edge_times = chodPacket->getTimes();
+		const uint_fast8_t* const edge_chIDs = chodPacket->getChIDs();
+		const bool* const edge_IDs = chodPacket->getIsLeadings();
+		const uint_fast8_t* const edge_tdcIDs = chodPacket->getTdcIDs();
+
+		uint numberOfEdgesOfCurrentBoard = chodPacket->getNumberOfEdgesStored();
+//		LOG_INFO<< "CHOD: Tel62 ID " << chodPacket->getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard << ENDL;
+
+		for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
+			/**
+			 * Process leading edges only
+			 *
+			 */
+			if (edge_IDs[iEdge]) {
+				const uint roChID = (edge_tdcIDs[iEdge] * 32)
+						+ edge_chIDs[iEdge];
+				LOG_INFO<< "Readout Channel ID " << roChID << ENDL;
+				/**
+				 * Process only first 128 readout channels, corresponding to low-threshold LAV FEE
+				 *
+				 */
+				//if (roChID < 128) {
+					LOG_INFO<< "Edge " << iEdge << " ID " << edge_IDs[iEdge] << ENDL;
+					LOG_INFO<< "Edge " << iEdge << " chID " << (uint) edge_chIDs[iEdge] << ENDL;
+					LOG_INFO<< "Edge " << iEdge << " tdcID " << (uint) edge_tdcIDs[iEdge] << ENDL;
+					LOG_INFO<< "Edge " << iEdge << " time " << std::hex << edge_times[iEdge] << std::dec << ENDL;
+
+					chROID[nHits] = roChID;
+					quadrantID[nHits] = roChID/16;
+					planeID[nHits] = roChID/64;
+					time[nHits] = edge_times[iEdge];
+
+					LOG_INFO<< "CHOD RO channel ID " << chROID[nHits] << ENDL;
+					LOG_INFO<< "CHOD quadrant ID " << quadrantID[nHits] << ENDL;
+					LOG_INFO<< "CHOD plane ID " << planeID[nHits] << ENDL;
+					LOG_INFO<< "CHOD time " << std::hex << time[nHits] << std::dec << ENDL;
+
+					nHits++;
+				//}
+			}
+		}
+		nEdges_chod_tot += numberOfEdgesOfCurrentBoard;
+	}
+	LOG_INFO<<"MultiDetAlgo.cpp: Analysed Event " << decoder.getDecodedEvent()->getEventNumber() << " - Total Number of edges " << nEdges_chod_tot << " - nHits " << nHits << ENDL;
+
+//	return nHits < nMaxSlabs;
+
+//	LOG_INFO<< "Sto entrando nella trigger condition!!!!" << ENDL;
+	for (uint iHit = 0; iHit != nHits; iHit++) {
+		int counter1 = chROID[iHit];
+		if (counter1 > 63)
+			continue;
+		int64_t time1 = time[iHit];
+		int quadrant1 = quadrantID[iHit];
+		int plane1 = planeID[iHit];
+//		LOG_INFO<< "Hit1 " << counter1 << " " << quadrant1 << " " << plane1 << " " << std::hex << time1 << std::dec << ENDL;
+
+		for (uint jHit = 0; jHit != nHits; jHit++) {
+			if (jHit == iHit)
+				continue;
+			int counter2 = chROID[jHit];
+			int64_t time2 = time[jHit];
+			int quadrant2 = quadrantID[jHit];
+			int plane2 = planeID[jHit];
+
+//			LOG_INFO<< "Hit2 " << counter2 << " " << quadrant2 << " " << plane2 << " " << std::hex << time2 << std::dec << ENDL;
+
+			// Check if slabs have "intersections"
+//			LOG_INFO<< "fabs(time1- time2) " << fabs(time1 - time2) << ENDL;
+//			if (fabs(time1 - time2) > 100) continue;
+
+// try to make a candidate
+			if ((nHits < nMaxSlabs) && ((quadrant2 - quadrant1) == 4)
+					&& (plane2 != plane1))
+				nCandidates++;
+		}
+	}
+
+	LOG_INFO<< "Number of CHOD candidates " << nCandidates << ENDL;
+
+	return nCandidates;
 }
 
 } /* namespace na62 */
