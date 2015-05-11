@@ -16,7 +16,6 @@
 #include "../common/decoding/DecoderHandler.h"
 #include "L1Downscaling.h"
 #include "KtagAlgo.h"
-#include "MultiDetAlgo.h"
 
 namespace na62 {
 
