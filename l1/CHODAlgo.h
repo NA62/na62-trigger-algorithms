@@ -1,23 +1,25 @@
 /*
- * MultiDetAlgo.h
+ * CHODAlgo.h
  *
- *  Created on: March 05, 2015
+ *  Created on: May 11, 2015
  *      Author: angela romano
  *      Email: axr@hep.ph.bham.ac.uk
  */
 
 #pragma once
-#ifndef MULTIALGORITHM_H_
-#define MULTIALGORITHM_H_
+#ifndef CHODALGORITHM_H_
+#define CHODALGORITHM_H_
 
 #include <cstdint>
 
 #include "../common/decoding/DecoderHandler.h"
 
+#define maxNhits 500
+
 namespace na62 {
 
 
-class MultiDetAlgo {
+class CHODAlgo {
 public:
 	/**
 	 * @param event Event* This is a pointer to the built Event containing all subevents (except those from the LKr)
@@ -27,13 +29,21 @@ public:
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 
-	MultiDetAlgo();
-	~MultiDetAlgo();
-	static uint_fast8_t processMultiDetTrigger(DecoderHandler& decoder);
+	CHODAlgo();
+	~CHODAlgo();
+	static uint_fast8_t processCHODTrigger(DecoderHandler& decoder);
 
 private:
+
+	static uint nHits;
+	static uint nMaxSlabs;
+	static uint nCandidates;
+	static int chROID[maxNhits];
+	static int quadrantID[maxNhits];
+	static int planeID[maxNhits];
+	static uint64_t time[maxNhits];
 
 };
 
 } /* namespace na62 */
-#endif /* MULTIALGORITHM_H_ */
+#endif /* CHODALGORITHM_H_ */
