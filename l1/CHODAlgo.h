@@ -10,9 +10,11 @@
 #ifndef CHODALGORITHM_H_
 #define CHODALGORITHM_H_
 
+#include <sys/types.h>
 #include <cstdint>
 
 #include "../common/decoding/DecoderHandler.h"
+#include "chod_algorithm/ParsConfFile.h"
 
 #define maxNhits 500
 
@@ -35,10 +37,12 @@ public:
 
 private:
 
+	static ParsConfFile* infoCHOD_;
+	static int* slabGeo;
 	static uint nHits;
 	static uint nMaxSlabs;
 	static uint nCandidates;
-	static int chROID[maxNhits];
+	static int slabID[maxNhits];
 	static int quadrantID[maxNhits];
 	static int planeID[maxNhits];
 	static uint64_t time[maxNhits];
