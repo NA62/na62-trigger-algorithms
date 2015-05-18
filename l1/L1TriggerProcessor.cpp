@@ -16,6 +16,7 @@
 #include "../common/decoding/DecoderHandler.h"
 #include "L1Downscaling.h"
 #include "KtagAlgo.h"
+#include "CHODAlgo.h"
 
 namespace na62 {
 
@@ -61,16 +62,20 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	uint_fast8_t cedarTrigger = 0;
 	if (L1Downscaling::processAlgorithm(cedarAlgorithmId)) {
 		if (SourceIDManager::isCedarActive()) {
-			cedarTrigger = KtagAlgo::processKtagTrigger(decoder);
+//			cedarTrigger = KtagAlgo::processKtagTrigger(decoder);
 		}
 	} else {
 		cedarTrigger = 0xFF;
 	}
 
+	uint_fast8_t chodTrigger = 0;
+	chodTrigger = CHODAlgo::processCHODTrigger(decoder);
+
 	/*
 	 * Final L1 trigger word calculation
 	 */
-	l1Trigger = cedarTrigger;
+//	l1Trigger = cedarTrigger;
+	l1Trigger = chodTrigger;
 
 	/*
 	 * Decision whether or not to request zero suppressed data from the creams
