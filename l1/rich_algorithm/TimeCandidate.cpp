@@ -5,6 +5,10 @@
  *      Author: vfascian
  */
 
+#include <options/Logging.h>
+#include <vector>
+#include <map>
+
 #include "TimeCandidate.h"
 
 namespace na62 {
@@ -17,6 +21,7 @@ TimeCandidate::TimeCandidate() {
 	nHitsClosestCandidate = -1;
 	isSelected = false;
 	isRemoved = false;
+	sortMapX = nullptr;
 
 	for (int i = 0; i < maxNCandHits; ++i) {
 		edgeCandIndexes[i] = -1;
@@ -30,10 +35,9 @@ void TimeCandidate::addEdgeIndexes(int edgeIndex, int nTotEdge) {
 	edgeCandIndexes[nTotEdge] = edgeIndex; // Pay attention to the incrementation of nTotEdge in TimeClustering!!!!
 }
 
-void TimeCandidate::removeEdgeIndexes(int nEdgePos){
+void TimeCandidate::removeEdgeIndexes(int nEdgePos) {
 	edgeCandIndexes[nEdgePos] = -1;
 }
-
 
 void TimeCandidate::addCandTime(double time) {
 	candTime = time;
@@ -83,8 +87,16 @@ void TimeCandidate::setIsRemoved(bool removed) {
 	isRemoved = removed;
 }
 
-bool TimeCandidate::getIsRemoved(){
+bool TimeCandidate::getIsRemoved() {
 	return isRemoved;
 }
+
+//std::vector<std::pair<int, double>>* TimeCandidate::getSortMapX() {
+//	return sortMapX;
+//}
+
+//void TimeCandidate::setSortMapX(std::vector<std::pair<int, double>> map){
+//	sortMapX = map;
+//}
 
 }

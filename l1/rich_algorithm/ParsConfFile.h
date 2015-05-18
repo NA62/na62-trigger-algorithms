@@ -31,6 +31,7 @@ public:
 	int* getFocalCenterJura();
 	void readT0();
 	int getMinPMsForEvent();
+	int getNCandClusteringIterations();
 
 private:
 
@@ -41,10 +42,11 @@ private:
 	int focalCenterSaleve[2];
 	int focalCenterJura[2];
 	int geoPmsMap[2560];
-	double posPmsMap[3904];
+	double posPmsMap[1952];
 	double timeT0[1952];
 	string fileT0;
 	int minPMsForEvent;
+	int nCandClusteringIterations;
 
 };
 

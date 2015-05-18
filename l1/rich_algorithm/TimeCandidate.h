@@ -8,6 +8,9 @@
 #ifndef L1_RICH_ALGORITHM_TIMECANDIDATE_H_
 #define L1_RICH_ALGORITHM_TIMECANDIDATE_H_
 
+#include <vector>
+#include <map>
+
 #define maxNCandHits 500
 
 namespace na62 {
@@ -28,11 +31,13 @@ public:
 	bool getIsRemoved();
 	double getDeltaTimeClosestCandidate();
 	int getNHitsClosestCandidate();
+	//std::vector<std::pair<int, double>>* getSortMapX();
 	void setDeltaTimeClosestCandidate(double time);
 	void setNHitsClosestCandidate(int hits);
 	void setNHits(int nTotEdges);
 	void setIsSelected(bool selection);
 	void setIsRemoved(bool removed);
+	//void setSortMapX(std::vector<std::pair<int, double>> map);
 
 private:
 
@@ -43,6 +48,10 @@ private:
 	double deltaTimeClosestCandidate;
 	int nHitsClosestCandidate;
 	bool isRemoved;
+
+public:
+
+	std::vector<std::pair<int, double>> sortMapX;
 
 };
 }

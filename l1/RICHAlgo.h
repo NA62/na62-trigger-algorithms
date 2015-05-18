@@ -10,6 +10,8 @@
 
 #include <sys/types.h>
 #include <cstdint>
+#include <map>
+#include <vector>
 
 #include "../common/decoding/DecoderHandler.h"
 #include "rich_algorithm/TimeCandidate.h"
@@ -34,27 +36,38 @@ public:
 	 */
 
 	static uint_fast8_t processRICHTrigger(DecoderHandler& decoder);
-	static double evalDeltaX(double* fitPositionX);
-	static double evalDeltaY(double* fitPositionY);
+	static double evalDeltaX();
+	static double evalDeltaY();
 	static int* getChPosFocalCorr(int diskID);
-	static void timeClustering(double* leadTime);
+	static void timeClustering();
+	static void mapping();
+	static void multiRingReco();
+	static bool startingTriplet(int iSide);
+
 
 private:
     static uint chRO[maxNhits];
 	static int nHits;
-	static double* t0Time;
 	static ParsConfFile* infoRICH_;
+	static double* t0Time;
 	static int* pmsGeo;
 	static double* pmsPos;
 	static int* focalCenterJura;
 	static int* focalCenterSaleve;
 	static int minPMsForEvent;
+	static int nCandClusteringIterations;
 	static int nCandidates;
 	static TimeCandidate timeCandidates[maxNCands];
 	static double fitPositionX[maxNhits];
 	static double fitPositionY[maxNhits];
 	static double leadRecoTime[maxNhits];
 	static int focalCorrection[2];
+	static double edge_times_ns[maxNhits];
+	static int timeWindow;
+	//static vector<pair<int, double>> sortMapX;
+	static pair<int, double> pairX;
+	//typedef static pair<int, double> sortPair;
+
 
 
 };
