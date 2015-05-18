@@ -41,11 +41,10 @@ private:
 	static int* slabGeo;
 	static uint nHits;
 	static uint nMaxSlabs;
-	static uint nCandidates;
-	static int slabID[maxNhits];
-	static int quadrantID[maxNhits];
-	static int planeID[maxNhits];
-	static uint64_t time[maxNhits];
+//	static int slabID[maxNhits];
+//	static int quadrantID[maxNhits];
+//	static int planeID[maxNhits];
+//	static uint64_t time[maxNhits];
 
 };
 
