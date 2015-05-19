@@ -21,7 +21,7 @@ TimeCandidate::TimeCandidate() {
 	nHitsClosestCandidate = -1;
 	isSelected = false;
 	isRemoved = false;
-	sortMapX = nullptr;
+	//sortMapX = nullptr;
 
 	for (int i = 0; i < maxNCandHits; ++i) {
 		edgeCandIndexes[i] = -1;
