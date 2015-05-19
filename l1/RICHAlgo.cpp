@@ -185,8 +185,8 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 		//gettimeofday(&time[6], 0);
 	}
 //LOG_INFO << "NHits " << nHits<< ENDL;
-	//return (DeltaX > 400 || DeltaY > 390);
-	return 1;
+	return (nHits > 10 && (DeltaX > 400 || DeltaY > 390));
+	//return 1;
 
 //	LOG_INFO<< "nHits " << " " << "nCandidates" << ENDL;
 //	LOG_INFO<< nHits << "      " << nCandidates << ENDL;
