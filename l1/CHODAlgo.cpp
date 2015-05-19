@@ -49,7 +49,7 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder) {
 	using namespace l0;
 
 	nHits = 0;
-	nMaxSlabs = 14;
+	nMaxSlabs = 7;
 
 //	LOG_INFO<< "Event number = " << decoder.getDecodedEvent()->getEventNumber() << ENDL;
 //	LOG_INFO<< "Timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << ENDL;
