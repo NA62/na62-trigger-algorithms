@@ -43,6 +43,7 @@ public:
 	static void mapping();
 	static void multiRingReco();
 	static bool startingTriplet(int iSide);
+	static void monoRingFit();
 
 
 private:
@@ -67,6 +68,8 @@ private:
 	//static vector<pair<int, double>> sortMapX;
 	static pair<int, double> pairX;
 	//typedef static pair<int, double> sortPair;
+	static float centerRing[2];
+	static float radiusRing;
 
 
 

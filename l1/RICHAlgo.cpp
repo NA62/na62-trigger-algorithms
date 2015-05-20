@@ -53,10 +53,12 @@ int RICHAlgo::focalCorrection[2];
 int RICHAlgo::timeWindow = 10 * ns;
 //vector<pair<int, double>> RICHAlgo::sortMapX;
 pair<int, double> RICHAlgo::pairX;
+float RICHAlgo::centerRing[2];
+float RICHAlgo::radiusRing;
 
 uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 
-	//struct timeval time[10];
+	struct timeval time[10];
 
 	//gettimeofday(&time[0], 0);
 
@@ -95,6 +97,7 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 		uint numberOfEdgesOfCurrentBoard = richPacket->getNumberOfEdgesStored();
 
 		//gettimeofday(&time[1], 0);
+
 		const uint_fast8_t fineTime = decoder.getDecodedEvent()->getFinetime();
 		double fineTime_ns = 0;
 
@@ -124,19 +127,13 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 				int chSeqID = channel.getChannelSeqID();
 				if (chSeqID == -1)
 					continue;
-//				LOG_INFO << "Seq ID " << chSeqID << ENDL;
 				int newSeqID = chSeqID % 976;
-				//	LOG_INFO<< "new SeqID " << newSeqID << ENDL;
 
-				if (fabs(
-						edge_times_ns[iEdge + nEdges_tot]
-								- fineTime_ns) < 5 * ns || 1 ) {
+				if (fabs(edge_times_ns[iEdge + nEdges_tot] - fineTime_ns)
+						< 5 * ns || 1) {
 
-					//leadRecoTime[nHits] = edge_times_ns[iEdge+nEdges_tot] - t0Time[chSeqID];
-					//int* focalCorrection = new int[2];
 					getChPosFocalCorr(channel.getDiskID(pmsGeo[chRO[nHits]]));
 
-//				LOG_INFO << "Disk ID " << channel.getDiskID(pmsGeo[chRO[nHits]]) << " X correction "<<focalCorrection[0] << ENDL;
 
 					fitPositionX[nHits] = pmsPos[newSeqID * 2]
 							- focalCorrection[0];
@@ -145,14 +142,6 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 					leadRecoTime[nHits] = edge_times_ns[iEdge + nEdges_tot]
 							- t0Time[chSeqID];
 
-//LOG_INFO<<"iLead " << nHits << " chID " << pmsGeo[chRO[nHits]] << " seq " << chSeqID <<" ChRO " << chRO[nHits]<< "  time " << edge_times_ns[iEdge+nEdges_tot] << ENDL;
-
-//LOG_INFO << "chRO " << chRO[iEdge] <<" chGEO " << pmsGeo[chRO[iEdge]] << ENDL;
-//				LOG_INFO << "T0 time " << t0Time[chSeqID] << ENDL;
-
-//				LOG_INFO <<"X position " << pmsPos[newSeqID*2] << " X fit position " << fitPositionX[nHits] << ENDL;
-//				LOG_INFO<< "Y position " << pmsPos[newSeqID*2+1] << " Y fit position " << fitPositionY[nHits] << ENDL;
-// 				LOG_INFO<<"Index " <<nHits <<" Edge Time[ns] " << edge_times_ns[iEdge + nEdges_tot] << " Rec Time " << leadRecoTime[nHits] << ENDL;
 
 					nHits++;
 				}
@@ -164,7 +153,7 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 		nEdges_tot += numberOfEdgesOfCurrentBoard;
 	}
 
-//gettimeofday(&time[2], 0);
+	//gettimeofday(&time[1], 0);
 
 //	LOG_INFO<< "nHits " << nHits << ENDL;
 //	LOG_INFO<< "DeltaX value " << evalDeltaX(fitPositionX) << ENDL;
@@ -176,44 +165,33 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 	if (nHits > 0) {
 		//gettimeofday(&time[3], 0);
 		//timeClustering();
-		//gettimeofday(&time[4], 0);
-
+		//gettimeofday(&time[2], 0);
 		DeltaX = evalDeltaX();
-
-		//gettimeofday(&time[5], 0);
+		//gettimeofday(&time[3], 0);
 		DeltaY = evalDeltaY();
-		//gettimeofday(&time[6], 0);
+		//gettimeofday(&time[4], 0);
+		monoRingFit();
+		//gettimeofday(&time[5], 0);
+		//LOG_INFO << "NHits " << nHits << " DeltaX " << DeltaX << " DeltaY " << DeltaY << ENDL;
 	}
-//LOG_INFO << "NHits " << nHits<< ENDL;
-	return (nHits > 40 && (DeltaX > 400 || DeltaY > 390));
-	//return 1;
 
-//	LOG_INFO<< "nHits " << " " << "nCandidates" << ENDL;
-//	LOG_INFO<< nHits << "      " << nCandidates << ENDL;
+	//gettimeofday(&time[5], 0);
 
-//	for (int i = 0; i < nCandidates; ++i){
-//	//	LOG_INFO <<"iCand " << i << " nHits " << timeCandidates[i].getNHits()<< ENDL;
-//		for (int j = 0; j < timeCandidates[i].getNHits(); j++){
-//			LOG_INFO << "iCand " << i << " hit index " << timeCandidates[i].getEdgeIndexes()[j] <<" Time " << leadRecoTime[timeCandidates[i].getEdgeIndexes()[j]] <<  ENDL;
-//
-//		}
-//	}
+	//gettimeofday(&time[6], 0);
 
-//	if (nHits > 0) {
-//		mapping();
-//	}
 
 //uint nRings = 0;
 
 //	gettimeofday(&time[7], 0);
 
 //	if (nHits > 0) {
-//		LOG_INFO<< "CIAO ";
-//		for (int i = 0; i < 6; i++) {
-//			LOG_INFO << ((time[i+1].tv_usec + time[i+1].tv_sec*1e6)-(time[i].tv_usec + time[i].tv_sec*1e6)) << " ";
+//		//LOG_INFO<< "CIAO ";
+//		for (int i = 0; i < 7; i++) {
+//			LOG_INFO<< ((time[i+1].tv_usec + time[i+1].tv_sec*1e6)-(time[i].tv_usec + time[i].tv_sec*1e6))*0.7 << " ";
 //		}
 //		LOG_INFO <<ENDL;
 //	}
+	return (nHits > 40 && (DeltaX > 400 || DeltaY > 390));
 //return nRings;
 
 }
@@ -543,6 +521,73 @@ void RICHAlgo::mapping() {
 //		}
 	}
 }
+
+void RICHAlgo::monoRingFit() {
+
+	float xm = 0;
+	float ym = 0;
+	float xav;
+	float yav;
+	float newPosX[nHits];
+	float newPosY[nHits];
+	float Suu = 0;
+	float Svv = 0;
+	float Suuu = 0;
+	float Svvv = 0;
+	float Suv = 0;
+	float Suvv = 0;
+	float Suuv = 0;
+	float ui, vi;
+
+	for (int i = 0; i < nHits; ++i) {
+
+		//LOG_INFO<< "fitPos " << fitPositionX[i] << ENDL;
+		xm = xm + fitPositionX[i];
+		ym = ym + fitPositionY[i];
+	}
+
+	xav = xm / nHits;
+	yav = ym / nHits;
+
+	//LOG_INFO<< "xSum " << xm << " xMean " << xav << ENDL;
+
+	for (int i = 0; i < nHits; ++i) {
+
+		newPosX[i] = fitPositionX[i] - xav;
+		newPosY[i] = fitPositionY[i] - yav;
+		//LOG_INFO<< "newPosX " << newPosX[i] << " newPosY " << newPosY[i]<< ENDL;
+		ui = newPosX[i];
+		vi = newPosY[i];
+
+		//LOG_INFO<< " ui " << ui << " uuu " << ui*ui*ui<< ENDL;
+
+		Suu = Suu + ui * ui;
+		Svv = Svv + vi * vi;
+		Suv = Suv + ui * vi;
+		Suuu = Suuu + ui * ui * ui;
+		Svvv = Svvv + vi * vi * vi;
+		Suuv = Suuv + ui * ui * vi;
+		Suvv = Suvv + vi * vi * ui;
+
+	}
+
+	float cc1 = 0.5 * (Suuu + Suvv);
+	float cc2 = 0.5 * (Svvv + Suuv);
+	float uc = ((Suv * cc2 - Svv * cc1) / (Suv * Suv - Suu * Svv));
+	float vc = (cc1 - Suu * uc) / Suv;
+	float alpha = uc * uc + vc * vc + (Suu + Svv) / nHits;
+
+	//LOG_INFO<< " Suv * Suv - Suu * Svv " << Suv * Suv - Suu * Svv << ENDL;
+	//LOG_INFO<< "Suu " << Suu <<" Svv " << Svv << " Suv " << Suv << " Suuu " << Suuu << " Svv " << Svvv << " Suuv " << Suuv << " Suvv " << Suvv << ENDL;
+	//LOG_INFO<< "cc1 " << cc1 << " cc2 " << cc2 << " uc " << uc << " vc " << vc << " alpha " << alpha<< ENDL;
+// compute radius and center
+
+	centerRing[0] = uc + xav;
+	centerRing[1] = vc + yav;
+	radiusRing = sqrt(alpha);
+
+}
+
 }
 /* namespace na62 */
 

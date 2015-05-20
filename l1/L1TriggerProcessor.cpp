@@ -24,8 +24,6 @@ namespace na62 {
 double L1TriggerProcessor::bypassProbability;
 uint L1TriggerProcessor::cedarAlgorithmId;
 
-
-
 void L1TriggerProcessor::registerDownscalingAlgorithms() {
 	cedarAlgorithmId = L1Downscaling::registerAlgorithm("CEDAR");
 
@@ -49,6 +47,7 @@ bool L1TriggerProcessor::isRequestZeroSuppressedCreamData(
 uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	using namespace l0;
 	DecoderHandler decoder(event);
+//LOG_INFO<< "CIAOOOOOO" << ENDL;
 
 	/*
 	 * Check if the event should bypass the processing
@@ -79,7 +78,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	 * Final L1 trigger word calculation
 	 */
 	l1Trigger = cedarTrigger;
-    //l1Trigger = richTrigger;
+	//l1Trigger = richTrigger;
 	/*
 	 * Decision whether or not to request zero suppressed data from the creams
 	 */
