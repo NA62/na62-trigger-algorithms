@@ -49,7 +49,7 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder) {
 	using namespace l0;
 
 	nHits = 0;
-	nMaxSlabs = 7;
+	nMaxSlabs = 5;
 
 //	LOG_INFO<< "Event number = " << decoder.getDecodedEvent()->getEventNumber() << ENDL;
 //	LOG_INFO<< "Timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << ENDL;
@@ -108,7 +108,7 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder) {
 	gettimeofday(&time[2], 0);
 //	LOG_INFO<< "time check " << time[2].tv_sec << " " << time[2].tv_usec << ENDL;
 //	}
-//	LOG_INFO<<"CHODAlgo.cpp: Analysed Event " << decoder.getDecodedEvent()->getEventNumber() << " - nHits " << nHits << ENDL;
+//	LOG_INFO<<" ************************************** CHODAlgo.cpp: Analysed Event " << decoder.getDecodedEvent()->getEventNumber() << " - nHits " << nHits << ENDL;
 
 	gettimeofday(&time[3], 0);
 //	LOG_INFO<< "time check (final)" << time[3].tv_sec << " " << time[3].tv_usec << ENDL;

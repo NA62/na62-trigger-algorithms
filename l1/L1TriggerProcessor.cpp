@@ -46,6 +46,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	using namespace l0;
 	DecoderHandler decoder(event);
 
+	event->readTriggerTypeWordAndFineTime();
+
 	/*
 	 * Check if the event should bypass the processing
 	 */
