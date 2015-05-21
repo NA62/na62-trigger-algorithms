@@ -32,7 +32,7 @@
 
 namespace na62 {
 
-ParsConfFile* RICHAlgo::infoRICH_ = ParsConfFile::GetInstance();
+RICHParsConfFile* RICHAlgo::infoRICH_ = RICHParsConfFile::GetInstance();
 int* RICHAlgo::pmsGeo = infoRICH_->getGeoPmsMap();
 double* RICHAlgo::pmsPos = infoRICH_->getPosPmsMap();
 int* RICHAlgo::focalCenterJura = infoRICH_->getFocalCenterJura();

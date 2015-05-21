@@ -49,7 +49,7 @@ public:
 private:
     static uint chRO[maxNhits];
 	static int nHits;
-	static ParsConfFile* infoRICH_;
+	static RICHParsConfFile* infoRICH_;
 	static double* t0Time;
 	static int* pmsGeo;
 	static double* pmsPos;

@@ -5,7 +5,7 @@
  *      Author: vfascian
  */
 
-#include "ConfFileReader.h"
+#include "../../common/ConfFileReader.h"
 #include "ParsConfFile.h"
 
 #include <iostream>
@@ -15,11 +15,11 @@
 
 #include <sys/time.h>
 
-ParsConfFile* ParsConfFile::theInstance = nullptr;
+RICHParsConfFile* RICHParsConfFile::theInstance = nullptr;
 
-ParsConfFile::ParsConfFile() {
+RICHParsConfFile::RICHParsConfFile() {
 
-	//LOG_INFO<< "In ParseConfFile" << ENDL;
+	//LOG_INFO<< "In RICH ParseConfFile" << ENDL;
 
 //	struct timeval timePars1;
 //	struct timeval timePars2;
@@ -29,7 +29,7 @@ ParsConfFile::ParsConfFile() {
 	fileT0 = " ";
 
 	ConfFileReader fileName_(
-			"/Users/vfascian/Documents/workspace/na62-trigger-algorithms/l1/rich_algorithm/config/RICH.conf");
+			"/workspace/na62-trigger-algorithms/l1/rich_algorithm/config/RICH.conf");
 
 	if (!fileName_.isValid())
 		LOG_INFO<< "Config file not found" << ENDL;
@@ -131,46 +131,46 @@ ParsConfFile::ParsConfFile() {
 	//LOG_INFO<< ((timePars2.tv_usec + timePars2.tv_sec*1e6)-(timePars1.tv_usec + timePars1.tv_sec*1e6))*0.7 << ENDL;
 }
 
-ParsConfFile::~ParsConfFile() {
+RICHParsConfFile::~RICHParsConfFile() {
 }
 
-ParsConfFile* ParsConfFile::GetInstance() {
+RICHParsConfFile* RICHParsConfFile::GetInstance() {
 
 	if (theInstance == nullptr) {
-		theInstance = new ParsConfFile();
+		theInstance = new RICHParsConfFile();
 	}
 	return theInstance;
 
 }
 
-//int ParsConfFile::getChannelRemap(int ROID) {
+//int RICHParsConfFile::getChannelRemap(int ROID) {
 //
 //	int geoID = channelRemap.at(ROID);
 //	return geoID;
 //
 //}
 
-int* ParsConfFile::getGeoPmsMap() {
+int* RICHParsConfFile::getGeoPmsMap() {
 	return geoPmsMap;
 }
 
-double* ParsConfFile::getPosPmsMap() {
+double* RICHParsConfFile::getPosPmsMap() {
 	return posPmsMap;
 }
 
-int* ParsConfFile::getFocalCenterJura() {
+int* RICHParsConfFile::getFocalCenterJura() {
 	return focalCenterJura;
 }
 
-int* ParsConfFile::getFocalCenterSaleve() {
+int* RICHParsConfFile::getFocalCenterSaleve() {
 	return focalCenterSaleve;
 }
 
-void ParsConfFile::readT0() {
+void RICHParsConfFile::readT0() {
 
-//	LOG_INFO<< "ParsFile::File T0 " << fileT0 << ENDL;
+//	LOG_INFO<< "RICH ParsFile::File T0 " << fileT0 << ENDL;
 	ConfFileReader fileT0_(
-			"/Users/vfascian/Documents/workspace/na62-trigger-algorithms/l1/rich_algorithm/"
+			"/workspace/na62-trigger-algorithms/l1/rich_algorithm/"
 					+ fileT0);
 
 	if (!fileT0_.isValid())
@@ -206,15 +206,15 @@ void ParsConfFile::readT0() {
 	}
 }
 
-double* ParsConfFile::getT0() {
+double* RICHParsConfFile::getT0() {
 	readT0();
 	return timeT0;
 }
 
-int ParsConfFile::getMinPMsForEvent() {
+int RICHParsConfFile::getMinPMsForEvent() {
 	return minPMsForEvent;
 }
 
-int ParsConfFile::getNCandClusteringIterations() {
+int RICHParsConfFile::getNCandClusteringIterations() {
 	return nCandClusteringIterations;
 }

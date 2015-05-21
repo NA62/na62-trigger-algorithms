@@ -8,7 +8,7 @@
 #ifndef L1_RICH_ALGORITHM_PARSCONFFILE_H_
 #define L1_RICH_ALGORITHM_PARSCONFFILE_H_
 
-#include "ConfFileReader.h"
+#include "../../common/ConfFileReader.h"
 
 #include <iostream>
 #include <vector>
@@ -16,12 +16,12 @@
 
 using namespace std;
 
-class ParsConfFile {
+class RICHParsConfFile {
 public:
-	ParsConfFile();
-	~ParsConfFile();
+	RICHParsConfFile();
+	~RICHParsConfFile();
 
-	static ParsConfFile* GetInstance();
+	static RICHParsConfFile* GetInstance();
 
 	//int getChannelRemap(int);
 	int* getGeoPmsMap();
@@ -35,7 +35,7 @@ public:
 
 private:
 
-	static ParsConfFile* theInstance;  // singleton instance
+	static RICHParsConfFile* theInstance;  // singleton instance
 
 	int nChannels;
 	int nroChannels;
@@ -50,4 +50,4 @@ private:
 
 };
 
-#endif /* L1_PARSCONFFILE_H_ */
+#endif /* L1_RICH_ALGORITHM_PARSCONFFILE_H_ */

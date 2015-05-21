@@ -18,12 +18,12 @@
 
 using namespace std;
 
-class ParsConfFile {
+class CHODParsConfFile {
 public:
-       ParsConfFile();
-       ~ParsConfFile();
+       CHODParsConfFile();
+       ~CHODParsConfFile();
 
-       static ParsConfFile* GetInstance();
+       static CHODParsConfFile* GetInstance();
 
        int* getGeoSlabMap();
 //       double* getT0();
@@ -31,7 +31,7 @@ public:
 
 private:
 
-       static ParsConfFile* theInstance;  // singleton instance
+       static CHODParsConfFile* theInstance;  // singleton instance
 
        int nroChannels;
        int geoSlabMap[512];

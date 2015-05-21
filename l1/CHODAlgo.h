@@ -37,7 +37,7 @@ public:
 
 private:
 
-	static ParsConfFile* infoCHOD_;
+	static CHODParsConfFile* infoCHOD_;
 	static int* slabGeo;
 	static uint nHits;
 	static uint nMaxSlabs;

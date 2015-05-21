@@ -17,14 +17,14 @@
 
 #include <sys/time.h>
 
-ParsConfFile* ParsConfFile::theInstance = nullptr;
+CHODParsConfFile* CHODParsConfFile::theInstance = nullptr;
 
-ParsConfFile::ParsConfFile() {
+CHODParsConfFile::CHODParsConfFile() {
 
-//	LOG_INFO<< "In ParseConfFile" << ENDL;
+//	LOG_INFO<< "In CHOD ParseConfFile" << ENDL;
 
 	ConfFileReader fileName_(
-			"/Users/romano/Desktop/workspace/na62-trigger-algorithms/l1/chod_algorithm/config/CHOD.conf");
+			"/workspace/na62-trigger-algorithms/l1/chod_algorithm/config/CHOD.conf");
 
 	if (!fileName_.isValid())
 		LOG_INFO<< "Config file not found" << ENDL;
@@ -63,25 +63,25 @@ ParsConfFile::ParsConfFile() {
 	}
 }
 
-ParsConfFile::~ParsConfFile() {
+CHODParsConfFile::~CHODParsConfFile() {
 }
 
-ParsConfFile* ParsConfFile::GetInstance() {
+CHODParsConfFile* CHODParsConfFile::GetInstance() {
 
 	if (theInstance == nullptr) {
-		theInstance = new ParsConfFile();
+		theInstance = new CHODParsConfFile();
 	}
 	return theInstance;
 
 }
 
-int* ParsConfFile::getGeoSlabMap() {
+int* CHODParsConfFile::getGeoSlabMap() {
 	return geoSlabMap;
 }
 
-//void ParsConfFile::readT0() {
+//void CHODParsConfFile::readT0() {
 //
-////     LOG_INFO<< "ParsFile::File T0 " << fileT0 << ENDL;
+////     LOG_INFO<< "CHOD ParsFile::File T0 " << fileT0 << ENDL;
 //       ConfFileReader fileT0_("");
 //
 //       if (!fileT0_.isValid())
@@ -117,7 +117,7 @@ int* ParsConfFile::getGeoSlabMap() {
 //               }
 //}
 //
-//double* ParsConfFile::getT0() {
+//double* CHODParsConfFile::getT0() {
 //       readT0();
 //       return timeT0;
 //}

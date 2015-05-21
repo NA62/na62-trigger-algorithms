@@ -23,7 +23,7 @@
 
 namespace na62 {
 
-ParsConfFile* CHODAlgo::infoCHOD_ = ParsConfFile::GetInstance();
+CHODParsConfFile* CHODAlgo::infoCHOD_ = CHODParsConfFile::GetInstance();
 int * CHODAlgo::slabGeo = infoCHOD_->getGeoSlabMap();
 uint CHODAlgo::nHits;
 uint CHODAlgo::nMaxSlabs;
