@@ -17,6 +17,7 @@
 #include "L1Downscaling.h"
 #include "KtagAlgo.h"
 #include "CHODAlgo.h"
+#include "RICHAlgo.h"
 
 namespace na62 {
 
@@ -25,6 +26,7 @@ uint L1TriggerProcessor::cedarAlgorithmId;
 
 void L1TriggerProcessor::registerDownscalingAlgorithms() {
 	cedarAlgorithmId = L1Downscaling::registerAlgorithm("CEDAR");
+
 }
 
 void L1TriggerProcessor::initialize(double _bypassProbability) {
@@ -73,11 +75,15 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	uint_fast8_t chodTrigger = 0;
 	chodTrigger = CHODAlgo::processCHODTrigger(decoder);
 
+	uint_fast8_t richTrigger = 0;
+	richTrigger = RICHAlgo::processRICHTrigger(decoder);
+
 	/*
 	 * Final L1 trigger word calculation
 	 */
 //	l1Trigger = cedarTrigger;
 	l1Trigger = chodTrigger;
+//	l1Trigger = richTrigger;
 
 	/*
 	 * Decision whether or not to request zero suppressed data from the creams
