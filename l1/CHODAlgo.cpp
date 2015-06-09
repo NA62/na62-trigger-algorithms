@@ -49,7 +49,7 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder) {
 	using namespace l0;
 
 	nHits = 0;
-	nMaxSlabs = 5;
+	nMaxSlabs = 6;
 
 //	LOG_INFO<< "Event number = " << decoder.getDecodedEvent()->getEventNumber() << ENDL;
 //	LOG_INFO<< "Timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << ENDL;
@@ -86,6 +86,7 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder) {
 			 *
 			 */
 			if (slabGeo[roChID] < 128) {
+//			if (roChID < 128) {
 //				LOG_INFO<< "Edge " << iEdge << " ID " << edge_IDs[iEdge] << ENDL;
 //				LOG_INFO<< "Edge " << iEdge << " chID " << (uint) edge_chIDs[iEdge] << ENDL;
 //				LOG_INFO<< "Edge " << iEdge << " tdcID " << (uint) edge_tdcIDs[iEdge] << ENDL;
@@ -108,7 +109,7 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder) {
 	gettimeofday(&time[2], 0);
 //	LOG_INFO<< "time check " << time[2].tv_sec << " " << time[2].tv_usec << ENDL;
 //	}
-//	LOG_INFO<<" ************************************** CHODAlgo.cpp: Analysed Event " << decoder.getDecodedEvent()->getEventNumber() << " - nHits " << nHits << ENDL;
+//	LOG_INFO<<" CHODAlgo.cpp: Analysed Event " << decoder.getDecodedEvent()->getEventNumber() << " - nHits " << nHits << ENDL;
 
 	gettimeofday(&time[3], 0);
 //	LOG_INFO<< "time check (final)" << time[3].tv_sec << " " << time[3].tv_usec << ENDL;
@@ -119,7 +120,12 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder) {
 //		}
 //	LOG_INFO<< ((time[3].tv_sec - time[0].tv_sec)*1e6 + time[3].tv_usec) - time[0].tv_usec << ENDL;
 
-	return nHits < nMaxSlabs;
+//	if ((nHits > 0) && (nHits < nMaxSlabs)) {
+//		return 1;
+//	} else {
+//		return 0x40;
+//	}
+	return ((nHits > 0) && (nHits < nMaxSlabs));
 }
 
 }

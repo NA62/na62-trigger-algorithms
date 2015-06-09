@@ -31,7 +31,7 @@ CHODParsConfFile::CHODParsConfFile() {
 
 	if (fileName_.isValid()) {
 
-//		LOG_INFO<< "File CHOD.conf open" << ENDL;
+//		LOG_INFO<< "CHOD configuration file open" << ENDL;
 
 		while (fileName_.nextLine()) {
 

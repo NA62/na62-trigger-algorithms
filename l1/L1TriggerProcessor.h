@@ -17,9 +17,10 @@ namespace na62 {
 
 class EventBuilder;
 class Event;
-class CedarData;
+//class CedarData;
 class KtagAlgo;
 class RICHAlgo;
+class CHODAlgo;
 
 class L1TriggerProcessor {
 public:
@@ -52,17 +53,17 @@ public:
 	/**
 	 * Placeholder for deciding whether or not to request ZS CREAM data
 	 */
-	static bool isRequestZeroSuppressedCreamData(uint_fast8_t l1TriggerTypeWord);
+	static bool isRequestZeroSuppressedCreamData(
+			uint_fast8_t l1TriggerTypeWord);
 
 	static void initialize(double _bypassProbability);
-
-
 
 private:
 	static double bypassProbability;
 
 	static uint cedarAlgorithmId;
-
+	static uint chodAlgorithmId;
+	static uint richAlgorithmId;
 };
 
 } /* namespace na62 */

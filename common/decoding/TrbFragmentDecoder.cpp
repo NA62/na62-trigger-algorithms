@@ -53,7 +53,7 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	 * Each word is 4 bytes: there is 1 board header and at least 1 FPGA header and 1 Frame header
 	 * -> use this to estimate the maximum number of words
 	 */
-	const uint maxNwords = (trbDataFragment->getPayloadLength() / 4) - 3;
+	const uint maxNwords = (trbDataFragment->getPayloadLength() / 4) - 2;
 	edgeTimes = new uint64_t[maxNwords];
 	edgeChIDs = new uint_fast8_t[maxNwords];
 	edgeTdcIDs = new uint_fast8_t[maxNwords];
@@ -84,8 +84,9 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 		//LOG_INFO<< "FPGA ID " << (uint) fpgaHeader->FPGAID<< ENDL;
 		//LOG_INFO<< "Error Flags " << (uint) fpgaHeader->errFlags<< ENDL;
 
-		const uint_fast8_t nFrames = fpgaHeader->noFrames;
-		//LOG_INFO<< "Number of Frames (from fpgaHeader) " << nFrames << ENDL;
+		////////// 2015 DATA FORMAT with suppression of empty frames ////////////////////
+		const uint_fast8_t nFrames = fpgaHeader->noNonEmptyFrames;
+		//LOG_INFO<< "Number of (Non Empty) Frames (from fpgaHeader) " << nFrames << ENDL;
 
 		for (uint iFrame = 0; iFrame != nFrames; iFrame++) {
 			//printf("writing getpayload() + %d\n", 2 + iFPGA + nWords_tot);
@@ -95,7 +96,8 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 			//LOG_INFO<< "Number of Words in Frame " << (uint) frameHeader->nWords<< ENDL;
 			//LOG_INFO<< "Frame Timestamp " << (uint) frameHeader->frameTimeStamp<< ENDL;
 
-			const uint_fast16_t nWordsOfCurrentFrame = (uint) frameHeader->nWords;
+			const uint_fast16_t nWordsOfCurrentFrame =
+					(uint) frameHeader->nWords;
 			nWords_tot += nWordsOfCurrentFrame;
 			//LOG_INFO<< "Number of Words  " << nWords_tot << ENDL;
 
@@ -149,7 +151,7 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 			}
 		}
 	}
-	//LOG_INFO<<"TrbDecoder.cpp: Analysed Tel62 ID " << trbNum << " - Number of edges found " << nEdges_tot << ENDL;
+//	LOG_INFO<<"TrbDecoder.cpp: Analysed Tel62 ID " << fragmentNumber_ << " - Number of edges found " << nEdges_tot << ENDL;
 }
 
 }

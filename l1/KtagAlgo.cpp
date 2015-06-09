@@ -65,12 +65,19 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 //			LOG_INFO<< "Edge " << iEdge << " tdcID " << (uint) edge_tdcIDs[iEdge] << ENDL;
 //			LOG_INFO<< "Edge " << iEdge << " time " << std::hex << edge_times[iEdge] << std::dec << ENDL;
 
+			/**
+			 * Process leading edges only
+			 *
+			 */
+			//if (edge_IDs[iEdge] && (fabs(edge_times[iEdge] - decoder.getDecodedEvent()->getFinetime()) < 50)) {
 			if (edge_IDs[iEdge]) {
 				const uint trbID = edge_tdcIDs[iEdge] / 4;
 				const uint box = calculateSector(
 						cedarPacket->getFragmentNumber(), trbID);
 
-//				LOG_INFO << "box " << box << ENDL;
+				// Algorithm for exercise with PATTI input
+				//const uint box = 2 * (edge_tdcIDs[iEdge] % 4) + (edge_chIDs[iEdge] / 8);
+				LOG_INFO << "box " << box << ENDL;
 				sector_occupancy[box]++;
 			}
 			//LOG_INFO<< "ANGELA-L1" << "\t" << decoder.getDecodedEvent()->getEventNumber() << "\t" << decoder.getDecodedEvent()->getTimestamp() << "\t" << (int)edge_IDs[iEdge] << "\t" << (int)edge_chIDs[iEdge]<< "\t" << (int)edge_tdcIDs[iEdge] << "\t" << edge_times[iEdge] << "\t" << trbID << "\t" << box << ENDL;
@@ -97,9 +104,9 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 //	LOG_INFO<< "Angela: " << decoder.getDecodedEvent()->getEventNumber() << "\t" << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << "\t" << nSectors << ENDL;
 	gettimeofday(&time[5], 0);
 //  LOG_INFO<< "time check (outside for - Nsector coincidences)" << time[5].tv_sec << " " << time[5].tv_usec << ENDL;
-	//for (int i = 0; i < 5; i++) {
-	//             if(i && i!=3) LOG_INFO<< ((time[i+1].tv_sec - time[i].tv_sec)*1e6 + time[i+1].tv_usec) - time[i].tv_usec << " ";
-	//     }
+//for (int i = 0; i < 5; i++) {
+//             if(i && i!=3) LOG_INFO<< ((time[i+1].tv_sec - time[i].tv_sec)*1e6 + time[i+1].tv_usec) - time[i].tv_usec << " ";
+//     }
 
 //	LOG_INFO<< std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << " " << nEdges_tot << " " << nSectors << " " << ((time[4].tv_sec - time[0].tv_sec)*1e6 + time[4].tv_usec) - time[0].tv_usec << " " << ((time[5].tv_sec - time[0].tv_sec)*1e6 + time[5].tv_usec) - time[0].tv_usec << ENDL;
 //	LOG_INFO<< nEdges_tot << " " << ((time[4].tv_sec - time[0].tv_sec)*1e6 + time[4].tv_usec) - time[0].tv_usec << " " << ((time[5].tv_sec - time[0].tv_sec)*1e6 + time[5].tv_usec) - time[0].tv_usec << ENDL;

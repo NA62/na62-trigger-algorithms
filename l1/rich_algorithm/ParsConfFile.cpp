@@ -36,7 +36,7 @@ RICHParsConfFile::RICHParsConfFile() {
 
 	if (fileName_.isValid()) {
 
-//		LOG_INFO << "File RICH.conf open" << ENDL;
+		LOG_INFO<< "RICH configuration file open" << ENDL;
 
 		while (fileName_.nextLine()) {
 
@@ -99,7 +99,7 @@ RICHParsConfFile::RICHParsConfFile() {
 							//LOG_INFO << "i1 " << iCh*16+jCh << " i1 Pos " << fileName_.getField<double>(jCh + 2) << ENDL;
 							//LOG_INFO << "i2 " << iCh*16+jCh + nChannels << " i2 Pos " << fileName.getField<double>(jCh + 2) << ENDL;
 							posPmsMap[iCh * 16 + jCh] = fileName_.getField<
-									double>(jCh + 2);
+							double>(jCh + 2);
 							//posPmsMap[iCh*16+jCh+nChannels] = fileName.getField<double>(jCh + 2);
 						}
 					}
@@ -116,8 +116,8 @@ RICHParsConfFile::RICHParsConfFile() {
 				minPMsForEvent = fileName_.getField<int>(2);
 			}
 
-			if (fileName_.getField<string>(1).find("NCandidateClusteringIterations")
-					!= string::npos) {
+			if (fileName_.getField<string>(1).find(
+							"NCandidateClusteringIterations") != string::npos) {
 				nCandClusteringIterations = fileName_.getField<int>(2);
 			}
 
@@ -170,8 +170,7 @@ void RICHParsConfFile::readT0() {
 
 //	LOG_INFO<< "RICH ParsFile::File T0 " << fileT0 << ENDL;
 	ConfFileReader fileT0_(
-			"/workspace/na62-trigger-algorithms/l1/rich_algorithm/"
-					+ fileT0);
+			"/workspace/na62-trigger-algorithms/l1/rich_algorithm/" + fileT0);
 
 	if (!fileT0_.isValid())
 		LOG_INFO<< "T0 file not found" << ENDL;

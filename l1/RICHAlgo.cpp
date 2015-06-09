@@ -66,8 +66,6 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 
 //	LOG_INFO<<"####### RICHAlgo.cpp: Analysing Event #### " << decoder.getDecodedEvent()->getEventNumber() << ENDL;
 
-//	infoRICH_ = ParsConfFile::GetInstance();
-
 	nHits = 0;
 	nCandidates = 0;
 
@@ -132,8 +130,9 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 				if (fabs(edge_times_ns[iEdge + nEdges_tot] - fineTime_ns)
 						< 5 * ns || 1) {
 
-					getChPosFocalCorr(channel.getDiskID(pmsGeo[chRO[nHits]]));
+//				if (fabs(edge_times_ns[iEdge + nEdges_tot] - fineTime_ns) < 5) {
 
+					getChPosFocalCorr(channel.getDiskID(pmsGeo[chRO[nHits]]));
 
 					fitPositionX[nHits] = pmsPos[newSeqID * 2]
 							- focalCorrection[0];
@@ -153,6 +152,7 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 		nEdges_tot += numberOfEdgesOfCurrentBoard;
 	}
 
+	//LOG_INFO<<"RICHAlgo.cpp: Analysed Event " << decoder.getDecodedEvent()->getEventNumber() << " - nHits " << nHits << ENDL;
 	//gettimeofday(&time[1], 0);
 
 //	LOG_INFO<< "nHits " << nHits << ENDL;
@@ -162,7 +162,7 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 	double DeltaX = 0;
 	double DeltaY = 0;
 
-	if (nHits > 0) {
+	if (nHits > 3) {
 		//gettimeofday(&time[3], 0);
 		//timeClustering();
 		//gettimeofday(&time[2], 0);
@@ -173,6 +173,7 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 		monoRingFit();
 		//gettimeofday(&time[5], 0);
 		//LOG_INFO << "NHits " << nHits << " DeltaX " << DeltaX << " DeltaY " << DeltaY << ENDL;
+		//LOG_INFO << "Ring radius " << radiusRing << " center_x " << centerRing[0] << " center_y " << centerRing[1] << ENDL;
 	}
 
 	//gettimeofday(&time[5], 0);
@@ -184,14 +185,17 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 
 //	gettimeofday(&time[7], 0);
 
+//	LOG_INFO<< ((time[7].tv_sec - time[0].tv_sec)*1e6 + time[7].tv_usec) - time[0].tv_usec << ENDL;
+
 //	if (nHits > 0) {
-//		//LOG_INFO<< "CIAO ";
 //		for (int i = 0; i < 7; i++) {
 //			LOG_INFO<< ((time[i+1].tv_usec + time[i+1].tv_sec*1e6)-(time[i].tv_usec + time[i].tv_sec*1e6))*0.7 << " ";
 //		}
 //		LOG_INFO <<ENDL;
 //	}
-	return (nHits > 40 && (DeltaX > 400 || DeltaY > 390));
+//	return (nHits > 40 && (DeltaX > 400 || DeltaY > 390));
+	return ((nHits > 3) && (nHits < 22) && (DeltaX <= 400 && DeltaY <= 400));
+
 //return nRings;
 
 }
@@ -490,7 +494,7 @@ void RICHAlgo::mapping() {
 
 		for (int iHit = 0; iHit < timeCandidates[iCand].getNHits(); ++iHit) {
 
-			//		LOG_INFO<< "X index " << index[iHit] << " X value " << fitPositionX[index[iHit]] << ENDL;
+//			LOG_INFO<< "X index " << index[iHit] << " X value " << fitPositionX[index[iHit]] << ENDL;
 
 			pairX.first = index[iHit];
 			pairX.second = fitPositionX[index[iHit]];
@@ -549,7 +553,7 @@ void RICHAlgo::monoRingFit() {
 	xav = xm / nHits;
 	yav = ym / nHits;
 
-	//LOG_INFO<< "xSum " << xm << " xMean " << xav << ENDL;
+//	LOG_INFO<< "xSum " << xm << " xMean " << xav << ENDL;
 
 	for (int i = 0; i < nHits; ++i) {
 

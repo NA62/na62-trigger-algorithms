@@ -47,8 +47,8 @@ struct TrbDataHeader {
  * struct containing FPGA header
  */
 struct FPGADataHeader {
-	uint noFrames :8;
 	uint noNonEmptyFrames :8;
+	uint noFrames :8; //Reserved in 2015 data format
 	uint FPGAID :8;
 	uint errFlags :8;
 }__attribute__ ((__packed__));
