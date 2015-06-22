@@ -15,6 +15,7 @@
 
 #include "../common/decoding/DecoderHandler.h"
 #include "L1Downscaling.h"
+#include "L1Fragment.h"
 #include "KtagAlgo.h"
 #include "CHODAlgo.h"
 #include "RICHAlgo.h"
@@ -27,9 +28,11 @@ uint L1TriggerProcessor::chodAlgorithmId;
 uint L1TriggerProcessor::richAlgorithmId;
 
 void L1TriggerProcessor::registerDownscalingAlgorithms() {
+	uint numberOfRegisteredAlgorithms = 0;
 	cedarAlgorithmId = L1Downscaling::registerAlgorithm("CEDAR");
 	chodAlgorithmId = L1Downscaling::registerAlgorithm("CHOD");
 	richAlgorithmId = L1Downscaling::registerAlgorithm("RICH");
+
 }
 
 void L1TriggerProcessor::initialize(double _bypassProbability) {
@@ -53,6 +56,12 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 
 	event->readTriggerTypeWordAndFineTime();
 
+	const l0::MEPFragment* const L1Fragment =
+			event->getL1Subevent()->getFragment(0);
+
+	const char* payload = L1Fragment->getPayload();
+	L1_BLOCK * l1Block = (L1_BLOCK *) (payload);
+
 	/*
 	 * Check if the event should bypass the processing
 	 */
@@ -61,6 +70,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 		event->setRrequestZeroSuppressedCreamData(
 				isRequestZeroSuppressedCreamData(TRIGGER_L1_BYPASS));
 
+		l1Block->triggerword = TRIGGER_L1_BYPASS;
 		return TRIGGER_L1_BYPASS;
 	}
 
@@ -112,6 +122,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	event->setRrequestZeroSuppressedCreamData(
 			isRequestZeroSuppressedCreamData(l1Trigger));
 	event->setProcessingID(0); // 0 indicates raw data as collected from the detector
+
+	l1Block->triggerword = l1Trigger;
 	return l1Trigger;
 }
 

@@ -22,6 +22,9 @@ void L1Downscaling::initialize() {
 	eventCountersByAlgoID_ = new std::atomic<int>(downscaleFactors_.size());
 }
 
+uint L1Downscaling::getNumberOfRegisteredAlgorithms(){
+	return algorithmTitles_.size();
+}
 uint L1Downscaling::registerAlgorithm(std::string algorithmTitle) {
 	// Check if the algo has already been registered
 	if (std::find(algorithmTitles_.begin(), algorithmTitles_.end(),

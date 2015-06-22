@@ -39,6 +39,8 @@ public:
 	 */
 	static uint registerAlgorithm(std::string algorithmTitle);
 
+	static uint getNumberOfRegisteredAlgorithms();
+
 	static void initialize();
 
 	/**
