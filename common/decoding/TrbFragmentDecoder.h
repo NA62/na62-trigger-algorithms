@@ -73,6 +73,22 @@ struct TrbData {
 	uint ID :4;        //0x4 (leading time), 0x5 (trailing time)
 }__attribute__ ((__packed__));
 
+/**
+ * struct containing Error header (2015 data format)
+ */
+struct ErrorDataHeader {
+	uint frame0ErrWords :8;
+	uint frame1ErrWords :8;
+	uint nErrWords :16;
+}__attribute__ ((__packed__));
+
+/**
+ * struct containing Error data
+ */
+struct ErrData {
+	uint32_t errWord :32;
+}__attribute__ ((__packed__));
+
 class TrbFragmentDecoder: private boost::noncopyable {
 	friend class DecoderHandler; // Only Decoder may access readData and isReady
 

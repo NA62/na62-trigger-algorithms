@@ -50,7 +50,7 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	const l0::MEPFragment* const trbDataFragment = subevent_->getFragment(
 			fragmentNumber_);
 	/*
-	 * Each word is 4 bytes: there is 1 board header and at least 1 FPGA header and 1 Frame header
+	 * Each word is 4 bytes: there is 1 board header and at least 1 FPGA header
 	 * -> use this to estimate the maximum number of words
 	 */
 	const uint maxNwords = (trbDataFragment->getPayloadLength() / 4) - 2;
@@ -58,48 +58,48 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	edgeChIDs = new uint_fast8_t[maxNwords];
 	edgeTdcIDs = new uint_fast8_t[maxNwords];
 	edgeIsLeading = new bool[maxNwords];
+	uint_fast16_t nWords_tot = 0;
 
 	const char* const payload = trbDataFragment->getPayload();
 
 	const TrbDataHeader* const boardHeader =
 			reinterpret_cast<const TrbDataHeader*>(payload);
 
-	//LOG_INFO<< "FPGA Flags " << (uint) boardHeader->fpgaFlags << ENDL;
-	//LOG_INFO<< "L0 trigger type " << (uint) boardHeader->triggerType << ENDL;
-	//LOG_INFO<< "Source (Tel62) sub-ID " << (uint) boardHeader->sourceSubID << ENDL;
-	//LOG_INFO<< "Format " << (uint) boardHeader->format << ENDL;
+//	LOG_INFO<< "FPGA Flags " << (uint) boardHeader->fpgaFlags << ENDL;
+//	LOG_INFO<< "L0 trigger type " << (uint) boardHeader->triggerType << ENDL;
+//	LOG_INFO<< "Source (Tel62) sub-ID " << (uint) boardHeader->sourceSubID << ENDL;
+//	LOG_INFO<< "Format " << (uint) boardHeader->format << ENDL;
 
 	const uint nFPGAs = boardHeader->getNumberOfFPGAs();
+//	LOG_INFO<< "Number of FPGAs (from boardHeader) " << nFPGAs << ENDL;
 
-	//LOG_INFO<< "Number of FPGAs (from boardHeader) " << nFPGAs << ENDL;
-
-	uint_fast16_t nWords_tot = 0;
 	for (uint iFPGA = 0; iFPGA != nFPGAs; iFPGA++) {
-		//printf("writing getpayload() + %d\n", 1 + iFPGA + nWords_tot);
+//		printf("writing getpayload() + %d\n", 1 + iFPGA + nWords_tot);
 		FPGADataHeader* fpgaHeader = (FPGADataHeader*) payload + 1 + iFPGA
 				+ nWords_tot;
 
-		//LOG_INFO<< "Number of (25ns long) Frames " << (uint) fpgaHeader->noFrames << ENDL;
-		//LOG_INFO<< "Number of non-empty Frames " << (uint) fpgaHeader->noNonEmptyFrames<< ENDL;
-		//LOG_INFO<< "FPGA ID " << (uint) fpgaHeader->FPGAID<< ENDL;
-		//LOG_INFO<< "Error Flags " << (uint) fpgaHeader->errFlags<< ENDL;
+//		LOG_INFO<< "Number of (25ns long) Frames " << (uint) fpgaHeader->noFrames << ENDL;
+//		LOG_INFO<< "Number of non-empty Frames " << (uint) fpgaHeader->noNonEmptyFrames<< ENDL;
+//		LOG_INFO<< "FPGA ID " << (uint) fpgaHeader->FPGAID<< ENDL;
+//		LOG_INFO<< "Error Flags " << (uint) fpgaHeader->errFlags<< ENDL;
 
-		////////// 2015 DATA FORMAT with suppression of empty frames ////////////////////
+		/*
+		 * In 2015 DATA FORMAT empty frames are suppressed
+		 */
 		const uint_fast8_t nFrames = fpgaHeader->noNonEmptyFrames;
-		//LOG_INFO<< "Number of (Non Empty) Frames (from fpgaHeader) " << nFrames << ENDL;
 
 		for (uint iFrame = 0; iFrame != nFrames; iFrame++) {
-			//printf("writing getpayload() + %d\n", 2 + iFPGA + nWords_tot);
+//			printf("writing getpayload() + %d\n", 2 + iFPGA + nWords_tot);
 			FrameDataHeader* frameHeader = (FrameDataHeader*) payload + 2
 					+ iFPGA + nWords_tot;
 
-			//LOG_INFO<< "Number of Words in Frame " << (uint) frameHeader->nWords<< ENDL;
-			//LOG_INFO<< "Frame Timestamp " << (uint) frameHeader->frameTimeStamp<< ENDL;
+//			LOG_INFO<< "Number of Words in Frame " << (uint) frameHeader->nWords<< ENDL;
+//			LOG_INFO<< "Frame Timestamp " << (uint) frameHeader->frameTimeStamp<< ENDL;
 
 			const uint_fast16_t nWordsOfCurrentFrame =
 					(uint) frameHeader->nWords;
 			nWords_tot += nWordsOfCurrentFrame;
-			//LOG_INFO<< "Number of Words  " << nWords_tot << ENDL;
+//			LOG_INFO<< "Number of Words  " << nWords_tot << ENDL;
 
 			frameTS = (frameHeader->frameTimeStamp & 0x0000ffff)
 					+ (timestamp & 0xffff0000);
@@ -118,7 +118,7 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 //				LOG_INFO<< "nEdges " << nEdges << ENDL;
 			if (nEdges) {
 				for (uint iEdge = 0; iEdge < nEdges; iEdge++) {
-					//printf("writing getpayload() + %d\n",2 + iFPGA + nWords_tot - nEdges + iEdge);
+//					printf("writing getpayload() + %d\n", 2 + iFPGA + nWords_tot - nEdges + iEdge);
 					TrbData* tdcData = (TrbData*) payload + 2 + iFPGA
 							+ nWords_tot - nEdges + iEdge;
 
@@ -148,6 +148,33 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 						nEdges_tot += nEdges;
 					}
 				}
+			}
+		}
+		if (fpgaHeader->errFlags) {
+//			printf("writing getpayload() + %d\n", 2 + iFPGA + nWords_tot);
+			ErrorDataHeader* errHeader = (ErrorDataHeader*) payload + 2 + iFPGA
+					+ nWords_tot;
+			if ((((uint) errHeader->frame1ErrWords) != 0xff)
+					&& ((nWords_tot + 5)
+							!= (trbDataFragment->getPayloadLength() / 4))) {
+//				LOG_INFO<< "Frame 0 err words " << (uint) errHeader->frame0ErrWords << ENDL;
+//				LOG_INFO<< "Frame 1 err words " << (uint) errHeader->frame1ErrWords << ENDL;
+//				LOG_INFO<< "Number of err words " << (uint) errHeader->nErrWords << ENDL;
+
+				/*
+				 * In 2015 DATA FORMAT error words can be present at the end of each FPGA block
+				 */
+				const uint_fast8_t nErrWords = errHeader->nErrWords;
+				const uint nErrors = nErrWords - 1;
+
+				for (uint iErr = 0; iErr != nErrors; iErr++) {
+//					printf("writing getpayload() + %d\n", 3 + iFPGA + nWords_tot + iErr);
+					ErrData* errData = (ErrData*) payload + 3 + iFPGA
+							+ nWords_tot + iErr;
+//					LOG_INFO<<"Error Word " << std::hex << (uint) errData->errWord << std::dec << ENDL;
+				}
+				nWords_tot += nErrWords;
+//				LOG_INFO<<"Number of Words  " << nWords_tot << ENDL;
 			}
 		}
 	}
