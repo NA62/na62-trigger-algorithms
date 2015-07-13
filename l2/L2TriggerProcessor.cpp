@@ -33,7 +33,7 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 	/*
 	 * Check if the event should bypass the processing
 	 */
-	if (event->isL1Bypassed() || bypassEvent()) {
+	if (event->isL2Bypassed() || bypassEvent() || event->isSpecialTriggerEvent()) {
 		l2Block->triggerword = TRIGGER_L2_BYPASS;
 		return TRIGGER_L2_BYPASS;
 	}

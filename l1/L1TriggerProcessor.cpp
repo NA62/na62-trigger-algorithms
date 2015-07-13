@@ -12,9 +12,11 @@
 #include <eventBuilding/SourceIDManager.h>
 #include <l0/MEPFragment.h>
 #include <l0/Subevent.h>
+#include <eventBuilding/L1Builder.h>
 
 #include "../common/decoding/DecoderHandler.h"
 #include "L1Downscaling.h"
+#include "L1Reduction.h"
 #include "L1Fragment.h"
 #include "KtagAlgo.h"
 #include "CHODAlgo.h"
@@ -26,13 +28,20 @@ double L1TriggerProcessor::bypassProbability;
 uint L1TriggerProcessor::cedarAlgorithmId;
 uint L1TriggerProcessor::chodAlgorithmId;
 uint L1TriggerProcessor::richAlgorithmId;
+bool L1TriggerProcessor::L1_flag_mode_ = 0;
 
 void L1TriggerProcessor::registerDownscalingAlgorithms() {
 	uint numberOfRegisteredAlgorithms = 0;
 	cedarAlgorithmId = L1Downscaling::registerAlgorithm("CEDAR");
 	chodAlgorithmId = L1Downscaling::registerAlgorithm("CHOD");
 	richAlgorithmId = L1Downscaling::registerAlgorithm("RICH");
+}
 
+void L1TriggerProcessor::registerReductionAlgorithms() {
+	uint numberOfRegisteredAlgorithms = 0;
+//	cedarAlgorithmId = L1Reduction::registerAlgorithm("CEDAR");
+//	chodAlgorithmId = L1Reduction::registerAlgorithm("CHOD");
+//	richAlgorithmId = L1Reduction::registerAlgorithm("RICH");
 }
 
 void L1TriggerProcessor::initialize(double _bypassProbability) {
@@ -42,6 +51,8 @@ void L1TriggerProcessor::initialize(double _bypassProbability) {
 	bypassProbability = _bypassProbability;
 
 	L1Downscaling::initialize();
+	L1Reduction::initialize();
+	L1_flag_mode_ = MyOptions::GetBool(OPTION_L1_FLAG_MODE);
 }
 
 bool L1TriggerProcessor::isRequestZeroSuppressedCreamData(
@@ -51,6 +62,7 @@ bool L1TriggerProcessor::isRequestZeroSuppressedCreamData(
 }
 
 uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
+
 	using namespace l0;
 	DecoderHandler decoder(event);
 
@@ -74,38 +86,64 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 		return TRIGGER_L1_BYPASS;
 	}
 
-	uint_fast8_t l1Trigger = 1;
-//	uint_fast8_t l1Trigger = 0;
+	uint_fast8_t l1Trigger;
+	if (L1_flag_mode_) {
+		l1Trigger = 1;
+	} else {
+		l1Trigger = 0;
+	}
+
 	uint_fast8_t cedarTrigger = 0;
 	uint_fast8_t chodTrigger = 0;
 	uint_fast8_t richTrigger = 0;
 
-	if (L1Downscaling::processAlgorithm(cedarAlgorithmId)) {
-		if (SourceIDManager::isCedarActive()) {
-			cedarTrigger = KtagAlgo::processKtagTrigger(decoder);
+	if (SourceIDManager::isCedarActive()) {
+		cedarTrigger = KtagAlgo::processKtagTrigger(decoder);
+		if (cedarTrigger != 0) {
+			L1Downscaling::processAlgorithm(cedarAlgorithmId);
 		}
-	} else {
-		cedarTrigger = 0xFF;
 	}
+
 	//	printf("L1TriggerProcessor.cpp: cedarTrigger %d\n",cedarTrigger);
+	if (SourceIDManager::isChodActive()) {
+		chodTrigger = CHODAlgo::processCHODTrigger(decoder);
 
-	if (L1Downscaling::processAlgorithm(chodAlgorithmId)) {
-		if (SourceIDManager::isChodActive()) {
-			chodTrigger = CHODAlgo::processCHODTrigger(decoder);
+		if (chodTrigger != 0) {
+			L1Downscaling::processAlgorithm(chodAlgorithmId);
 		}
-	} else {
-		chodTrigger = 0xFF;
 	}
+
 	//	printf("L1TriggerProcessor.cpp: chodTrigger %d\n",chodTrigger);
-
-	if (L1Downscaling::processAlgorithm(richAlgorithmId)) {
-		if (SourceIDManager::isRhichActive()) {
-			richTrigger = RICHAlgo::processRICHTrigger(decoder);
+	if (SourceIDManager::isRhichActive()) {
+		richTrigger = RICHAlgo::processRICHTrigger(decoder);
+		if (richTrigger != 0) {
+			L1Downscaling::processAlgorithm(richAlgorithmId);
 		}
-	} else {
-		richTrigger = 0xFF;
 	}
+
 	//	printf("L1TriggerProcessor.cpp: richTrigger %d\n",richTrigger);
+
+	/*
+	 * Reduction of specific trigger algorithms
+	 *
+	 */
+	/*
+	 if (L1Reduction::processAlgorithm(cedarAlgorithmId)) {
+	 if (SourceIDManager::isCedarActive()) {
+	 cedarTrigger = KtagAlgo::processKtagTrigger(decoder);
+	 }
+	 }
+	 if (L1Reduction::processAlgorithm(chodAlgorithmId)) {
+	 if (SourceIDManager::isChodActive()) {
+	 chodTrigger = CHODAlgo::processCHODTrigger(decoder);
+	 }
+	 }
+	 if (L1Reduction::processAlgorithm(richAlgorithmId)) {
+	 if (SourceIDManager::isRhichActive()) {
+	 richTrigger = RICHAlgo::processRICHTrigger(decoder);
+	 }
+	 }
+	 */
 
 	/*
 	 * Final L1 trigger word calculation
@@ -115,6 +153,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 //	l1Trigger = richTrigger;
 	l1Trigger = (l1Trigger << 7) | (cedarTrigger << 2) | (richTrigger << 1)
 			| chodTrigger;
+
 //	printf("L1TriggerProcessor.cpp: l1Trigger %d\n",l1Trigger);
 	/*
 	 * Decision whether or not to request zero suppressed data from the creams
@@ -124,7 +163,9 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	event->setProcessingID(0); // 0 indicates raw data as collected from the detector
 
 	l1Block->triggerword = l1Trigger;
+
 	return l1Trigger;
 }
 
-} /* namespace na62 */
+}
+/* namespace na62 */

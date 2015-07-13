@@ -12,6 +12,8 @@
 #include <sys/types.h>
 #include <random>
 #include <cstdint>
+#include "options/MyOptions.h"
+
 
 namespace na62 {
 
@@ -51,6 +53,11 @@ public:
 	static void registerDownscalingAlgorithms();
 
 	/**
+	 * Registers all reduction algorithms. Must be called before Options::Load is executed!
+	 */
+	static void registerReductionAlgorithms();
+
+	/**
 	 * Placeholder for deciding whether or not to request ZS CREAM data
 	 */
 	static bool isRequestZeroSuppressedCreamData(
@@ -64,6 +71,7 @@ private:
 	static uint cedarAlgorithmId;
 	static uint chodAlgorithmId;
 	static uint richAlgorithmId;
+	static bool L1_flag_mode_;
 };
 
 } /* namespace na62 */

@@ -104,6 +104,7 @@ public:
 	/*
 	 * Add functionality for all detectors
 	 */
+
 ADD_TRB(CEDAR)
 
 ADD_TRB(RICH)

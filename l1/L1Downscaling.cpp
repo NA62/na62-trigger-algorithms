@@ -1,13 +1,13 @@
 /*
  * L1Downscaling.cpp
+
  *
- *  Created on: Mar 2, 2015
+ *  Created on: Jun 24, 2015
  *      Author: Jonas Kunze (kunze.jonas@gmail.com)
  */
 
-#include "L1Downscaling.h"
-
 #include <options/Options.h>
+#include "L1Downscaling.h"
 
 namespace na62 {
 
@@ -42,4 +42,8 @@ uint L1Downscaling::registerAlgorithm(std::string algorithmTitle) {
 	return algorithmTitles_.size() - 1;
 }
 
+
 } /* namespace na62 */
+
+
+

@@ -53,7 +53,11 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	 * Each word is 4 bytes: there is 1 board header and at least 1 FPGA header
 	 * -> use this to estimate the maximum number of words
 	 */
+
 	const uint maxNwords = (trbDataFragment->getPayloadLength() / 4) - 2;
+
+//	LOG_INFO << "trbData " << trbDataFragment->getPayloadLength() << ENDL;
+
 	edgeTimes = new uint64_t[maxNwords];
 	edgeChIDs = new uint_fast8_t[maxNwords];
 	edgeTdcIDs = new uint_fast8_t[maxNwords];
@@ -116,55 +120,62 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 				LOG_ERROR<< "TrbDecoder.cpp: Number of Words in Frame is Null !" << ENDL;
 
 //				LOG_INFO<< "nEdges " << nEdges << ENDL;
-			if (nEdges) {
-				for (uint iEdge = 0; iEdge < nEdges; iEdge++) {
+			for (uint iEdge = 0; iEdge < nEdges; iEdge++) {
 //					printf("writing getpayload() + %d\n", 2 + iFPGA + nWords_tot - nEdges + iEdge);
-					TrbData* tdcData = (TrbData*) payload + 2 + iFPGA
-							+ nWords_tot - nEdges + iEdge;
+				TrbData* tdcData = (TrbData*) payload + 2 + iFPGA + nWords_tot
+						- (nEdges - iEdge);
 
-					/*
-					 * TODO: let the user decide what data he needs and remove the unwanted parts in compile time
-					 */
+				/*
+				 * TODO: let the user decide what data he needs and remove the unwanted parts in compile time
+				 */
 //					edge_times[iEdge + nEdges_tot] = ((time - timestamp * 256.) * 0.097464731802);
-					/*
-					 * TODO: edge_times is still a uint64_t*: is this necessary?
-					 *
-					 */
-					edgeTimes[iEdge + nEdges_tot] = (tdcData->time & 0x0007ffff)
-							+ ((frameTS & 0xfffff800) * 0x100);
+				/*
+				 * TODO: edge_times is still a uint64_t*: is this necessary?
+				 *
+				 */
+				edgeTimes[iEdge + nEdges_tot] = (tdcData->time & 0x0007ffff)
+						+ ((frameTS & 0xfffff800) * 0x100);
 
-					edgeChIDs[iEdge + nEdges_tot] = (uint) tdcData->chID;
-					edgeTdcIDs[iEdge + nEdges_tot] = (uint) tdcData->tdcID;
-					edgeIsLeading[iEdge + nEdges_tot] = tdcData->ID == 0x4;
+				edgeChIDs[iEdge + nEdges_tot] = (uint) tdcData->chID;
+				edgeTdcIDs[iEdge + nEdges_tot] = (uint) tdcData->tdcID;
+				edgeIsLeading[iEdge + nEdges_tot] = tdcData->ID == 0x4;
 
 //					LOG_INFO<< "edgeChIDs[" << iEdge + nEdges_tot << "] " << (uint) edgeChIDs[iEdge + nEdges_tot] << ENDL;
 //					LOG_INFO<< "edgeTdcIDs[" << iEdge + nEdges_tot << "] " << (uint) edgeTdcIDs[iEdge + nEdges_tot] << ENDL;
 //					LOG_INFO<< "edgeIsLeading["<< iEdge + nEdges_tot << "] " << edgeIsLeading[iEdge + nEdges_tot] << ENDL;
 //					LOG_INFO<< "edgeTimes[" << iEdge + nEdges_tot << "] " << std::hex << edgeTimes[iEdge + nEdges_tot] << std::dec << ENDL;
-
+//
 //					LOG_INFO<< "TIME (ns) " << ((edgeTimes[iEdge+nEdges_tot] - timestamp* 256.) * 0.097464731802) << ENDL;
 
-					if (iEdge == (nEdges - 1)) {
-						nEdges_tot += nEdges;
-					}
-				}
 			}
+
+			nEdges_tot += nEdges;
 		}
-		if (fpgaHeader->errFlags) {
+		if (fpgaHeader->errFlags & 0x1) {
 //			printf("writing getpayload() + %d\n", 2 + iFPGA + nWords_tot);
 			ErrorDataHeader* errHeader = (ErrorDataHeader*) payload + 2 + iFPGA
 					+ nWords_tot;
+
+
 			if ((((uint) errHeader->frame1ErrWords) != 0xff)
-					&& ((nWords_tot + 5)
-							!= (trbDataFragment->getPayloadLength() / 4))) {
-//				LOG_INFO<< "Frame 0 err words " << (uint) errHeader->frame0ErrWords << ENDL;
+								&& ((nWords_tot + nFPGAs +1)
+										!= (trbDataFragment->getPayloadLength() / 4))) {
+
+
+
+				// Temporary patch
+//			if ((((uint) errHeader->frame1ErrWords) != 0xff)
+//								&& (errHeader->nErrWords & 0xff00) != 0x0100) {
+
+//				LOG_INFO<<"Frame 0 err words " << (uint) errHeader->frame0ErrWords << ENDL;
 //				LOG_INFO<< "Frame 1 err words " << (uint) errHeader->frame1ErrWords << ENDL;
 //				LOG_INFO<< "Number of err words " << (uint) errHeader->nErrWords << ENDL;
 
 				/*
 				 * In 2015 DATA FORMAT error words can be present at the end of each FPGA block
 				 */
-				const uint_fast8_t nErrWords = errHeader->nErrWords;
+//				const uint_fast8_t nErrWords = errHeader->nErrWords;
+				const uint_fast16_t nErrWords = errHeader->nErrWords;
 				const uint nErrors = nErrWords - 1;
 
 				for (uint iErr = 0; iErr != nErrors; iErr++) {
@@ -176,6 +187,13 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 				nWords_tot += nErrWords;
 //				LOG_INFO<<"Number of Words  " << nWords_tot << ENDL;
 			}
+//			else {
+//				LOG_INFO<< "Err flag " << (uint)fpgaHeader->errFlags << ENDL;
+//				fpgaHeader->errFlags = (fpgaHeader->errFlags & 0xfe);
+//				LOG_INFO<< "Err flag " << (uint)fpgaHeader->errFlags << ENDL;
+//				LOG_INFO<< " **********Bit flip" << ENDL;
+//
+//			}
 		}
 	}
 //	LOG_INFO<<"TrbDecoder.cpp: Analysed Tel62 ID " << fragmentNumber_ << " - Number of edges found " << nEdges_tot << ENDL;
