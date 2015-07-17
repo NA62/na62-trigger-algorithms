@@ -10,7 +10,7 @@
 #include <options/Logging.h>
 #include <eventBuilding/Event.h>
 #include <l0/Subevent.h>
-
+#include <eventBuilding/L2Builder.h>
 #include <iostream>
 #include "L2Fragment.h"
 
@@ -30,10 +30,20 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 
 	const char* payload = L2Fragment->getPayload();
 	L2_BLOCK * l2Block = (L2_BLOCK *) (payload);
+
+	// Setting the new globalDownscaleFactor and globalReductionFactor in L2Block
+
+//	uint globDownFactor = L2Builder::GetL2DownscaleFactor();
+//	l2Block->globaldownscaling = globDownFactor;
+
+//	uint globReducFactor = L2Builder::GetL2ReductionFactor();
+//	l2Block->globalreduction = globReducFactor;
+
 	/*
 	 * Check if the event should bypass the processing
 	 */
-	if (event->isL2Bypassed() || bypassEvent() || event->isSpecialTriggerEvent()) {
+	if (event->isL2Bypassed() || bypassEvent()
+			|| event->isSpecialTriggerEvent()) {
 		l2Block->triggerword = TRIGGER_L2_BYPASS;
 		return TRIGGER_L2_BYPASS;
 	}

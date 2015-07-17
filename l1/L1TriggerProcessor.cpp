@@ -74,6 +74,14 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	const char* payload = L1Fragment->getPayload();
 	L1_BLOCK * l1Block = (L1_BLOCK *) (payload);
 
+// Setting the new globalDownscaleFactor and globalReductionFactor in L1Block
+
+//	uint globDownFactor = L1Builder::GetL1DownscaleFactor();
+//	l1Block->globaldownscaling = globDownFactor;
+
+//	uint globReducFactor = L1Builder::GetL1ReductionFactor();
+//	l1Block->globalreduction = globReducFactor;
+
 	/*
 	 * Check if the event should bypass the processing
 	 */
@@ -104,10 +112,9 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 		}
 	}
 
-	//	printf("L1TriggerProcessor.cpp: cedarTrigger %d\n",cedarTrigger);
+//		printf("L1TriggerProcessor.cpp: cedarTrigger %d\n",cedarTrigger);
 	if (SourceIDManager::isChodActive()) {
 		chodTrigger = CHODAlgo::processCHODTrigger(decoder);
-
 		if (chodTrigger != 0) {
 			L1Downscaling::processAlgorithm(chodAlgorithmId);
 		}

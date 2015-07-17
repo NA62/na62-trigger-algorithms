@@ -14,6 +14,8 @@ namespace na62 {
 
 struct L2_BLOCK {
 	uint32_t triggerword;
+//	uint16_t globaldownscaling;
+//	uint16_t globalreduction;
 };
 
 }
