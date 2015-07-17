@@ -12,7 +12,7 @@
 #include <sys/types.h>
 #include <random>
 #include <cstdint>
-#include "options/MyOptions.h"
+#include <options/MyOptions.h>
 
 
 namespace na62 {
