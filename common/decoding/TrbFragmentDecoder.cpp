@@ -119,9 +119,9 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 			if (!nWordsOfCurrentFrame)
 				LOG_ERROR<< "TrbDecoder.cpp: Number of Words in Frame is Null !" << ENDL;
 
-//				LOG_INFO<< "nEdges " << nEdges << ENDL;
+//			LOG_INFO<< "nEdges " << nEdges << ENDL;
 			for (uint iEdge = 0; iEdge < nEdges; iEdge++) {
-//					printf("writing getpayload() + %d\n", 2 + iFPGA + nWords_tot - nEdges + iEdge);
+//				printf("writing getpayload() + %d\n", 2 + iFPGA + nWords_tot - nEdges + iEdge);
 				TrbData* tdcData = (TrbData*) payload + 2 + iFPGA + nWords_tot
 						- (nEdges - iEdge);
 
@@ -140,12 +140,12 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 				edgeTdcIDs[iEdge + nEdges_tot] = (uint) tdcData->tdcID;
 				edgeIsLeading[iEdge + nEdges_tot] = tdcData->ID == 0x4;
 
-//					LOG_INFO<< "edgeChIDs[" << iEdge + nEdges_tot << "] " << (uint) edgeChIDs[iEdge + nEdges_tot] << ENDL;
-//					LOG_INFO<< "edgeTdcIDs[" << iEdge + nEdges_tot << "] " << (uint) edgeTdcIDs[iEdge + nEdges_tot] << ENDL;
-//					LOG_INFO<< "edgeIsLeading["<< iEdge + nEdges_tot << "] " << edgeIsLeading[iEdge + nEdges_tot] << ENDL;
-//					LOG_INFO<< "edgeTimes[" << iEdge + nEdges_tot << "] " << std::hex << edgeTimes[iEdge + nEdges_tot] << std::dec << ENDL;
-//
-//					LOG_INFO<< "TIME (ns) " << ((edgeTimes[iEdge+nEdges_tot] - timestamp* 256.) * 0.097464731802) << ENDL;
+//				LOG_INFO<< "edgeChIDs[" << iEdge + nEdges_tot << "] " << (uint) edgeChIDs[iEdge + nEdges_tot] << ENDL;
+//				LOG_INFO<< "edgeTdcIDs[" << iEdge + nEdges_tot << "] " << (uint) edgeTdcIDs[iEdge + nEdges_tot] << ENDL;
+//				LOG_INFO<< "edgeIsLeading["<< iEdge + nEdges_tot << "] " << edgeIsLeading[iEdge + nEdges_tot] << ENDL;
+//				LOG_INFO<< "edgeTimes[" << iEdge + nEdges_tot << "] " << std::hex << edgeTimes[iEdge + nEdges_tot] << std::dec << ENDL;
+
+//				LOG_INFO << "TIME (ns) " << ((edgeTimes[iEdge+nEdges_tot] - timestamp* 256.) * 0.097464731802) << ENDL;
 
 			}
 
@@ -156,20 +156,17 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 			ErrorDataHeader* errHeader = (ErrorDataHeader*) payload + 2 + iFPGA
 					+ nWords_tot;
 
-
 			if ((((uint) errHeader->frame1ErrWords) != 0xff)
-								&& ((nWords_tot + nFPGAs +1)
-										!= (trbDataFragment->getPayloadLength() / 4))) {
-
-
+					&& ((nWords_tot + nFPGAs + 1)
+							!= (trbDataFragment->getPayloadLength() / 4))) {
 
 				// Temporary patch
 //			if ((((uint) errHeader->frame1ErrWords) != 0xff)
 //								&& (errHeader->nErrWords & 0xff00) != 0x0100) {
 
-//				LOG_INFO<<"Frame 0 err words " << (uint) errHeader->frame0ErrWords << ENDL;
-//				LOG_INFO<< "Frame 1 err words " << (uint) errHeader->frame1ErrWords << ENDL;
-//				LOG_INFO<< "Number of err words " << (uint) errHeader->nErrWords << ENDL;
+//				LOG_INFO <<"Frame 0 err words " << (uint) errHeader->frame0ErrWords << ENDL;
+//				LOG_INFO << "Frame 1 err words " << (uint) errHeader->frame1ErrWords << ENDL;
+//				LOG_INFO << "Number of err words " << (uint) errHeader->nErrWords << ENDL;
 
 				/*
 				 * In 2015 DATA FORMAT error words can be present at the end of each FPGA block
@@ -182,18 +179,17 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 //					printf("writing getpayload() + %d\n", 3 + iFPGA + nWords_tot + iErr);
 					ErrData* errData = (ErrData*) payload + 3 + iFPGA
 							+ nWords_tot + iErr;
-//					LOG_INFO<<"Error Word " << std::hex << (uint) errData->errWord << std::dec << ENDL;
+//					LOG_INFO <<"Error Word " << std::hex << (uint) errData->errWord << std::dec << ENDL;
 				}
 				nWords_tot += nErrWords;
-//				LOG_INFO<<"Number of Words  " << nWords_tot << ENDL;
-			}
-//			else {
-//				LOG_INFO<< "Err flag " << (uint)fpgaHeader->errFlags << ENDL;
+//				LOG_INFO <<"Number of Words  " << nWords_tot << ENDL;
+			} else {
+//				LOG_INFO << "Err flag " << (uint)fpgaHeader->errFlags << ENDL;
 //				fpgaHeader->errFlags = (fpgaHeader->errFlags & 0xfe);
-//				LOG_INFO<< "Err flag " << (uint)fpgaHeader->errFlags << ENDL;
-//				LOG_INFO<< " **********Bit flip" << ENDL;
-//
-//			}
+//				LOG_INFO << "Err flag " << (uint)fpgaHeader->errFlags << ENDL;
+//				LOG_INFO << " **********Bit flip" << ENDL;
+
+			}
 		}
 	}
 //	LOG_INFO<<"TrbDecoder.cpp: Analysed Tel62 ID " << fragmentNumber_ << " - Number of edges found " << nEdges_tot << ENDL;

@@ -66,7 +66,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	using namespace l0;
 	DecoderHandler decoder(event);
 
-	event->readTriggerTypeWordAndFineTime();
+//	event->readTriggerTypeWordAndFineTime();
 
 	const l0::MEPFragment* const L1Fragment =
 			event->getL1Subevent()->getFragment(0);
@@ -111,25 +111,24 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 			L1Downscaling::processAlgorithm(cedarAlgorithmId);
 		}
 	}
-
-//		printf("L1TriggerProcessor.cpp: cedarTrigger %d\n",cedarTrigger);
+	//		printf("L1TriggerProcessor.cpp: cedarTrigger %d\n",cedarTrigger);
+	/*
 	if (SourceIDManager::isChodActive()) {
 		chodTrigger = CHODAlgo::processCHODTrigger(decoder);
 		if (chodTrigger != 0) {
 			L1Downscaling::processAlgorithm(chodAlgorithmId);
 		}
 	}
-
 	//	printf("L1TriggerProcessor.cpp: chodTrigger %d\n",chodTrigger);
+
 	if (SourceIDManager::isRhichActive()) {
 		richTrigger = RICHAlgo::processRICHTrigger(decoder);
 		if (richTrigger != 0) {
 			L1Downscaling::processAlgorithm(richAlgorithmId);
 		}
 	}
-
 	//	printf("L1TriggerProcessor.cpp: richTrigger %d\n",richTrigger);
-
+*/
 	/*
 	 * Reduction of specific trigger algorithms
 	 *
