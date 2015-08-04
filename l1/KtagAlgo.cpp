@@ -14,6 +14,7 @@
 #include <l0/Subevent.h>
 #include <options/Logging.h>
 #include <string.h>
+#include <math.h>
 
 #include <sys/time.h>
 
@@ -26,7 +27,6 @@
 namespace na62 {
 
 uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
-
 
 //  LOG_INFO<< "Initial Time " << time[0].tv_sec << " " << time[0].tv_usec << ENDL;
 
@@ -44,7 +44,7 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 		/**
 		 * Get Arrays with hit Info
 		 */
-//		const uint64_t* const edge_times = cedarPacket->getTimes();
+		const uint64_t* const edge_times = cedarPacket->getTimes();
 //		const uint_fast8_t* const edge_chIDs = cedarPacket->getChIDs();
 		const bool* const edge_IDs = cedarPacket->getIsLeadings();
 		const uint_fast8_t* const edge_tdcIDs = cedarPacket->getTdcIDs();
@@ -61,6 +61,8 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 //			LOG_INFO<< "Edge " << iEdge << " chID " << (uint) edge_chIDs[iEdge] << ENDL;
 //			LOG_INFO<< "Edge " << iEdge << " tdcID " << (uint) edge_tdcIDs[iEdge] << ENDL;
 //			LOG_INFO<< "Edge " << iEdge << " time " << std::hex << edge_times[iEdge] << std::dec << ENDL;
+//			LOG_INFO<< decoder.getDecodedEvent()->getFinetime() << ENDL;
+//			LOG_INFO<< decoder.getDecodedEvent()->getBurstID() << ENDL;
 
 			/**
 			 * Process leading edges only
@@ -77,7 +79,7 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 //				LOG_INFO << "box " << box << ENDL;
 				sector_occupancy[box]++;
 			}
-			//LOG_INFO<< "ANGELA-L1" << "\t" << decoder.getDecodedEvent()->getEventNumber() << "\t" << decoder.getDecodedEvent()->getTimestamp() << "\t" << (int)edge_IDs[iEdge] << "\t" << (int)edge_chIDs[iEdge]<< "\t" << (int)edge_tdcIDs[iEdge] << "\t" << edge_times[iEdge] << "\t" << trbID << "\t" << box << ENDL;
+//			LOG_INFO<< "ANGELA-L1" << "\t" << decoder.getDecodedEvent()->getEventNumber() << "\t" << decoder.getDecodedEvent()->getTimestamp() << "\t" << (int)edge_IDs[iEdge] << "\t" << (int)edge_chIDs[iEdge]<< "\t" << (int)edge_tdcIDs[iEdge] << "\t" << edge_times[iEdge] << "\t" << trbID << "\t" << box << ENDL;
 		}
 //      LOG_INFO<< "time check (inside iterator - end of computations) " << time[3].tv_sec << " " << time[3].tv_usec << ENDL;
 
@@ -105,7 +107,7 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 
 //	LOG_INFO<< std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << " " << nEdges_tot << " " << nSectors << " " << ((time[4].tv_sec - time[0].tv_sec)*1e6 + time[4].tv_usec) - time[0].tv_usec << " " << ((time[5].tv_sec - time[0].tv_sec)*1e6 + time[5].tv_usec) - time[0].tv_usec << ENDL;
 //	LOG_INFO<< nEdges_tot << " " << ((time[4].tv_sec - time[0].tv_sec)*1e6 + time[4].tv_usec) - time[0].tv_usec << " " << ((time[5].tv_sec - time[0].tv_sec)*1e6 + time[5].tv_usec) - time[0].tv_usec << ENDL;
-	return nSectors > 3;
+	return nSectors > 4;
 }
 
 } /* namespace na62 */
