@@ -75,7 +75,7 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 
 	for (TrbFragmentDecoder* richPacket : decoder.getRICHDecoderRange()) {
 
-		//LOG_INFO<< "Number of RICH Tel62s = " << decoder.getNumberOfRICHFragments() << ENDL;
+//		LOG_INFO<< "Number of RICH Tel62s = " << decoder.getNumberOfRICHFragments() << ENDL;
 
 //		LOG_INFO<< "RICHAlgo::TEL62 ID = " << richPacket->getFragmentNumber() << ENDL;
 
@@ -83,8 +83,8 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 		 * Get Arrays with hit Info
 		 */
 
-//		if (richPacket->getFragmentNumber() == 4)
-//			continue;
+		if (richPacket->getFragmentNumber() == 4) continue;
+
 		const uint64_t* const edge_times = richPacket->getTimes();
 
 		const uint_fast8_t* const edge_chIDs = richPacket->getChIDs();
