@@ -39,12 +39,11 @@ private:
 
 	static CHODParsConfFile* infoCHOD_;
 	static int* slabGeo;
-	static uint nHits;
+	static uint nHits_V, nHits_H;
 	static uint nMaxSlabs;
-//	static int slabID[maxNhits];
-//	static int quadrantID[maxNhits];
-//	static int planeID[maxNhits];
-//	static uint64_t time[maxNhits];
+	static int slabID;
+//	static int quadrantID;
+	static int planeID;
 
 };
 

@@ -36,6 +36,7 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 
 	uint nEdges_tot = 0;
 
+	double cedarOffsetFinetime = -10.; //ns (from run 3015)
 //TODO: chkmax need to be USED
 
 	for (TrbFragmentDecoder* cedarPacket : decoder.getCEDARDecoderRange()) {
@@ -48,6 +49,7 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 //		const uint_fast8_t* const edge_chIDs = cedarPacket->getChIDs();
 		const bool* const edge_IDs = cedarPacket->getIsLeadings();
 		const uint_fast8_t* const edge_tdcIDs = cedarPacket->getTdcIDs();
+		double_t finetime, edgetime;
 
 		uint numberOfEdgesOfCurrentBoard =
 				cedarPacket->getNumberOfEdgesStored();
@@ -64,18 +66,32 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 //			LOG_INFO<< decoder.getDecodedEvent()->getFinetime() << ENDL;
 //			LOG_INFO<< decoder.getDecodedEvent()->getBurstID() << ENDL;
 
+//			finetime = (uint64_t) (decoder.getDecodedEvent()->getFinetime()
+//					+ (decoder.getDecodedEvent()->getTimestamp() << 8));
+			finetime = decoder.getDecodedEvent()->getFinetime()
+					* 0.097464731802;
+			edgetime = (edge_times[iEdge]
+					- decoder.getDecodedEvent()->getTimestamp() * 256.)
+					* 0.097464731802;
+
+//			LOG_INFO<< "finetime (decoder) " << (uint)decoder.getDecodedEvent()->getFinetime() << ENDL;
+//			LOG_INFO<< "edge_time " << std::hex << edge_times[iEdge] << std::dec << ENDL;
+//			LOG_INFO<< "finetime (in ns) " << finetime << ENDL;
+//			LOG_INFO<< "edgetime (in ns) " << edgetime << ENDL;
+//			LOG_INFO<< "With offset " << fabs(edgetime + cedarOffsetFinetime - finetime) << ENDL;
+//			LOG_INFO<< "Without offset " << fabs(edgetime - finetime) << ENDL;
 			/**
 			 * Process leading edges only
 			 *
 			 */
-			//if (edge_IDs[iEdge] && (fabs(edge_times[iEdge] - decoder.getDecodedEvent()->getFinetime()) < 50)) {
-			if (edge_IDs[iEdge]) {
+//			if (edge_IDs[iEdge]){
+			if (edge_IDs[iEdge] && fabs(edgetime + cedarOffsetFinetime - finetime) <= 5.) {
 				const uint trbID = edge_tdcIDs[iEdge] / 4;
 				const uint box = calculateSector(
 						cedarPacket->getFragmentNumber(), trbID);
 
-				// Algorithm for exercise with PATTI input
-				//const uint box = 2 * (edge_tdcIDs[iEdge] % 4) + (edge_chIDs[iEdge] / 8);
+// Algorithm for exercise with PATTI input
+//const uint box = 2 * (edge_tdcIDs[iEdge] % 4) + (edge_chIDs[iEdge] / 8);
 //				LOG_INFO << "box " << box << ENDL;
 				sector_occupancy[box]++;
 			}

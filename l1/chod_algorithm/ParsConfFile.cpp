@@ -49,7 +49,7 @@ CHODParsConfFile::CHODParsConfFile() {
 					sprintf(name, "ChRemap_%d=", iCh);
 					string remap = (string) name;
 //					LOG_INFO << remap << ENDL;
-//					LOG_INFO << fileName_getField<string>(1) << ENDL;
+//					LOG_INFO << fileName_.getField<string>(1) << ENDL;
 
 					if (fileName_.getField<string>(1) == remap) {
 						for (int jCh = 0; jCh < 16; jCh++) {
