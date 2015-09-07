@@ -1,7 +1,7 @@
 /*
  * ParsConfFile.h
  *
- *  Created on: 07 Sept 2015
+ *  Created on: 7 Sep 2015
  *      Author: romano
  */
 
@@ -33,5 +33,8 @@ private:
        int geoLGMap[512];
 
 };
+
+
+
 
 #endif /* L1_LAV_ALGORITHM_PARSCONFFILE_H_ */

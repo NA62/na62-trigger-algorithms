@@ -1,7 +1,7 @@
 /*
- * ParseConfFile.cpp
+ * ParsConfFile.cpp
  *
- *  Created on: 07 Sept 2015
+ *  Created on: 7 Sep 2015
  *      Author: romano
  */
 
@@ -51,7 +51,7 @@ LAVParsConfFile::LAVParsConfFile() {
 
 					if (fileName_.getField<string>(1) == remap) {
 						for (int jCh = 0; jCh < 16; jCh++) {
-							geoSlabMap[iCh * 16 + jCh] =
+							geoLGMap[iCh * 16 + jCh] =
 									fileName_.getField<int>(jCh + 2);
 						}
 					}
@@ -76,3 +76,5 @@ LAVParsConfFile* LAVParsConfFile::GetInstance() {
 int* LAVParsConfFile::getGeoLGMap() {
 	return geoLGMap;
 }
+
+
