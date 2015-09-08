@@ -111,6 +111,8 @@ ADD_TRB(RICH)
 
 ADD_TRB(CHOD)
 
+ADD_TRB(LAV)
+
 private:
 	Event* const event_;
 
