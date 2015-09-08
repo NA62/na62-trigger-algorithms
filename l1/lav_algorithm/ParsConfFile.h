@@ -30,7 +30,7 @@ private:
        static LAVParsConfFile* theInstance;  // singleton instance
 
        int nroChannels;
-       int geoLGMap[512];
+       int geoLGMap[6144];
 
 };
 

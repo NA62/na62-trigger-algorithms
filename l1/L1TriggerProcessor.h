@@ -12,7 +12,7 @@
 #include <sys/types.h>
 #include <random>
 #include <cstdint>
-#include <options/MyOptions.h>
+//#include <options/MyOptions.h>
 
 
 namespace na62 {
@@ -71,6 +71,7 @@ private:
 	static uint cedarAlgorithmId;
 	static uint chodAlgorithmId;
 	static uint richAlgorithmId;
+	static uint lavAlgorithmId;
 	static bool L1_flag_mode_;
 };
 

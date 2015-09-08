@@ -21,6 +21,7 @@
 #include "KtagAlgo.h"
 #include "CHODAlgo.h"
 #include "RICHAlgo.h"
+#include "LAVAlgo.h"
 
 namespace na62 {
 
@@ -28,6 +29,7 @@ double L1TriggerProcessor::bypassProbability;
 uint L1TriggerProcessor::cedarAlgorithmId;
 uint L1TriggerProcessor::chodAlgorithmId;
 uint L1TriggerProcessor::richAlgorithmId;
+uint L1TriggerProcessor::lavAlgorithmId;
 bool L1TriggerProcessor::L1_flag_mode_ = 0;
 
 void L1TriggerProcessor::registerDownscalingAlgorithms() {
@@ -35,6 +37,7 @@ void L1TriggerProcessor::registerDownscalingAlgorithms() {
 	cedarAlgorithmId = L1Downscaling::registerAlgorithm("CEDAR");
 	chodAlgorithmId = L1Downscaling::registerAlgorithm("CHOD");
 	richAlgorithmId = L1Downscaling::registerAlgorithm("RICH");
+	lavAlgorithmId = L1Downscaling::registerAlgorithm("LAV");
 }
 
 void L1TriggerProcessor::registerReductionAlgorithms() {
@@ -104,6 +107,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	uint_fast8_t cedarTrigger = 0;
 	uint_fast8_t chodTrigger = 0;
 	uint_fast8_t richTrigger = 0;
+	uint_fast8_t lavTrigger = 0;
 
 	if (SourceIDManager::isCedarActive()) {
 		cedarTrigger = KtagAlgo::processKtagTrigger(decoder);
@@ -128,6 +132,14 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 //		}
 //	}
 //	printf("L1TriggerProcessor.cpp: richTrigger %d\n", richTrigger);
+
+	if (SourceIDManager::isLavActive()) {
+		lavTrigger = LAVAlgo::processLAVTrigger(decoder);
+		if (lavTrigger != 0) {
+			L1Downscaling::processAlgorithm (lavAlgorithmId);
+		}
+	}
+//	printf("L1TriggerProcessor.cpp: lavTrigger %d\n", lavTrigger);
 	/*
 	 * Reduction of specific trigger algorithms
 	 *

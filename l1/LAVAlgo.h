@@ -16,6 +16,7 @@
 #include "lav_algorithm/ParsConfFile.h"
 
 #define maxNhits 500
+#define maxNROchs 512
 
 namespace na62 {
 
@@ -38,6 +39,7 @@ private:
 
 	static LAVParsConfFile* infoLAV_;
 	static int* lgGeo;
+	static int hit[maxNROchs];
 	static uint nHits;
 
 };
