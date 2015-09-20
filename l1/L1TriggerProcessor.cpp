@@ -30,7 +30,7 @@ uint L1TriggerProcessor::cedarAlgorithmId;
 uint L1TriggerProcessor::chodAlgorithmId;
 uint L1TriggerProcessor::richAlgorithmId;
 uint L1TriggerProcessor::lavAlgorithmId;
-bool L1TriggerProcessor::L1_flag_mode_ = 0;
+//bool L1TriggerProcessor::L1_flag_mode_ = 0;
 
 void L1TriggerProcessor::registerDownscalingAlgorithms() {
 	uint numberOfRegisteredAlgorithms = 0;
@@ -55,7 +55,7 @@ void L1TriggerProcessor::initialize(double _bypassProbability) {
 
 	L1Downscaling::initialize();
 	L1Reduction::initialize();
-	L1_flag_mode_ = MyOptions::GetBool(OPTION_L1_FLAG_MODE);
+//	L1_flag_mode_ = MyOptions::GetBool(OPTION_L1_FLAG_MODE);
 }
 
 bool L1TriggerProcessor::isRequestZeroSuppressedCreamData(
@@ -71,11 +71,11 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 
 //	event->readTriggerTypeWordAndFineTime();
 
-	const l0::MEPFragment* const L1Fragment =
-			event->getL1Subevent()->getFragment(0);
-
-	const char* payload = L1Fragment->getPayload();
-	L1_BLOCK * l1Block = (L1_BLOCK *) (payload);
+//	const l0::MEPFragment* const L1Fragment =
+//			event->getL1Subevent()->getFragment(0);
+//
+//	const char* payload = L1Fragment->getPayload();
+//	L1_BLOCK * l1Block = (L1_BLOCK *) (payload);
 
 // Setting the new globalDownscaleFactor and globalReductionFactor in L1Block
 
@@ -93,16 +93,16 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 		event->setRrequestZeroSuppressedCreamData(
 				isRequestZeroSuppressedCreamData(TRIGGER_L1_BYPASS));
 
-		l1Block->triggerword = TRIGGER_L1_BYPASS;
+//		l1Block->triggerword = TRIGGER_L1_BYPASS;
 		return TRIGGER_L1_BYPASS;
 	}
 
-	uint_fast8_t l1Trigger;
-	if (L1_flag_mode_) {
-		l1Trigger = 1;
-	} else {
-		l1Trigger = 0;
-	}
+	uint_fast8_t l1Trigger = 0;
+//	if (L1_flag_mode_) {
+//		l1Trigger = 1;
+//	} else {
+//		l1Trigger = 0;
+//	}
 
 	uint_fast8_t cedarTrigger = 0;
 	uint_fast8_t chodTrigger = 0;
@@ -168,9 +168,9 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 //	l1Trigger = cedarTrigger;
 //	l1Trigger = chodTrigger;
 //	l1Trigger = richTrigger;
-	l1Trigger = (l1Trigger << 7) | (cedarTrigger << 2) | (richTrigger << 1)
-			| chodTrigger;
+//	l1Trigger = (l1Trigger << 7) | (lavTrigger << 3) | (cedarTrigger << 2) | (richTrigger << 1) | chodTrigger;
 
+	l1Trigger = (l1Trigger << 7) | (cedarTrigger << 2);
 //	printf("L1TriggerProcessor.cpp: l1Trigger %d\n",l1Trigger);
 	/*
 	 * Decision whether or not to request zero suppressed data from the creams
@@ -179,7 +179,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 			isRequestZeroSuppressedCreamData(l1Trigger));
 	event->setProcessingID(0); // 0 indicates raw data as collected from the detector
 
-	l1Block->triggerword = l1Trigger;
+//	l1Block->triggerword = l1Trigger;
 
 	return l1Trigger;
 }

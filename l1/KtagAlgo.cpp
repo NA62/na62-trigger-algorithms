@@ -36,7 +36,7 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 
 	uint nEdges_tot = 0;
 
-	double cedarOffsetFinetime = -10.; //ns (from run 3015)
+//	double cedarOffsetFinetime = -10.; //ns (from run 3015)
 //TODO: chkmax need to be USED
 
 	for (TrbFragmentDecoder* cedarPacket : decoder.getCEDARDecoderRange()) {
@@ -85,7 +85,7 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder) {
 			 *
 			 */
 //			if (edge_IDs[iEdge]){
-			if (edge_IDs[iEdge] && fabs(edgetime + cedarOffsetFinetime - finetime) <= 5.) {
+			if (edge_IDs[iEdge] && fabs(edgetime - finetime) <= 10.) {
 				const uint trbID = edge_tdcIDs[iEdge] / 4;
 				const uint box = calculateSector(
 						cedarPacket->getFragmentNumber(), trbID);

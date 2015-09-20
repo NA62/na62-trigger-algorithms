@@ -25,11 +25,11 @@ void L2TriggerProcessor::initialize(double _bypassProbability) {
 uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 	using namespace cream;
 
-	const l0::MEPFragment* const L2Fragment =
-			event->getL2Subevent()->getFragment(0);
+//	const l0::MEPFragment* const L2Fragment =
+//			event->getL2Subevent()->getFragment(0);
 
-	const char* payload = L2Fragment->getPayload();
-	L2_BLOCK * l2Block = (L2_BLOCK *) (payload);
+//	const char* payload = L2Fragment->getPayload();
+//	L2_BLOCK * l2Block = (L2_BLOCK *) (payload);
 
 	// Setting the new globalDownscaleFactor and globalReductionFactor in L2Block
 
@@ -44,7 +44,7 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 	 */
 	if (event->isL2Bypassed() || bypassEvent()
 			|| event->isSpecialTriggerEvent()) {
-		l2Block->triggerword = TRIGGER_L2_BYPASS;
+//		l2Block->triggerword = TRIGGER_L2_BYPASS;
 		return TRIGGER_L2_BYPASS;
 	}
 
@@ -60,7 +60,7 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 
 //	async_requestNonZSuppressedLKrData(localCreamIDsToRequestNonZSuppressedData, event);
 	uint_fast8_t l2Trigger = 3;
-	l2Block->triggerword = l2Trigger;
+//	l2Block->triggerword = l2Trigger;
 
 // Accept event
 	return l2Trigger;

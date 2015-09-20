@@ -41,7 +41,6 @@ CHODAlgo::~CHODAlgo() {
 
 uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder) {
 
-
 //	LOG_INFO<< "Initial Time " << time[0].tv_sec << " " << time[0].tv_usec << ENDL;
 
 	using namespace l0;
@@ -88,9 +87,9 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder) {
 		 * Process leading edges only
 		 *
 		 */
-		if (edge_IDs[iEdge]
-				&& fabs(edgetime + chodOffsetFinetime - finetime) <= 10.) {
-//		if (edge_IDs[iEdge]) {
+//		if (edge_IDs[iEdge]
+//				&& fabs(edgetime + chodOffsetFinetime - finetime) <= 10.) {
+		if (edge_IDs[iEdge]) {
 			const int roChID = (edge_tdcIDs[iEdge] * 32) + edge_chIDs[iEdge];
 //			LOG_INFO<< "Readout Channel ID " << roChID << ENDL;
 //			LOG_INFO<< "Geom Slab ID " << slabGeo[roChID] << ENDL;
@@ -134,7 +133,7 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder) {
 //		}
 //	LOG_INFO<< ((time[3].tv_sec - time[0].tv_sec)*1e6 + time[3].tv_usec) - time[0].tv_usec << ENDL;
 
-	return (((nHits_V+nHits_H) > 0) && ((nHits_V+nHits_H) < nMaxSlabs));
+	return (((nHits_V + nHits_H) > 0) && ((nHits_V + nHits_H) < nMaxSlabs));
 //	return (((nHits_V == 1) && (nHits_H == 1))
 //			|| ((nHits_V == 2) && (nHits_H == 1))
 //			|| ((nHits_V == 1) && (nHits_H == 2)));

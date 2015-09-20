@@ -72,7 +72,7 @@ private:
 	static uint chodAlgorithmId;
 	static uint richAlgorithmId;
 	static uint lavAlgorithmId;
-	static bool L1_flag_mode_;
+//	static bool L1_flag_mode_;
 };
 
 } /* namespace na62 */
