@@ -10,7 +10,6 @@
 #include <options/Logging.h>
 #include <eventBuilding/Event.h>
 #include <l0/Subevent.h>
-#include <eventBuilding/L2Builder.h>
 #include <iostream>
 #include "L2Fragment.h"
 
