@@ -29,7 +29,6 @@ uint L1TriggerProcessor::cedarAlgorithmId;
 uint L1TriggerProcessor::chodAlgorithmId;
 uint L1TriggerProcessor::richAlgorithmId;
 uint L1TriggerProcessor::lavAlgorithmId;
-//bool L1TriggerProcessor::L1_flag_mode_ = 0;
 
 void L1TriggerProcessor::registerDownscalingAlgorithms() {
 	uint numberOfRegisteredAlgorithms = 0;
@@ -54,7 +53,6 @@ void L1TriggerProcessor::initialize(double _bypassProbability) {
 
 	L1Downscaling::initialize();
 	L1Reduction::initialize();
-//	L1_flag_mode_ = MyOptions::GetBool(OPTION_L1_FLAG_MODE);
 }
 
 bool L1TriggerProcessor::isRequestZeroSuppressedCreamData(
@@ -97,12 +95,6 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	}
 
 	uint_fast8_t l1Trigger = 0;
-//	if (L1_flag_mode_) {
-//		l1Trigger = 1;
-//	} else {
-//		l1Trigger = 0;
-//	}
-
 	uint_fast8_t cedarTrigger = 0;
 	uint_fast8_t chodTrigger = 0;
 	uint_fast8_t richTrigger = 0;
