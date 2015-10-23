@@ -54,8 +54,12 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	 * -> use this to estimate the maximum number of words
 	 */
 
-	const uint maxNwords = (trbDataFragment->getPayloadLength() / 4) - 2;
+	const int maxNwords = (trbDataFragment->getPayloadLength() / 4) -2;
 
+	if(maxNwords <= 0){
+		LOG_ERROR << "The packet payload is not as expected !!!" << ENDL;
+		return;
+	}
 //	LOG_INFO << "trbData " << trbDataFragment->getPayloadLength() << ENDL;
 
 	edgeTimes = new uint64_t[maxNwords];
@@ -117,7 +121,7 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 
 			const uint nEdges = nWordsOfCurrentFrame - 1;
 			if (!nWordsOfCurrentFrame)
-				LOG_ERROR<< "TrbDecoder.cpp: Number of Words in Frame is Null !" << ENDL;
+				LOG_ERROR<< "Number of Words in Frame is Null !" << ENDL;
 
 //			LOG_INFO<< "nEdges " << nEdges << ENDL;
 			for (uint iEdge = 0; iEdge < nEdges; iEdge++) {
