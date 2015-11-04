@@ -23,6 +23,7 @@
 
 namespace na62 {
 
+double CHODAlgo::averageHitTime = 0.;
 CHODParsConfFile* CHODAlgo::infoCHOD_ = CHODParsConfFile::GetInstance();
 int * CHODAlgo::slabGeo = infoCHOD_->getGeoSlabMap();
 uint CHODAlgo::nHits_V;
@@ -39,7 +40,7 @@ CHODAlgo::~CHODAlgo() {
 // TODO Auto-generated destructor stub
 }
 
-uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder) {
+uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
 //	LOG_INFO<< "Initial Time " << time[0].tv_sec << " " << time[0].tv_usec << ENDL;
 
@@ -49,10 +50,9 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder) {
 	nHits_H = 0;
 	nHits_V = 0;
 
-	double chodOffsetFinetime = -2.; //ns (from run 3015)
-
 //	LOG_INFO<< "Event number = " << decoder.getDecodedEvent()->getEventNumber() << ENDL;
 //	LOG_INFO<< "Timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << ENDL;
+//	LOG_INFO << "Average Hit Time (initial value) " << averageHitTime << ENDL;
 
 	TrbFragmentDecoder& chodPacket =
 			(TrbFragmentDecoder&) decoder.getDecodedCHODFragment(0);
@@ -72,23 +72,14 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder) {
 
 	for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
 
-		finetime = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
-		edgetime = (edge_times[iEdge]
-				- decoder.getDecodedEvent()->getTimestamp() * 256.)
-				* 0.097464731802;
-
-//		LOG_INFO<< "finetime (decoder) " << (uint)decoder.getDecodedEvent()->getFinetime() << ENDL;
-//		LOG_INFO<< "edge_time " << std::hex << edge_times[iEdge] << std::dec << ENDL;
+//		finetime = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
+//		edgetime = (edge_times[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
 //		LOG_INFO<< "finetime (in ns) " << finetime << ENDL;
 //		LOG_INFO<< "edgetime (in ns) " << edgetime << ENDL;
-//		LOG_INFO<< "With offset " << fabs(edgetime + chodOffsetFinetime - finetime) << ENDL;
-//		LOG_INFO<< "Without offset " << fabs(edgetime - finetime) << ENDL;
 		/**
 		 * Process leading edges only
 		 *
 		 */
-//		if (edge_IDs[iEdge]
-//				&& fabs(edgetime + chodOffsetFinetime - finetime) <= 10.) {
 		if (edge_IDs[iEdge]) {
 			const int roChID = (edge_tdcIDs[iEdge] * 32) + edge_chIDs[iEdge];
 //			LOG_INFO<< "Readout Channel ID " << roChID << ENDL;
@@ -99,25 +90,32 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder) {
 			 *
 			 */
 			if (slabGeo[roChID] < 128) {
-//			if (roChID < 128) {
+				finetime = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
+				edgetime = (edge_times[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
+//				LOG_INFO<< "finetime (in ns) " << finetime << " edgetime (in ns) " << edgetime << ENDL;
 
-//				LOG_INFO<< "Edge " << iEdge << " ID " << edge_IDs[iEdge] << ENDL;
-//				LOG_INFO<< "Edge " << iEdge << " chID " << (uint) edge_chIDs[iEdge] << ENDL;
-//				LOG_INFO<< "Edge " << iEdge << " tdcID " << (uint) edge_tdcIDs[iEdge] << ENDL;
-//				LOG_INFO<< "Edge " << iEdge << " time " << std::hex << edge_times[iEdge] << std::dec << ENDL;
+//				if(fabs(edgetime - finetime) <= 30.) { //if ref detector is LKr
+				if(fabs(edgetime - finetime) <= 20.) { //otherwise
+					averageHitTime += edgetime;
 
-				slabID = slabGeo[roChID];
-//				quadrantID = slabID / 16.;
-				planeID = slabID / 64.;
+//  				LOG_INFO<< "Edge " << iEdge << " ID " << edge_IDs[iEdge] << ENDL;
+//	   				LOG_INFO<< "Edge " << iEdge << " chID " << (uint) edge_chIDs[iEdge] << ENDL;
+//					LOG_INFO<< "Edge " << iEdge << " tdcID " << (uint) edge_tdcIDs[iEdge] << ENDL;
+//					LOG_INFO<< "Edge " << iEdge << " time " << std::hex << edge_times[iEdge] << std::dec << ENDL;
 
-//				LOG_INFO<< "CHOD slab ID " << slabID << ENDL;
-//				LOG_INFO<< "CHOD quadrant ID " << quadrantID << ENDL;
-//				LOG_INFO<< "CHOD plane ID " << planeID << ENDL;
+					slabID = slabGeo[roChID];
+//					quadrantID = slabID / 16.;
+					planeID = slabID / 64.;
 
-				if (planeID)
-					nHits_V++;
-				else
-					nHits_H++;
+//					LOG_INFO<< "CHOD slab ID " << slabID << ENDL;
+//					LOG_INFO<< "CHOD quadrant ID " << quadrantID << ENDL;
+//					LOG_INFO<< "CHOD plane ID " << planeID << ENDL;
+
+					if (planeID)
+						nHits_V++;
+					else
+						nHits_H++;
+				}
 			}
 		}
 	}
@@ -132,6 +130,19 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder) {
 //			LOG_INFO<<((time[i+1].tv_sec - time[i].tv_sec)*1e6 + time[i+1].tv_usec) - time[i].tv_usec << " ";
 //		}
 //	LOG_INFO<< ((time[3].tv_sec - time[0].tv_sec)*1e6 + time[3].tv_usec) - time[0].tv_usec << ENDL;
+
+	if (nHits_V + nHits_H) averageHitTime = averageHitTime/(nHits_V + nHits_H);
+	else averageHitTime = 0.;
+
+	l1Info->setCHODAverageTime(averageHitTime);
+	l1Info->setL1CHODProcessed();
+
+//	LOG_INFO<< "PAT=============== number of Hits " << nHits_V + nHits_H << ENDL;
+//	LOG_INFO<< "PAT=============== average HitTime " << averageHitTime << ENDL;
+//	LOG_INFO<< "PAT=============== L1CHODProcessed Flag " << (uint)l1Info->isL1CHODProcessed() << ENDL;
+
+	averageHitTime = 0;
+//	LOG_INFO<< "PAT=============== reset average HitTime " << averageHitTime << ENDL;
 
 	return (((nHits_V + nHits_H) > 0) && ((nHits_V + nHits_H) < nMaxSlabs));
 //	return (((nHits_V == 1) && (nHits_H == 1))

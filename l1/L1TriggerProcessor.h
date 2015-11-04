@@ -14,6 +14,7 @@
 #include <cstdint>
 //#include <options/MyOptions.h>
 
+#include "L1InfoToStorage.h"
 
 namespace na62 {
 
@@ -66,6 +67,7 @@ public:
 	static void initialize(double _bypassProbability);
 
 private:
+	static L1InfoToStorage* l1Info_;
 	static double bypassProbability;
 
 	static uint cedarAlgorithmId;

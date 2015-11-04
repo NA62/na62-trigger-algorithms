@@ -24,6 +24,7 @@
 
 namespace na62 {
 
+L1InfoToStorage* L1TriggerProcessor::l1Info_ = L1InfoToStorage::GetInstance();
 double L1TriggerProcessor::bypassProbability;
 uint L1TriggerProcessor::cedarAlgorithmId;
 uint L1TriggerProcessor::chodAlgorithmId;
@@ -100,21 +101,22 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	uint_fast8_t richTrigger = 0;
 	uint_fast8_t lavTrigger = 0;
 
-	if (SourceIDManager::isCedarActive()) {
-		cedarTrigger = KtagAlgo::processKtagTrigger(decoder);
-		if (cedarTrigger != 0) {
-			L1Downscaling::processAlgorithm(cedarAlgorithmId);
-		}
-	}
-//	printf("L1TriggerProcessor.cpp: cedarTrigger %d\n", cedarTrigger);
-
 	if (SourceIDManager::isChodActive()) {
-		chodTrigger = CHODAlgo::processCHODTrigger(decoder);
+		chodTrigger = CHODAlgo::processCHODTrigger(decoder,l1Info_);
 		if (chodTrigger != 0) {
 			L1Downscaling::processAlgorithm(chodAlgorithmId);
 		}
 	}
 //	printf("L1TriggerProcessor.cpp: chodTrigger %d\n", chodTrigger);
+
+//	if (SourceIDManager::isCedarActive() && l1Info_->isL1CHODProcessed()) {
+	if (SourceIDManager::isCedarActive()) {
+		cedarTrigger = KtagAlgo::processKtagTrigger(decoder,l1Info_);
+		if (cedarTrigger != 0) {
+			L1Downscaling::processAlgorithm(cedarAlgorithmId);
+		}
+	}
+//	printf("L1TriggerProcessor.cpp: cedarTrigger %d\n", cedarTrigger);
 
 //	if (SourceIDManager::isRhichActive()) {
 //		richTrigger = RICHAlgo::processRICHTrigger(decoder);
@@ -124,13 +126,18 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 //	}
 //	printf("L1TriggerProcessor.cpp: richTrigger %d\n", richTrigger);
 
+//	if (SourceIDManager::isLavActive() && l1Info_->isL1CHODProcessed()) {
 	if (SourceIDManager::isLavActive()) {
-		lavTrigger = LAVAlgo::processLAVTrigger(decoder);
+		lavTrigger = LAVAlgo::processLAVTrigger(decoder,l1Info_);
 		if (lavTrigger != 0) {
 			L1Downscaling::processAlgorithm (lavAlgorithmId);
 		}
 	}
 //	printf("L1TriggerProcessor.cpp: lavTrigger %d\n", lavTrigger);
+
+	l1Info_->resetL1CHODProcessed();
+//	LOG_INFO << "Reset L1CHODProcessed boolean " << l1Info_->isL1CHODProcessed() << ENDL;
+
 	/*
 	 * Reduction of specific trigger algorithms
 	 *
@@ -159,9 +166,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 //	l1Trigger = cedarTrigger;
 //	l1Trigger = chodTrigger;
 //	l1Trigger = richTrigger;
-//	l1Trigger = (l1Trigger << 7) | (lavTrigger << 3) | (cedarTrigger << 2) | (richTrigger << 1) | chodTrigger;
-
-	l1Trigger = (l1Trigger << 7) | (cedarTrigger << 2);
+	l1Trigger = (l1Trigger << 7) | (lavTrigger << 3) | (cedarTrigger << 2) | (richTrigger << 1) | chodTrigger;
+//	l1Trigger = (cedarTrigger != 0 && chodTrigger != 0);
 //	printf("L1TriggerProcessor.cpp: l1Trigger %d\n",l1Trigger);
 	/*
 	 * Decision whether or not to request zero suppressed data from the creams
