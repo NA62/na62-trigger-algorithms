@@ -120,9 +120,10 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 				frameTS -= 0x10000; //16 bits overflow
 
 			const uint nEdges = nWordsOfCurrentFrame - 1;
-			if (!nWordsOfCurrentFrame)
+			if (!nWordsOfCurrentFrame){
 				LOG_ERROR<< "Number of Words in Frame is Null !" << ENDL;
-
+				return;
+			}
 //			LOG_INFO<< "nEdges " << nEdges << ENDL;
 			for (uint iEdge = 0; iEdge < nEdges; iEdge++) {
 //				printf("writing getpayload() + %d\n", 2 + iFPGA + nWords_tot - nEdges + iEdge);
