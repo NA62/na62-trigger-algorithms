@@ -30,9 +30,6 @@ public:
 	 */
 	static uint_fast8_t processStrawTrigger(DecoderHandler& decoder);
 
-	/**
-	 * Calculates the sectorID based on the Tel62 and FPGA IDs. Possible results are between 0 and 7
-	 */
 private:
 
 };

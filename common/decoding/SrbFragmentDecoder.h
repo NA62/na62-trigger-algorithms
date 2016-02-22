@@ -34,14 +34,14 @@ struct SrbDataHeader {
  */
 struct SrbData {
 //  uint32_t srbWord :32;
-	uint fineTime :5; //hit time (LSB = 780 ps)
+	uint fineTime :5;      //hit time (LSB = 780 ps)
 	uint edgeType :1;      //edge type (0=leading, 1=trailing)
-	uint strawID :8;     //identifier of the individual straw
+	uint strawID :8;       //identifier of the individual straw
 	uint errorFlag :2;
 }__attribute__ ((__packed__));
 
 struct SrbTimeSlot {
-    uint SlotCounter : 8;
+	uint SlotCounter :8;
 }__attribute__ ((__packed__));
 
 class SrbFragmentDecoder: private boost::noncopyable {
@@ -64,7 +64,7 @@ public:
 	void readData(uint_fast32_t timestamp);
 
 	/**
-	 * Method returning the total number of edges found per Tel62 board
+	 * Method returning the total number of edges found per Srb
 	 *
 	 */
 	inline uint getNumberOfEdgesStored() const {
@@ -86,7 +86,11 @@ public:
 	inline const uint64_t* getStrawIDs() const {
 		return edgeStrawIDs;
 	}
-	//todo: check if this is necessary or fragmentNumber_ can be used, or it can be reconstructed by strawIDs
+
+	/**
+	 * Method returning Srb ID for current fragment
+	 *
+	 */
 	inline const uint64_t* getSrbIDs() const {
 		return edgeSrbIDs;
 	}
@@ -100,7 +104,7 @@ public:
 	}
 
 	/**
-	 * Returns the subdetector specific ID of the fragment decoded by this object
+	 * Returns the Srb specific ID of the fragment decoded by this object
 	 */
 	inline const uint_fast16_t getFragmentNumber() const {
 		return fragmentNumber_;
@@ -121,7 +125,7 @@ private:
 	 *
 	 */
 
-    //check data types for the following
+	//check data types for the following
 	double* edgeTimes;
 	bool* edgeIsLeading;
 	uint64_t* edgeStrawIDs;

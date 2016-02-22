@@ -22,13 +22,12 @@
 namespace na62 {
 
 SrbFragmentDecoder::SrbFragmentDecoder() :
-		edgeTimes(nullptr), edgeStrawIDs(nullptr), edgeSrbIDs(nullptr), edgeErrorFlags(nullptr), edgeIsLeading(
-				nullptr), subevent_(nullptr), fragmentNumber_(UINT_FAST16_MAX) {
+		edgeTimes(nullptr), edgeStrawIDs(nullptr), edgeSrbIDs(nullptr), edgeErrorFlags(
+				nullptr), edgeIsLeading(nullptr), subevent_(nullptr), fragmentNumber_(
+		UINT_FAST16_MAX) {
 	firstTSCoarseTime = 0;
 	nEdges_tot = 0;
 }
-
-
 
 SrbFragmentDecoder::~SrbFragmentDecoder() {
 	if (isReady()) {
@@ -56,14 +55,11 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	 * there are 2 edges in a dataword
 	 * -> use this to estimate the maximum number of edges
 	 */
-	  std::ofstream myfile;
-	  myfile.open ("debug.txt",std::ofstream::app);
-	const uint maxNwords = ((srbDataFragment->getPayloadLength() / 4) - 2 - 4);
-	//const uint maxNwords = (srbDataFragment->getPayloadLength() / 4);
-	const uint maxNEdges = maxNwords*2;
+	const uint maxNwords = (srbDataFragment->getPayloadLength() / 4);
+	const uint maxNEdges = maxNwords * 2;
 
 	//LOG_INFO <<"srbData " << srbDataFragment->getPayloadLength() << ENDL;
-    //LOG_INFO << "maxNEdges = " << maxNEdges << ENDL;
+	//LOG_INFO << "maxNEdges = " << maxNEdges << ENDL;
 	edgeTimes = new double[maxNEdges];
 	edgeStrawIDs = new uint64_t[maxNEdges];
 	edgeErrorFlags = new uint_fast8_t[maxNEdges];
@@ -71,12 +67,12 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	edgeSrbIDs = new uint64_t[maxNEdges];
 
 	//initialize
-	for (uint i = 0; i < maxNwords; i++){
-		edgeTimes[i]=0;
-		edgeStrawIDs[i]=0;
-		edgeErrorFlags[i]=0;
-		edgeIsLeading[i]=0;
-		edgeSrbIDs[i]=0;
+	for (uint i = 0; i < maxNwords; i++) {
+		edgeTimes[i] = 0;
+		edgeStrawIDs[i] = 0;
+		edgeErrorFlags[i] = 0;
+		edgeIsLeading[i] = 0;
+		edgeSrbIDs[i] = 0;
 	}
 
 	const char* const payload = srbDataFragment->getPayload();
@@ -84,53 +80,51 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	const SrbDataHeader* const boardHeader =
 			reinterpret_cast<const SrbDataHeader*>(payload);
 
-			firstTSCoarseTime = (int64_t) boardHeader->firstTSCoarseTime;
-			uint64_t SrbID = boardHeader->srbID;
-			//LOG_INFO<< "SRBid = " << SrbID << ENDL;
-			//LOG_INFO<< "Event Timestamp " << std::hex << timestamp << std::dec << ENDL;
-			//LOG_INFO<< "firstTSCoarseTime " << std::hex << firstTSCoarseTime << std::dec << ENDL;
+	firstTSCoarseTime = (int64_t) boardHeader->firstTSCoarseTime;
+	uint64_t SrbID = boardHeader->srbID;
+	//LOG_INFO<< "SRBid = " << SrbID << ENDL;
+	//LOG_INFO<< "Event Timestamp " << std::hex << timestamp << std::dec << ENDL;
+	//LOG_INFO<< "firstTSCoarseTime " << std::hex << firstTSCoarseTime << std::dec << ENDL;
 
-            firstTSCoarseTime-=timestamp;
+	firstTSCoarseTime -= timestamp;
 
+	//number of datawords, computed from packet length (in bytes)
+	//2 header words and 4 slot words subtracted
+	const uint16_t nWords = ((uint16_t) boardHeader->packetLength) / 4 - 2 - 4;
+	const uint16_t nEdges = nWords * 2; //+1 empty edge if nWords in raw file was odd
 
-			//number of datawords, computed from packet length (in bytes)
-			//2 header words and 4 slot words subtracted
-			const uint16_t nWords = ((uint16_t) boardHeader->packetLength)/4 - 2 - 4;
-			const uint16_t nEdges = nWords*2; //+1 empty edge if nWords in raw file was odd
+	//if (! nEdges)
+	//LOG_INFO<< "SrbDecoder.cpp: Number of Words/Edges is Null !" << ENDL;
 
-			//if (! nEdges)
-				//LOG_ERROR<< "SrbDecoder.cpp: Number of Words/Edges is Null !" << ENDL;
+	for (uint iEdge = 0; iEdge < nEdges; iEdge++) {
 
-			for (uint iEdge = 0; iEdge < nEdges; iEdge++) {
+		SrbData* srbData = (SrbData*) payload + 2 + iEdge + 2;
 
-				SrbData* srbData = (SrbData*) payload + 2 + iEdge + 2;
+		//first edge (16 LSB in dataword)
+		edgeTimes[iEdge] = ((double) srbData->fineTime) * ClockPeriod / 32.; //fine time - later converted to global
+		edgeStrawIDs[iEdge] = (uint) srbData->strawID;
+		edgeSrbIDs[iEdge] = SrbID;
+		edgeErrorFlags[iEdge] = (uint) srbData->errorFlag;
+		edgeIsLeading[iEdge] = !((bool) srbData->edgeType);
 
-				//first edge (16 LSB in dataword)
-				edgeTimes[iEdge] = ((double)srbData->fineTime)*ClockPeriod/32.; //fine time - will be converted to global
-				edgeStrawIDs[iEdge] = (uint) srbData->strawID;
-				edgeSrbIDs[iEdge] = SrbID; //RIGA INCRIMINATA!!!
-				edgeErrorFlags[iEdge] = (uint) srbData->errorFlag;
-				edgeIsLeading[iEdge] = !((bool)srbData->edgeType);
+	}
 
-			}
-
-     		int NSlots = 16;
-			int NEdgesInSlot = 0;
-			int64_t slotTime = 0;
-			nEdges_tot = 0;
-			for(uint iSlot = 0; iSlot < NSlots; iSlot++){
-				SrbTimeSlot* srbTimeSlot = (SrbTimeSlot*) payload  /*+ nEdges */  + (2+nWords)*4   + iSlot /*+ nWords + iSlot*/;
-				NEdgesInSlot = (uint) srbTimeSlot->SlotCounter;
-				for (int iEdgeInSlot = 0; iEdgeInSlot < NEdgesInSlot; iEdgeInSlot++) {
-					slotTime = firstTSCoarseTime + iSlot;
-					edgeTimes[nEdges_tot + iEdgeInSlot] += slotTime*ClockPeriod;
-					LOG_INFO << std::hex << timestamp << std::dec << " " << std::hex << firstTSCoarseTime+timestamp << std::dec << " " << std::hex << SrbID << std::dec << " " << std::setprecision(6) << edgeTimes[nEdges_tot + iEdgeInSlot] << " " << edgeIsLeading[nEdges_tot + iEdgeInSlot] << " "  << std::hex << edgeStrawIDs[nEdges_tot + iEdgeInSlot]  << std::dec << ENDL;
-					myfile << std::hex << timestamp << std::dec << " " << std::hex << SrbID << std::dec << " " << std::setprecision(6) << edgeTimes[nEdges_tot + iEdgeInSlot] << " " << edgeIsLeading[nEdges_tot + iEdgeInSlot] << " "  << std::hex << edgeStrawIDs[nEdges_tot + iEdgeInSlot]  << std::dec << std::endl;
-				}
-				nEdges_tot+=NEdgesInSlot;
-			}
- myfile.close();
- }
+	int NSlots = 16;
+	int NEdgesInSlot = 0;
+	int64_t slotTime = 0;
+	nEdges_tot = 0;
+	for (uint iSlot = 0; iSlot < NSlots; iSlot++) {
+		SrbTimeSlot* srbTimeSlot = (SrbTimeSlot*) payload + (2 + nWords) * 4
+				+ iSlot;
+		NEdgesInSlot = (uint) srbTimeSlot->SlotCounter;
+		for (int iEdgeInSlot = 0; iEdgeInSlot < NEdgesInSlot; iEdgeInSlot++) {
+			slotTime = firstTSCoarseTime + iSlot;
+			edgeTimes[nEdges_tot + iEdgeInSlot] += slotTime * ClockPeriod;
+			//LOG_INFO << std::hex << timestamp << std::dec << " " << std::hex << firstTSCoarseTime+timestamp << std::dec << " " << std::hex << SrbID << std::dec << " " << std::setprecision(6) << edgeTimes[nEdges_tot + iEdgeInSlot] << " " << edgeIsLeading[nEdges_tot + iEdgeInSlot] << " "  << std::hex << edgeStrawIDs[nEdges_tot + iEdgeInSlot]  << std::dec << ENDL;
+		}
+		nEdges_tot += NEdgesInSlot;
+	}
+}
 
 //	LOG_INFO<<"SrbDecoder.cpp: Analyzed SRB ID " << fragmentNumber_ << " - Number of edges found " << nEdges_tot << ENDL;
 

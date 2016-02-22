@@ -33,8 +33,8 @@ uint_fast8_t StrawAlgo::processStrawTrigger(DecoderHandler& decoder) {
 	using namespace l0;
 
 //	double cedarOffsetFinetime = -10.; //ns (from run 3015)
-//TODO: chkmax need to be USED
-    LOG_INFO<< "receiving straw packet:" << endl;
+//  TODO: chkmax need to be USED
+	LOG_INFO<< "receiving straw packet:" << endl;
 	for (SrbFragmentDecoder* strawPacket : decoder.getSTRAWDecoderRange()) {
 
 		const uint64_t* straw_id = strawPacket->getStrawIDs();
@@ -42,11 +42,11 @@ uint_fast8_t StrawAlgo::processStrawTrigger(DecoderHandler& decoder) {
 		const bool* isLeading = strawPacket->getIsLeadings();
 		const uint nEdges = strawPacket->getNumberOfEdgesStored();
 		const uint64_t* srbID = strawPacket->getSrbIDs();
-        /*
-		for (int i = 0; i < nEdges; i++){
-		  LOG_INFO << srbID[i] << " " << straw_id[i] << " " << time[i] << " " << isLeading[i] << ENDL;
-		}
-		*/
+		/*
+		 for (int i = 0; i < nEdges; i++){
+		 LOG_INFO << srbID[i] << " " << straw_id[i] << " " << time[i] << " " << isLeading[i] << ENDL;
+		 }
+		 */
 
 	}
 
