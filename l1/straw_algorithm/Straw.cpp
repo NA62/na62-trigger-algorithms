@@ -19,6 +19,7 @@ Straw::Straw() {
 }
 
 Straw::~Straw() {
+	// TODO Auto-generated destructor stub
 }
 
 void Straw::printStraw() {

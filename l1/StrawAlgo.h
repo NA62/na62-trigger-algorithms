@@ -23,6 +23,9 @@ namespace na62 {
 
 class Event;
 class Straw;
+class Cluster;
+class Point;
+class Track;
 class STRAWChannelID;
 class DigiManager;
 
@@ -37,13 +40,35 @@ public:
 	 */
 	static uint_fast8_t processStrawTrigger(DecoderHandler& decoder);
 	static float posTubNew(int chamber, int view, int plane, int jstraw);
+	static int strawAcceptance(int n, double *coor, int zone);
+	static int cdaVertex(Point qfascio, Point qtraccia, Point mfascio, Point mtraccia, float* cda, Point* vertice);
+
 
 private:
 	static STRAWParsConfFile* infoSTRAW_;
 	static int* strawGeo;
 	static double* fROMezzaninesT0;
 	static uint chRO[MAXNHITS];
+
+	static double t0_main_shift;
+	static double cutlowleading;
+	static double cuthighleading;
+	static double cutlowtrailing;
+	static double cuthightrailing;
+	static double m1leadtrail;
+	static double q1leadtrail;
+	static double m2leadtrail;
+	static double q2leadtrail;
+	static double hit3low;
+	static double hit3high;
+	static double hit2low;
+	static double hit2high;
+	static int cutcluster;
+
+	static bool tl_flag;
+	static bool skip_flag;
 	static int nHits;
+
 	static int chamberID;
 	static int viewID;
 	static int halfviewID;
@@ -53,11 +78,23 @@ private:
 	static double trailing;
 	static float position;
 	static float wireDistance;
-	static bool tl_flag;
+
 	static STRAWChannelID strawChannel_;
 	static DigiManager strawDigiMan_;
+	static float fChamberZPosition[4];
 	static Straw strawPrecluster_[4][4][2][500];
-	static int nStrawPrecluster[4][4][2];
+	static int nStrawPreclusters[4][4][2];
+	static Cluster strawCluster_[4][4][500];
+	static int nStrawClusters[4][4];
+	static Point strawPointTemp_[4][5000];
+	static int nStrawPointsTemp[4];
+	static Point strawPointTempbis_[4][2000];
+	static int nStrawPointsTempbis[4];
+	static Point strawPointFinal_[4][2000];
+	static int nStrawPointsFinal[4];
+	static Track strawFirstTempTrk_[3000];
+	static Track strawTempTrk_[4000];
+	static Track strawTrkIntermedie_[1000];
 };
 
 } /* namespace na62 */

@@ -28,8 +28,8 @@ public:
 	float position;
 	float wiredistance;
 
-	void printStraw();
 	void setStraw(int a,int b,int c,int d, int e,double f, double g, int h, int i, float l, float m);
+	void printStraw();
 
 private:
 };
