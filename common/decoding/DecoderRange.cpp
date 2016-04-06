@@ -2,6 +2,7 @@
 
 #include "DecoderHandler.h"
 #include "TrbFragmentDecoder.h"
+#include "SrbFragmentDecoder.h"
 
 namespace na62 {
 
@@ -14,4 +15,8 @@ T* ElementIterator<T>::operator *() const {
 // Explicit template instantiation
 template class ElementIterator<TrbFragmentDecoder> ;
 
+// Explicit template instantiation
+template class ElementIterator<SrbFragmentDecoder> ;
 }
+
+
