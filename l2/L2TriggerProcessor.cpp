@@ -22,7 +22,6 @@ void L2TriggerProcessor::initialize(double _bypassProbability) {
 }
 
 uint_fast8_t L2TriggerProcessor::compute(Event* event) {
-	using namespace cream;
 
 //	const l0::MEPFragment* const L2Fragment =
 //			event->getL2Subevent()->getFragment(0);
