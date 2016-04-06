@@ -160,12 +160,15 @@ public:
 		subevent_ = subevent;
 		fragmentNumber_ = fragmentNumber;
 	}
+	bool isBadFragment() {
+		return isBadFrag_;
+	}
 
 private:
 	uint64_t frameTS;
 	uint64_t time;
 	uint nEdges_tot;	//total number of edges per Tel62 board
-
+	bool isBadFrag_;
 	/**
 	 * Arrays with edge info
 	 *

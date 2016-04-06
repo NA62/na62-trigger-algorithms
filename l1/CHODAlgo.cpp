@@ -40,7 +40,8 @@ CHODAlgo::~CHODAlgo() {
 // TODO Auto-generated destructor stub
 }
 
-uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder, L1InfoToStorage* l1Info) {
+uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder,
+		L1InfoToStorage* l1Info) {
 
 //	LOG_INFO<< "Initial Time " << time[0].tv_sec << " " << time[0].tv_usec << ENDL;
 
@@ -56,6 +57,9 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder, L1InfoToStora
 
 	TrbFragmentDecoder& chodPacket =
 			(TrbFragmentDecoder&) decoder.getDecodedCHODFragment(0);
+	if (chodPacket.isBadFragment()) {
+		return 0;
+	}
 //	LOG_INFO<< "First time check (inside iterator) " << time[1].tv_sec << " " << time[1].tv_usec << ENDL;
 	/**
 	 * Get Arrays with hit Info
@@ -90,12 +94,15 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder, L1InfoToStora
 			 *
 			 */
 			if (slabGeo[roChID] < 128) {
-				finetime = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
-				edgetime = (edge_times[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
+				finetime = decoder.getDecodedEvent()->getFinetime()
+						* 0.097464731802;
+				edgetime = (edge_times[iEdge]
+						- decoder.getDecodedEvent()->getTimestamp() * 256.)
+						* 0.097464731802;
 //				LOG_INFO<< "finetime (in ns) " << finetime << " edgetime (in ns) " << edgetime << ENDL;
 
 //				if(fabs(edgetime - finetime) <= 30.) { //if ref detector is LKr
-				if(fabs(edgetime - finetime) <= 20.) { //otherwise
+				if (fabs(edgetime - finetime) <= 20.) { //otherwise
 					averageHitTime += edgetime;
 
 //  				LOG_INFO<< "Edge " << iEdge << " ID " << edge_IDs[iEdge] << ENDL;
@@ -131,8 +138,10 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder, L1InfoToStora
 //		}
 //	LOG_INFO<< ((time[3].tv_sec - time[0].tv_sec)*1e6 + time[3].tv_usec) - time[0].tv_usec << ENDL;
 
-	if (nHits_V + nHits_H) averageHitTime = averageHitTime/(nHits_V + nHits_H);
-	else averageHitTime = 0.;
+	if (nHits_V + nHits_H)
+		averageHitTime = averageHitTime / (nHits_V + nHits_H);
+	else
+		averageHitTime = 0.;
 
 	l1Info->setCHODAverageTime(averageHitTime);
 	l1Info->setL1CHODProcessed();

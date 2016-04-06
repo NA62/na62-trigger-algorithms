@@ -34,7 +34,8 @@ LAVAlgo::~LAVAlgo() {
 // TODO Auto-generated destructor stub
 }
 
-uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder, L1InfoToStorage* l1Info) {
+uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder,
+		L1InfoToStorage* l1Info) {
 
 	nHits = 0;
 
@@ -60,6 +61,9 @@ uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder, L1InfoToStorage
 		/**
 		 * Get Arrays with hit Info
 		 */
+		if (lavPacket->isBadFragment()) {
+			return 0;
+		}
 		const uint64_t* const edge_times = lavPacket->getTimes();
 		const uint_fast8_t* const edge_chIDs = lavPacket->getChIDs();
 		const bool* const edge_IDs = lavPacket->getIsLeadings();

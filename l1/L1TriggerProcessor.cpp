@@ -88,8 +88,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	 */
 	if (bypassEvent() || event->isSpecialTriggerEvent()) {
 		// Request zero suppressed CREAM data for bypassed events?
-		event->setRrequestZeroSuppressedCreamData(
-				isRequestZeroSuppressedCreamData(TRIGGER_L1_BYPASS));
+		//event->setRrequestZeroSuppressedCreamData(
+		//isRequestZeroSuppressedCreamData(TRIGGER_L1_BYPASS));
 
 //		l1Block->triggerword = TRIGGER_L1_BYPASS;
 		return TRIGGER_L1_BYPASS;

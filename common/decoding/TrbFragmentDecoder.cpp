@@ -22,6 +22,7 @@ TrbFragmentDecoder::TrbFragmentDecoder() :
 	frameTS = 0;
 	time = 0;
 	nEdges_tot = 0;
+	isBadFrag_ = false;
 }
 
 TrbFragmentDecoder::~TrbFragmentDecoder() {
@@ -47,8 +48,12 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 		return;
 	}
 
-	const l0::MEPFragment* const trbDataFragment = subevent_->getFragment(
-			fragmentNumber_);
+	const l0::MEPFragment* const trbDataFragment = subevent_->getFragment(fragmentNumber_);
+
+	if (!trbDataFragment->getPayloadLength()) {
+		isBadFrag_ = true;
+		return;
+	}
 	/*
 	 * Each word is 4 bytes: there is 1 board header and at least 1 FPGA header
 	 * -> use this to estimate the maximum number of words
@@ -58,6 +63,8 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 
 	if(maxNwords <= 0){
 		LOG_ERROR << "The packet payload is not as expected !!!" << ENDL;
+		//throw NA62Error("The packet payload is not as expected !!!");
+		isBadFrag_ = true;
 		return;
 	}
 //	LOG_INFO << "trbData " << trbDataFragment->getPayloadLength() << ENDL;
@@ -119,12 +126,16 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 			if ((timestamp & 0xf000) == 0x0000 && (frameTS & 0xf000) == 0xf000)
 				frameTS -= 0x10000; //16 bits overflow
 
-			const uint nEdges = nWordsOfCurrentFrame - 1;
 			if (!nWordsOfCurrentFrame){
-				LOG_ERROR<< "Number of Words in Frame is Null !" << ENDL;
+
+				LOG_ERROR << "Number of Words in Frame is Null !" << std::hex << (int) (trbDataFragment->getSourceID()) << ":"
+						<< (int)(trbDataFragment->getSourceSubID()) << ENDL;
+				isBadFrag_ = true;
 				return;
 			}
+			const uint nEdges = nWordsOfCurrentFrame - 1;
 //			LOG_INFO<< "nEdges " << nEdges << ENDL;
+
 			for (uint iEdge = 0; iEdge < nEdges; iEdge++) {
 //				printf("writing getpayload() + %d\n", 2 + iFPGA + nWords_tot - nEdges + iEdge);
 				TrbData* tdcData = (TrbData*) payload + 2 + iFPGA + nWords_tot

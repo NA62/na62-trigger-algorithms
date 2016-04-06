@@ -27,7 +27,8 @@
 namespace na62 {
 
 double KtagAlgo::averageCHODHitTime = 0.;
-uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder,L1InfoToStorage* l1Info) {
+uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder,
+		L1InfoToStorage* l1Info) {
 
 //  LOG_INFO<< "Initial Time " << time[0].tv_sec << " " << time[0].tv_usec << ENDL;
 
@@ -42,6 +43,11 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder,L1InfoToStorag
 	uint nEdges_tot = 0;
 
 //TODO: chkmax need to be USED
+	DecoderRange<TrbFragmentDecoder> x = decoder.getCEDARDecoderRange();
+	if (x.begin() == x.end()) {
+		LOG_ERROR<< "Empty decoder range!";
+		return 0;
+	}
 
 	for (TrbFragmentDecoder* cedarPacket : decoder.getCEDARDecoderRange()) {
 //      LOG_INFO<< "First time check (inside iterator) " << time[1].tv_sec << " " << time[1].tv_usec << ENDL;
@@ -49,6 +55,9 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder,L1InfoToStorag
 		/**
 		 * Get Arrays with hit Info
 		 */
+		if (cedarPacket->isBadFragment()) {
+			return 0;
+		}
 		const uint64_t* const edge_times = cedarPacket->getTimes();
 //		const uint_fast8_t* const edge_chIDs = cedarPacket->getChIDs();
 		const bool* const edge_IDs = cedarPacket->getIsLeadings();
@@ -72,7 +81,8 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder,L1InfoToStorag
 
 //			finetime = (uint64_t) (decoder.getDecodedEvent()->getFinetime()
 //					+ (decoder.getDecodedEvent()->getTimestamp() << 8));
-			finetime = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
+			finetime = decoder.getDecodedEvent()->getFinetime()
+					* 0.097464731802;
 			edgetime = (edge_times[iEdge]
 					- decoder.getDecodedEvent()->getTimestamp() * 256.)
 					* 0.097464731802;
@@ -87,7 +97,6 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder,L1InfoToStorag
 			 */
 //			if (edge_IDs[iEdge]){
 //			if (edge_IDs[iEdge] && fabs(edgetime - finetime) <= 10.) {
-
 			double dt_chod = fabs(edgetime - averageCHODHitTime);
 			double dt_l0tp = fabs(edgetime - finetime);
 //			LOG_INFO<< "dt_l0tp " << dt_l0tp << " dt_chod " << dt_chod << ENDL;
@@ -100,8 +109,10 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder,L1InfoToStorag
 // Algorithm for exercise with PATTI input
 //const uint box = 2 * (edge_tdcIDs[iEdge] % 4) + (edge_chIDs[iEdge] / 8);
 //				LOG_INFO << "box " << box << ENDL;
-				if (dt_l0tp<10.) sector_occupancy_l0tp[box]++;
-				if (dt_chod<10.) sector_occupancy_chod[box]++;
+				if (dt_l0tp < 10.)
+					sector_occupancy_l0tp[box]++;
+				if (dt_chod < 10.)
+					sector_occupancy_chod[box]++;
 			}
 //			LOG_INFO<< "ANGELA-L1" << "\t" << decoder.getDecodedEvent()->getEventNumber() << "\t" << decoder.getDecodedEvent()->getTimestamp() << "\t" << (int)edge_IDs[iEdge] << "\t" << (int)edge_chIDs[iEdge]<< "\t" << (int)edge_tdcIDs[iEdge] << "\t" << edge_times[iEdge] << "\t" << trbID << "\t" << box << ENDL;
 		}
@@ -119,8 +130,10 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder,L1InfoToStorag
 	uint nSectors_chod = 0;
 	uint nSectors_l0tp = 0;
 	for (uint iSec = 0; iSec != 8; iSec++) {
-		if (sector_occupancy_l0tp[iSec]) nSectors_l0tp++;
-		if (sector_occupancy_chod[iSec]) nSectors_chod++;
+		if (sector_occupancy_l0tp[iSec])
+			nSectors_l0tp++;
+		if (sector_occupancy_chod[iSec])
+			nSectors_chod++;
 	}
 
 //	LOG_INFO << "sectors_l0tp = " << nSectors_l0tp << " sectors_chod = " << nSectors_chod << ENDL;
