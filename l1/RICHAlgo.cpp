@@ -82,8 +82,11 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 		/**
 		 * Get Arrays with hit Info
 		 */
-
-		if (richPacket->getFragmentNumber() == 4) continue;
+		if (richPacket->isBadFragment()) {
+			return 0;
+		}
+		if (richPacket->getFragmentNumber() == 4)
+			continue;
 
 		const uint64_t* const edge_times = richPacket->getTimes();
 
@@ -141,7 +144,6 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 					leadRecoTime[nHits] = edge_times_ns[iEdge + nEdges_tot]
 							- t0Time[chSeqID];
 
-
 					nHits++;
 				}
 			}
@@ -179,7 +181,6 @@ uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 	//gettimeofday(&time[5], 0);
 
 	//gettimeofday(&time[6], 0);
-
 
 //uint nRings = 0;
 

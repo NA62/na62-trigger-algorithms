@@ -14,6 +14,7 @@
 
 #include "../common/decoding/DecoderHandler.h"
 #include "lav_algorithm/ParsConfFile.h"
+#include "L1InfoToStorage.h"
 
 #define maxNhits 500
 #define maxNROchs 512
@@ -33,7 +34,7 @@ public:
 
 	LAVAlgo();
 	~LAVAlgo();
-	static uint_fast8_t processLAVTrigger(DecoderHandler& decoder);
+	static uint_fast8_t processLAVTrigger(DecoderHandler& decoder,L1InfoToStorage* l1Info);
 
 private:
 
@@ -41,6 +42,7 @@ private:
 	static int* lgGeo;
 	static int hit[maxNROchs];
 	static uint nHits;
+	static double averageCHODHitTime;
 
 };
 

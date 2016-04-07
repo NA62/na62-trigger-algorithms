@@ -14,6 +14,7 @@
 #include <cstdint>
 
 #include "../common/decoding/DecoderHandler.h"
+#include "L1InfoToStorage.h"
 
 namespace na62 {
 
@@ -28,8 +29,7 @@ public:
 	 *
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
-	static uint_fast8_t processKtagTrigger(DecoderHandler& decoder);
-
+	static uint_fast8_t processKtagTrigger(DecoderHandler& decoder,L1InfoToStorage* l1Info);
 	/**
 	 * Calculates the sectorID based on the Tel62 and FPGA IDs. Possible results are between 0 and 7
 	 */
@@ -38,6 +38,7 @@ public:
 	}
 
 private:
+	static double averageCHODHitTime;
 
 };
 

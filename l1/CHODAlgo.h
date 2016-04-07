@@ -15,6 +15,7 @@
 
 #include "../common/decoding/DecoderHandler.h"
 #include "chod_algorithm/ParsConfFile.h"
+#include "L1InfoToStorage.h"
 
 #define maxNhits 500
 
@@ -33,7 +34,7 @@ public:
 
 	CHODAlgo();
 	~CHODAlgo();
-	static uint_fast8_t processCHODTrigger(DecoderHandler& decoder);
+	static uint_fast8_t processCHODTrigger(DecoderHandler& decoder, L1InfoToStorage* l1Info);
 
 private:
 
@@ -44,6 +45,7 @@ private:
 	static int slabID;
 //	static int quadrantID;
 	static int planeID;
+	static double averageHitTime;
 
 };
 

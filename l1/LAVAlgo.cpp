@@ -25,6 +25,7 @@ LAVParsConfFile* LAVAlgo::infoLAV_ = LAVParsConfFile::GetInstance();
 int * LAVAlgo::lgGeo = infoLAV_->getGeoLGMap();
 int LAVAlgo::hit[maxNROchs];
 uint LAVAlgo::nHits;
+double LAVAlgo::averageCHODHitTime = 0.;
 
 LAVAlgo::LAVAlgo() {
 }
@@ -33,7 +34,8 @@ LAVAlgo::~LAVAlgo() {
 // TODO Auto-generated destructor stub
 }
 
-uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder) {
+uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder,
+		L1InfoToStorage* l1Info) {
 
 	nHits = 0;
 
@@ -41,9 +43,10 @@ uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder) {
 
 	using namespace l0;
 
-	uint nEdges_tot = 0;
+	averageCHODHitTime = l1Info->getCHODAverageTime();
+//	LOG_INFO<< "PATchodtime " << averageCHODHitTime << ENDL;
 
-	double LAVOffsetFinetime = 0.; //ns (from run 3015)
+	uint nEdges_tot = 0;
 
 //	LOG_INFO<< "Event number = " << decoder.getDecodedEvent()->getEventNumber() << ENDL;
 //	LOG_INFO<< "Timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << ENDL;
@@ -58,6 +61,9 @@ uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder) {
 		/**
 		 * Get Arrays with hit Info
 		 */
+		if (lavPacket->isBadFragment()) {
+			return 0;
+		}
 		const uint64_t* const edge_times = lavPacket->getTimes();
 		const uint_fast8_t* const edge_chIDs = lavPacket->getChIDs();
 		const bool* const edge_IDs = lavPacket->getIsLeadings();
@@ -81,19 +87,16 @@ uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder) {
 			edgetime = (edge_times[iEdge]
 					- decoder.getDecodedEvent()->getTimestamp() * 256.)
 					* 0.097464731802;
+//			LOG_INFO<< "finetime (in ns) " << finetime << ENDL;
+//			LOG_INFO<< "edgetime (in ns) " << edgetime << ENDL;
 
-//		LOG_INFO<< "finetime (decoder) " << (uint)decoder.getDecodedEvent()->getFinetime() << ENDL;
-//		LOG_INFO<< "edge_time " << std::hex << edge_times[iEdge] << std::dec << ENDL;
-//		LOG_INFO<< "finetime (in ns) " << finetime << ENDL;
-//		LOG_INFO<< "edgetime (in ns) " << edgetime << ENDL;
-//		LOG_INFO<< "With offset " << fabs(edgetime + LAVOffsetFinetime - finetime) << ENDL;
-//		LOG_INFO<< "Without offset " << fabs(edgetime - finetime) << ENDL;
+			double dt_chod = fabs(edgetime - averageCHODHitTime);
+			double dt_l0tp = fabs(edgetime - finetime);
+//			LOG_INFO<< "dt_l0tp " << dt_l0tp << " dt_chod " << dt_chod << ENDL;
 			/**
 			 * Process leading edges only
 			 *
 			 */
-//		if (edge_IDs[iEdge]
-//				&& fabs(edgetime + LAVOffsetFinetime - finetime) <= 10.) {
 //			if (edge_IDs[iEdge]) {
 			const int roChID = edge_trbIDs * 512 + edge_tdcIDs[iEdge] * 32
 					+ edge_chIDs[iEdge];
@@ -108,7 +111,8 @@ uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder) {
 					+ edge_chIDs[iEdge];
 //			LOG_INFO<< "Readout Channel ID per Tel62 " << roChIDPerTrb << ENDL;
 
-			if ((roChID & 1) == 0) {
+//			if (((roChID & 1) == 0) && (dt_l0tp < 20. || dt_chod < 20.)) {
+			if (((roChID & 1) == 0) && (dt_l0tp < 20.)) {
 				if (edge_IDs[iEdge]) {
 					hit[roChIDPerTrb]++;
 //					LOG_INFO<< "Increment hit[" << roChIDPerTrb << "] to " << hit[roChIDPerTrb] << ENDL;
@@ -117,7 +121,7 @@ uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder) {
 //					LOG_INFO<< "Increment nHits " << nHits << ENDL;
 				}
 			} else {
-//				printf("ODD! - Soglia alta!\n");
+//				printf("ODD! - Soglia alta! - Out Of Time! \n");
 			}
 		}
 //	LOG_INFO<< "time check " << time[2].tv_sec << " " << time[2].tv_usec << ENDL;
