@@ -86,12 +86,11 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	/*
 	 * Check if the event should bypass the processing
 	 */
-	if (bypassEvent() || event->isSpecialTriggerEvent()) {
-		// Request zero suppressed CREAM data for bypassed events?
-		//event->setRrequestZeroSuppressedCreamData(
-		//isRequestZeroSuppressedCreamData(TRIGGER_L1_BYPASS));
-
-//		l1Block->triggerword = TRIGGER_L1_BYPASS;
+	if (event->isSpecialTriggerEvent()) {
+		event->setRrequestZeroSuppressedCreamData(false);
+		return TRIGGER_L1_BYPASS;
+	}
+	if (bypassEvent()) {
 		return TRIGGER_L1_BYPASS;
 	}
 
@@ -172,8 +171,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	/*
 	 * Decision whether or not to request zero suppressed data from the creams
 	 */
-	event->setRrequestZeroSuppressedCreamData(
-			isRequestZeroSuppressedCreamData(l1Trigger));
+	event->setRrequestZeroSuppressedCreamData(true);
 	event->setProcessingID(0); // 0 indicates raw data as collected from the detector
 
 //	l1Block->triggerword = l1Trigger;
