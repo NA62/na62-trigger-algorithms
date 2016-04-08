@@ -61,10 +61,10 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	//LOG_INFO <<"srbData " << srbDataFragment->getPayloadLength() << ENDL;
 	//LOG_INFO << "maxNEdges = " << maxNEdges << ENDL;
 	edgeTimes = new double[maxNEdges];
-	edgeStrawIDs = new uint64_t[maxNEdges];
+	edgeStrawIDs = new uint_fast8_t[maxNEdges];
 	edgeErrorFlags = new uint_fast8_t[maxNEdges];
 	edgeIsLeading = new bool[maxNEdges];
-	edgeSrbIDs = new uint64_t[maxNEdges];
+	edgeSrbIDs = new uint_fast8_t[maxNEdges];
 
 	//initialize
 	for (uint i = 0; i < maxNwords; i++) {
@@ -81,7 +81,7 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 			reinterpret_cast<const SrbDataHeader*>(payload);
 
 	firstTSCoarseTime = (int64_t) boardHeader->firstTSCoarseTime;
-	uint64_t SrbID = boardHeader->srbID;
+	uint_fast8_t SrbID = boardHeader->srbID;
 	//LOG_INFO<< "SRBid = " << SrbID << ENDL;
 	//LOG_INFO<< "Event Timestamp " << std::hex << timestamp << std::dec << ENDL;
 	//LOG_INFO<< "firstTSCoarseTime " << std::hex << firstTSCoarseTime << std::dec << ENDL;

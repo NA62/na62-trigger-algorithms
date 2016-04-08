@@ -48,8 +48,10 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 		return;
 	}
 
-	const l0::MEPFragment* const trbDataFragment = subevent_->getFragment(fragmentNumber_);
+	const l0::MEPFragment* const trbDataFragment = subevent_->getFragment(
+			fragmentNumber_);
 
+//	LOG_INFO<< "trbData " << trbDataFragment->getPayloadLength() << ENDL;
 	if (!trbDataFragment->getPayloadLength()) {
 		isBadFrag_ = true;
 		return;
@@ -59,21 +61,14 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	 * -> use this to estimate the maximum number of words
 	 */
 
-	const int maxNwords = (trbDataFragment->getPayloadLength() / 4) -2;
+	const int maxNwords = (trbDataFragment->getPayloadLength() / 4) - 2;
 
-	if(maxNwords <= 0){
-		LOG_ERROR << "The packet payload is not as expected !!!" << ENDL;
+	if (maxNwords <= 0) {
+		LOG_ERROR<< "The packet payload is not as expected !!!" << ENDL;
 		//throw NA62Error("The packet payload is not as expected !!!");
 		isBadFrag_ = true;
 		return;
 	}
-//	LOG_INFO << "trbData " << trbDataFragment->getPayloadLength() << ENDL;
-
-	edgeTimes = new uint64_t[maxNwords];
-	edgeChIDs = new uint_fast8_t[maxNwords];
-	edgeTdcIDs = new uint_fast8_t[maxNwords];
-	edgeIsLeading = new bool[maxNwords];
-	uint_fast16_t nWords_tot = 0;
 
 	const char* const payload = trbDataFragment->getPayload();
 
@@ -87,6 +82,17 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 
 	const uint nFPGAs = boardHeader->getNumberOfFPGAs();
 //	LOG_INFO<< "Number of FPGAs (from boardHeader) " << nFPGAs << ENDL;
+	if (!boardHeader->fpgaFlags || nFPGAs > 4) {
+		LOG_ERROR<< "FPGA Flags or Number of FPGAs is not as expected !" << ENDL;
+		isBadFrag_ = true;
+		return;
+	}
+
+	edgeTimes = new uint64_t[maxNwords];
+	edgeChIDs = new uint_fast8_t[maxNwords];
+	edgeTdcIDs = new uint_fast8_t[maxNwords];
+	edgeIsLeading = new bool[maxNwords];
+	uint_fast16_t nWords_tot = 0;
 
 	for (uint iFPGA = 0; iFPGA != nFPGAs; iFPGA++) {
 //		printf("writing getpayload() + %d\n", 1 + iFPGA + nWords_tot);
@@ -113,6 +119,12 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 
 			const uint_fast16_t nWordsOfCurrentFrame =
 					(uint) frameHeader->nWords;
+			if (!nWordsOfCurrentFrame) {
+				LOG_ERROR<< "Number of Words in Frame is Null !" << std::hex << (int) (trbDataFragment->getSourceID()) << ":"
+				<< (int)(trbDataFragment->getSourceSubID()) << ENDL;
+				isBadFrag_ = true;
+				return;
+			}
 			nWords_tot += nWordsOfCurrentFrame;
 //			LOG_INFO<< "Number of Words  " << nWords_tot << ENDL;
 
@@ -126,13 +138,6 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 			if ((timestamp & 0xf000) == 0x0000 && (frameTS & 0xf000) == 0xf000)
 				frameTS -= 0x10000; //16 bits overflow
 
-			if (!nWordsOfCurrentFrame){
-
-				LOG_ERROR << "Number of Words in Frame is Null !" << std::hex << (int) (trbDataFragment->getSourceID()) << ":"
-						<< (int)(trbDataFragment->getSourceSubID()) << ENDL;
-				isBadFrag_ = true;
-				return;
-			}
 			const uint nEdges = nWordsOfCurrentFrame - 1;
 //			LOG_INFO<< "nEdges " << nEdges << ENDL;
 
@@ -176,10 +181,6 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 					&& ((nWords_tot + nFPGAs + 1)
 							!= (trbDataFragment->getPayloadLength() / 4))) {
 
-				// Temporary patch
-//			if ((((uint) errHeader->frame1ErrWords) != 0xff)
-//								&& (errHeader->nErrWords & 0xff00) != 0x0100) {
-
 //				LOG_INFO <<"Frame 0 err words " << (uint) errHeader->frame0ErrWords << ENDL;
 //				LOG_INFO << "Frame 1 err words " << (uint) errHeader->frame1ErrWords << ENDL;
 //				LOG_INFO << "Number of err words " << (uint) errHeader->nErrWords << ENDL;
@@ -187,8 +188,12 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 				/*
 				 * In 2015 DATA FORMAT error words can be present at the end of each FPGA block
 				 */
-//				const uint_fast8_t nErrWords = errHeader->nErrWords;
 				const uint_fast16_t nErrWords = errHeader->nErrWords;
+				if (!nErrWords) {
+					LOG_ERROR<< "Number of ErrWords is Null but Err Flag says otherwise!" << std::hex << (int) (trbDataFragment->getSourceID()) << ":" << (int)(trbDataFragment->getSourceSubID()) << ENDL;
+					isBadFrag_ = true;
+					return;
+				}
 				const uint nErrors = nErrWords - 1;
 
 				for (uint iErr = 0; iErr != nErrors; iErr++) {
