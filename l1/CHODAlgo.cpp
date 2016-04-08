@@ -52,12 +52,12 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder,
 	nHits_V = 0;
 
 //	LOG_INFO<< "Event number = " << decoder.getDecodedEvent()->getEventNumber() << ENDL;
-//	LOG_INFO<< "Timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << ENDL;
+//	LOG_INFO<< "CHODAlgo: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << ENDL;
 //	LOG_INFO << "Average Hit Time (initial value) " << averageHitTime << ENDL;
 
-	TrbFragmentDecoder& chodPacket =
-			(TrbFragmentDecoder&) decoder.getDecodedCHODFragment(0);
-	if (chodPacket.isBadFragment()) {
+	TrbFragmentDecoder& chodPacket = (TrbFragmentDecoder&) decoder.getDecodedCHODFragment(0);
+	if (!chodPacket.isReady() || chodPacket.isBadFragment()) {
+		LOG_ERROR<< "CHODAlgo: This looks like a Bad Packet!!!! " << ENDL;
 		return 0;
 	}
 //	LOG_INFO<< "First time check (inside iterator) " << time[1].tv_sec << " " << time[1].tv_usec << ENDL;
@@ -75,11 +75,6 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder,
 //	LOG_INFO<< "Reference detector fine time " << decoder.getDecodedEvent()->getFinetime() << ENDL;
 
 	for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
-
-//		finetime = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
-//		edgetime = (edge_times[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
-//		LOG_INFO<< "finetime (in ns) " << finetime << ENDL;
-//		LOG_INFO<< "edgetime (in ns) " << edgetime << ENDL;
 		/**
 		 * Process leading edges only
 		 *
@@ -101,7 +96,7 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder,
 						* 0.097464731802;
 //				LOG_INFO<< "finetime (in ns) " << finetime << " edgetime (in ns) " << edgetime << ENDL;
 
-//				if(fabs(edgetime - finetime) <= 30.) { //if ref detector is LKr
+//				if (fabs(edgetime - finetime) <= 30.) { //if ref detector is LKr
 				if (fabs(edgetime - finetime) <= 20.) { //otherwise
 					averageHitTime += edgetime;
 
@@ -128,7 +123,7 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder,
 	}
 //	LOG_INFO<< "time check " << time[2].tv_sec << " " << time[2].tv_usec << ENDL;
 //	}
-//	LOG_INFO<<" CHODAlgo.cpp: Analysed Event " << decoder.getDecodedEvent()->getEventNumber() << " - nHits(H) " << nHits_H << " nHits(V) " << nHits_V << ENDL;
+//	LOG_INFO<<"CHODAlgo.cpp: Analysed Event " << decoder.getDecodedEvent()->getEventNumber() << " - nHits(H) " << nHits_H << " nHits(V) " << nHits_V << ENDL;
 
 //	LOG_INFO<< "time check (final)" << time[3].tv_sec << " " << time[3].tv_usec << ENDL;
 
@@ -141,17 +136,17 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder,
 	if (nHits_V + nHits_H)
 		averageHitTime = averageHitTime / (nHits_V + nHits_H);
 	else
-		averageHitTime = 0.;
+		averageHitTime = -1.0e+28;
 
 	l1Info->setCHODAverageTime(averageHitTime);
 	l1Info->setL1CHODProcessed();
 
-//	LOG_INFO<< "PAT=============== number of Hits " << nHits_V + nHits_H << ENDL;
-//	LOG_INFO<< "PAT=============== average HitTime " << averageHitTime << ENDL;
-//	LOG_INFO<< "PAT=============== L1CHODProcessed Flag " << (uint)l1Info->isL1CHODProcessed() << ENDL;
+//	LOG_INFO<< "CHODAlgo=============== number of Hits " << nHits_V + nHits_H << ENDL;
+//	LOG_INFO<< "CHODAlgo=============== average HitTime " << averageHitTime << ENDL;
+//	LOG_INFO<< "CHODAlgo=============== L1CHODProcessed Flag " << (uint)l1Info->isL1CHODProcessed() << ENDL;
 
 	averageHitTime = 0;
-//	LOG_INFO<< "PAT=============== reset average HitTime " << averageHitTime << ENDL;
+//	LOG_INFO<< "CHODAlgo=============== reset average HitTime " << averageHitTime << ENDL;
 
 	return (((nHits_V + nHits_H) > 0) && ((nHits_V + nHits_H) < nMaxSlabs));
 //	return (((nHits_V == 1) && (nHits_H == 1))
