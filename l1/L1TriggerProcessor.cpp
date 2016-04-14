@@ -39,12 +39,12 @@ uint L1TriggerProcessor::autoFlagFactor_ = 0;
 
 L1InfoToStorage* L1TriggerProcessor::l1Info_ = L1InfoToStorage::GetInstance();
 double L1TriggerProcessor::bypassProbability;
-uint8_t L1TriggerProcessor::l0TrigWord = 0;
-uint16_t L1TriggerProcessor::l0TrigFlags = 0;
-uint16_t L1TriggerProcessor::l1TrigMask = 0;
-uint16_t L1TriggerProcessor::l1TrigLogic = 0;
-uint16_t L1TriggerProcessor::l1TrigFlag = 0;
-uint16_t L1TriggerProcessor::l1TrigDS = 0;
+uint_fast8_t L1TriggerProcessor::l0TrigWord = 0;
+uint_fast16_t L1TriggerProcessor::l0TrigFlags = 0;
+uint_fast16_t L1TriggerProcessor::l1TrigMask = 0;
+uint_fast16_t L1TriggerProcessor::l1TrigLogic = 0;
+uint_fast16_t L1TriggerProcessor::l1TrigFlag = 0;
+uint_fast16_t L1TriggerProcessor::l1TrigDS = 0;
 uint L1TriggerProcessor::l1ReferenceTimeSource = 0;
 
 uint L1TriggerProcessor::cedarAlgorithmId;
