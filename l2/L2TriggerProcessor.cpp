@@ -38,8 +38,7 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 }
 
 uint_fast8_t L2TriggerProcessor::onNonZSuppressedLKrDataReceived(Event* event) {
-	LOG_INFO<< "onNonZSuppressedLKrDataReceived - Trigger method not yet implemented!!!!!!!!!!!!"
-	<< ENDL;
+	LOG_INFO("onNonZSuppressedLKrDataReceived - Trigger method not yet implemented!!!!!!!!!!!!");
 	return 1;
 }
 

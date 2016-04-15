@@ -51,7 +51,7 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	const l0::MEPFragment* const trbDataFragment = subevent_->getFragment(
 			fragmentNumber_);
 
-//	LOG_INFO<< "trbData " << trbDataFragment->getPayloadLength() << ENDL;
+//	LOG_INFO("trbData " << trbDataFragment->getPayloadLength());
 	if (!trbDataFragment->getPayloadLength()) {
 		isBadFrag_ = true;
 		return;
@@ -64,7 +64,7 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	const int maxNwords = (trbDataFragment->getPayloadLength() / 4) - 2;
 
 	if (maxNwords <= 0) {
-		LOG_ERROR<< "The packet payload is not as expected !!!" << ENDL;
+		LOG_ERROR("The packet payload is not as expected !!!");
 		//throw NA62Error("The packet payload is not as expected !!!");
 		isBadFrag_ = true;
 		return;
@@ -75,15 +75,15 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	const TrbDataHeader* const boardHeader =
 			reinterpret_cast<const TrbDataHeader*>(payload);
 
-//	LOG_INFO<< "FPGA Flags " << (uint) boardHeader->fpgaFlags << ENDL;
-//	LOG_INFO<< "L0 trigger type " << (uint) boardHeader->triggerType << ENDL;
-//	LOG_INFO<< "Source (Tel62) sub-ID " << (uint) boardHeader->sourceSubID << ENDL;
-//	LOG_INFO<< "Format " << (uint) boardHeader->format << ENDL;
+//	LOG_INFO("FPGA Flags " << (uint) boardHeader->fpgaFlags);
+//	LOG_INFO("L0 trigger type " << (uint) boardHeader->triggerType);
+//	LOG_INFO("Source (Tel62) sub-ID " << (uint) boardHeader->sourceSubID);
+//	LOG_INFO("Format " << (uint) boardHeader->format);
 
 	const uint nFPGAs = boardHeader->getNumberOfFPGAs();
-//	LOG_INFO<< "Number of FPGAs (from boardHeader) " << nFPGAs << ENDL;
+//	LOG_INFO("Number of FPGAs (from boardHeader) " << nFPGAs);
 	if (!boardHeader->fpgaFlags || nFPGAs > 4) {
-		LOG_ERROR<< "FPGA Flags or Number of FPGAs is not as expected !" << ENDL;
+		LOG_ERROR("FPGA Flags or Number of FPGAs is not as expected !");
 		isBadFrag_ = true;
 		return;
 	}
@@ -99,10 +99,10 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 		FPGADataHeader* fpgaHeader = (FPGADataHeader*) payload + 1 + iFPGA
 				+ nWords_tot;
 
-//		LOG_INFO<< "Number of (25ns long) Frames " << (uint) fpgaHeader->noFrames << ENDL;
-//		LOG_INFO<< "Number of non-empty Frames " << (uint) fpgaHeader->noNonEmptyFrames<< ENDL;
-//		LOG_INFO<< "FPGA ID " << (uint) fpgaHeader->FPGAID<< ENDL;
-//		LOG_INFO<< "Error Flags " << (uint) fpgaHeader->errFlags<< ENDL;
+//		LOG_INFO("Number of (25ns long) Frames " << (uint) fpgaHeader->noFrames);
+//		LOG_INFO("Number of non-empty Frames " << (uint) fpgaHeader->noNonEmptyFrames);
+//		LOG_INFO("FPGA ID " << (uint) fpgaHeader->FPGAID);
+//		LOG_INFO("Error Flags " << (uint) fpgaHeader->errFlags);
 
 		/*
 		 * In 2015 DATA FORMAT empty frames are suppressed
@@ -114,24 +114,24 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 			FrameDataHeader* frameHeader = (FrameDataHeader*) payload + 2
 					+ iFPGA + nWords_tot;
 
-//			LOG_INFO<< "Number of Words in Frame " << (uint) frameHeader->nWords<< ENDL;
-//			LOG_INFO<< "Frame Timestamp " << (uint) frameHeader->frameTimeStamp<< ENDL;
+//			LOG_INFO("Number of Words in Frame " << (uint) frameHeader->nWords);
+//			LOG_INFO("Frame Timestamp " << (uint) frameHeader->frameTimeStamp);
 
 			const uint_fast16_t nWordsOfCurrentFrame =
 					(uint) frameHeader->nWords;
 			if (!nWordsOfCurrentFrame) {
-				LOG_ERROR<< "Number of Words in Frame is Null !" << std::hex << (int) (trbDataFragment->getSourceID()) << ":"
-				<< (int)(trbDataFragment->getSourceSubID()) << ENDL;
+				LOG_ERROR("Number of Words in Frame is Null !" << std::hex << (int) (trbDataFragment->getSourceID()) << ":"
+				<< (int)(trbDataFragment->getSourceSubID()));
 				isBadFrag_ = true;
 				return;
 			}
 			nWords_tot += nWordsOfCurrentFrame;
-//			LOG_INFO<< "Number of Words  " << nWords_tot << ENDL;
+//			LOG_INFO("Number of Words  " << nWords_tot);
 
 			frameTS = (frameHeader->frameTimeStamp & 0x0000ffff)
 					+ (timestamp & 0xffff0000);
-//			LOG_INFO<< "Event Timestamp " << std::hex << timestamp << std::dec << ENDL;
-//			LOG_INFO<< "FrameTS " << std::hex << frameTS << std::dec << ENDL;
+//			LOG_INFO("Event Timestamp " << std::hex << timestamp << std::dec);
+//			LOG_INFO("FrameTS " << std::hex << frameTS << std::dec);
 
 			if ((timestamp & 0xf000) == 0xf000 && (frameTS & 0xf000) == 0x0000)
 				frameTS += 0x10000; //16 bits overflow
@@ -139,7 +139,7 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 				frameTS -= 0x10000; //16 bits overflow
 
 			const uint nEdges = nWordsOfCurrentFrame - 1;
-//			LOG_INFO<< "nEdges " << nEdges << ENDL;
+//			LOG_INFO("nEdges " << nEdges);
 
 			for (uint iEdge = 0; iEdge < nEdges; iEdge++) {
 //				printf("writing getpayload() + %d\n", 2 + iFPGA + nWords_tot - nEdges + iEdge);
@@ -161,12 +161,12 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 				edgeTdcIDs[iEdge + nEdges_tot] = (uint) tdcData->tdcID;
 				edgeIsLeading[iEdge + nEdges_tot] = tdcData->ID == 0x4;
 
-//				LOG_INFO<< "edgeChIDs[" << iEdge + nEdges_tot << "] " << (uint) edgeChIDs[iEdge + nEdges_tot] << ENDL;
-//				LOG_INFO<< "edgeTdcIDs[" << iEdge + nEdges_tot << "] " << (uint) edgeTdcIDs[iEdge + nEdges_tot] << ENDL;
-//				LOG_INFO<< "edgeIsLeading["<< iEdge + nEdges_tot << "] " << edgeIsLeading[iEdge + nEdges_tot] << ENDL;
-//				LOG_INFO<< "edgeTimes[" << iEdge + nEdges_tot << "] " << std::hex << edgeTimes[iEdge + nEdges_tot] << std::dec << ENDL;
+//				LOG_INFO("edgeChIDs[" << iEdge + nEdges_tot << "] " << (uint) edgeChIDs[iEdge + nEdges_tot]);
+//				LOG_INFO("edgeTdcIDs[" << iEdge + nEdges_tot << "] " << (uint) edgeTdcIDs[iEdge + nEdges_tot]);
+//				LOG_INFO("edgeIsLeading["<< iEdge + nEdges_tot << "] " << edgeIsLeading[iEdge + nEdges_tot]);
+//				LOG_INFO("edgeTimes[" << iEdge + nEdges_tot << "] " << std::hex << edgeTimes[iEdge + nEdges_tot] << std::dec);
 
-//				LOG_INFO << "TIME (ns) " << ((edgeTimes[iEdge+nEdges_tot] - timestamp* 256.) * 0.097464731802) << ENDL;
+//				LOG_INFO("TIME (ns) " << ((edgeTimes[iEdge+nEdges_tot] - timestamp* 256.) * 0.097464731802));
 
 			}
 
@@ -181,16 +181,16 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 					&& ((nWords_tot + nFPGAs + 1)
 							!= (trbDataFragment->getPayloadLength() / 4))) {
 
-//				LOG_INFO <<"Frame 0 err words " << (uint) errHeader->frame0ErrWords << ENDL;
-//				LOG_INFO << "Frame 1 err words " << (uint) errHeader->frame1ErrWords << ENDL;
-//				LOG_INFO << "Number of err words " << (uint) errHeader->nErrWords << ENDL;
+//				LOG_INFO("Frame 0 err words " << (uint) errHeader->frame0ErrWords));
+//				LOG_INFO("Frame 1 err words " << (uint) errHeader->frame1ErrWords));
+//				LOG_INFO("Number of err words " << (uint) errHeader->nErrWords));
 
 				/*
 				 * In 2015 DATA FORMAT error words can be present at the end of each FPGA block
 				 */
 				const uint_fast16_t nErrWords = errHeader->nErrWords;
 				if (!nErrWords) {
-					LOG_ERROR<< "Number of ErrWords is Null but Err Flag says otherwise!" << std::hex << (int) (trbDataFragment->getSourceID()) << ":" << (int)(trbDataFragment->getSourceSubID()) << ENDL;
+					LOG_ERROR("Number of ErrWords is Null but Err Flag says otherwise!" << std::hex << (int) (trbDataFragment->getSourceID()) << ":" << (int)(trbDataFragment->getSourceSubID()));
 					isBadFrag_ = true;
 					return;
 				}
@@ -200,20 +200,20 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 //					printf("writing getpayload() + %d\n", 3 + iFPGA + nWords_tot + iErr);
 					ErrData* errData = (ErrData*) payload + 3 + iFPGA
 							+ nWords_tot + iErr;
-//					LOG_INFO <<"Error Word " << std::hex << (uint) errData->errWord << std::dec << ENDL;
+//					LOG_INFO("Error Word " << std::hex << (uint) errData->errWord << std::dec);
 				}
 				nWords_tot += nErrWords;
-//				LOG_INFO <<"Number of Words  " << nWords_tot << ENDL;
+//				LOG_INFO("Number of Words  " << nWords_tot);
 			} else {
-//				LOG_INFO << "Err flag " << (uint)fpgaHeader->errFlags << ENDL;
+//				LOG_INFO("Err flag " << (uint)fpgaHeader->errFlags);
 //				fpgaHeader->errFlags = (fpgaHeader->errFlags & 0xfe);
-//				LOG_INFO << "Err flag " << (uint)fpgaHeader->errFlags << ENDL;
-//				LOG_INFO << " **********Bit flip" << ENDL;
+//				LOG_INFO("Err flag " << (uint)fpgaHeader->errFlags);
+//				LOG_INFO(" **********Bit flip");
 
 			}
 		}
 	}
-//	LOG_INFO<<"TrbDecoder.cpp: Analysed Tel62 ID " << fragmentNumber_ << " - Number of edges found " << nEdges_tot << ENDL;
+//	LOG_INFO("TrbDecoder.cpp: Analysed Tel62 ID " << fragmentNumber_ << " - Number of edges found " << nEdges_tot);
 }
 
 }

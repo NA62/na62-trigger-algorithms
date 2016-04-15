@@ -21,7 +21,7 @@ double STRAWParsConfFile::fROMezzaninesT0[512];
 
 STRAWParsConfFile::STRAWParsConfFile() {
 
-//	LOG_INFO<< "In STRAW ParsConfFile" << ENDL;
+//	LOG_INFO("In STRAW ParsConfFile");
 
 	ConfFileReader fileName_(
 			"/Users/romano/Desktop/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer_online.2015.conf");
@@ -30,10 +30,10 @@ STRAWParsConfFile::STRAWParsConfFile() {
 	int loopChannels = 0;
 	fileT0 = " ";
 
-	if (!fileName_.isValid()) LOG_INFO<< "STRAW Configuration file not found" << ENDL;
+	if (!fileName_.isValid()) LOG_INFO("STRAW Configuration file not found");
 
 	if (fileName_.isValid()) {
-		LOG_INFO<< "STRAW configuration file open" << ENDL;
+		LOG_INFO("STRAW configuration file open");
 
 		while (fileName_.nextLine()) {
 
@@ -43,8 +43,8 @@ STRAWParsConfFile::STRAWParsConfFile() {
 			if (fileName_.getField<string>(1) == "NROChannels=") {
 				nROChannels = fileName_.getField<int>(2);
 				if(nROChannels) loopChannels = nROChannels/16;
-				else LOG_INFO << "Number of STRAW Readout Channels is empty" << ENDL;
-//				LOG_INFO << "Number of (Straw) Readout Channels " << nROChannels << ENDL;
+				else LOG_INFO("Number of STRAW Readout Channels is empty");
+//				LOG_INFO("Number of (Straw) Readout Channels " << nROChannels);
 			}
 			if (fileName_.getField<string>(1).find("ChRemap_")
 					!= string::npos) {
@@ -52,14 +52,14 @@ STRAWParsConfFile::STRAWParsConfFile() {
 					char name[1000];
 					sprintf(name, "ChRemap_%04d=", iCh);
 					string remap = (string) name;
-//					LOG_INFO << remap << ENDL;
-//					LOG_INFO << fileName_.getField<string>(1) << ENDL;
+//					LOG_INFO(remap);
+//					LOG_INFO(fileName_.getField<string>(1));
 
 					if (fileName_.getField<string>(1) == remap) {
 						for (int jCh = 0; jCh != 16; jCh++) {
 							geoMap[iCh*16 + jCh] = fileName_.getField<int>(jCh + 2);
 							if(geoMap[16*iCh+jCh]>maxChannelID) maxChannelID = geoMap[16*iCh+jCh];
-//							LOG_INFO << "(Straw) geoMap " << geoStrawMap[16*iCh+jCh] << ENDL;
+//							LOG_INFO("(Straw) geoMap " << geoStrawMap[16*iCh+jCh]);
 						}
 					}
 				}
@@ -94,13 +94,13 @@ int STRAWParsConfFile::getNROChannels() {
 
 void STRAWParsConfFile::readT0() {
 
-//	LOG_INFO<< "In STRAW ParsConfFile - T0 Mezzanines file " << fileT0 << ENDL;
+//	LOG_INFO("In STRAW ParsConfFile - T0 Mezzanines file " << fileT0);
 
 	ConfFileReader fileT0_(
 			"/Users/romano/Desktop/workspace/na62-trigger-algorithms/l1/straw_algorithm/" + fileT0);
 
 	if (!fileT0_.isValid())
-	LOG_INFO<< "STRAW T0 file not found" << ENDL;
+	LOG_INFO("STRAW T0 file not found");
 
 	int nROMezzanines = 512;
 	int nGroups = nROMezzanines/16;
@@ -112,7 +112,7 @@ void STRAWParsConfFile::readT0() {
 		}
 	}
 	if (fileT0_.isValid()) {
-		LOG_INFO<< "STRAW T0 file " << fileT0 << " open" <<ENDL;
+		LOG_INFO("STRAW T0 file " << fileT0 << " open");
 
 		while (fileT0_.nextLine()) {
 
@@ -124,15 +124,15 @@ void STRAWParsConfFile::readT0() {
 					char name[1000];
 					sprintf(name, "MezzaninesT0_%02d=", iGroup);
 					string time = (string) name;
-//					LOG_INFO << time << ENDL;
-//					LOG_INFO << fileT0_.getField<string>(1) << ENDL;
+//					LOG_INFO(time);
+//					LOG_INFO(fileT0_.getField<string>(1));
 
 					if(fileT0_.getField<string>(1) == time) {
 //					if(fileT0_.getField<string>(1).find(Form("MezzaninesT0_%02d=",iGroup))!= string::npos) {
 						for (int iMezzanine=0;iMezzanine<16;iMezzanine++) {
 							if(16*iGroup+iMezzanine<nROMezzanines) {
 								fROMezzaninesT0[16*iGroup+iMezzanine] = fileT0_.getField<double>(iMezzanine + 2);
-//								LOG_INFO << "(Straw) fROMezzaninesT0 " << fROMezzaninesT0[16*iGroup+iMezzanine] << ENDL;
+//								LOG_INFO("(Straw) fROMezzaninesT0 " << fROMezzaninesT0[16*iGroup+iMezzanine]);
 							}
 						}
 					}

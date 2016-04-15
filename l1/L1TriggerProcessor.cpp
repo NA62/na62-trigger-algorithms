@@ -135,7 +135,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 //	printf("L1TriggerProcessor.cpp: lavTrigger %d\n", lavTrigger);
 
 	l1Info_->resetL1CHODProcessed();
-//	LOG_INFO << "Reset L1CHODProcessed boolean " << l1Info_->isL1CHODProcessed() << ENDL;
+//	LOG_INFO("Reset L1CHODProcessed boolean " << l1Info_->isL1CHODProcessed());
 
 	/*
 	 * Reduction of specific trigger algorithms

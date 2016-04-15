@@ -38,11 +38,11 @@ uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder,
 		L1InfoToStorage* l1Info) {
 
 	using namespace l0;
-//	LOG_INFO<< "Initial Time " << time[0].tv_sec << " " << time[0].tv_usec << ENDL;
-//	LOG_INFO<< "LAVAlgo: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << ENDL;
+//	LOG_INFO("Initial Time " << time[0].tv_sec << " " << time[0].tv_usec);
+//	LOG_INFO("LAVAlgo: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
 
 	averageCHODHitTime = l1Info->getCHODAverageTime();
-//	LOG_INFO<< "LAVAlgo: chodtime " << averageCHODHitTime << ENDL;
+//	LOG_INFO("LAVAlgo: chodtime " << averageCHODHitTime);
 
 	bool isCHODRefTime;
 	if (l1Info->isL1CHODProcessed() && averageCHODHitTime != -1.0e+28)
@@ -56,15 +56,15 @@ uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder,
 	//TODO: chkmax need to be USED
 	DecoderRange<TrbFragmentDecoder> x = decoder.getLAVDecoderRange();
 	if (x.begin() == x.end()) {
-		LOG_ERROR<< "LAV: Empty decoder range!";
+		LOG_ERROR("LAV: Empty decoder range!");
 		return 0;
 	}
 
 	for (TrbFragmentDecoder* lavPacket : decoder.getLAVDecoderRange()) {
-//	LOG_INFO<< "First time check (inside iterator) " << time[1].tv_sec << " " << time[1].tv_usec << ENDL;
+//	LOG_INFO("First time check (inside iterator) " << time[1].tv_sec << " " << time[1].tv_usec);
 
 		if (!lavPacket->isReady() || lavPacket->isBadFragment()) {
-			LOG_ERROR<< "LAVAlgo: This looks like a Bad Packet!!!! " << ENDL;
+			LOG_ERROR("LAVAlgo: This looks like a Bad Packet!!!! ");
 			return 0;
 		}
 
@@ -84,44 +84,44 @@ uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder,
 
 		uint numberOfEdgesOfCurrentBoard = lavPacket->getNumberOfEdgesStored();
 
-//		LOG_INFO<< "LAV: Tel62 ID " << lavPacket->getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard << ENDL;
-//		LOG_INFO<< "Reference detector fine time " << decoder.getDecodedEvent()->getFinetime() << ENDL;
+//		LOG_INFO("LAV: Tel62 ID " << lavPacket->getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard);
+//		LOG_INFO("Reference detector fine time " << decoder.getDecodedEvent()->getFinetime());
 
 		for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
-//			LOG_INFO<< "Edge " << iEdge << " ID " << edge_IDs[iEdge] << ENDL;
-//			LOG_INFO<< "Edge " << iEdge << " chID " << (uint) edge_chIDs[iEdge] << ENDL;
-//			LOG_INFO<< "Edge " << iEdge << " tdcID " << (uint) edge_tdcIDs[iEdge] << ENDL;
-//			LOG_INFO<< "Edge " << iEdge << " time " << std::hex << edge_times[iEdge] << std::dec << ENDL;
+//			LOG_INFO("Edge " << iEdge << " ID " << edge_IDs[iEdge]);
+//			LOG_INFO("Edge " << iEdge << " chID " << (uint) edge_chIDs[iEdge]);
+//			LOG_INFO("Edge " << iEdge << " tdcID " << (uint) edge_tdcIDs[iEdge]);
+//			LOG_INFO("Edge " << iEdge << " time " << std::hex << edge_times[iEdge] << std::dec);
 
 //			if (edge_IDs[iEdge]) {
 			const int roChID = edge_trbIDs * 512 + edge_tdcIDs[iEdge] * 32 + edge_chIDs[iEdge];
-//			LOG_INFO<< "Readout Channel ID " << roChID << ENDL;
-//			LOG_INFO<< "Geom LeadGlass ID " << lgGeo[roChID] << ENDL;
+//			LOG_INFO("Readout Channel ID " << roChID);
+//			LOG_INFO("Geom LeadGlass ID " << lgGeo[roChID]);
 
 			const int roChIDPerTrb = edge_tdcIDs[iEdge] * 32 + edge_chIDs[iEdge];
-//			LOG_INFO<< "Readout Channel ID per Tel62 " << roChIDPerTrb << ENDL;
+//			LOG_INFO("Readout Channel ID per Tel62 " << roChIDPerTrb);
 
 			if ((roChID & 1) == 0) {
 				finetime = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
 				edgetime = (edge_times[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
-//				LOG_INFO<< "finetime (in ns) " << finetime << ENDL;
-//				LOG_INFO<< "edgetime (in ns) " << edgetime << ENDL;
+//				LOG_INFO("finetime (in ns) " << finetime);
+//				LOG_INFO("edgetime (in ns) " << edgetime);
 
 				dt_l0tp = fabs(edgetime - finetime);
 
 				if(isCHODRefTime) dt_chod = fabs(edgetime - averageCHODHitTime);
 				else dt_chod = -1.0e+28;
-//				LOG_INFO<< "dt_l0tp " << dt_l0tp << " dt_chod " << dt_chod << ENDL;
+//				LOG_INFO("dt_l0tp " << dt_l0tp << " dt_chod " << dt_chod);
 
 //				if (dt_l0tp < 20.) {
 				if (dt_l0tp < 20. || (isCHODRefTime && dt_chod < 20.)) {
 					if (edge_IDs[iEdge]) {
 						hit[roChIDPerTrb]++;
-//						LOG_INFO<< "Increment hit[" << roChIDPerTrb << "] to " << hit[roChIDPerTrb] << ENDL;
+//						LOG_INFO("Increment hit[" << roChIDPerTrb << "] to " << hit[roChIDPerTrb]);
 					}
 					else if (hit[roChIDPerTrb]) {
 						nHits++;
-//						LOG_INFO<< "Increment nHits " << nHits << ENDL;
+//						LOG_INFO("Increment nHits " << nHits);
 						if (nHits >= 3) return 0;
 					}
 				}
@@ -129,18 +129,18 @@ uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder,
 //				printf("ODD! - Soglia alta! - Out Of Time! \n");
 			}
 		}
-//	LOG_INFO<< "time check " << time[2].tv_sec << " " << time[2].tv_usec << ENDL;
+//	LOG_INFO("time check " << time[2].tv_sec << " " << time[2].tv_usec);
 		nEdges_tot += numberOfEdgesOfCurrentBoard;
 	}
 
-//	LOG_INFO<<"LAVAlgo.cpp: Analysed Event " << decoder.getDecodedEvent()->getEventNumber() << " - nEdges_tot " << nEdges_tot << " - nHits " << nHits << ENDL;
-//	LOG_INFO<< "time check (final)" << time[3].tv_sec << " " << time[3].tv_usec << ENDL;
+//	LOG_INFO("LAVAlgo.cpp: Analysed Event " << decoder.getDecodedEvent()->getEventNumber() << " - nEdges_tot " << nEdges_tot << " - nHits " << nHits);
+//	LOG_INFO("time check (final)" << time[3].tv_sec << " " << time[3].tv_usec);
 
 //	for (int i = 0; i < 3; i++) {
 //		if (i)
-//			LOG_INFO<<((time[i+1].tv_sec - time[i].tv_sec)*1e6 + time[i+1].tv_usec) - time[i].tv_usec << " ";
+//			LOG_INFO(((time[i+1].tv_sec - time[i].tv_sec)*1e6 + time[i+1].tv_usec) - time[i].tv_usec << " ");
 //		}
-//	LOG_INFO<< ((time[3].tv_sec - time[0].tv_sec)*1e6 + time[3].tv_usec) - time[0].tv_usec << ENDL;
+//	LOG_INFO(((time[3].tv_sec - time[0].tv_sec)*1e6 + time[3].tv_usec) - time[0].tv_usec);
 
 	return (nHits < 3);
 
