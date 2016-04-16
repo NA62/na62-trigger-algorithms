@@ -17,7 +17,7 @@
 L1InfoToStorage* L1InfoToStorage::theInstance = nullptr;
 
 L1InfoToStorage::L1InfoToStorage() {
-	LOG_INFO<< "********************In L1 InfoToStorage" << ENDL;
+	LOG_INFO("********************In L1 InfoToStorage");
 	chodTime = 0.;
 	L1CHODProcessed_ = false;
 }

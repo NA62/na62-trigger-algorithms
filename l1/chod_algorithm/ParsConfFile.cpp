@@ -21,17 +21,17 @@ CHODParsConfFile* CHODParsConfFile::theInstance = nullptr;
 
 CHODParsConfFile::CHODParsConfFile() {
 
-//	LOG_INFO<< "In CHOD ParseConfFile" << ENDL;
+//	LOG_INFO("In CHOD ParseConfFile");
 
 	ConfFileReader fileName_(
 			"/workspace/na62-trigger-algorithms/l1/chod_algorithm/config/CHOD.conf");
 
 	if (!fileName_.isValid())
-		LOG_INFO<< "Config file not found" << ENDL;
+		LOG_INFO("Config file not found");
 
 	if (fileName_.isValid()) {
 
-//		LOG_INFO<< "CHOD configuration file open" << ENDL;
+//		LOG_INFO("CHOD configuration file open");
 
 		while (fileName_.nextLine()) {
 
@@ -40,7 +40,7 @@ CHODParsConfFile::CHODParsConfFile() {
 			}
 			if (fileName_.getField<string>(1) == "NROChannels=") {
 				nroChannels = fileName_.getField<int>(2);
-//				LOG_INFO << "nroChannels " << nroChannels << ENDL;
+//				LOG_INFO("nroChannels " << nroChannels);
 			}
 			if (fileName_.getField<string>(1).find("ChRemap_")
 					!= string::npos) {
@@ -48,8 +48,8 @@ CHODParsConfFile::CHODParsConfFile() {
 					char name[1000];
 					sprintf(name, "ChRemap_%d=", iCh);
 					string remap = (string) name;
-//					LOG_INFO << remap << ENDL;
-//					LOG_INFO << fileName_.getField<string>(1) << ENDL;
+//					LOG_INFO(remap);
+//					LOG_INFO(fileName_.getField<string>(1));
 
 					if (fileName_.getField<string>(1) == remap) {
 						for (int jCh = 0; jCh < 16; jCh++) {
@@ -81,15 +81,15 @@ int* CHODParsConfFile::getGeoSlabMap() {
 
 //void CHODParsConfFile::readT0() {
 //
-////     LOG_INFO<< "CHOD ParsFile::File T0 " << fileT0 << ENDL;
+////     LOG_INFO("CHOD ParsFile::File T0 " << fileT0);
 //       ConfFileReader fileT0_("");
 //
 //       if (!fileT0_.isValid())
-////     LOG_INFO<< "T0 file not found" << ENDL;
+////     LOG_INFO("T0 file not found");
 //
 //               if (fileT0_.isValid()) {
 //
-////             LOG_INFO<< "T0 file " << fileT0 << " open" <<ENDL;
+////             LOG_INFO("T0 file " << fileT0 << " open");
 //
 //                       while (fileT0_.nextLine()) {
 //
@@ -102,8 +102,8 @@ int* CHODParsConfFile::getGeoSlabMap() {
 //                                               char name[1000];
 //                                               sprintf(name, "T0_%d=", iCh);
 //                                               string time = (string) name;
-//                                               //LOG_INFO << remap << ENDL;
-//                                               //LOG_INFO << fileName.getField<string>(1) << ENDL;
+//                                               //LOG_INFO(remap);
+//                                               //LOG_INFO(fileName.getField<string>(1));
 //
 //                                               if (fileT0_.getField<string>(1) == time) {
 //                                                       for (int jCh = 0; jCh < 16; jCh++) {
