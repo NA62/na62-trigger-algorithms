@@ -15,6 +15,7 @@
 
 #include "../common/decoding/DecoderHandler.h"
 #include "L1InfoToStorage.h"
+#include "../struct/HLTConfParams.h"
 
 namespace na62 {
 
@@ -37,7 +38,23 @@ public:
 		return ((tel62ID << 2) | fpgaID) / 3;
 	}
 
+	static void initialize(l1KTAG &l1KtagStruct);
+
+	static bool isAlgoProcessed();
+	static void resetAlgoProcessed();
+	static bool isEmptyPacket();
+	static bool isBadData();
+
 private:
+	static uint algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for MUV3, 5 for Straw
+	static uint algoLogic;
+	static uint algoRefTimeSourceID;
+	static double algoOnlineTimeWindow;
+
+	static bool algoProcessed;
+	static bool emptyPacket;
+	static bool badData;
+	static bool isCHODRefTime;
 	static double averageCHODHitTime;
 
 };

@@ -15,12 +15,12 @@
 #include "../common/decoding/DecoderHandler.h"
 #include "lav_algorithm/ParsConfFile.h"
 #include "L1InfoToStorage.h"
+#include "../struct/HLTConfParams.h"
 
 #define maxNhits 500
 #define maxNROchs 512
 
 namespace na62 {
-
 
 class LAVAlgo {
 public:
@@ -34,11 +34,29 @@ public:
 
 	LAVAlgo();
 	~LAVAlgo();
+
 	static uint_fast8_t processLAVTrigger(DecoderHandler& decoder,L1InfoToStorage* l1Info);
+
+	static void initialize(l1LAV &l1LAVStruct);
+
+	static bool isAlgoProcessed();
+	static void resetAlgoProcessed();
+	static bool isEmptyPacket();
+	static bool isBadData();
 
 private:
 
 	static LAVParsConfFile* infoLAV_;
+	static uint algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for MUV3, 5 for Straw
+	static uint algoLogic;
+	static uint algoRefTimeSourceID;
+	static double algoOnlineTimeWindow;
+
+	static bool algoProcessed;
+	static bool emptyPacket;
+	static bool badData;
+	static bool isCHODRefTime;
+
 	static int* lgGeo;
 	static int hit[maxNROchs];
 	static uint nHits;
