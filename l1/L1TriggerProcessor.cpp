@@ -36,6 +36,7 @@ std::atomic<uint64_t> L1TriggerProcessor::L1AcceptedEvents_(0);
 std::atomic<uint64_t> L1TriggerProcessor::L1BypassedEvents_(0);
 
 double L1TriggerProcessor::bypassProbability;
+<<<<<<< HEAD
 uint L1TriggerProcessor::reductionFactor = 0;
 uint L1TriggerProcessor::downscaleFactor = 0;
 bool L1TriggerProcessor::flagMode = 0;
