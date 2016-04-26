@@ -7,6 +7,7 @@
 
 #include "HLTriggerManager.h"
 #include "options/Logging.h"
+#include "../options/TriggerOptions.h"
 
 namespace na62 {
 
@@ -181,9 +182,7 @@ void HLTriggerManager::createXMLFile() {
 
 void HLTriggerManager::fillStructFromXMLFile(HLTStruct &HLTStruct) {
 
-	if (xml_read_file_HLTStruct(
-			"/Users/romano/Desktop/workspace/na62-trigger-algorithms/struct/HLTConfParams.xml")
-			== -1)
+	if (xml_read_file_HLTStruct(OPTION_TRIGGER_XML_FILE)== -1)
 		LOG_INFO << "Fatal error: " << xml_getLastFatalError_HLTStruct() << ENDL;
 
 	xml_apply_HLTStruct(&HLTStruct);

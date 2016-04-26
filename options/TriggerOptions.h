@@ -18,6 +18,8 @@
  */
 #define OPTION_TRIGGER_CONFIG_FILE (char*)"triggerConfigFile"
 
+#define OPTION_TRIGGER_XML_FILE (char*)"triggerXMLFile"
+
 //#define OPTION_L1_BYPASS_PROBABILITY (char*)"L1BypassProbability"
 //#define OPTION_L2_BYPASS_PROBABILITY (char*)"L2BypassProbability"
 //
@@ -59,9 +61,15 @@ public:
 				po::value<std::string>()->default_value(
 						"/etc/na62-trigger.conf"),
 				"Config file for trigger specific options")
-		/*
-		 * Define L1 - L2 Trigger Global options
-		 */
+
+		(OPTION_TRIGGER_XML_FILE,
+				po::value<std::string>()->default_value(
+						"/etc/HLTConfParams.xml"),
+				"XML file with trigger configurations")
+
+				/*
+				 * Define L1 - L2 Trigger Global options
+				 */
 //		(OPTION_L1_BYPASS_PROBABILITY, po::value<double>()->default_value(0.),
 //				"Probability for every event to bypass L1 and L2 processing")
 //
@@ -108,7 +116,6 @@ public:
 //
 //		(OPTION_L1_REFERENCE_TIME, po::value<int>()->default_value(0),
 //				"Set L1 reference time source.")
-
 				/*
 				 * Add your Option here like following:
 				 * 	(OPTION_YOUR_OPTION_NAME, po::value<std::string>()->default_value(123),
