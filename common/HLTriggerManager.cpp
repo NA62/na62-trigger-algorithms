@@ -182,7 +182,7 @@ void HLTriggerManager::createXMLFile() {
 
 void HLTriggerManager::fillStructFromXMLFile(HLTStruct &HLTStruct) {
 
-	if (xml_read_file_HLTStruct(OPTION_TRIGGER_XML_FILE)== -1)
+	if (xml_read_file_HLTStruct("/etc/HLTConfParams.xml")== -1)
 		LOG_INFO << "Fatal error: " << xml_getLastFatalError_HLTStruct() << ENDL;
 
 	xml_apply_HLTStruct(&HLTStruct);
