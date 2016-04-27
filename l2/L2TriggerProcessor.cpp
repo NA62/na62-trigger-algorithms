@@ -47,11 +47,7 @@ void L2TriggerProcessor::initialize(l2Struct &l2Struct) {
 	flagMode = (bool) l2Struct.l2Global.l2FlagMode;
 	autoFlagFactor = l2Struct.l2Global.l2AutoFlagFactor;
 	referenceTimeSourceID = l2Struct.l2Global.l2ReferenceTimeSourceID;
-/*
-	LOG_INFO << "L2: byPassProb " << bypassProbability << " autoFlagFactor " << autoFlagFactor << " redFactor "
-				<< reductionFactor << " dwscFactor " << downscaleFactor << " flagMode " << flagMode
-				<< " refTimeID " << referenceTimeSourceID << ENDL;
-*/
+
 	/*
 	 * Initialisation of individual Algo masks
 	 */
@@ -64,9 +60,9 @@ void L2TriggerProcessor::initialize(l2Struct &l2Struct) {
 uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 
 	L2InputEvents_.fetch_add(1, std::memory_order_relaxed);
-//	LOG_INFO<< "L2Event number after adding 1 " << L2InputEvents_ << ENDL;
+//	LOG_INFO("L2Event number after adding 1 " << L2InputEvents_);
 	L2InputEventsPerBurst_.fetch_add(1, std::memory_order_relaxed);
-//	LOG_INFO<< "L2Event number per Burst after adding 1 " << L2InputEventsPerBurst_ << ENDL;
+//	LOG_INFO("L2Event number per Burst after adding 1 " << L2InputEventsPerBurst_);
 	/*
 	 * Check if the event should bypass the processing
 	 */
@@ -75,20 +71,20 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 	}
 	if (event->isL2Bypassed() || bypassEvent()) {
 		L2BypassedEvents_.fetch_add(1, std::memory_order_relaxed);
-//		LOG_INFO<< "L2 ByPassed Event number after adding 1 " << L2BypassedEvents_ << ENDL;
+//		LOG_INFO("L2 ByPassed Event number after adding 1 " << L2BypassedEvents_);
 		return TRIGGER_L2_BYPASS;
 	}
 	/*
 	 * Check if the event fulfills the reduction option
 	 *
 	 */
-//	LOG_INFO<< "L2Reduction Factor " << reductionFactor << ENDL;
-//	LOG_INFO<< "Modulo " << L2InputEvents_ % reductionFactor << ENDL;
+//	LOG_INFO("L2Reduction Factor " << reductionFactor);
+//	LOG_INFO("Modulo " << L2InputEvents_ % reductionFactor);
 	if (L2InputEvents_ % reductionFactor != 0)
 		return 0;
 
 	L2InputReducedEvents_.fetch_add(1, std::memory_order_relaxed);
-//	LOG_INFO<< "L2ReducedEvent number after adding 1 " << L2InputReducedEvents_ << ENDL;
+//	LOG_INFO("L2ReducedEvent number after adding 1 " << L2InputReducedEvents_);
 
 	/*
 	 * The event is ready to be processed
@@ -110,22 +106,19 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 
 	if (l2Trigger != 0) {
 		L2AcceptedEvents_.fetch_add(1, std::memory_order_relaxed);
-//		LOG_INFO<<"L2 Accepted Event number after adding 1 " << L2AcceptedEvents_ << ENDL;
+//		LOG_INFO("L2 Accepted Event number after adding 1 " << L2AcceptedEvents_);
 
 //Global L2 downscaling
-//		LOG_INFO<< "L2Downscale Factor " << downscaleFactor << ENDL;
-//		LOG_INFO<< "Modulo " << L2AcceptedEvents_ % downscaleFactor << ENDL;
+//		LOG_INFO("L2Downscale Factor " << downscaleFactor);
+//		LOG_INFO("Modulo " << L2AcceptedEvents_ % downscaleFactor);
 		if (L2AcceptedEvents_ % downscaleFactor != 0)
 			return 0;
 	}
 	return l2Trigger;
 }
 
-uint_fast8_t L2TriggerProcessor::onNonZSuppressedLKrDataReceived(
-		Event * event) {
-	LOG_INFO
-			<< "onNonZSuppressedLKrDataReceived - Trigger method not yet implemented!!!!!!"
-			<< ENDL;
+uint_fast8_t L2TriggerProcessor::onNonZSuppressedLKrDataReceived(Event* event) {
+	LOG_INFO("onNonZSuppressedLKrDataReceived - Trigger method not yet implemented!!!!!!!!!!!!");
 	return 1;
 }
 

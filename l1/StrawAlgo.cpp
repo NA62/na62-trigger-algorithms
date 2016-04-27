@@ -53,7 +53,7 @@ int StrawAlgo::nStrawPrecluster[4][4][2];
 
 uint_fast8_t StrawAlgo::processStrawTrigger(DecoderHandler& decoder) {
 
-//  LOG_INFO<< "Initial Time " << time[0].tv_sec << " " << time[0].tv_usec << ENDL;
+//  LOG_INFO("Initial Time " << time[0].tv_sec << " " << time[0].tv_usec);
 
 	using namespace l0;
 
@@ -73,7 +73,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(DecoderHandler& decoder) {
 //	printf ("\nnevent = %d, event timestamp = %u, ClockPeriod %lf \n",decoder.getDecodedEvent()->getEventNumber(),decoder.getDecodedEvent()->getTimestamp(),CLOCK_PERIOD);
 
 	//  TODO: chkmax need to be USED
-//	LOG_INFO<< "receiving straw packet:" << endl;
+//	LOG_INFO("receiving straw packet:");
 	for (SrbFragmentDecoder* strawPacket_ : decoder.getSTRAWDecoderRange()) {
 
 		const uint_fast8_t* strawAddr = strawPacket_->getStrawIDs();
@@ -85,7 +85,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(DecoderHandler& decoder) {
 				strawPacket_->getNumberOfEdgesStored();
 
 		for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
-//			LOG_INFO<< (uint)srbAddr[iEdge] << " " << (uint)strawAddr[iEdge] << " " << time[iEdge] << " " << edgeIsLeading[iEdge] << ENDL;
+//			LOG_INFO((uint)srbAddr[iEdge] << " " << (uint)strawAddr[iEdge] << " " << time[iEdge] << " " << edgeIsLeading[iEdge]);
 			chRO[nHits] = 256 * srbAddr[iEdge] + strawAddr[iEdge];
 
 			strawChannel_.resetChannelID();
@@ -103,12 +103,12 @@ uint_fast8_t StrawAlgo::processStrawTrigger(DecoderHandler& decoder) {
 
 			int coverAddr = ((strawAddr[iEdge]&0xf0)>>4);
 
-//			LOG_INFO << chRO[nHits] << " " << strawGeo[chRO[nHits]] << ENDL;
-//			LOG_INFO<< "ChamberID " << chamberID
+//			LOG_INFO(chRO[nHits] << " " << strawGeo[chRO[nHits]]);
+//			LOG_INFO("ChamberID " << chamberID
 //			<< " ViewID " << viewID
 //			<< " HalfViewID " << halfviewID
 //			<< " PlaneID " << planeID
-//			<< " StrawID " << strawID << ENDL;
+//			<< " StrawID " << strawID);
 
 			if(edgeIsLeading[iEdge]) leading = (double)edgeTime[iEdge] + (double)t0_main_shift - (double)fROMezzaninesT0[srbAddr[iEdge]*16+coverAddr] + (double)INVISIBLE_SHIFT - (((double)decoder.getDecodedEvent()->getFinetime()*CLOCK_PERIOD)/256 + 0.5);
 //			if(edgeIsLeading[iEdge]) leading = (double)edgeTime[iEdge];
@@ -169,7 +169,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(DecoderHandler& decoder) {
 		nEdges_tot += numberOfEdgesOfCurrentBoard;
 	}
 
-//	LOG_INFO<< "Angela: " << decoder.getDecodedEvent()->getEventNumber() << "\t" << decoder.getDecodedEvent()->getTimestamp() << "\t" << nEdges_tot << ENDL;
+//	LOG_INFO("Angela: " << decoder.getDecodedEvent()->getEventNumber() << "\t" << decoder.getDecodedEvent()->getTimestamp() << "\t" << nEdges_tot);
 	return 0; //return the Straw Trigger word!
 }
 
