@@ -165,6 +165,7 @@ private:
 	static bool isAlgoEnableForAllL0Masks;
 	static bool isDownscaledAndFlaggedEvent;
 	static bool isReducedEvent;
+	static bool isAllL1AlgoDisable;
 }
 ;
 

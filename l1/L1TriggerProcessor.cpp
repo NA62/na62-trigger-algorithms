@@ -84,6 +84,7 @@ uint L1TriggerProcessor::numberOfTriggeredL1Masks = 0;
 bool L1TriggerProcessor::isAlgoEnableForAllL0Masks = 0;
 bool L1TriggerProcessor::isDownscaledAndFlaggedEvent = 0;
 bool L1TriggerProcessor::isReducedEvent = 0;
+bool L1TriggerProcessor::isAllL1AlgoDisable = 0;
 
 void L1TriggerProcessor::registerDownscalingAlgorithms() {
 	uint numberOfRegisteredAlgorithms = 0;
@@ -112,6 +113,7 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 
 	eventCountersByL0MaskByAlgoID_ = new std::atomic<uint64_t>*[16];
 	for (int i = 0; i != 16; ++i) {
+		L1AcceptedEventsPerL0Mask_[i] = 0;
 		eventCountersByL0MaskByAlgoID_[i] = new std::atomic<uint64_t>[4] { };
 	}
 	for (int i = 0; i != 0xFF + 1; i++) {
@@ -253,12 +255,14 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	 */
 	if (event->isSpecialTriggerEvent()) {
 		event->setRrequestZeroSuppressedCreamData(false);
-		return TRIGGER_L1_BYPASS;
+		L1Triggers_[TRIGGER_L1_SPECIAL].fetch_add(1, std::memory_order_relaxed);
+		return TRIGGER_L1_SPECIAL;
 	}
 	if (bypassEvent()) {
 		L1BypassedEvents_.fetch_add(1, std::memory_order_relaxed);
 //		LOG_INFO("L1 ByPassed Event number after adding 1 " << L1BypassedEvents_);
 		event->setRrequestZeroSuppressedCreamData(true);
+		L1Triggers_[TRIGGER_L1_BYPASS].fetch_add(1, std::memory_order_relaxed);
 		return TRIGGER_L1_BYPASS;
 	}
 	/*
@@ -298,14 +302,16 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 //	uint globReducFactor = L1Builder::GetL1ReductionFactor();
 //	l1Block->globalreduction = globReducFactor;
 
-	uint_fast8_t l1FlagTrigger = 0;
+	uint_fast8_t l1GlobalFlagTrigger = 0;
+//	LOG_INFO("Global flagMode " << flagMode << " " << L1InputReducedEvents_ << " " << autoFlagFactor);
 	if (flagMode || (L1InputReducedEvents_ % autoFlagFactor == 0)) {
-		l1FlagTrigger = 1;
+		l1GlobalFlagTrigger = 1;
 	} else {
-		l1FlagTrigger = 0;
+		l1GlobalFlagTrigger = 0;
 	}
 
 	isReducedEvent = 0;
+	isAllL1AlgoDisable = 0;
 	isDownscaledAndFlaggedEvent = 0;
 	isAlgoEnableForAllL0Masks = 0;
 	numberOfTriggeredL1Masks = 0;
@@ -314,35 +320,33 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	cedarTrigger = 0;
 	lavTrigger = 0;
 	uint_fast8_t l1TriggerTmp;
+	uint_fast8_t l1FlagTrigger;
 
 	for (int i = 0; i != 16; i++) {
 		l1TriggerTmp = 0;
+		l1FlagTrigger = 0;
 		l1TriggerWords[i] = 0;
 		if (l0TrigFlags & (1 << i)) {
 			l1ProcessID = 0;
 			if (numberOfFlaggedAlgos[i])
 				l1FlagTrigger = 1;
-//			LOG_INFO("Modulo (algoReductionFactor) " << L1InputReducedEvents_ % algoReductionFactor[i]);
+//			LOG_INFO("Reduction factor " << algoReductionFactor[i] << " Modulo (algoReductionFactor) " << L1InputReducedEvents_ % algoReductionFactor[i]);
 			if (L1InputReducedEvents_ % algoReductionFactor[i] != 0)
 				isReducedEvent = 1;
 			else
 				isReducedEvent = 0;
-			/*
-			 LOG_INFO("isReducedEvent " << isReducedEvent);
-			 LOG_INFO("i " << i << " processID " << l1ProcessID
-			 << " nEnAlgos " << numberOfEnabledAlgos[i]
-			 << " l1TriggerTemp " << (uint) l1TriggerTmp
-			 << " nFlagAlgos " << numberOfFlaggedAlgos[i]
-			 << " l1FlagTrig " << (uint) l1FlagTrigger);
-			 */
+
+//			LOG_INFO("isReducedEvent " << isReducedEvent);
+//			LOG_INFO("i " << i << " processID " << l1ProcessID << " nEnAlgos " << numberOfEnabledAlgos[i] << " l1TriggerTemp " << (uint) l1TriggerTmp << " nFlagAlgos " << numberOfFlaggedAlgos[i] << " l1FlagTrig " << (uint) l1FlagTrigger);
+			if (!numberOfEnabledAlgos[i])
+				isAllL1AlgoDisable = 1;
+
 			while (!isReducedEvent && l1ProcessID != numberOfEnabledAlgos[i]) {
 
 				if ((chodEnableMask & (1 << i))
 						&& (chodProcessID[i] == l1ProcessID)
 						&& SourceIDManager::isChodActive()) {
-//					LOG_INFO("is CHOD Algo Processed? " << CHODAlgo::isAlgoProcessed());
 					if (!CHODAlgo::isAlgoProcessed()) {
-//						LOG_INFO("I am Processing CHOD!!!!!" );
 						chodTrigger = CHODAlgo::processCHODTrigger(decoder,
 								l1Info_);
 //					if (chodTrigger != 0) {
@@ -351,7 +355,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 					}
 					l1ProcessID++;
 					l1TriggerTmp = chodTrigger;
-//					printf("L1TriggerProcessor.cpp: chodTrigger %d\n",chodTrigger);
+					//printf("L1TriggerProcessor.cpp: chodTrigger %d\n",
+					//	chodTrigger);
 				}
 				if ((chodEnableMask & l0TrigFlags) == l0TrigFlags)
 					isAlgoEnableForAllL0Masks = 1;
@@ -369,7 +374,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 				 //					}
 				 l1ProcessID++;
 				 l1TriggerTmp = richTrigger;
-				 printf("L1TriggerProcessor.cpp: richTrigger %d\n",
+				 //printf("L1TriggerProcessor.cpp: richTrigger %d\n",
 				 richTrigger);
 				 }
 				 if ((richEnableMask & l0TrigFlags) == l0TrigFlags)
@@ -381,9 +386,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 				if ((cedarEnableMask & (1 << i))
 						&& cedarProcessID[i] == l1ProcessID
 						&& SourceIDManager::isCedarActive()) {
-//					LOG_INFO("is Ktag Algo Processed? " << KtagAlgo::isAlgoProcessed());
 					if (!KtagAlgo::isAlgoProcessed()) {
-//						LOG_INFO("I am Processing KTAG!!!!!");
 						cedarTrigger = KtagAlgo::processKtagTrigger(decoder,
 								l1Info_);
 //					if (cedarTrigger != 0) {
@@ -392,7 +395,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 					}
 					l1ProcessID++;
 					l1TriggerTmp = cedarTrigger;
-//					printf("L1TriggerProcessor.cpp: cedarTrigger %d\n",cedarTrigger);
+					//printf("L1TriggerProcessor.cpp: cedarTrigger %d\n",
+					//		cedarTrigger);
 				}
 				if ((cedarEnableMask & l0TrigFlags) == l0TrigFlags)
 					isAlgoEnableForAllL0Masks = 1;
@@ -402,9 +406,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 
 				if ((lavEnableMask & (1 << i)) && lavProcessID[i] == l1ProcessID
 						&& SourceIDManager::isLavActive()) {
-//					LOG_INFO("is LAV Algo Processed? "<< LAVAlgo::isAlgoProcessed());
 					if (!LAVAlgo::isAlgoProcessed()) {
-//						LOG_INFO("I am Processing LAV!!!!!");
 						lavTrigger = LAVAlgo::processLAVTrigger(decoder,
 								l1Info_);
 //					if (lavTrigger != 0) {
@@ -413,7 +415,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 					}
 					l1ProcessID++;
 					l1TriggerTmp = lavTrigger;
-//					printf("L1TriggerProcessor.cpp: lavTrigger %d\n",lavTrigger);
+					//printf("L1TriggerProcessor.cpp: lavTrigger %d\n",
+					//	lavTrigger);
 				}
 				if ((lavEnableMask & l0TrigFlags) == l0TrigFlags)
 					isAlgoEnableForAllL0Masks = 1;
@@ -426,33 +429,23 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 			 */
 			l1TriggerTmp = (lavTrigger << 3) | (cedarTrigger << 2)
 					| (richTrigger << 1) | chodTrigger;
-//			printf("L1TriggerProcessor.cpp: l1Trigger (!!TMP!!) %x\n",l1TriggerTmp);
-			/*
-			 LOG_INFO("isReducedEvent " << isReducedEvent << " EnableMask "
-			 << algoEnableMask[i] << " trigTmp & EnableMask "
-			 << (l1TriggerTmp & algoEnableMask[i]) << " l1FlagTrig "
-			 << (uint) l1FlagTrigger);
-			 */
+			//printf("L1TriggerProcessor.cpp: l1Trigger (!!TMP!!) %x\n",
+			//	l1TriggerTmp);
+
+//			LOG_INFO("isReducedEvent " << isReducedEvent << " EnableMask " << algoEnableMask[i] << " trigTmp & EnableMask " << (l1TriggerTmp & algoEnableMask[i]) << " l1FlagTrig " << (uint) l1FlagTrigger);
+
 			if (!isReducedEvent
 					&& (!algoEnableMask[i]
 							|| ((l1TriggerTmp & algoEnableMask[i])
 									== algoEnableMask[i]) || l1FlagTrigger)) {
 				L1AcceptedEventsPerL0Mask_[i].fetch_add(1,
 						std::memory_order_relaxed);
-				/*
-				 LOG_INFO("L1 Accepted Event Per L0 mask " << i
-				 << " number after adding 1 "
-				 << L1AcceptedEventsPerL0Mask_[i]);
-				 LOG_INFO("TrigTmp " << (uint) l1TriggerTmp << " dwscMask "
-				 << (uint) algoDwScMask[i]);
-				 LOG_INFO("downscale Factor "
-				 << algoDwScFactor[i][__builtin_ctz(
-				 (uint) algoDwScMask[i])]);
-				 LOG_INFO("Modulo "
-				 << L1AcceptedEventsPerL0Mask_[i]
-				 % algoDwScFactor[i][__builtin_ctz(
-				 (uint) algoDwScMask[i])]);
-				 */
+
+//				LOG_INFO("L1 Accepted Event Per L0 mask " << i << " number after adding 1 " << L1AcceptedEventsPerL0Mask_[i]);
+//				LOG_INFO("TrigTmp " << (uint) l1TriggerTmp << " dwscMask " << (uint) algoDwScMask[i]);
+//				LOG_INFO("downscale Factor " << algoDwScFactor[i][__builtin_ctz( (uint) algoDwScMask[i])]);
+//				LOG_INFO("Modulo " << L1AcceptedEventsPerL0Mask_[i] % algoDwScFactor[i][__builtin_ctz( (uint) algoDwScMask[i])]);
+
 				if ((l1TriggerTmp & algoDwScMask[i])
 						&& (++(eventCountersByL0MaskByAlgoID_[i][__builtin_ctz(
 								(uint) algoDwScMask[i])])
@@ -461,24 +454,23 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 					l1TriggerWords[i] = 0;
 //					isDownscaledAndFlaggedEvent += (numberOfFlaggedAlgos[i] != 0);
 					isDownscaledAndFlaggedEvent += ((uint) l1FlagTrigger);
-					/*
-					 LOG_INFO("flagTrig " << (uint) l1FlagTrigger
-					 << " isDownscaledAndFlaggedEvent "
-					 << isDownscaledAndFlaggedEvent);
-					 */
+
+					LOG_INFO(
+							"flagTrig " << (uint) l1FlagTrigger << " isDownscaledAndFlaggedEvent " << isDownscaledAndFlaggedEvent);
+
 				} else
 					l1TriggerWords[i] = ((l1TriggerTmp & algoEnableMask[i])
 							== algoEnableMask[i]);
 			} else
 				l1TriggerWords[i] = 0;
-//			printf("L1TriggerProcessor.cpp: l1Trigger %x\n", l1TriggerWords[i]);
+			//printf("L1TriggerProcessor.cpp: l1Trigger %x\n", l1TriggerWords[i]);
 		}
 		if (__builtin_popcount((uint) l1TriggerWords[i]))
 			numberOfTriggeredL1Masks++;
 	}
 
-//	printf("Summary of Triggered Masks: %d\n", numberOfTriggeredL1Masks);
-//	for (int i = 0; i != 16; i++) printf("Summary of Trigger Words: l1Trigger %x\n", l1TriggerWords[i]);
+	//printf("Summary of Triggered Masks: %d\n", numberOfTriggeredL1Masks);
+//	for (int i = 0; i != 16; i++) //printf("Summary of Trigger Words: l1Trigger %x\n", l1TriggerWords[i]);
 
 	if (l1Info_->isL1CHODProcessed())
 		l1Info_->resetL1CHODProcessed();
@@ -518,15 +510,17 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	 * Final L1 trigger word calculation
 	 */
 	uint_fast8_t l1Trigger = 0;
-	/*
-	 LOG_INFO((uint) l1FlagTrigger << " " << isDownscaledAndFlaggedEvent
-	 << " " << ((uint) l1FlagTrigger && !isDownscaledAndFlaggedEvent));
-	 */
-	l1Trigger = (((uint) l1FlagTrigger && !isDownscaledAndFlaggedEvent) << 7)
-			| (numberOfTriggeredL1Masks != 0);
-//	l1Trigger = (l1FlagTrigger << 7) | (lavTrigger << 3) | (cedarTrigger << 2) | (richTrigger << 1) | chodTrigger;
+	if (isAllL1AlgoDisable) {
+		l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | (1 << 6);
+		L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed);
+		return l1Trigger;
+	}
+//	LOG_INFO((uint) l1GlobalFlagTrigger << " " << isDownscaledAndFlaggedEvent << " " << ((uint) l1GlobalFlagTrigger && !isDownscaledAndFlaggedEvent));
+
+	l1Trigger = (((uint) l1GlobalFlagTrigger && !isDownscaledAndFlaggedEvent) << 7) | (numberOfTriggeredL1Masks != 0);
+//	l1Trigger = (l1GlobalFlagTrigger << 7) | (lavTrigger << 3) | (cedarTrigger << 2) | (richTrigger << 1) | chodTrigger;
 //	l1Trigger = (cedarTrigger != 0 && chodTrigger != 0);
-//	printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %x\n", l1Trigger);
+	//printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %x\n", l1Trigger);
 
 	L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed); // The second 8 bits are the L1 trigger type word
 

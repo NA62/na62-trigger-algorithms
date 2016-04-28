@@ -67,7 +67,7 @@ uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder,
 		if (l1Info->isL1CHODProcessed() && averageCHODHitTime != -1.0e+28) {
 			isCHODRefTime = 1;
 			averageCHODHitTime = l1Info->getCHODAverageTime();
-		} else LOG_ERROR << "LAVAlgo.cpp: Not able to use averageCHODHitTime as Reference Time even if it is requested!" << ENDL;
+		} else LOG_ERROR("LAVAlgo.cpp: Not able to use averageCHODHitTime as Reference Time even if it is requested!");
 	}
 //	LOG_INFO("LAVAlgo: chodtime " << averageCHODHitTime);
 

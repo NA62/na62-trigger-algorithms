@@ -59,19 +59,23 @@ void L2TriggerProcessor::initialize(l2Struct &l2Struct) {
 
 uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 
+	event->readTriggerTypeWordAndFineTime();
+
 	L2InputEvents_.fetch_add(1, std::memory_order_relaxed);
-//	LOG_INFO("L2Event number after adding 1 " << L2InputEvents_);
+//	LOG_INFO("-------------- L2Event number after adding 1 " << L2InputEvents_);
 	L2InputEventsPerBurst_.fetch_add(1, std::memory_order_relaxed);
-//	LOG_INFO("L2Event number per Burst after adding 1 " << L2InputEventsPerBurst_);
+//	LOG_INFO("--------------- L2Event number per Burst after adding 1 " << L2InputEventsPerBurst_);
 	/*
 	 * Check if the event should bypass the processing
 	 */
 	if (event->isSpecialTriggerEvent()) {
-		return TRIGGER_L2_BYPASS;
+		L2Triggers_[TRIGGER_L2_SPECIAL].fetch_add(1, std::memory_order_relaxed);
+		return TRIGGER_L2_SPECIAL;
 	}
 	if (event->isL2Bypassed() || bypassEvent()) {
 		L2BypassedEvents_.fetch_add(1, std::memory_order_relaxed);
 //		LOG_INFO("L2 ByPassed Event number after adding 1 " << L2BypassedEvents_);
+		L2Triggers_[TRIGGER_L2_BYPASS].fetch_add(1, std::memory_order_relaxed);
 		return TRIGGER_L2_BYPASS;
 	}
 	/*
