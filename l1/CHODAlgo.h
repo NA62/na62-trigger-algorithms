@@ -15,11 +15,12 @@
 
 #include "../common/decoding/DecoderHandler.h"
 #include "chod_algorithm/ParsConfFile.h"
+#include "L1InfoToStorage.h"
+#include "../struct/HLTConfParams.h"
 
 #define maxNhits 500
 
 namespace na62 {
-
 
 class CHODAlgo {
 public:
@@ -33,17 +34,35 @@ public:
 
 	CHODAlgo();
 	~CHODAlgo();
-	static uint_fast8_t processCHODTrigger(DecoderHandler& decoder);
+
+	static uint_fast8_t processCHODTrigger(DecoderHandler& decoder, L1InfoToStorage* l1Info);
+	static void initialize(l1CHOD &l1ChodStruct);
+
+	static bool isAlgoProcessed();
+	static void resetAlgoProcessed();
+	static bool isEmptyPacket();
+	static bool isBadData();
 
 private:
 
 	static CHODParsConfFile* infoCHOD_;
+	static uint algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for MUV3, 5 for Straw
+	static uint algoLogic;
+	static uint algoRefTimeSourceID;
+	static double algoOnlineTimeWindow;
+
+	static bool algoProcessed;
+	static bool emptyPacket;
+	static bool badData;
+	static bool isCHODRefTime;
+
 	static int* slabGeo;
 	static uint nHits_V, nHits_H;
 	static uint nMaxSlabs;
 	static int slabID;
 //	static int quadrantID;
 	static int planeID;
+	static double averageHitTime;
 
 };
 

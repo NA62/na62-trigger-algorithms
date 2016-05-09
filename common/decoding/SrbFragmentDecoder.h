@@ -83,7 +83,7 @@ public:
 	 * Method returning an array of edge Straw IDs
 	 *
 	 */
-	inline const uint64_t* getStrawIDs() const {
+	inline const uint_fast8_t* getStrawIDs() const {
 		return edgeStrawIDs;
 	}
 
@@ -91,7 +91,7 @@ public:
 	 * Method returning Srb ID for current fragment
 	 *
 	 */
-	inline const uint64_t* getSrbIDs() const {
+	inline const uint_fast8_t* getSrbIDs() const {
 		return edgeSrbIDs;
 	}
 
@@ -127,10 +127,10 @@ private:
 
 	//check data types for the following
 	double* edgeTimes;
-	bool* edgeIsLeading;
-	uint64_t* edgeStrawIDs;
-	uint64_t* edgeSrbIDs;
+	uint_fast8_t* edgeStrawIDs;
+	uint_fast8_t* edgeSrbIDs;
 	uint_fast8_t * edgeErrorFlags;
+	bool* edgeIsLeading;
 
 	const l0::Subevent* subevent_;
 	uint_fast16_t fragmentNumber_;

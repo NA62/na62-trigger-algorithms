@@ -23,6 +23,17 @@
 
 namespace na62 {
 
+uint CHODAlgo::algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for MUV3, 5 for Straw
+uint CHODAlgo::algoLogic;
+uint CHODAlgo::algoRefTimeSourceID;
+double CHODAlgo::algoOnlineTimeWindow;
+
+bool CHODAlgo::algoProcessed = 0;
+bool CHODAlgo::emptyPacket = 0;
+bool CHODAlgo::badData = 0;
+bool CHODAlgo::isCHODRefTime = 0;
+
+double CHODAlgo::averageHitTime = 0.;
 CHODParsConfFile* CHODAlgo::infoCHOD_ = CHODParsConfFile::GetInstance();
 int * CHODAlgo::slabGeo = infoCHOD_->getGeoSlabMap();
 uint CHODAlgo::nHits_V;
@@ -39,9 +50,19 @@ CHODAlgo::~CHODAlgo() {
 // TODO Auto-generated destructor stub
 }
 
-uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder) {
+void CHODAlgo::initialize(l1CHOD &l1CHODStruct) {
 
-//	LOG_INFO<< "Initial Time " << time[0].tv_sec << " " << time[0].tv_usec << ENDL;
+	algoID = l1CHODStruct.configParams.l1TrigMaskID;
+	algoLogic = l1CHODStruct.configParams.l1TrigLogic;
+	algoRefTimeSourceID = l1CHODStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
+	algoOnlineTimeWindow = l1CHODStruct.configParams.l1TrigOnlineTimeWindow;
+
+}
+
+uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder,
+		L1InfoToStorage* l1Info) {
+
+//	LOG_INFO("Initial Time " << time[0].tv_sec << " " << time[0].tv_usec);
 
 	using namespace l0;
 
@@ -49,14 +70,19 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder) {
 	nHits_H = 0;
 	nHits_V = 0;
 
-	double chodOffsetFinetime = -2.; //ns (from run 3015)
-
-//	LOG_INFO<< "Event number = " << decoder.getDecodedEvent()->getEventNumber() << ENDL;
-//	LOG_INFO<< "Timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << ENDL;
+//	LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
+//	LOG_INFO("CHODAlgo: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
+//	LOG_INFO("Average Hit Time (initial value) " << averageHitTime);
 
 	TrbFragmentDecoder& chodPacket =
 			(TrbFragmentDecoder&) decoder.getDecodedCHODFragment(0);
-//	LOG_INFO<< "First time check (inside iterator) " << time[1].tv_sec << " " << time[1].tv_usec << ENDL;
+	if (!chodPacket.isReady() || chodPacket.isBadFragment()) {
+
+		LOG_ERROR ("CHODAlgo: This looks like a Bad Packet!!!! ");
+		badData = 1;
+		return 0;
+	}
+//	LOG_INFO("First time check (inside iterator) " << time[1].tv_sec << " " << time[1].tv_usec);
 	/**
 	 * Get Arrays with hit Info
 	 */
@@ -67,77 +93,110 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder) {
 	double finetime, edgetime;
 
 	uint numberOfEdgesOfCurrentBoard = chodPacket.getNumberOfEdgesStored();
-//	LOG_INFO<< "CHOD: Tel62 ID " << chodPacket.getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard << ENDL;
-//	LOG_INFO<< "Reference detector fine time " << decoder.getDecodedEvent()->getFinetime() << ENDL;
+	if (!numberOfEdgesOfCurrentBoard)
+		emptyPacket = 1;
 
 	for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
-
-		finetime = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
-		edgetime = (edge_times[iEdge]
-				- decoder.getDecodedEvent()->getTimestamp() * 256.)
-				* 0.097464731802;
-
-//		LOG_INFO<< "finetime (decoder) " << (uint)decoder.getDecodedEvent()->getFinetime() << ENDL;
-//		LOG_INFO<< "edge_time " << std::hex << edge_times[iEdge] << std::dec << ENDL;
-//		LOG_INFO<< "finetime (in ns) " << finetime << ENDL;
-//		LOG_INFO<< "edgetime (in ns) " << edgetime << ENDL;
-//		LOG_INFO<< "With offset " << fabs(edgetime + chodOffsetFinetime - finetime) << ENDL;
-//		LOG_INFO<< "Without offset " << fabs(edgetime - finetime) << ENDL;
 		/**
 		 * Process leading edges only
 		 *
 		 */
-//		if (edge_IDs[iEdge]
-//				&& fabs(edgetime + chodOffsetFinetime - finetime) <= 10.) {
 		if (edge_IDs[iEdge]) {
 			const int roChID = (edge_tdcIDs[iEdge] * 32) + edge_chIDs[iEdge];
-//			LOG_INFO<< "Readout Channel ID " << roChID << ENDL;
-//			LOG_INFO<< "Geom Slab ID " << slabGeo[roChID] << ENDL;
+//			LOG_INFO("Readout Channel ID " << roChID);
+//			LOG_INFO("Geom Slab ID " << slabGeo[roChID]);
 
 			/**
 			 * Process only first 128 readout channels, corresponding to low-threshold LAV FEE
 			 *
 			 */
 			if (slabGeo[roChID] < 128) {
-//			if (roChID < 128) {
+				finetime = decoder.getDecodedEvent()->getFinetime()
+						* 0.097464731802;
+				edgetime = (edge_times[iEdge]
+						- decoder.getDecodedEvent()->getTimestamp() * 256.)
+						* 0.097464731802;
+//				LOG_INFO("finetime (in ns) " << finetime << " edgetime (in ns) " << edgetime);
 
-//				LOG_INFO<< "Edge " << iEdge << " ID " << edge_IDs[iEdge] << ENDL;
-//				LOG_INFO<< "Edge " << iEdge << " chID " << (uint) edge_chIDs[iEdge] << ENDL;
-//				LOG_INFO<< "Edge " << iEdge << " tdcID " << (uint) edge_tdcIDs[iEdge] << ENDL;
-//				LOG_INFO<< "Edge " << iEdge << " time " << std::hex << edge_times[iEdge] << std::dec << ENDL;
+//				if (fabs(edgetime - finetime) <= 30.) { //if ref detector is LKr
+				if (fabs(edgetime - finetime) <= 20.) { //otherwise
+					averageHitTime += edgetime;
 
-				slabID = slabGeo[roChID];
-//				quadrantID = slabID / 16.;
-				planeID = slabID / 64.;
+//  				LOG_INFO("Edge " << iEdge << " ID " << edge_IDs[iEdge]);
+//	   				LOG_INFO("Edge " << iEdge << " chID " << (uint) edge_chIDs[iEdge]);
+//					LOG_INFO("Edge " << iEdge << " tdcID " << (uint) edge_tdcIDs[iEdge]);
+//					LOG_INFO("Edge " << iEdge << " time " << std::hex << edge_times[iEdge] << std::dec);
 
-//				LOG_INFO<< "CHOD slab ID " << slabID << ENDL;
-//				LOG_INFO<< "CHOD quadrant ID " << quadrantID << ENDL;
-//				LOG_INFO<< "CHOD plane ID " << planeID << ENDL;
+					slabID = slabGeo[roChID];
+//					quadrantID = slabID / 16.;
+					planeID = slabID / 64.;
 
-				if (planeID)
-					nHits_V++;
-				else
-					nHits_H++;
+//					LOG_INFO("CHOD slab ID " << slabID);
+//					LOG_INFO("CHOD quadrant ID " << quadrantID);
+//					LOG_INFO("CHOD plane ID " << planeID);
+
+					if (planeID)
+						nHits_V++;
+					else
+						nHits_H++;
+				}
 			}
 		}
 	}
-//	LOG_INFO<< "time check " << time[2].tv_sec << " " << time[2].tv_usec << ENDL;
+//	LOG_INFO("time check " << time[2].tv_sec << " " << time[2].tv_usec);
 //	}
-//	LOG_INFO<<" CHODAlgo.cpp: Analysed Event " << decoder.getDecodedEvent()->getEventNumber() << " - nHits(H) " << nHits_H << " nHits(V) " << nHits_V << ENDL;
+//	LOG_INFO("CHODAlgo.cpp: Analysed Event " << decoder.getDecodedEvent()->getEventNumber() << " - nHits(H) " << nHits_H << " nHits(V) " << nHits_V);
 
-//	LOG_INFO<< "time check (final)" << time[3].tv_sec << " " << time[3].tv_usec << ENDL;
+//	LOG_INFO("time check (final)" << time[3].tv_sec << " " << time[3].tv_usec);
 
 //	for (int i = 0; i < 3; i++) {
 //		if (i)
-//			LOG_INFO<<((time[i+1].tv_sec - time[i].tv_sec)*1e6 + time[i+1].tv_usec) - time[i].tv_usec << " ";
+//			LOG_INFO(((time[i+1].tv_sec - time[i].tv_sec)*1e6 + time[i+1].tv_usec) - time[i].tv_usec << " ");
 //		}
-//	LOG_INFO<< ((time[3].tv_sec - time[0].tv_sec)*1e6 + time[3].tv_usec) - time[0].tv_usec << ENDL;
+//	LOG_INFO(((time[3].tv_sec - time[0].tv_sec)*1e6 + time[3].tv_usec) - time[0].tv_usec);
 
-	return (((nHits_V + nHits_H) > 0) && ((nHits_V + nHits_H) < nMaxSlabs));
+	if (nHits_V + nHits_H)
+		averageHitTime = averageHitTime / (nHits_V + nHits_H);
+	else
+		averageHitTime = -1.0e+28;
+
+	algoProcessed = 1;
+
+	l1Info->setCHODAverageTime(averageHitTime);
+	l1Info->setL1CHODProcessed();
+
+//	LOG_INFO("CHODAlgo=============== number of Hits " << nHits_V + nHits_H);
+//	LOG_INFO("CHODAlgo=============== average HitTime " << averageHitTime);
+//	LOG_INFO("CHODAlgo=============== L1CHODProcessed Flag " << (uint)l1Info->isL1CHODProcessed());
+
+	averageHitTime = 0;
+//	LOG_INFO("CHODAlgo=============== reset average HitTime " << averageHitTime);
+
+	if (algoLogic)
+		return (((nHits_V + nHits_H) > 0) && ((nHits_V + nHits_H) < nMaxSlabs));
+	else
+		return ((nHits_V + nHits_H) >= nMaxSlabs);
+
 //	return (((nHits_V == 1) && (nHits_H == 1))
 //			|| ((nHits_V == 2) && (nHits_H == 1))
 //			|| ((nHits_V == 1) && (nHits_H == 2)));
 
+}
+
+bool CHODAlgo::isAlgoProcessed() {
+	return algoProcessed;
+}
+
+void CHODAlgo::resetAlgoProcessed() {
+	algoProcessed = 0;
+}
+
+bool CHODAlgo::isEmptyPacket() {
+	return emptyPacket;
+}
+
+bool CHODAlgo::isBadData() {
+	return badData;
 }
 
 }
