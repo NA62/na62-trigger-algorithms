@@ -27,7 +27,7 @@ MUV3ParsConfFile::MUV3ParsConfFile() {
 			"/home/lorenza/workspace/na62-trigger-algorithms/l1/muv_algorithm/config/MUV3.2015.conf");
 
 	if (!fileName_.isValid())
-		LOG_INFO<< "Config file not found" << ENDL;
+		LOG_INFO("Config file not found");
 
 	if (fileName_.isValid()) {
 

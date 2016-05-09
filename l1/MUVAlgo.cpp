@@ -41,8 +41,8 @@ uint_fast8_t MUV3Algo::processMUV3Trigger(DecoderHandler& decoder) {
 	//nMaxPMTs = 0;
 	nHits = 0;
 
-	LOG_INFO<< "Event number = " << decoder.getDecodedEvent()->getEventNumber() << ENDL;
-	LOG_INFO<< "Timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << ENDL;
+	LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
+	LOG_INFO("Timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
 
 	TrbFragmentDecoder& muv3Packet =
 			(TrbFragmentDecoder&) decoder.getDecodedMUV3Fragment(0);
@@ -56,7 +56,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger(DecoderHandler& decoder) {
 	double finetime, edgetime;
 
 	uint numberOfEdgesOfCurrentBoard = muv3Packet.getNumberOfEdgesStored();
-	LOG_INFO<< "MUV3: Tel62 ID " << muv3Packet.getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard << ENDL;
+	LOG_INFO("MUV3: Tel62 ID " << muv3Packet.getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard);
 
 	for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
 
@@ -83,7 +83,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger(DecoderHandler& decoder) {
 			nHits++;
 		}
 	}
-	LOG_INFO<<" MUV3Algo.cpp: Analysed Event " << decoder.getDecodedEvent()->getEventNumber() << " nHits " << nHits << ENDL;
+	LOG_INFO(" MUV3Algo.cpp: Analysed Event " << decoder.getDecodedEvent()->getEventNumber() << " nHits " << nHits);
 
 	return (nHits > 0);
 }
