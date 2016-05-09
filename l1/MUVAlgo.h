@@ -31,15 +31,19 @@ public:
 
 	MUV3Algo();
 	~MUV3Algo();
-	static uint_fast8_t processMUV3Trigger(DecoderHandler& decoder);
+	static uint_fast8_t processMUV3Trigger1(DecoderHandler& decoder);
+	static uint_fast8_t processMUV3Trigger2(DecoderHandler& decoder);
 
 private:
 
 	static MUV3ParsConfFile* infoMUV3_;
 	static int* pmtGeo;
-	static uint nHits;
-	static uint nMaxPMTs;
-	static int pmtID;
+	//static uint nHits;
+	//static uint nMaxPMTs;
+	static uint pmtID1;
+	static uint pmtID2;
+	static int roChID;
+
 };
 
 } /* namespace na62 */

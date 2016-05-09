@@ -31,7 +31,7 @@ MUV3ParsConfFile::MUV3ParsConfFile() {
 
 	if (fileName_.isValid()) {
 
-//		LOG_INFO<< "MUV3 configuration file open" << ENDL;
+		LOG_INFO("MUV3 configuration file open");
 
 		while (fileName_.nextLine()) {
 
@@ -46,15 +46,16 @@ MUV3ParsConfFile::MUV3ParsConfFile() {
 					!= string::npos) {
 				for (int iCh = 0; iCh < nroChannels / 16; ++iCh) {
 					char name[1000];
-					sprintf(name, "ChRemap_%d=", iCh);
+					sprintf(name, "ChRemap_%04d=", iCh);
 					string remap = (string) name;
-//					LOG_INFO << remap << ENDL;
-//					LOG_INFO << fileName_.getField<string>(1) << ENDL;
+					//LOG_INFO << remap << ENDL;
+					//LOG_INFO << fileName_.getField<string>(1) << ENDL;
 
 					if (fileName_.getField<string>(1) == remap) {
 						for (int jCh = 0; jCh < 16; jCh++) {
 							geoPMTMap[iCh * 16 + jCh] =
 									fileName_.getField<int>(jCh + 2);
+							//LOG_INFO << "geoPMTMap= " << geoPMTMap[iCh * 16 + jCh]<<ENDL;
 						}
 					}
 				}
