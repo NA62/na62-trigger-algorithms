@@ -14,8 +14,6 @@
 #include "../common/decoding/DecoderHandler.h"
 #include "muv_algorithm/ParsConfFile.h"
 
-#define maxNhits 500
-
 namespace na62 {
 
 

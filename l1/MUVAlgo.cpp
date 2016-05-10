@@ -43,8 +43,8 @@ uint_fast8_t MUV3Algo::processMUV3Trigger1(DecoderHandler& decoder) {
 	//nMaxPMTs = 0;
 	//nHits = 0;
 
-	LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
-	LOG_INFO("Timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
+	//LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
+	//LOG_INFO("Timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
 
 	TrbFragmentDecoder& muv3Packet =
 			(TrbFragmentDecoder&) decoder.getDecodedMUV3Fragment(0);
@@ -59,7 +59,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger1(DecoderHandler& decoder) {
 	//double finetime, edgetime;
 
 	uint numberOfEdgesOfCurrentBoard = muv3Packet.getNumberOfEdgesStored();
-	LOG_INFO("MUV3: Tel62 ID " << muv3Packet.getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard);
+//	LOG_INFO("MUV3: Tel62 ID " << muv3Packet.getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard);
 
 	for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
 
@@ -102,7 +102,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger2(DecoderHandler& decoder) {
 
 	using namespace l0;
 
-	LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
+	//LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
 
 	TrbFragmentDecoder& muv3Packet =
 			(TrbFragmentDecoder&) decoder.getDecodedMUV3Fragment(0);
@@ -127,10 +127,10 @@ uint_fast8_t MUV3Algo::processMUV3Trigger2(DecoderHandler& decoder) {
 					if (pmtGeo[roChID] > 151) pmtID2 = pmtGeo[roChID] - 200;
 					else pmtID2 = pmtGeo[roChID];
 					if (abs(pmtID1-pmtID2) == 1 && ((pmtID1+pmtID2) % 24) != 23 && pmtID1 < 144 && pmtID2 < 144) {
-							LOG_INFO("neighbours! pmt1= " << pmtID1 << " pmt2= " << pmtID2);
+//							LOG_INFO("neighbours! pmt1= " << pmtID1 << " pmt2= " << pmtID2);
 						return 1;}
 					else if (abs(pmtID1-pmtID2) == 12 && pmtID1 < 144 && pmtID2 < 144) {
-							LOG_INFO("neighbours! pmt1= " << pmtID1 << " pmt2= " << pmtID2);
+//							LOG_INFO("neighbours! pmt1= " << pmtID1 << " pmt2= " << pmtID2);
 						return 1;}
 				}
 			}
