@@ -14,15 +14,15 @@
 					</externalSetting>
 				</externalSettings>
 				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.lib.debug.1021636035" name="Debug" parent="cdt.managedbuild.config.gnu.lib.debug">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.lib.debug.1021636035" name="Debug" parent="cdt.managedbuild.config.gnu.lib.debug">
 					<folderInfo id="cdt.managedbuild.config.gnu.lib.debug.1021636035." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.lib.debug.1558744108" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.lib.debug">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.lib.debug.146107942" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.lib.debug"/>
@@ -34,15 +34,14 @@
 								<option id="gnu.cpp.compiler.option.other.other.955322006" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++11" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1069550273" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/na62-farm-lib}&quot;"/>
-									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/ipp/include"/>
-									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/mkl/include"/>
-									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/tbb/include"/>
-									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/lcg/external/Boost/1.55.0_python2.7/x86_64-slc6-gcc47-opt/include/boost-1_55/"/>
-									<listOptionValue builtIn="false" value="/sw/opt/boost-1_55/include"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor/XMLConf"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.dialect.std.111815822" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.2087208403" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUGGING"/>
+									<listOptionValue builtIn="false" value="USE_GLOG"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.355919957" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -51,6 +50,9 @@
 								<option id="gnu.c.compiler.lib.debug.option.debugging.level.993428324" name="Debug Level" superClass="gnu.c.compiler.lib.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.1643604722" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/na62-farm-lib}&quot;"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
 								</option>
 								<option id="gnu.c.compiler.option.dialect.std.328146658" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1757153772" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
@@ -60,6 +62,9 @@
 							<tool id="cdt.managedbuild.tool.gnu.assembler.lib.debug.766314781" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.debug">
 								<option id="gnu.both.asm.option.include.paths.1707309518" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/na62-farm-lib}&quot;"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1235554435" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -87,15 +92,15 @@
 					</externalSetting>
 				</externalSettings>
 				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.lib.debug.1021636035.973445731" name="Debug_GLOG" parent="cdt.managedbuild.config.gnu.lib.debug">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.lib.debug.1021636035.973445731" name="Debug_GLOG" parent="cdt.managedbuild.config.gnu.lib.debug">
 					<folderInfo id="cdt.managedbuild.config.gnu.lib.debug.1021636035.973445731." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.lib.debug.656339283" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.lib.debug">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.lib.debug.1121988303" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.lib.debug"/>
@@ -108,6 +113,9 @@
 								<option id="gnu.cpp.compiler.option.include.paths.962089875" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/na62-farm-lib}&quot;"/>
 									<listOptionValue builtIn="false" value="/sw/opt/boost-1_55/include"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor/XMLConf"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1533554108" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="USE_GLOG"/>
@@ -121,6 +129,9 @@
 								<option id="gnu.c.compiler.lib.debug.option.debugging.level.148528145" name="Debug Level" superClass="gnu.c.compiler.lib.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.1573466158" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/na62-farm-lib}&quot;"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1207625878" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -129,6 +140,9 @@
 							<tool id="cdt.managedbuild.tool.gnu.assembler.lib.debug.1425019059" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.debug">
 								<option id="gnu.both.asm.option.include.paths.514040872" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/na62-farm-lib}&quot;"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1165430247" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -141,6 +155,7 @@
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/na62-farm-lib"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/na62-farm-lib/GLOG_DEBUG"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/na62-farm-lib/Debug"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="na62-farm-lib" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -156,15 +171,15 @@
 					</externalSetting>
 				</externalSettings>
 				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.lib.release.310524003.205960005" name="Release_GLOG" parent="cdt.managedbuild.config.gnu.lib.release">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.lib.release.310524003.205960005" name="Release_GLOG" parent="cdt.managedbuild.config.gnu.lib.release">
 					<folderInfo id="cdt.managedbuild.config.gnu.lib.release.310524003.205960005." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.lib.release.1869519615" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.lib.release">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.lib.release.746298458" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.lib.release"/>
@@ -177,6 +192,9 @@
 								<option id="gnu.cpp.compiler.option.include.paths.1862565220" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/na62-farm-lib}&quot;"/>
 									<listOptionValue builtIn="false" value="/sw/opt/boost-1_55/include"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.424499358" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="USE_GLOG"/>
@@ -193,6 +211,9 @@
 									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/ipp/include"/>
 									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/mkl/include"/>
 									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/tbb/include"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.994547109" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -204,6 +225,9 @@
 									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/ipp/include"/>
 									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/mkl/include"/>
 									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/tbb/include"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.3657385" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -231,15 +255,15 @@
 					</externalSetting>
 				</externalSettings>
 				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.lib.debug.1021636035.879850991" name="gcc4.6" parent="cdt.managedbuild.config.gnu.lib.debug">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.lib.debug.1021636035.879850991" name="gcc4.6" parent="cdt.managedbuild.config.gnu.lib.debug">
 					<folderInfo id="cdt.managedbuild.config.gnu.lib.debug.1021636035.879850991." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.lib.debug.1969223761" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.lib.debug">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.lib.debug.479010051" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.lib.debug"/>
@@ -252,6 +276,9 @@
 								<option id="gnu.cpp.compiler.option.include.paths.162175647" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/na62-farm-lib}&quot;"/>
 									<listOptionValue builtIn="false" value="/sw/opt/boost-1_55/include"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.dialect.std.545207047" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.2142028537" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
@@ -264,6 +291,9 @@
 								<option id="gnu.c.compiler.lib.debug.option.debugging.level.1687812326" name="Debug Level" superClass="gnu.c.compiler.lib.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.1590890011" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/na62-farm-lib}&quot;"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1837467733" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -272,6 +302,9 @@
 							<tool id="cdt.managedbuild.tool.gnu.assembler.lib.debug.1309961827" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.debug">
 								<option id="gnu.both.asm.option.include.paths.1921361677" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/na62-farm-lib}&quot;"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.477284161" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -299,15 +332,15 @@
 					</externalSetting>
 				</externalSettings>
 				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.lib.release.310524003.205960005.1774209017" name="icc_GLOG" parent="cdt.managedbuild.config.gnu.lib.release">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.lib.release.310524003.205960005.1774209017" name="icc_GLOG" parent="cdt.managedbuild.config.gnu.lib.release">
 					<folderInfo id="cdt.managedbuild.config.gnu.lib.release.310524003.205960005.1774209017." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.lib.release.529789134" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.lib.release">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.lib.release.1619491039" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.lib.release"/>
@@ -323,6 +356,9 @@
 									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/mkl/include"/>
 									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/tbb/include"/>
 									<listOptionValue builtIn="false" value="/sw/opt/boost-1_55/include"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.391441649" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="USE_GLOG"/>
@@ -339,6 +375,9 @@
 									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/ipp/include"/>
 									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/mkl/include"/>
 									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/tbb/include"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.485883098" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -350,6 +389,9 @@
 									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/ipp/include"/>
 									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/mkl/include"/>
 									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/tbb/include"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.910410793" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -377,15 +419,15 @@
 					</externalSetting>
 				</externalSettings>
 				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.lib.debug.1021636035.513625890" name="llvm3.5" parent="cdt.managedbuild.config.gnu.lib.debug">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.lib.debug.1021636035.513625890" name="llvm3.5" parent="cdt.managedbuild.config.gnu.lib.debug">
 					<folderInfo id="cdt.managedbuild.config.gnu.lib.debug.1021636035.513625890." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.lib.debug.1292474953" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.lib.debug">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.lib.debug.368765901" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.lib.debug"/>
@@ -398,6 +440,9 @@
 								<option id="gnu.cpp.compiler.option.include.paths.1637896203" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/na62-farm-lib}&quot;"/>
 									<listOptionValue builtIn="false" value="/sw/opt/boost-1_55/include"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.dialect.std.914904465" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1320109565" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
@@ -413,6 +458,9 @@
 									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/ipp/include"/>
 									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/mkl/include"/>
 									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/tbb/include"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
 								</option>
 								<option id="gnu.c.compiler.option.dialect.std.567195246" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.771911125" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
@@ -425,6 +473,9 @@
 									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/ipp/include"/>
 									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/mkl/include"/>
 									<listOptionValue builtIn="false" value="/afs/cern.ch/sw/IntelSoftware/linux/x86_64/xe2013/composer_xe_2013_sp1.2.144/tbb/include"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.779439910" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -442,29 +493,129 @@
 				</externalSettings>
 			</storageModule>
 		</cconfiguration>
+		<cconfiguration id="cdt.managedbuild.config.gnu.lib.debug.1021636035.872359377">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.lib.debug.1021636035.872359377" moduleId="org.eclipse.cdt.core.settings" name="Debug_ERS">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/na62-trigger-algorithms"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/na62-trigger-algorithms/Debug_ERS"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="na62-trigger-algorithms" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.lib.debug.1021636035.872359377" name="Debug_ERS" parent="cdt.managedbuild.config.gnu.lib.debug">
+					<folderInfo id="cdt.managedbuild.config.gnu.lib.debug.1021636035.872359377." name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.lib.debug.321028356" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.lib.debug">
+							<targetPlatform id="cdt.managedbuild.target.gnu.platform.lib.debug.1482284875" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.lib.debug"/>
+							<builder buildPath="${workspace_loc:/na62-farm-lib}/Debug" id="cdt.managedbuild.target.gnu.builder.lib.debug.1326601865" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="cdt.managedbuild.target.gnu.builder.lib.debug"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.lib.debug.352518834" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.debug"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.864919731" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug">
+								<option id="gnu.cpp.compiler.lib.debug.option.optimization.level.1056786081" name="Optimization Level" superClass="gnu.cpp.compiler.lib.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.lib.debug.option.debugging.level.87894309" name="Debug Level" superClass="gnu.cpp.compiler.lib.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.other.other.989885363" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++11" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.include.paths.912184561" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/na62-farm-lib}&quot;"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor/XMLConf"/>
+								</option>
+								<option id="gnu.cpp.compiler.option.dialect.std.1325642863" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.1612290336" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="DEBUGGING"/>
+									<listOptionValue builtIn="false" value="USE_ERS"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.2059456681" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.debug.1956932011" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.debug">
+								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.lib.debug.option.optimization.level.117214268" name="Optimization Level" superClass="gnu.c.compiler.lib.debug.option.optimization.level" valueType="enumerated"/>
+								<option id="gnu.c.compiler.lib.debug.option.debugging.level.378822187" name="Debug Level" superClass="gnu.c.compiler.lib.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.include.paths.1321919172" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/na62-farm-lib}&quot;"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
+								</option>
+								<option id="gnu.c.compiler.option.dialect.std.1129551476" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1667141434" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.1649680509" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.961021495" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.lib.debug.625986300" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.debug">
+								<option id="gnu.both.asm.option.include.paths.756585281" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/na62-farm-lib}&quot;"/>
+									<listOptionValue builtIn="false" value="/mnt/sw/LCG/include"/>
+									<listOptionValue builtIn="false" value="/workspace/XMLPreProcessor"/>
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.779883331" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="na62-farm-lib;cdt.managedbuild.config.gnu.lib.release.310524003.808849853.1025848830" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/na62-farm-lib"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/na62-farm-lib/Debug"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="na62-farm-lib" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+			</storageModule>
+		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="na62-farm-lib.cdt.managedbuild.target.gnu.lib.497807866" name="Static Library" projectType="cdt.managedbuild.target.gnu.lib"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="Release">
+		<configuration configurationName="gcc4.6"/>
+		<configuration configurationName="icc_GLOG"/>
+		<configuration configurationName="Debug_GLOG">
+			<resource resourceType="PROJECT" workspacePath="/na62-trigger-algorithms"/>
+		</configuration>
+		<configuration configurationName="Release_GLOG"/>
+		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/na62-farm-lib"/>
 		</configuration>
-		<configuration configurationName="Debug">
+		<configuration configurationName="llvm3.5"/>
+		<configuration configurationName="Release">
 			<resource resourceType="PROJECT" workspacePath="/na62-farm-lib"/>
 		</configuration>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.1021636035;cdt.managedbuild.config.gnu.lib.debug.1021636035.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.952519847;cdt.managedbuild.tool.gnu.cpp.compiler.input.355919957">
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.release.310524003.205960005.1774209017;cdt.managedbuild.config.gnu.lib.release.310524003.205960005.1774209017.;cdt.managedbuild.tool.gnu.c.compiler.lib.release.879840039;cdt.managedbuild.tool.gnu.c.compiler.input.485883098">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.release.310524003.205960005;cdt.managedbuild.config.gnu.lib.release.310524003.205960005.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.192874117;cdt.managedbuild.tool.gnu.cpp.compiler.input.575968032">
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.release.310524003.205960005;cdt.managedbuild.config.gnu.lib.release.310524003.205960005.;cdt.managedbuild.tool.gnu.c.compiler.lib.release.110319940;cdt.managedbuild.tool.gnu.c.compiler.input.994547109">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.1021636035.973445731;cdt.managedbuild.config.gnu.lib.debug.1021636035.973445731.;cdt.managedbuild.tool.gnu.c.compiler.lib.debug.26656623;cdt.managedbuild.tool.gnu.c.compiler.input.1207625878">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.1021636035.879850991;cdt.managedbuild.config.gnu.lib.debug.1021636035.879850991.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1025676211;cdt.managedbuild.tool.gnu.cpp.compiler.input.1232582827">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.1021636035.513625890;cdt.managedbuild.config.gnu.lib.debug.1021636035.513625890.;cdt.managedbuild.tool.gnu.c.compiler.lib.debug.1835559909;cdt.managedbuild.tool.gnu.c.compiler.input.771911125">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.1021636035.973445731;cdt.managedbuild.config.gnu.lib.debug.1021636035.973445731.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1187407728;cdt.managedbuild.tool.gnu.cpp.compiler.input.1052780575">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.1021636035;cdt.managedbuild.config.gnu.lib.debug.1021636035.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.952519847;cdt.managedbuild.tool.gnu.cpp.compiler.input.355919957">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.1021636035.513625890;cdt.managedbuild.config.gnu.lib.debug.1021636035.513625890.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.862820664;cdt.managedbuild.tool.gnu.cpp.compiler.input.1487792183">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.release.310524003;cdt.managedbuild.config.gnu.lib.release.310524003.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.1884753766;cdt.managedbuild.tool.gnu.cpp.compiler.input.440494843">
@@ -473,31 +624,22 @@
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.1021636035.879850991;cdt.managedbuild.config.gnu.lib.debug.1021636035.879850991.;cdt.managedbuild.tool.gnu.c.compiler.lib.debug.1622234649;cdt.managedbuild.tool.gnu.c.compiler.input.1837467733">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.1021636035.513625890;cdt.managedbuild.config.gnu.lib.debug.1021636035.513625890.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.862820664;cdt.managedbuild.tool.gnu.cpp.compiler.input.1487792183">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.release.310524003.205960005.1774209017;cdt.managedbuild.config.gnu.lib.release.310524003.205960005.1774209017.;cdt.managedbuild.tool.gnu.c.compiler.lib.release.879840039;cdt.managedbuild.tool.gnu.c.compiler.input.485883098">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.release.310524003;cdt.managedbuild.config.gnu.lib.release.310524003.;cdt.managedbuild.tool.gnu.c.compiler.lib.release.507293269;cdt.managedbuild.tool.gnu.c.compiler.input.1083597664">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.1021636035.513625890;cdt.managedbuild.config.gnu.lib.debug.1021636035.513625890.;cdt.managedbuild.tool.gnu.c.compiler.lib.debug.1835559909;cdt.managedbuild.tool.gnu.c.compiler.input.771911125">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.1021636035;cdt.managedbuild.config.gnu.lib.debug.1021636035.;cdt.managedbuild.tool.gnu.c.compiler.lib.debug.693797920;cdt.managedbuild.tool.gnu.c.compiler.input.1757153772">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.1021636035.973445731;cdt.managedbuild.config.gnu.lib.debug.1021636035.973445731.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1187407728;cdt.managedbuild.tool.gnu.cpp.compiler.input.1052780575">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.release.310524003.205960005;cdt.managedbuild.config.gnu.lib.release.310524003.205960005.;cdt.managedbuild.tool.gnu.c.compiler.lib.release.110319940;cdt.managedbuild.tool.gnu.c.compiler.input.994547109">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.release.310524003.205960005.1774209017;cdt.managedbuild.config.gnu.lib.release.310524003.205960005.1774209017.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.241247246;cdt.managedbuild.tool.gnu.cpp.compiler.input.1735598152">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.1021636035.973445731;cdt.managedbuild.config.gnu.lib.debug.1021636035.973445731.;cdt.managedbuild.tool.gnu.c.compiler.lib.debug.26656623;cdt.managedbuild.tool.gnu.c.compiler.input.1207625878">
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.1021636035.872359377;cdt.managedbuild.config.gnu.lib.debug.1021636035.872359377.;cdt.managedbuild.tool.gnu.c.compiler.lib.debug.1956932011;cdt.managedbuild.tool.gnu.c.compiler.input.1667141434">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.release.310524003.205960005;cdt.managedbuild.config.gnu.lib.release.310524003.205960005.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.192874117;cdt.managedbuild.tool.gnu.cpp.compiler.input.575968032">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.1021636035.872359377;cdt.managedbuild.config.gnu.lib.debug.1021636035.872359377.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.864919731;cdt.managedbuild.tool.gnu.cpp.compiler.input.2059456681">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.release.310524003;cdt.managedbuild.config.gnu.lib.release.310524003.;cdt.managedbuild.tool.gnu.c.compiler.lib.release.507293269;cdt.managedbuild.tool.gnu.c.compiler.input.1083597664">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 	</storageModule>

@@ -58,8 +58,8 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	const uint maxNwords = (srbDataFragment->getPayloadLength() / 4);
 	const uint maxNEdges = maxNwords * 2;
 
-	//LOG_INFO <<"srbData " << srbDataFragment->getPayloadLength() << ENDL;
-	//LOG_INFO << "maxNEdges = " << maxNEdges << ENDL;
+	//LOG_INFO("srbData " << srbDataFragment->getPayloadLength());
+	//LOG_INFO("maxNEdges = " << maxNEdges);
 	edgeTimes = new double[maxNEdges];
 	edgeStrawIDs = new uint_fast8_t[maxNEdges];
 	edgeErrorFlags = new uint_fast8_t[maxNEdges];
@@ -82,9 +82,9 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 
 	firstTSCoarseTime = (int64_t) boardHeader->firstTSCoarseTime;
 	uint_fast8_t SrbID = boardHeader->srbID;
-	//LOG_INFO<< "SRBid = " << SrbID << ENDL;
-	//LOG_INFO<< "Event Timestamp " << std::hex << timestamp << std::dec << ENDL;
-	//LOG_INFO<< "firstTSCoarseTime " << std::hex << firstTSCoarseTime << std::dec << ENDL;
+	//LOG_INFO("SRBid = " << SrbID);
+	//LOG_INFO("Event Timestamp " << std::hex << timestamp << std::dec);
+	//LOG_INFO("firstTSCoarseTime " << std::hex << firstTSCoarseTime << std::dec);
 
 	firstTSCoarseTime -= timestamp;
 
@@ -94,7 +94,7 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	const uint16_t nEdges = nWords * 2; //+1 empty edge if nWords in raw file was odd
 
 	//if (! nEdges)
-	//LOG_INFO<< "SrbDecoder.cpp: Number of Words/Edges is Null !" << ENDL;
+	//LOG_INFO("SrbDecoder.cpp: Number of Words/Edges is Null !");
 
 	for (uint iEdge = 0; iEdge < nEdges; iEdge++) {
 
@@ -120,12 +120,12 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 		for (int iEdgeInSlot = 0; iEdgeInSlot < NEdgesInSlot; iEdgeInSlot++) {
 			slotTime = firstTSCoarseTime + iSlot;
 			edgeTimes[nEdges_tot + iEdgeInSlot] += slotTime * ClockPeriod;
-			//LOG_INFO << std::hex << timestamp << std::dec << " " << std::hex << firstTSCoarseTime+timestamp << std::dec << " " << std::hex << SrbID << std::dec << " " << std::setprecision(6) << edgeTimes[nEdges_tot + iEdgeInSlot] << " " << edgeIsLeading[nEdges_tot + iEdgeInSlot] << " "  << std::hex << edgeStrawIDs[nEdges_tot + iEdgeInSlot]  << std::dec << ENDL;
+			//LOG_INFO(std::hex << timestamp << std::dec << " " << std::hex << firstTSCoarseTime+timestamp << std::dec << " " << std::hex << SrbID << std::dec << " " << std::setprecision(6) << edgeTimes[nEdges_tot + iEdgeInSlot] << " " << edgeIsLeading[nEdges_tot + iEdgeInSlot] << " "  << std::hex << edgeStrawIDs[nEdges_tot + iEdgeInSlot]  << std::dec);
 		}
 		nEdges_tot += NEdgesInSlot;
 	}
 }
 
-//	LOG_INFO<<"SrbDecoder.cpp: Analyzed SRB ID " << fragmentNumber_ << " - Number of edges found " << nEdges_tot << ENDL;
+//	LOG_INFO("SrbDecoder.cpp: Analyzed SRB ID " << fragmentNumber_ << " - Number of edges found " << nEdges_tot);
 
 }

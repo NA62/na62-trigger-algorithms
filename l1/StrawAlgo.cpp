@@ -149,6 +149,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(DecoderHandler& decoder) {
 //			decoder.getDecodedEvent()->getFinetime(), CLOCK_PERIOD);
 
 	//  TODO: chkmax need to be USED
+
 	/*
 	 * Pre-clustering: looping over SRB readout boards - read all edges and perform first stage of clustering
 	 *
@@ -173,8 +174,8 @@ uint_fast8_t StrawAlgo::processStrawTrigger(DecoderHandler& decoder) {
 //		LOG_INFO<< "Access Packets " << ((time[4].tv_sec - time[3].tv_sec)*1e6 + time[4].tv_usec) - time[3].tv_usec << ENDL;
 
 		for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
-//			LOG_INFO<< (uint)srbAddr[iEdge] << " " << (uint)strawAddr[iEdge] << " " << time[iEdge] << " " << edgeIsLeading[iEdge] << ENDL;
 
+//			LOG_INFO((uint)srbAddr[iEdge] << " " << (uint)strawAddr[iEdge] << " " << time[iEdge] << " " << edgeIsLeading[iEdge]);
 			gettimeofday(&time[5], 0);
 //			LOG_INFO<< "Read Config File and Assign ChannelID - Start " << time[5].tv_sec << " " << time[5].tv_usec << ENDL;
 
@@ -198,12 +199,12 @@ uint_fast8_t StrawAlgo::processStrawTrigger(DecoderHandler& decoder) {
 			int coverAddr = ((strawAddr[iEdge] & 0xf0) >> 4);
 //			LOG_INFO<< "SrbAddr " << (uint)srbAddr[iEdge] << " StrawAddr "<< (uint)strawAddr[iEdge] << " CoverAddr " << coverAddr << " fR0Mezz Index " << srbAddr[iEdge] * 16 + coverAddr << ENDL;
 
-//			LOG_INFO << chRO[nHits] << " " << strawGeo[chRO[nHits]] << ENDL;
-//			LOG_INFO<< "ChamberID " << chamberID
+//			LOG_INFO(chRO[nHits] << " " << strawGeo[chRO[nHits]]);
+//			LOG_INFO("ChamberID " << chamberID
 //			<< " ViewID " << viewID
 //			<< " HalfViewID " << halfviewID
 //			<< " PlaneID " << planeID
-//			<< " StrawID " << strawID << ENDL;
+//			<< " StrawID " << strawID);
 
 			if (edgeIsLeading[iEdge]) {
 				leading = (double) edgeTime[iEdge] + (double) t0_main_shift
@@ -330,6 +331,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(DecoderHandler& decoder) {
 		}
 		nEdges_tot += numberOfEdgesOfCurrentBoard;
 	}
+
 	gettimeofday(&time[11], 0);
 //	LOG_INFO<< "Access All Straw Data Packets & PreClustering - Stop " << time[11].tv_sec << " " << time[11].tv_usec << ENDL;
 	//////////////////////////////// End of loop for Pre-clustering ///////////////////////////////////////////////
