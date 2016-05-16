@@ -171,6 +171,8 @@ ADD_TRB(LAV)
 
 ADD_SRB(STRAW)
 
+ADD_TRB(MUV3)
+
 private:
 	Event* const event_;
 

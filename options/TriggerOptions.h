@@ -62,11 +62,6 @@ public:
 						"/etc/na62-trigger.conf"),
 				"Config file for trigger specific options")
 
-		(OPTION_TRIGGER_XML_FILE,
-				po::value<std::string>()->default_value(
-						"/etc/HLTConfParams.xml"),
-				"XML file with trigger configurations")
-
 				/*
 				 * Define L1 - L2 Trigger Global options
 				 */
