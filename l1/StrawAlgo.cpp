@@ -110,7 +110,7 @@ Track StrawAlgo::strawFirstTempTrk_[3000];
 Track StrawAlgo::strawTempTrk_[4000];
 Track StrawAlgo::strawTrkIntermedie_[1000];
 
-uint_fast8_t StrawAlgo::processStrawTrigger(DecoderHandler& decoder) {
+uint_fast8_t StrawAlgo::processStrawTrigger(DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
 	struct timeval time[30];
 	gettimeofday(&time[0], 0);
