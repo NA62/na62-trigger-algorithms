@@ -200,6 +200,16 @@ bool KtagAlgo::isBadData() {
 	return badData;
 }
 
+void KtagAlgo::writeData(L1Block &l1Block){
+
+	for(int iMask=0; iMask<16; iMask++){
+	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoID = algoID;
+	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoProcessed = algoProcessed;
+	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoOnlineTimeWindow = algoOnlineTimeWindow;
+	}
+
+}
+
 }
 /* namespace na62 */
 

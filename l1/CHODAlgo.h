@@ -17,6 +17,7 @@
 #include "chod_algorithm/ParsConfFile.h"
 #include "L1InfoToStorage.h"
 #include "../struct/HLTConfParams.h"
+#include "L1Fragment.h"
 
 #define maxNhits 500
 
@@ -37,6 +38,7 @@ public:
 
 	static uint_fast8_t processCHODTrigger(DecoderHandler& decoder, L1InfoToStorage* l1Info);
 	static void initialize(l1CHOD &l1ChodStruct);
+	static void writeData(L1Block &l1Block);
 
 	static bool isAlgoProcessed();
 	static void resetAlgoProcessed();

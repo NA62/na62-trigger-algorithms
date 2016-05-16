@@ -16,6 +16,7 @@
 #include "../common/decoding/DecoderHandler.h"
 #include "L1InfoToStorage.h"
 #include "../struct/HLTConfParams.h"
+#include "L1Fragment.h"
 
 namespace na62 {
 
@@ -39,6 +40,7 @@ public:
 	}
 
 	static void initialize(l1KTAG &l1KtagStruct);
+	static void writeData(L1Block &l1Block);
 
 	static bool isAlgoProcessed();
 	static void resetAlgoProcessed();
