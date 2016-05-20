@@ -42,7 +42,7 @@ public:
 	static void resetAlgoProcessed();
 	static bool isEmptyPacket();
 	static bool isBadData();
-
+//
 private:
 
 	static NewCHODParsConfFile* infoNewCHOD_;
