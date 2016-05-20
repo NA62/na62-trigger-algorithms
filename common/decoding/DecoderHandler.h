@@ -173,6 +173,8 @@ ADD_SRB(STRAW)
 
 ADD_TRB(MUV3)
 
+ADD_TRB(IRC_SAC)
+
 private:
 	Event* const event_;
 
