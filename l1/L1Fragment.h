@@ -54,6 +54,19 @@ struct L1Block {
 	L1Mask l1Mask[16];
 };
 
+struct L1GLOBAL {
+	uint32_t x;
+	uint32_t y;
+	uint32_t z;
+};
+
+struct L1MASK {
+	uint32_t xx;
+	uint32_t yy;
+	uint32_t zz;
+};
+
+
 }
 
 

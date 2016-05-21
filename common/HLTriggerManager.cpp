@@ -11,6 +11,8 @@
 
 namespace na62 {
 
+std::string HLTriggerManager::xmlTriggerFile = "";
+
 HLTriggerManager::HLTriggerManager() {
 	// TODO Auto-generated constructor stub
 }
@@ -175,14 +177,15 @@ void HLTriggerManager::createXMLFile() {
 		 */
 	}
 
-	const char* filename =
-			"/Users/romano/Desktop/workspace/na62-trigger-algorithms/struct/HLTConfParams.xml";
+	const char* filename = "xml_trigger_local.xml";
 	xml_create_HLTStruct(test, filename);
 }
 
 void HLTriggerManager::fillStructFromXMLFile(HLTStruct &HLTStruct) {
 
-	if (xml_read_file_HLTStruct("/etc/HLTConfParams.xml")== -1)
+	xmlTriggerFile = TriggerOptions::GetString(OPTION_TRIGGER_XML_FILE);
+
+	if (xml_read_file_HLTStruct(xmlTriggerFile.c_str())== -1)
 		LOG_ERROR( "xml_getLastFatalError_HLTStruct()");
 
 	xml_apply_HLTStruct(&HLTStruct);
