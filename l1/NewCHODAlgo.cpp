@@ -73,7 +73,7 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(DecoderHandler& decoder,
 //	LOG_INFO("Average Hit Time (initial value) " << averageHitTime);
 
 	TrbFragmentDecoder& newchodPacket =
-			(TrbFragmentDecoder&) decoder.getDecodedNEWCHODFragment(0);
+			(TrbFragmentDecoder&) decoder.getDecodedNewCHODFragment(0);
 	if (!newchodPacket.isReady() || newchodPacket.isBadFragment()) {
 //
 		LOG_ERROR ("NewCHODAlgo: This looks like a Bad Packet!!!! ");
