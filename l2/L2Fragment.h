@@ -18,6 +18,18 @@ struct L2_BLOCK {
 //	uint16_t globalreduction;
 };
 
+struct L2GLOBAL {
+	uint32_t x;
+	uint32_t y;
+	uint32_t z;
+};
+
+struct L2MASK {
+	uint32_t xx;
+	uint32_t yy;
+	uint32_t zz;
+};
+
 }
 
 

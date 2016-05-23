@@ -304,11 +304,18 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 
 	uint_fast8_t l1GlobalFlagTrigger = 0;
 //	LOG_INFO("Global flagMode " << flagMode << " " << L1InputReducedEvents_ << " " << autoFlagFactor);
-	if (flagMode || (L1InputReducedEvents_ % autoFlagFactor == 0)) {
+	if (flagMode) {
 		l1GlobalFlagTrigger = 1;
-	} else {
-		l1GlobalFlagTrigger = 0;
+	} else if ((autoFlagFactor > 0)
+			&& (L1InputReducedEvents_ % autoFlagFactor == 0)) {
+		l1GlobalFlagTrigger = 1;
 	}
+
+//	if (flagMode || (L1InputReducedEvents_ % autoFlagFactor == 0)) {
+//		l1GlobalFlagTrigger = 1;
+//	} else {
+//		l1GlobalFlagTrigger = 0;
+//	}
 
 	isReducedEvent = 0;
 	isAllL1AlgoDisable = 0;
@@ -451,14 +458,18 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 								(uint) algoDwScMask[i])])
 								% algoDwScFactor[i][__builtin_ctz(
 										(uint) algoDwScMask[i])] != 0)) {
-					l1TriggerWords[i] = 0;
-//					isDownscaledAndFlaggedEvent += (numberOfFlaggedAlgos[i] != 0);
 					isDownscaledAndFlaggedEvent += ((uint) l1FlagTrigger);
+//					LOG_INFO("flagTrig " << (uint) l1FlagTrigger << " isDownscaledAndFlaggedEvent " << isDownscaledAndFlaggedEvent);
 
-					LOG_INFO(
-							"flagTrig " << (uint) l1FlagTrigger << " isDownscaledAndFlaggedEvent " << isDownscaledAndFlaggedEvent);
-
+					if (isDownscaledAndFlaggedEvent) {
+//						LOG_INFO("flagTrig " << (uint) l1FlagTrigger << " isDownscaledAndFlaggedEvent " << isDownscaledAndFlaggedEvent);
+						l1TriggerWords[i] = ((l1TriggerTmp & algoEnableMask[i])
+								== algoEnableMask[i]);
+//						l1TriggerWords[i] = l1TriggerTmp;
+					} else
+						l1TriggerWords[i] = 0;
 				} else
+//					l1TriggerWords[i] = l1TriggerTmp;
 					l1TriggerWords[i] = ((l1TriggerTmp & algoEnableMask[i])
 							== algoEnableMask[i]);
 			} else
@@ -511,13 +522,18 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	 */
 	uint_fast8_t l1Trigger = 0;
 	if (isAllL1AlgoDisable) {
-		l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | (1 << 6);
+		l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | (1 << 6)
+				| (numberOfTriggeredL1Masks != 0);
+//		l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | (1 << 6) | l1TriggerWords[2];
+		event->setRrequestZeroSuppressedCreamData(true);
 		L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed);
 		return l1Trigger;
 	}
 //	LOG_INFO((uint) l1GlobalFlagTrigger << " " << isDownscaledAndFlaggedEvent << " " << ((uint) l1GlobalFlagTrigger && !isDownscaledAndFlaggedEvent));
 
-	l1Trigger = (((uint) l1GlobalFlagTrigger && !isDownscaledAndFlaggedEvent) << 7) | (numberOfTriggeredL1Masks != 0);
+	l1Trigger = (((uint) l1GlobalFlagTrigger && !isDownscaledAndFlaggedEvent)
+			<< 7) | (numberOfTriggeredL1Masks != 0);
+//	l1Trigger = (((uint) l1GlobalFlagTrigger || !isDownscaledAndFlaggedEvent) << 7) | l1TriggerWords[2];
 //	l1Trigger = (l1GlobalFlagTrigger << 7) | (lavTrigger << 3) | (cedarTrigger << 2) | (richTrigger << 1) | chodTrigger;
 //	l1Trigger = (cedarTrigger != 0 && chodTrigger != 0);
 	//printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %x\n", l1Trigger);

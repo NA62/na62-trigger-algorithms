@@ -48,14 +48,18 @@ typedef struct l1LAV_t {
 	l1MaskSubStruct configParams;
 	int xx;
 } l1LAV;
-typedef struct l1MUV3_t {
+typedef struct l1IRCSAC_t {
 	l1MaskSubStruct configParams;
 	int xx;
-} l1MUV3;
+} l1IRCSAC;
 typedef struct l1Straw_t {
 	l1MaskSubStruct configParams;
 	int xx;
 } l1Straw;
+typedef struct l1MUV_t {
+	l1MaskSubStruct configParams;
+	int xx;
+} l1MUV;
 
 typedef struct l2LKr_t {
 	l2MaskSubStruct configParams;
@@ -70,7 +74,9 @@ typedef struct l1MaskStruct_t {
 	l1CHOD chod;
 	l1RICH rich;
 	l1LAV lav;
+	l1IRCSAC ircsac;
 	l1Straw straw;
+	l1MUV muv;
 	///....all L1 Algorithms
 } l1MaskStruct;
 
