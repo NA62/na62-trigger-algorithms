@@ -15,6 +15,7 @@
 #include <l0/Subevent.h>
 
 #include "../common/decoding/DecoderHandler.h"
+#include "../options/TriggerOptions.h"
 
 #include "L1Fragment.h"
 #include "KtagAlgo.h"
@@ -83,6 +84,9 @@ uint_fast8_t L1TriggerProcessor::cedarTrigger = 0;
 uint_fast8_t L1TriggerProcessor::lavTrigger = 0;
 uint_fast8_t L1TriggerProcessor::l1TriggerWords[16];
 
+uint L1TriggerProcessor::MaskIDToNum[16];
+uint L1TriggerProcessor::NumToMaskID[16];
+
 uint_fast8_t L1TriggerProcessor::evtRefFineTime;
 
 L1InfoToStorage* L1TriggerProcessor::l1Info_ = L1InfoToStorage::GetInstance();
@@ -92,6 +96,8 @@ bool L1TriggerProcessor::isAlgoEnableForAllL0Masks = 0;
 bool L1TriggerProcessor::isDownscaledAndFlaggedEvent = 0;
 bool L1TriggerProcessor::isReducedEvent = 0;
 bool L1TriggerProcessor::isAllL1AlgoDisable = 0;
+uint_fast8_t L1TriggerProcessor::numberOfEnabledL0Masks = 0;
+
 
 void L1TriggerProcessor::registerDownscalingAlgorithms() {
 	uint numberOfRegisteredAlgorithms = 0;
@@ -118,6 +124,8 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 	// Seed for rand()
 	srand(time(NULL));
 
+	numberOfEnabledL0Masks = TriggerOptions::GetInt(OPTION_NUMBER_OF_ENABLED_L0_MASKS);
+
 	eventCountersByL0MaskByAlgoID_ = new std::atomic<uint64_t>*[16];
 	for (int i = 0; i != 16; ++i) {
 		L1AcceptedEventsPerL0Mask_[i] = 0;
@@ -140,6 +148,19 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 	/*
 	 * Initialisation of 16 L0 trigger masks
 	 */
+	int num = 0;
+	for (int iMask=0; iMask<16; iMask++) {
+		if(l0TrigFlags & (1 << iMask)){
+			NumToMaskID[num] = iMask;
+			MaskIDToNum[iMask] = num;
+			num++;
+		}
+		else{
+			NumToMaskID[num] = -1;
+			MaskIDToNum[iMask] = -1;
+		}
+
+	}
 	for (int i = 0; i != 16; i++) {
 		if (!i) {
 			chodAlgorithmId = l1Struct.l1Mask[i].chod.configParams.l1TrigMaskID;
@@ -212,10 +233,10 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 		 << " LAV: "
 		 << algoDwScFactor[i][(uint) l1Struct.l1Mask[i].lav.configParams.l1TrigMaskID]);
 		 */
-		CHODAlgo::initialize(l1Struct.l1Mask[i].chod);
-//		RICHAlgo::initialize(l1Struct.l1Mask[i].rich);
-		KtagAlgo::initialize(l1Struct.l1Mask[i].ktag);
-		LAVAlgo::initialize(l1Struct.l1Mask[i].lav);
+		CHODAlgo::initialize(l1Struct.l1Mask[i].chod, numberOfEnabledL0Masks);
+//		RICHAlgo::initialize(l1Struct.l1Mask[i].rich, numberOfEnabledL0Masks);
+		KtagAlgo::initialize(l1Struct.l1Mask[i].ktag, numberOfEnabledL0Masks);
+		LAVAlgo::initialize(l1Struct.l1Mask[i].lav, numberOfEnabledL0Masks);
 
 		chodProcessID[i] = l1Struct.l1Mask[i].chod.configParams.l1TrigProcessID;
 		richProcessID[i] = l1Struct.l1Mask[i].rich.configParams.l1TrigProcessID;
@@ -595,33 +616,35 @@ void L1TriggerProcessor::writeData(L1Block &l1Block) {
 	(l1Block.l1Global).l1AutoFlagFactor = autoFlagFactor;
 	(l1Block.l1Global).l1ReductionFactor = reductionFactor;
 	(l1Block.l1Global).l1DownscaleFactor = downscaleFactor;
+	int numToMaskID;
+	for (int iNum = 0; iNum < numberOfEnabledL0Masks; iNum++) {
+		if (NumToMaskID[iNum]==-1) LOG_ERROR("ERROR! Wrong association of mask ID!");
+		else numToMaskID = NumToMaskID[iNum];
+		(l1Block.l1Mask[iNum]).maskID = numToMaskID;
+		(l1Block.l1Mask[iNum]).triggerWord = l1TriggerWords[numToMaskID];
+		(l1Block.l1Mask[iNum]).numberOfEnabledAlgos =
+				numberOfEnabledAlgos[numToMaskID];
+		(l1Block.l1Mask[iNum]).numberOfFlaggedAlgos =
+				numberOfFlaggedAlgos[numToMaskID];
+		(l1Block.l1Mask[iNum]).reductionFactor = algoReductionFactor[numToMaskID];
+		(l1Block.l1Mask[iNum]).algoEnableMask = algoEnableMask[numToMaskID];
+		(l1Block.l1Mask[iNum]).algoFlagMask = algoFlagMask[numToMaskID];
+		(l1Block.l1Mask[iNum]).algoLogicMask = algoLogicMask[numToMaskID];
+		(l1Block.l1Mask[iNum]).algoDwScMask = algoDwScMask[numToMaskID];
 
-	for (int iMask = 0; iMask < 16; iMask++) {
+		(l1Block.l1Mask[iNum]).l1Algo[chodAlgorithmId].l1AlgoDSFactor =
+				algoDwScFactor[numToMaskID][chodAlgorithmId];
+		(l1Block.l1Mask[iNum]).l1Algo[cedarAlgorithmId].l1AlgoDSFactor =
+				algoDwScFactor[numToMaskID][cedarAlgorithmId];
+		(l1Block.l1Mask[iNum]).l1Algo[lavAlgorithmId].l1AlgoDSFactor =
+				algoDwScFactor[numToMaskID][lavAlgorithmId];
 
-		(l1Block.l1Mask[iMask]).triggerWord = l1TriggerWords[iMask];
-		(l1Block.l1Mask[iMask]).numberOfEnabledAlgos =
-				numberOfEnabledAlgos[iMask];
-		(l1Block.l1Mask[iMask]).numberOfFlaggedAlgos =
-				numberOfFlaggedAlgos[iMask];
-		(l1Block.l1Mask[iMask]).reductionFactor = algoReductionFactor[iMask];
-		(l1Block.l1Mask[iMask]).algoEnableMask = algoEnableMask[iMask];
-		(l1Block.l1Mask[iMask]).algoFlagMask = algoFlagMask[iMask];
-		(l1Block.l1Mask[iMask]).algoLogicMask = algoLogicMask[iMask];
-		(l1Block.l1Mask[iMask]).algoDwScMask = algoDwScMask[iMask];
-
-		(l1Block.l1Mask[iMask]).l1Algo[chodAlgorithmId].l1AlgoDSFactor =
-				algoDwScFactor[iMask][chodAlgorithmId];
-		(l1Block.l1Mask[iMask]).l1Algo[cedarAlgorithmId].l1AlgoDSFactor =
-				algoDwScFactor[iMask][cedarAlgorithmId];
-		(l1Block.l1Mask[iMask]).l1Algo[lavAlgorithmId].l1AlgoDSFactor =
-				algoDwScFactor[iMask][lavAlgorithmId];
-
-		(l1Block.l1Mask[iMask]).l1Algo[chodAlgorithmId].l1AlgoProcessID =
-				chodProcessID[iMask];
-		(l1Block.l1Mask[iMask]).l1Algo[cedarAlgorithmId].l1AlgoProcessID =
-				cedarProcessID[iMask];
-		(l1Block.l1Mask[iMask]).l1Algo[lavAlgorithmId].l1AlgoProcessID =
-				lavProcessID[iMask];
+		(l1Block.l1Mask[iNum]).l1Algo[chodAlgorithmId].l1AlgoProcessID =
+				chodProcessID[numToMaskID];
+		(l1Block.l1Mask[iNum]).l1Algo[cedarAlgorithmId].l1AlgoProcessID =
+				cedarProcessID[numToMaskID];
+		(l1Block.l1Mask[iNum]).l1Algo[lavAlgorithmId].l1AlgoProcessID =
+				lavProcessID[numToMaskID];
 
 	}
 }

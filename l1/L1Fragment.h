@@ -46,7 +46,8 @@ struct L1Mask {
 	uint8_t algoFlagMask;
 	uint8_t algoDwScMask;
 	L1Algo l1Algo[4];
-	uint32_t data;
+	uint8_t maskID  :4;
+	uint32_t data  : 28;
 };
 
 struct L1Block {

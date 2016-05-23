@@ -21,6 +21,7 @@
 #include "../common/decoding/DecoderRange.h"
 #include "../common/decoding/DecoderHandler.h"
 #include "../common/decoding/TrbFragmentDecoder.h"
+#include "L1TriggerProcessor.h"
 
 #define maxNhits 500
 
@@ -36,13 +37,15 @@ bool KtagAlgo::emptyPacket = 0;
 bool KtagAlgo::badData = 0;
 bool KtagAlgo::isCHODRefTime = 0;
 double KtagAlgo::averageCHODHitTime = 0.;
+uint_fast8_t KtagAlgo::numberOfEnabledL0Masks = 0;
 
-void KtagAlgo::initialize(l1KTAG &l1KtagStruct) {
+void KtagAlgo::initialize(l1KTAG &l1KtagStruct, uint_fast8_t nEnabledMasks) {
 
 	algoID = l1KtagStruct.configParams.l1TrigMaskID;
 	algoLogic = l1KtagStruct.configParams.l1TrigLogic;
 	algoRefTimeSourceID = l1KtagStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
 	algoOnlineTimeWindow = l1KtagStruct.configParams.l1TrigOnlineTimeWindow;
+	numberOfEnabledL0Masks = nEnabledMasks;
 
 }
 
@@ -195,12 +198,11 @@ bool KtagAlgo::isBadData() {
 
 void KtagAlgo::writeData(L1Block &l1Block){
 
-	for(int iMask=0; iMask<16; iMask++){
-	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoID = algoID;
-	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoProcessed = algoProcessed;
-	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoOnlineTimeWindow = algoOnlineTimeWindow;
+	for(int iNum=0; iNum<numberOfEnabledL0Masks; iNum++){
+	  (l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoID = algoID;
+	  (l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoProcessed = algoProcessed;
+	  (l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoOnlineTimeWindow = algoOnlineTimeWindow;
 	}
-
 }
 
 }

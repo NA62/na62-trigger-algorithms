@@ -38,7 +38,7 @@ public:
 
 	static uint_fast8_t processLAVTrigger(DecoderHandler& decoder,L1InfoToStorage* l1Info);
 
-	static void initialize(l1LAV &l1LAVStruct);
+	static void initialize(l1LAV &l1LAVStruct, uint_fast8_t nEnabledMasks);
 	static void writeData(L1Block &l1Block);
 
 	static bool isAlgoProcessed();
@@ -63,6 +63,7 @@ private:
 	static int hit[maxNROchs];
 	static uint nHits;
 	static double averageCHODHitTime;
+	static uint_fast8_t numberOfEnabledL0Masks;
 
 };
 

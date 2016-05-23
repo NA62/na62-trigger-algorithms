@@ -39,7 +39,7 @@ public:
 		return ((tel62ID << 2) | fpgaID) / 3;
 	}
 
-	static void initialize(l1KTAG &l1KtagStruct);
+	static void initialize(l1KTAG &l1KtagStruct, uint_fast8_t nEnabledMasks);
 	static void writeData(L1Block &l1Block);
 
 	static bool isAlgoProcessed();
@@ -58,6 +58,7 @@ private:
 	static bool badData;
 	static bool isCHODRefTime;
 	static double averageCHODHitTime;
+	static uint_fast8_t numberOfEnabledL0Masks;
 
 };
 

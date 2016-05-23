@@ -36,6 +36,7 @@ int * LAVAlgo::lgGeo = infoLAV_->getGeoLGMap();
 int LAVAlgo::hit[maxNROchs];
 uint LAVAlgo::nHits;
 double LAVAlgo::averageCHODHitTime = 0.;
+uint_fast8_t LAVAlgo::numberOfEnabledL0Masks = 0;
 
 LAVAlgo::LAVAlgo() {
 }
@@ -44,13 +45,13 @@ LAVAlgo::~LAVAlgo() {
 // TODO Auto-generated destructor stub
 }
 
-void LAVAlgo::initialize(l1LAV &l1LAVStruct) {
+void LAVAlgo::initialize(l1LAV &l1LAVStruct, uint_fast8_t nEnabledMasks) {
 
 	algoID = l1LAVStruct.configParams.l1TrigMaskID;
 	algoLogic = l1LAVStruct.configParams.l1TrigLogic;
 	algoRefTimeSourceID = l1LAVStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
 	algoOnlineTimeWindow = l1LAVStruct.configParams.l1TrigOnlineTimeWindow;
-
+	numberOfEnabledL0Masks = nEnabledMasks;
 }
 
 uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder,
@@ -201,14 +202,12 @@ bool LAVAlgo::isBadData() {
 
 void LAVAlgo::writeData(L1Block &l1Block){
 
-	for(int iMask=0; iMask<16; iMask++){
+	for(int iMask=0; iMask<numberOfEnabledL0Masks; iMask++){
 	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoID = algoID;
 	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoProcessed = algoProcessed;
 	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoOnlineTimeWindow = algoOnlineTimeWindow;
 	}
-
 }
 
 }
 /* namespace na62 */
-

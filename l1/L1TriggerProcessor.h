@@ -168,6 +168,9 @@ private:
 	static uint_fast8_t lavTrigger;
 	static uint_fast8_t l1TriggerWords[16];
 
+	static uint MaskIDToNum[16];
+	static uint NumToMaskID[16];
+
 	static L1InfoToStorage* l1Info_;
 	static uint l1ProcessID;
 	static uint numberOfTriggeredL1Masks;
@@ -176,6 +179,7 @@ private:
 	static bool isReducedEvent;
 	static bool isAllL1AlgoDisable;
 	static uint_fast8_t evtRefFineTime;
+	static uint_fast8_t numberOfEnabledL0Masks;
 }
 ;
 

@@ -37,7 +37,7 @@ public:
 	~CHODAlgo();
 
 	static uint_fast8_t processCHODTrigger(DecoderHandler& decoder, L1InfoToStorage* l1Info);
-	static void initialize(l1CHOD &l1ChodStruct);
+	static void initialize(l1CHOD &l1ChodStruct, uint_fast8_t nEnabledMasks);
 	static void writeData(L1Block &l1Block);
 
 	static bool isAlgoProcessed();
@@ -65,6 +65,7 @@ private:
 //	static int quadrantID;
 	static int planeID;
 	static double averageHitTime;
+	static uint_fast8_t numberOfEnabledL0Masks;
 
 };
 
