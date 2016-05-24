@@ -16,6 +16,7 @@
 #include "../common/decoding/DecoderHandler.h"
 #include "L1InfoToStorage.h"
 #include "../struct/HLTConfParams.h"
+#include "L1Fragment.h"
 
 namespace na62 {
 
@@ -38,7 +39,8 @@ public:
 		return ((tel62ID << 2) | fpgaID) / 3;
 	}
 
-	static void initialize(l1KTAG &l1KtagStruct);
+	static void initialize(l1KTAG &l1KtagStruct, uint_fast8_t nEnabledMasks);
+	static void writeData(L1Block &l1Block);
 
 	static bool isAlgoProcessed();
 	static void resetAlgoProcessed();
@@ -56,6 +58,7 @@ private:
 	static bool badData;
 	static bool isCHODRefTime;
 	static double averageCHODHitTime;
+	static uint_fast8_t numberOfEnabledL0Masks;
 
 };
 
