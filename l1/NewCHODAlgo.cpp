@@ -67,8 +67,9 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(DecoderHandler& decoder,
 
 	nMaxPMTs = 6;
 	nHits = 0;
+	averageHitTime = 0;
 
-//	LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
+	LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
 //	LOG_INFO("NewCHODAlgo: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
 //	LOG_INFO("Average Hit Time (initial value) " << averageHitTime);
 
@@ -97,25 +98,28 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(DecoderHandler& decoder,
 	for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
 		const int roChID = (edge_tdcIDs[iEdge] * 32) + edge_chIDs[iEdge];
 		PMTID1 = PMTGeo[roChID];
-		LOG_INFO("Readout Channel ID " << roChID);
-		LOG_INFO("Geom PMT ID " << PMTID1);
-		for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard; jEdge++) {
-			const int roChID = (edge_tdcIDs[jEdge] * 32) + edge_chIDs[jEdge];
-			PMTID2 = PMTGeo[roChID];
-			LOG_INFO("Readout Channel ID " << roChID);
-			LOG_INFO("Geom PMT ID " << PMTID2);
-			if (fabs(PMTID1-PMTID2) == 50) {
-				finetime = decoder.getDecodedEvent()->getFinetime()
-						* 0.097464731802;
-				edgetime1 = (edge_times[iEdge]
-						- decoder.getDecodedEvent()->getTimestamp() * 256.)
-						* 0.097464731802;
-				edgetime2 = (edge_times[jEdge]
-						- decoder.getDecodedEvent()->getTimestamp() * 256.)
-						* 0.097464731802;
-				if(fabs(edgetime1-edgetime2) < 20) {
-					averageHitTime += (edgetime1 + edgetime2)/2;
-					nHits++;
+//		LOG_INFO("Readout Channel ID1 " << roChID);
+//		LOG_INFO("Geom PMT ID1 " << PMTID1);
+		if ((PMTID1/10)%10 >= 1 && (PMTID1/10)%10 <= 3) {
+			for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard; jEdge++) {
+				const int roChID = (edge_tdcIDs[jEdge] * 32) + edge_chIDs[jEdge];
+				PMTID2 = PMTGeo[roChID];
+	//			LOG_INFO("Readout Channel ID2 " << roChID);
+	//			LOG_INFO("Geom PMT ID2 " << PMTID2);
+				if (fabs(PMTID1-PMTID2) == 50 && (PMTID1/100)%10 == (PMTID2/100)%10) {
+					finetime = decoder.getDecodedEvent()->getFinetime()
+							* 0.097464731802;
+					edgetime1 = (edge_times[iEdge]
+							- decoder.getDecodedEvent()->getTimestamp() * 256.)
+							* 0.097464731802;
+					edgetime2 = (edge_times[jEdge]
+							- decoder.getDecodedEvent()->getTimestamp() * 256.)
+							* 0.097464731802;
+					if(fabs(edgetime1-edgetime2) < 5) {
+//						LOG_INFO("edge1-edge2 "<<fabs(edgetime1-edgetime2));
+						averageHitTime += (edgetime1 + edgetime2)/2;
+						nHits++;
+					}
 				}
 			}
 		}
@@ -134,16 +138,17 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(DecoderHandler& decoder,
 //	LOG_INFO("NewCHODAlgo=============== number of Hits " << nHits_V + nHits_H);
 //	LOG_INFO("NewCHODAlgo=============== average HitTime " << averageHitTime);
 //	LOG_INFO("NewCHODAlgo=============== L1NewCHODProcessed Flag " << (uint)l1Info->isL1NewCHODProcessed());
-
-	averageHitTime = 0;
 //	LOG_INFO("NewCHODAlgo=============== reset average HitTime " << averageHitTime);
 
 /*	if (algoLogic)
 		return ((nHits > 0) && ((nHits) < nMaxPMTs));
 	else
 		return (nHits >= nMaxPMTs);*/
-	if (nHits == 1)
-		return averageHitTime;
+
+	if (nHits == 1) {
+		LOG_INFO("hits "<<nHits);
+		LOG_INFO("avg "<<averageHitTime);
+		return averageHitTime;}
 	else
 		return 0;
 }

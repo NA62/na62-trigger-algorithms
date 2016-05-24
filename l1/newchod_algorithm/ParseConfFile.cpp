@@ -22,7 +22,7 @@ NewCHODParsConfFile::NewCHODParsConfFile() {
 //	LOG_INFO<< "In NewCHOD ParseConfFile" << ENDL;
 
 	ConfFileReader fileName_(
-			"/home/lorenza/workspace/na62-trigger-algorithms/l1/muv_algorithm/config/NewCHOD.conf");
+			"/home/lorenza/workspace/na62-trigger-algorithms/l1/newchod_algorithm/config/NewCHOD.conf");
 
 	if (!fileName_.isValid())
 		LOG_INFO("Config file not found");
