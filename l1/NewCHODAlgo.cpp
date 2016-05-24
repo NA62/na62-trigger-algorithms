@@ -145,10 +145,9 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(DecoderHandler& decoder,
 	else
 		return (nHits >= nMaxPMTs);*/
 
-	if (nHits == 1) {
-		LOG_INFO("hits "<<nHits);
-		LOG_INFO("avg "<<averageHitTime);
-		return averageHitTime;}
+	if (nHits == 1)
+		return 1;
+		//return averageHitTime;
 	else
 		return 0;
 }
