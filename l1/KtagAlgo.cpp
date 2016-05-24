@@ -21,7 +21,6 @@
 #include "../common/decoding/DecoderRange.h"
 #include "../common/decoding/DecoderHandler.h"
 #include "../common/decoding/TrbFragmentDecoder.h"
-#include "L1TriggerProcessor.h"
 
 #define maxNhits 500
 
