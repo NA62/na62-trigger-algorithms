@@ -21,7 +21,6 @@
 #include "CHODAlgo.h"
 #include "RICHAlgo.h"
 #include "LAVAlgo.h"
-#include "NewCHODAlgo.h"
 
 namespace na62 {
 
@@ -77,7 +76,6 @@ uint_fast8_t L1TriggerProcessor::chodTrigger = 0;
 uint_fast8_t L1TriggerProcessor::richTrigger = 0;
 uint_fast8_t L1TriggerProcessor::cedarTrigger = 0;
 uint_fast8_t L1TriggerProcessor::lavTrigger = 0;
-uint_fast8_t L1TriggerProcessor::newchodTrigger = 0;
 uint_fast8_t L1TriggerProcessor::l1TriggerWords[16];
 
 L1InfoToStorage* L1TriggerProcessor::l1Info_ = L1InfoToStorage::GetInstance();
@@ -285,8 +283,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	 */
 	l0TrigWord = event->getL0TriggerTypeWord();
 //	LOG_INFO("l0TriggerWord " << std::hex << (uint) l0TrigWord << std::dec);
-//	l0TrigFlags = event->getTriggerFlags();
-	l0TrigFlags = 1;
+	l0TrigFlags = event->getTriggerFlags();
 //	LOG_INFO("l0TriggerFlags " << std::hex << (uint) l0TrigFlags << std::dec);
 
 	/*
@@ -329,7 +326,6 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	richTrigger = 0;
 	cedarTrigger = 0;
 	lavTrigger = 0;
-	newchodTrigger = 0;
 	uint_fast8_t l1TriggerTmp;
 	uint_fast8_t l1FlagTrigger;
 
@@ -351,9 +347,6 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 //			LOG_INFO("i " << i << " processID " << l1ProcessID << " nEnAlgos " << numberOfEnabledAlgos[i] << " l1TriggerTemp " << (uint) l1TriggerTmp << " nFlagAlgos " << numberOfFlaggedAlgos[i] << " l1FlagTrig " << (uint) l1FlagTrigger);
 			if (!numberOfEnabledAlgos[i])
 				isAllL1AlgoDisable = 1;
-
-			 if( SourceIDManager::isNewChodActive()){ newchodTrigger = NewCHODAlgo::processNewCHODTrigger(decoder,
-											l1Info_);}
 
 			while (!isReducedEvent && l1ProcessID != numberOfEnabledAlgos[i]) {
 
@@ -441,10 +434,10 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 			/*
 			 * L1 trigger word calculation
 			 */
-			l1TriggerTmp = (newchodTrigger << 4) | (lavTrigger << 3) | (cedarTrigger << 2)
+			l1TriggerTmp = (lavTrigger << 3) | (cedarTrigger << 2)
 					| (richTrigger << 1) | chodTrigger;
-			printf("L1TriggerProcessor.cpp: l1Trigger: %x\n",
-				l1TriggerTmp);
+			//printf("L1TriggerProcessor.cpp: l1Trigger (!!TMP!!) %x\n",
+			//	l1TriggerTmp);
 
 //			LOG_INFO("isReducedEvent " << isReducedEvent << " EnableMask " << algoEnableMask[i] << " trigTmp & EnableMask " << (l1TriggerTmp & algoEnableMask[i]) << " l1FlagTrig " << (uint) l1FlagTrigger);
 

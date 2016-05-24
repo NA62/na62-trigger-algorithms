@@ -70,7 +70,7 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(DecoderHandler& decoder,
 	averageHitTime = 0;
 
 	LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
-//	LOG_INFO("NewCHODAlgo: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
+	LOG_INFO("NewCHODAlgo: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
 //	LOG_INFO("Average Hit Time (initial value) " << averageHitTime);
 
 	TrbFragmentDecoder& newchodPacket =

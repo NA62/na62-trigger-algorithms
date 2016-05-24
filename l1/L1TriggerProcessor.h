@@ -28,7 +28,6 @@ class Event;
 class KtagAlgo;
 class RICHAlgo;
 class CHODAlgo;
-class NewCHODAlgo;
 
 class L1TriggerProcessor {
 public:
@@ -158,7 +157,6 @@ private:
 	static uint_fast8_t richTrigger;
 	static uint_fast8_t cedarTrigger;
 	static uint_fast8_t lavTrigger;
-	static uint_fast8_t newchodTrigger;
 	static uint_fast8_t l1TriggerWords[16];
 
 	static L1InfoToStorage* l1Info_;
