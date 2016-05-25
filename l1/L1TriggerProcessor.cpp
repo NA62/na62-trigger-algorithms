@@ -656,5 +656,5 @@ void L1TriggerProcessor::writeData(L1Block &l1Block) {
 
 	}
 }
-
+}
 /* namespace na62 */
