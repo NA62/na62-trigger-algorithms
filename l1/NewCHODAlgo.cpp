@@ -69,8 +69,8 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(DecoderHandler& decoder,
 	nHits = 0;
 	averageHitTime = 0;
 
-	LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
-	LOG_INFO("NewCHODAlgo: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
+//	LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
+//	LOG_INFO("NewCHODAlgo: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
 //	LOG_INFO("Average Hit Time (initial value) " << averageHitTime);
 
 	TrbFragmentDecoder& newchodPacket =
@@ -117,18 +117,12 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(DecoderHandler& decoder,
 							* 0.097464731802;
 					if(fabs(edgetime1-edgetime2) < 5) {
 //						LOG_INFO("edge1-edge2 "<<fabs(edgetime1-edgetime2));
-						averageHitTime += (edgetime1 + edgetime2)/2;
-						nHits++;
+						return 1;
 					}
 				}
 			}
 		}
 	}
-
-	if (nHits)
-		averageHitTime = averageHitTime/nHits;
-	else
-		averageHitTime = -1.0e+28;
 
 	algoProcessed = 1;
 
@@ -144,12 +138,6 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(DecoderHandler& decoder,
 		return ((nHits > 0) && ((nHits) < nMaxPMTs));
 	else
 		return (nHits >= nMaxPMTs);*/
-
-	if (nHits == 1)
-		return 1;
-		//return averageHitTime;
-	else
-		return 0;
 }
 
 bool NewCHODAlgo::isAlgoProcessed() {

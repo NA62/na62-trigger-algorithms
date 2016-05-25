@@ -18,8 +18,6 @@
 #include "L1InfoToStorage.h"
 #include "../struct/HLTConfParams.h"
 
-#define maxNhits 500
-
 namespace na62 {
 
 class NewCHODAlgo {
