@@ -607,6 +607,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	}
 	return l1Trigger;
 }
+}
 
 void L1TriggerProcessor::writeData(L1Block &l1Block) {
 
@@ -654,8 +655,6 @@ void L1TriggerProcessor::writeData(L1Block &l1Block) {
 				lavProcessID[numToMaskID];
 
 	}
-}
-
 }
 
 /* namespace na62 */
