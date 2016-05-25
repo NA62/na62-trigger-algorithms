@@ -2,7 +2,7 @@
  * NewCHODAlgo.h
  *
  *  Created on: 16 May 2016
- *      Author: lorenza
+ *      Author: lorenzaiacobuzio
  */
 
 #pragma once
