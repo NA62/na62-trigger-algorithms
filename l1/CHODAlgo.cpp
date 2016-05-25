@@ -42,6 +42,7 @@ uint CHODAlgo::nMaxSlabs;
 int CHODAlgo::slabID;
 //int CHODAlgo::quadrantID;
 int CHODAlgo::planeID;
+uint_fast8_t CHODAlgo::numberOfEnabledL0Masks = 0;
 
 CHODAlgo::CHODAlgo() {
 }
@@ -50,13 +51,13 @@ CHODAlgo::~CHODAlgo() {
 // TODO Auto-generated destructor stub
 }
 
-void CHODAlgo::initialize(l1CHOD &l1CHODStruct) {
+void CHODAlgo::initialize(l1CHOD &l1CHODStruct, uint_fast8_t nEnabledMasks) {
 
 	algoID = l1CHODStruct.configParams.l1TrigMaskID;
 	algoLogic = l1CHODStruct.configParams.l1TrigLogic;
 	algoRefTimeSourceID = l1CHODStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
 	algoOnlineTimeWindow = l1CHODStruct.configParams.l1TrigOnlineTimeWindow;
-
+	numberOfEnabledL0Masks = nEnabledMasks;
 }
 
 uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder,
@@ -197,6 +198,15 @@ bool CHODAlgo::isEmptyPacket() {
 
 bool CHODAlgo::isBadData() {
 	return badData;
+}
+
+void CHODAlgo::writeData(L1Block &l1Block){
+
+	for(int iMask=0; iMask<numberOfEnabledL0Masks; iMask++){
+	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoID = algoID;
+	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoProcessed = algoProcessed;
+	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoOnlineTimeWindow = algoOnlineTimeWindow;
+	}
 }
 
 }
