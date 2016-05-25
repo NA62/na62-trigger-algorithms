@@ -123,8 +123,7 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 	// Seed for rand()
 	srand(time(NULL));
 
-	numberOfEnabledL0Masks = TriggerOptions::GetInt(
-			OPTION_NUMBER_OF_ENABLED_L0_MASKS);
+	numberOfEnabledL0Masks = TriggerOptions::GetInt(OPTION_NUMBER_OF_ENABLED_L0_MASKS);
 
 	eventCountersByL0MaskByAlgoID_ = new std::atomic<uint64_t>*[16];
 	for (int i = 0; i != 16; ++i) {
@@ -148,6 +147,10 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 	/*
 	 * Initialisation of 16 L0 trigger masks
 	 */
+	for (int j = 0; j != 16; j++) {
+		NumToMaskID[j] = -1;
+		MaskIDToNum[j] = -1;
+	}
 	int num = 0;
 	for (int iMask = 0; iMask < numberOfEnabledL0Masks; iMask++) {
 		NumToMaskID[num] = iMask;
