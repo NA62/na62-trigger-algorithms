@@ -11,11 +11,7 @@
 
 namespace na62 {
 
-<<<<<<< Updated upstream
 std::string HLTriggerManager::xmlTriggerFile = "";
-=======
-std::string HLTriggerManager::xmlTriggerFile;
->>>>>>> Stashed changes
 
 HLTriggerManager::HLTriggerManager() {
 	// TODO Auto-generated constructor stub

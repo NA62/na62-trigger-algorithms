@@ -79,7 +79,7 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder,
 			(TrbFragmentDecoder&) decoder.getDecodedCHODFragment(0);
 	if (!chodPacket.isReady() || chodPacket.isBadFragment()) {
 
-		LOG_ERROR ("CHODAlgo: This looks like a Bad Packet!!!! ");
+		LOG_ERROR("CHODAlgo: This looks like a Bad Packet!!!! ");
 		badData = 1;
 		return 0;
 	}
@@ -91,7 +91,7 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder,
 	const uint_fast8_t* const edge_chIDs = chodPacket.getChIDs();
 	const bool* const edge_IDs = chodPacket.getIsLeadings();
 	const uint_fast8_t* const edge_tdcIDs = chodPacket.getTdcIDs();
-	double finetime, edgetime;
+	double finetime, edgetime, dt_l0tp;
 
 	uint numberOfEdgesOfCurrentBoard = chodPacket.getNumberOfEdgesStored();
 	if (!numberOfEdgesOfCurrentBoard)
@@ -112,16 +112,17 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder,
 			 *
 			 */
 			if (slabGeo[roChID] < 128) {
-				finetime = decoder.getDecodedEvent()->getFinetime()
-						* 0.097464731802;
 				edgetime = (edge_times[iEdge]
 						- decoder.getDecodedEvent()->getTimestamp() * 256.)
 						* 0.097464731802;
+				finetime = decoder.getDecodedEvent()->getFinetime()
+						* 0.097464731802;
 //				LOG_INFO("finetime (in ns) " << finetime << " edgetime (in ns) " << edgetime);
 
+				dt_l0tp = fabs(edgetime - finetime);
 //				if (fabs(edgetime - finetime) <= 30.) { //if ref detector is LKr
-				if (fabs(edgetime - finetime) <= 20.) { //otherwise
-					averageHitTime += edgetime;
+//				if (fabs(edgetime - finetime) <= 20.) { //otherwise
+				if (dt_l0tp < algoOnlineTimeWindow) { //otherwise
 
 //  				LOG_INFO("Edge " << iEdge << " ID " << edge_IDs[iEdge]);
 //	   				LOG_INFO("Edge " << iEdge << " chID " << (uint) edge_chIDs[iEdge]);
@@ -135,6 +136,9 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder,
 //					LOG_INFO("CHOD slab ID " << slabID);
 //					LOG_INFO("CHOD quadrant ID " << quadrantID);
 //					LOG_INFO("CHOD plane ID " << planeID);
+
+					if (algoRefTimeSourceID == 1)
+						averageHitTime += edgetime;
 
 					if (planeID)
 						nHits_V++;
@@ -156,9 +160,9 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder,
 //		}
 //	LOG_INFO(((time[3].tv_sec - time[0].tv_sec)*1e6 + time[3].tv_usec) - time[0].tv_usec);
 
-	if (nHits_V + nHits_H)
+	if ((algoRefTimeSourceID == 1) && (nHits_V + nHits_H)) {
 		averageHitTime = averageHitTime / (nHits_V + nHits_H);
-	else
+	} else
 		averageHitTime = -1.0e+28;
 
 	algoProcessed = 1;
@@ -200,12 +204,13 @@ bool CHODAlgo::isBadData() {
 	return badData;
 }
 
-void CHODAlgo::writeData(L1Block &l1Block){
+void CHODAlgo::writeData(L1Block &l1Block) {
 
-	for(int iMask=0; iMask<numberOfEnabledL0Masks; iMask++){
-	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoID = algoID;
-	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoProcessed = algoProcessed;
-	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoOnlineTimeWindow = algoOnlineTimeWindow;
+	for (int iMask = 0; iMask < numberOfEnabledL0Masks; iMask++) {
+		(l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoID = algoID;
+		(l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoProcessed = algoProcessed;
+		(l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoOnlineTimeWindow =
+				algoOnlineTimeWindow;
 	}
 }
 
