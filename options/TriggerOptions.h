@@ -64,7 +64,9 @@ public:
 						"/etc/na62-trigger.conf"),
 				"Config file for trigger specific options")
 
-		(OPTION_TRIGGER_XML_FILE, po::value<std::string>()->default_value("/lkrpn0/RunControl/PCFarm/Trigger/config_START_RUN.cfg"),
+		(OPTION_TRIGGER_XML_FILE,
+				po::value<std::string>()->default_value(
+						"/lkrpn0/RunControl/PCFarm/Trigger/config_START_RUN.cfg"),
 				"XML Trigger file for trigger configuration")
 
 		(OPTION_NUMBER_OF_ENABLED_L0_MASKS,

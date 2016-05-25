@@ -54,7 +54,6 @@ void L2TriggerProcessor::initialize(l2Struct &l2Struct) {
 //	for (int i = 0; i != 16; i++) {
 //		LKrAlgo::initialize(l2Struct.l2Mask[i].lkr);
 //	}
-
 }
 
 uint_fast8_t L2TriggerProcessor::compute(Event* event) {
@@ -71,6 +70,10 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 	if (event->isSpecialTriggerEvent()) {
 		L2Triggers_[TRIGGER_L2_SPECIAL].fetch_add(1, std::memory_order_relaxed);
 		return TRIGGER_L2_SPECIAL;
+	}
+	if (event->isPulserGTKTriggerEvent()) {
+		L2Triggers_[TRIGGER_L2_SPECIAL_GTK].fetch_add(1, std::memory_order_relaxed);
+		return TRIGGER_L2_SPECIAL_GTK;
 	}
 	if (event->isL2Bypassed() || bypassEvent()) {
 		L2BypassedEvents_.fetch_add(1, std::memory_order_relaxed);
@@ -122,7 +125,8 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 }
 
 uint_fast8_t L2TriggerProcessor::onNonZSuppressedLKrDataReceived(Event* event) {
-	LOG_INFO("onNonZSuppressedLKrDataReceived - Trigger method not yet implemented!!!!!!!!!!!!");
+	LOG_INFO(
+			"onNonZSuppressedLKrDataReceived - Trigger method not yet implemented!!!!!!!!!!!!");
 	return 1;
 }
 
