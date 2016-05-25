@@ -327,9 +327,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	 */
 	l0TrigWord = event->getL0TriggerTypeWord();
 //	LOG_INFO("l0TriggerWord " << std::hex << (uint) l0TrigWord << std::dec);
-	l0TrigFlags = 2;
-//	l0TrigFlags = event->getTriggerFlags();
-	LOG_INFO("l0TriggerFlags " << std::hex << (uint) l0TrigFlags << std::dec);
+	l0TrigFlags = event->getTriggerFlags();
+//	LOG_INFO("l0TriggerFlags " << std::hex << (uint) l0TrigFlags << std::dec);
 
 	/*
 	 * Store the global event timestamp taken from the reverence detector
@@ -408,8 +407,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 					}
 					l1ProcessID++;
 					l1TriggerTmp = chodTrigger;
-					printf("L1TriggerProcessor.cpp: chodTrigger %d\n",
-							chodTrigger);
+//					printf("L1TriggerProcessor.cpp: chodTrigger %d\n",
+//							chodTrigger);
 				}
 				if ((chodEnableMask & l0TrigFlags) == l0TrigFlags)
 					isAlgoEnableForAllL0Masks = 1;
@@ -448,8 +447,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 					}
 					l1ProcessID++;
 					l1TriggerTmp = cedarTrigger;
-					printf("L1TriggerProcessor.cpp: cedarTrigger %d\n",
-							cedarTrigger);
+//					printf("L1TriggerProcessor.cpp: cedarTrigger %d\n",
+//							cedarTrigger);
 				}
 				if ((cedarEnableMask & l0TrigFlags) == l0TrigFlags)
 					isAlgoEnableForAllL0Masks = 1;
@@ -468,9 +467,9 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 					}
 					l1ProcessID++;
 					l1TriggerTmp = lavTrigger;
-					printf("L1TriggerProcessor.cpp: lavTrigger %d\n",
-							lavTrigger);
-				}
+//					printf("L1TriggerProcessor.cpp: lavTrigger %d\n",
+//							lavTrigger);
+//				}
 				if ((lavEnableMask & l0TrigFlags) == l0TrigFlags)
 					isAlgoEnableForAllL0Masks = 1;
 				if (!(l1TriggerTmp & algoEnableMask[i]) && l1ProcessID
@@ -480,8 +479,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 			/*
 			 * L1 trigger word calculation
 			 */
-			l1TriggerTmp = (l1FlagTrigger << 7) | (lavTrigger << 3)
-					| (cedarTrigger << 2) | (richTrigger << 1) | chodTrigger;
+			l1TriggerTmp = (lavTrigger << 3) | (cedarTrigger << 2)
+							| (richTrigger << 1) | chodTrigger;
 			//printf("L1TriggerProcessor.cpp: l1Trigger (!!TMP!!) %x\n",
 			//	l1TriggerTmp);
 
@@ -528,8 +527,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	}
 
 	//printf("Summary of Triggered Masks: %d\n", numberOfTriggeredL1Masks);
-	for (int i = 0; i != 16; i++)
-		printf("Summary of Trigger Words: l1Trigger %x\n", l1TriggerWords[i]);
+//	for (int i = 0; i != 16; i++)
+//		printf("Summary of Trigger Words: l1Trigger %x\n", l1TriggerWords[i]);
 
 	if (l1Info_->isL1CHODProcessed())
 		l1Info_->resetL1CHODProcessed();
@@ -575,8 +574,6 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 //		l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | (1 << 6) | l1TriggerWords[2];
 		event->setRrequestZeroSuppressedCreamData(true);
 		L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed);
-		printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %x\n",
-				l1Trigger);
 		return l1Trigger;
 	}
 //	LOG_INFO((uint) l1GlobalFlagTrigger << " " << isDownscaledAndFlaggedEvent << " " << ((uint) l1GlobalFlagTrigger && !isDownscaledAndFlaggedEvent));
@@ -586,7 +583,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 //	l1Trigger = (((uint) l1GlobalFlagTrigger || !isDownscaledAndFlaggedEvent) << 7) | l1TriggerWords[2];
 //	l1Trigger = (l1GlobalFlagTrigger << 7) | (lavTrigger << 3) | (cedarTrigger << 2) | (richTrigger << 1) | chodTrigger;
 //	l1Trigger = (cedarTrigger != 0 && chodTrigger != 0);
-	printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %x\n", l1Trigger);
+//	printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %x\n", l1Trigger);
 
 	L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed); // The second 8 bits are the L1 trigger type word
 
