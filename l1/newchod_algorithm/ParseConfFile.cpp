@@ -1,10 +1,8 @@
 /*
  * ParseConfFile.cpp
  *
- *  Created on: 20 Apr 2015
- *      Author: vfascian
- *  Modified on: 11 May 2015
- *      Author: romano
+ *  Created on: 13 May 2016
+ *      Author: lorenza
  */
 
 #include "../../common/ConfFileReader.h"
@@ -17,21 +15,21 @@
 
 #include <sys/time.h>
 
-MUV3ParsConfFile* MUV3ParsConfFile::theInstance = nullptr;
+NewCHODParsConfFile* NewCHODParsConfFile::theInstance = nullptr;
 
-MUV3ParsConfFile::MUV3ParsConfFile() {
+NewCHODParsConfFile::NewCHODParsConfFile() {
 
-//	LOG_INFO<< "In MUV3 ParseConfFile" << ENDL;
+//	LOG_INFO<< "In NewCHOD ParseConfFile" << ENDL;
 
 	ConfFileReader fileName_(
-			"/workspace/na62-trigger-algorithms/l1/muv_algorithm/config/MUV3.2015.conf");
+			"/workspace/na62-trigger-algorithms/l1/newchod_algorithm/config/NewCHOD.conf");
 
 	if (!fileName_.isValid())
 		LOG_INFO("Config file not found");
 
 	if (fileName_.isValid()) {
 
-		LOG_INFO("MUV3 configuration file open");
+		LOG_INFO("NewCHOD configuration file open");
 
 		while (fileName_.nextLine()) {
 
@@ -64,18 +62,18 @@ MUV3ParsConfFile::MUV3ParsConfFile() {
 	}
 }
 
-MUV3ParsConfFile::~MUV3ParsConfFile() {
+NewCHODParsConfFile::~NewCHODParsConfFile() {
 }
 
-MUV3ParsConfFile* MUV3ParsConfFile::GetInstance() {
+NewCHODParsConfFile* NewCHODParsConfFile::GetInstance() {
 
 	if (theInstance == nullptr) {
-		theInstance = new MUV3ParsConfFile();
+		theInstance = new NewCHODParsConfFile();
 	}
 	return theInstance;
 
 }
 
-int* MUV3ParsConfFile::getGeoPMTMap() {
+int* NewCHODParsConfFile::getGeoPMTMap() {
 	return geoPMTMap;
 }

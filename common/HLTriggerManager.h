@@ -22,6 +22,8 @@ public:
 	static void fillStructFromXMLFile(HLTStruct &HLTStruct);
 
 private:
+
+	static std::string xmlTriggerFile;
 };
 
 } /* namespace na62 */

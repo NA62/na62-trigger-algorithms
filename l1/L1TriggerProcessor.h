@@ -19,6 +19,7 @@
 #include "../struct/HLTConfParams.h"
 #include "L1Downscaling.h"
 #include "L1Reduction.h"
+#include "L1Fragment.h"
 
 namespace na62 {
 
@@ -61,6 +62,11 @@ public:
 	 * Registers all reduction algorithms. Must be called before Options::Load is executed!
 	 */
 	static void registerReductionAlgorithms();
+
+	/**
+	 * Registers all reduction algorithms. Must be called before Options::Load is executed!
+	 */
+	static void writeData(L1Block &l1Block);
 
 	/**
 	 * Placeholder for deciding whether or not to request ZS CREAM data
@@ -125,8 +131,11 @@ private:
 	static uint algoReductionFactor[16];
 
 	static uint_fast16_t algoEnableMask[16];
+	static uint_fast16_t algoFlagMask[16];
+	static uint_fast16_t algoLogicMask[16];
 	static uint_fast16_t algoDwScMask[16];
-	static uint algoDwScFactor[16][4];
+	static uint16_t algoDwScFactor[16][4];
+	static uint8_t algoProcessID[16][4];
 
 	static uint_fast16_t chodEnableMask;
 	static uint_fast16_t richEnableMask;
@@ -159,6 +168,9 @@ private:
 	static uint_fast8_t lavTrigger;
 	static uint_fast8_t l1TriggerWords[16];
 
+	static uint MaskIDToNum[16];
+	static uint NumToMaskID[16];
+
 	static L1InfoToStorage* l1Info_;
 	static uint l1ProcessID;
 	static uint numberOfTriggeredL1Masks;
@@ -166,6 +178,8 @@ private:
 	static bool isDownscaledAndFlaggedEvent;
 	static bool isReducedEvent;
 	static bool isAllL1AlgoDisable;
+	static uint_fast8_t evtRefFineTime;
+	static uint_fast8_t numberOfEnabledL0Masks;
 }
 ;
 

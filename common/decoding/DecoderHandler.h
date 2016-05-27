@@ -161,17 +161,13 @@ public:
 	 * Add functionality for all detectors
 	 */
 
-ADD_TRB(CEDAR)
-
-ADD_TRB(RICH)
-
 ADD_TRB(CHOD)
-
+ADD_TRB(RICH)
+ADD_TRB(CEDAR)
 ADD_TRB(LAV)
-
 ADD_SRB(STRAW)
-
 ADD_TRB(MUV3)
+ADD_TRB(IRC)
 
 ADD_TRB(IRC_SAC)
 
