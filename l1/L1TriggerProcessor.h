@@ -160,6 +160,7 @@ private:
 
 	// Varie
 	static uint_fast8_t l0TrigWord;   //=1 in 2015
+	static uint_fast8_t l0DataType;   //0x1 for physics, 0x2 for periodics, 0x4 for calibrations
 	static uint_fast16_t l0TrigFlags; //16 bit word: bit ith set to 0(1) if L0 mask ith has(has NOT) triggered!
 
 	static uint_fast8_t chodTrigger;
@@ -173,6 +174,9 @@ private:
 
 	static L1InfoToStorage* l1Info_;
 	static uint l1ProcessID;
+	static bool isL0PhysicsTrigger;
+	static bool isL0PeriodicTrigger;
+	static bool isL0ControlTrigger;
 	static uint numberOfTriggeredL1Masks;
 	static bool isAlgoEnableForAllL0Masks;
 	static bool isDownscaledAndFlaggedEvent;
