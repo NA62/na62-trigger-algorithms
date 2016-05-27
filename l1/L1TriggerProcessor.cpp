@@ -123,7 +123,8 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 	// Seed for rand()
 	srand(time(NULL));
 
-	numberOfEnabledL0Masks = TriggerOptions::GetInt(OPTION_NUMBER_OF_ENABLED_L0_MASKS);
+	numberOfEnabledL0Masks = TriggerOptions::GetInt(
+			OPTION_NUMBER_OF_ENABLED_L0_MASKS);
 
 	eventCountersByL0MaskByAlgoID_ = new std::atomic<uint64_t>*[16];
 	for (int i = 0; i != 16; ++i) {
@@ -299,7 +300,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	}
 	if (event->isPulserGTKTriggerEvent()) {
 		event->setRrequestZeroSuppressedCreamData(true);
-		L1Triggers_[TRIGGER_L1_SPECIAL_GTK].fetch_add(1, std::memory_order_relaxed);
+		L1Triggers_[TRIGGER_L1_SPECIAL_GTK].fetch_add(1,
+				std::memory_order_relaxed);
 		return TRIGGER_L1_SPECIAL_GTK;
 	}
 	if (bypassEvent()) {
@@ -469,7 +471,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 					l1TriggerTmp = lavTrigger;
 //					printf("L1TriggerProcessor.cpp: lavTrigger %d\n",
 //							lavTrigger);
-//				}
+				}
 				if ((lavEnableMask & l0TrigFlags) == l0TrigFlags)
 					isAlgoEnableForAllL0Masks = 1;
 				if (!(l1TriggerTmp & algoEnableMask[i]) && l1ProcessID
@@ -480,9 +482,9 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 			 * L1 trigger word calculation
 			 */
 			l1TriggerTmp = (lavTrigger << 3) | (cedarTrigger << 2)
-							| (richTrigger << 1) | chodTrigger;
-			//printf("L1TriggerProcessor.cpp: l1Trigger (!!TMP!!) %x\n",
-			//	l1TriggerTmp);
+					| (richTrigger << 1) | chodTrigger;
+//			printf("L1TriggerProcessor.cpp: l1Trigger (!!TMP!!) %x\n",
+//					l1TriggerTmp);
 
 //			LOG_INFO("isReducedEvent " << isReducedEvent << " EnableMask " << algoEnableMask[i] << " trigTmp & EnableMask " << (l1TriggerTmp & algoEnableMask[i]) << " l1FlagTrig " << (uint) l1FlagTrigger);
 
@@ -526,7 +528,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 			numberOfTriggeredL1Masks++;
 	}
 
-	//printf("Summary of Triggered Masks: %d\n", numberOfTriggeredL1Masks);
+//	printf("Summary of Triggered Masks: %d\n", numberOfTriggeredL1Masks);
 //	for (int i = 0; i != 16; i++)
 //		printf("Summary of Trigger Words: l1Trigger %x\n", l1TriggerWords[i]);
 
@@ -574,6 +576,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 //		l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | (1 << 6) | l1TriggerWords[2];
 		event->setRrequestZeroSuppressedCreamData(true);
 		L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed);
+//		printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %x\n",l1Trigger);
 		return l1Trigger;
 	}
 //	LOG_INFO((uint) l1GlobalFlagTrigger << " " << isDownscaledAndFlaggedEvent << " " << ((uint) l1GlobalFlagTrigger && !isDownscaledAndFlaggedEvent));
@@ -606,7 +609,6 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 		event->setProcessingID(0); // 0 indicates raw data as collected from the detector
 	}
 	return l1Trigger;
-}
 }
 
 void L1TriggerProcessor::writeData(L1Block &l1Block) {
