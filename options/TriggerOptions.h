@@ -22,6 +22,8 @@
 
 #define OPTION_NUMBER_OF_ENABLED_L0_MASKS (char*)"numberOfEnabledL0Masks"
 
+#define OPTION_ACTIVE_L0_MASKS (char*)"activeL0MaskIDs"
+
 //#define OPTION_L1_BYPASS_PROBABILITY (char*)"L1BypassProbability"
 //#define OPTION_L2_BYPASS_PROBABILITY (char*)"L2BypassProbability"
 //
@@ -69,12 +71,11 @@ public:
 						"/lkrpn0/RunControl/PCFarm/Trigger/config_START_RUN.cfg"),
 				"XML Trigger file for trigger configuration")
 
-		(OPTION_NUMBER_OF_ENABLED_L0_MASKS,
-				po::value<uint>()->default_value(
-								0),
+		(OPTION_NUMBER_OF_ENABLED_L0_MASKS, po::value<int>()->default_value(0),
 				"Number of enabled LO Masks")
 
-
+		(OPTION_ACTIVE_L0_MASKS, po::value<std::string>()->required(),
+				"List of Active L0 Masks to be used")
 				/*
 				 * Define L1 - L2 Trigger Global options
 				 */
