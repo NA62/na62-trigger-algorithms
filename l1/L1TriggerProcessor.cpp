@@ -358,7 +358,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 				| ((l1MaskFlagTrigger != 0) << 6) | (isL1Bypassed << 5)
 				| (isAllL1AlgoDisable << 4) | (numberOfTriggeredL1Masks != 0);
 		L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed);
-		L1TriggerProcessor::writeData(*l1Block);
+//		L1TriggerProcessor::writeData(*l1Block);
 		return l1Trigger;
 	}
 	if (event->isPulserGTKTriggerEvent() || bypassEvent()) {
@@ -368,7 +368,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 				| ((l1MaskFlagTrigger != 0) << 6) | (isL1Bypassed << 5)
 				| (isAllL1AlgoDisable << 4) | (numberOfTriggeredL1Masks != 0);
 		L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed);
-		L1TriggerProcessor::writeData(*l1Block);
+//		L1TriggerProcessor::writeData(*l1Block);
 		return l1Trigger;
 	}
 
@@ -702,14 +702,14 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 //Global L1 downscaling
 //		LOG_INFO("L1Downscale Factor " << downscaleFactor);
 //		LOG_INFO("Modulo " << L1AcceptedEvents_ % downscaleFactor);
-		if (L1AcceptedEvents_ % downscaleFactor != 0)
+		if (downscaleFactor && (L1AcceptedEvents_ % downscaleFactor != 0))
 			return 0;
 		/*
 		 * Decision whether or not to request zero suppressed data from the creams
 		 */
 		event->setRrequestZeroSuppressedCreamData(true);
 		event->setProcessingID(0); // 0 indicates raw data as collected from the detector
-		L1TriggerProcessor::writeData(*l1Block);
+//		L1TriggerProcessor::writeData(*l1Block);
 	}
 
 //	printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %x\n", l1Trigger);
