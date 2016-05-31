@@ -89,9 +89,6 @@ public:
 	static void ResetL1InputEventsPerBurst() {
 		L1InputEventsPerBurst_ = 0;
 	}
-	static inline uint64_t GetL1BypassedEvents() {
-		return L1BypassedEvents_;
-	}
 	static inline uint GetL1DownscaleFactor() {
 		return downscaleFactor;
 	}
@@ -110,8 +107,8 @@ public:
 private:
 	static std::atomic<uint64_t>* L1Triggers_;
 	static std::atomic<uint64_t>* L1AcceptedEventsPerL0Mask_;
+	static std::atomic<uint64_t>* L1InputReducedEventsPerL0Mask_;
 	static std::atomic<uint64_t>** eventCountersByL0MaskByAlgoID_;
-	static std::atomic<uint64_t> L1BypassedEvents_;
 	static std::atomic<uint64_t> L1InputEvents_;
 	static std::atomic<uint64_t> L1InputReducedEvents_;
 	static std::atomic<uint64_t> L1InputEventsPerBurst_;
@@ -128,7 +125,8 @@ private:
 	// L1 Mask configuration parameters (for 16 L0 masks)
 	static uint numberOfEnabledAlgos[16];
 	static uint numberOfFlaggedAlgos[16];
-	static uint algoReductionFactor[16];
+	static uint numberOfEnabledAndFlaggedAlgos[16];
+	static uint maskReductionFactor[16];
 
 	static uint_fast16_t algoEnableMask[16];
 	static uint_fast16_t algoFlagMask[16];
@@ -177,13 +175,18 @@ private:
 	static bool isL0PhysicsTrigger;
 	static bool isL0PeriodicTrigger;
 	static bool isL0ControlTrigger;
+	static bool isL1Bypassed;
 	static uint numberOfTriggeredL1Masks;
 	static bool isAlgoEnableForAllL0Masks;
-	static bool isDownscaledAndFlaggedEvent;
 	static bool isReducedEvent;
 	static bool isAllL1AlgoDisable;
 	static uint_fast8_t evtRefFineTime;
+
 	static uint_fast8_t numberOfEnabledL0Masks;
+	static std::vector<int> l0MaskIDs;
+
+	static uint_fast32_t L1DataPacketLength;
+	static L1Block* l1Block;
 }
 ;
 

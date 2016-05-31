@@ -14,7 +14,8 @@ namespace na62 {
 struct L1Global {
 	uint32_t PCfarmSoftwareID;
 	uint8_t refFineTime;
-	uint8_t l0TriggerType;
+	uint8_t l0TriggerType :4;
+	uint8_t l0DataType :4;
 	uint16_t l0TriggerFlags;
 	uint8_t l1BypassProbability;
 	uint8_t l1FlagMode :4;
