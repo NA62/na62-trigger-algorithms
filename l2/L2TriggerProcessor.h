@@ -66,9 +66,6 @@ public:
 	static inline uint64_t GetL2InputReducedStats() {
 		return L2InputReducedEvents_;
 	}
-	static inline uint64_t GetL2BypassedEvents() {
-		return L2BypassedEvents_;
-	}
 	static inline uint64_t GetL2InputEventsPerBurst() {
 		return L2InputEventsPerBurst_;
 	}
@@ -90,11 +87,12 @@ public:
 
 private:
 	static std::atomic<uint64_t>* L2Triggers_;
-	static std::atomic<uint64_t> L2BypassedEvents_;
 	static std::atomic<uint64_t> L2InputEvents_;
 	static std::atomic<uint64_t> L2InputReducedEvents_;
 	static std::atomic<uint64_t> L2InputEventsPerBurst_;
 	static std::atomic<uint64_t> L2AcceptedEvents_;
+
+	static uint numberOfEnabledAlgos[16];
 
 	static double bypassProbability;
 	static uint reductionFactor;
@@ -102,6 +100,18 @@ private:
 	static uint flagMode;
 	static uint autoFlagFactor;
 	static uint referenceTimeSourceID;
+
+	static bool isL0PhysicsTrigger;
+	static bool isL0PeriodicTrigger;
+	static bool isL0ControlTrigger;
+	static bool isL2Bypassed;
+	static uint numberOfTriggeredL2Masks;
+	static bool isAllL2AlgoDisable;
+
+	static uint_fast8_t l0TrigWord;
+	static uint_fast8_t l0DataType; //0x1 for physics, 0x2 for periodics, 0x4 for calibrations
+	static uint_fast16_t l0TrigFlags;
+	static uint_fast8_t l2TriggerWords[16];
 };
 
 } /* namespace na62 */
