@@ -15,6 +15,7 @@
 #include "muv_algorithm/ParsConfFile.h"
 #include "L1InfoToStorage.h"
 #include "../struct/HLTConfParams.h"
+#include "L1Fragment.h"
 
 namespace na62 {
 
@@ -30,16 +31,19 @@ public:
 
 	MUV3Algo();
 	~MUV3Algo();
+	static uint_fast8_t processMUV3Trigger0(DecoderHandler& decoder,
+			L1InfoToStorage* l1Info);
 	static uint_fast8_t processMUV3Trigger1(DecoderHandler& decoder,
 			L1InfoToStorage* l1Info);
 	static uint_fast8_t processMUV3Trigger2(DecoderHandler& decoder,
 			L1InfoToStorage* l1Info);
-	static void initialize(l1MUV &l1MUV3Struct);
+	static void initialize(l1MUV &l1MUV3Struct, uint_fast8_t nEnabledMasks);
 
 	static bool isAlgoProcessed();
 	static void resetAlgoProcessed();
 	static bool isEmptyPacket();
 	static bool isBadData();
+	static void writeData(L1Block &l1Block);
 
 private:
 
@@ -54,11 +58,16 @@ private:
 	static bool badData;
 	static bool isCHODRefTime;
 	static double averageCHODHitTime;
+	static uint_fast8_t numberOfEnabledL0Masks;
 
 	static int* pmtGeo;
 	static int roChID;
 	static uint pmtID1;
 	static uint pmtID2;
+
+	static bool tileID[152];
+	static uint pmtID[2];
+	static uint nTiles;
 
 };
 
