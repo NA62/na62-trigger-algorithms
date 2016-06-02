@@ -133,17 +133,9 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 	// Seed for rand()
 	srand(time(NULL));
 
-	numberOfEnabledL0Masks = TriggerOptions::GetInt(
-	OPTION_NUMBER_OF_ENABLED_L0_MASKS);
-//	LOG_INFO("numberOfEnabledL0Masks " << (uint)numberOfEnabledL0Masks);
-
 	l0MaskIDs = TriggerOptions::GetIntList(OPTION_ACTIVE_L0_MASKS);
-
-	if (numberOfEnabledL0Masks != l0MaskIDs.size()) {
-		LOG_ERROR(
-				"Mismatch between number of enabled L0 masks and size of L0maskID list !");
-		numberOfEnabledL0Masks = l0MaskIDs.size();
-	}
+	numberOfEnabledL0Masks = l0MaskIDs.size();
+//	LOG_INFO("numberOfEnabledL0Masks " << (uint)numberOfEnabledL0Masks);
 
 	L1DataPacketLength = sizeof(L1Global)
 			+ numberOfEnabledL0Masks * sizeof(L1Mask);
