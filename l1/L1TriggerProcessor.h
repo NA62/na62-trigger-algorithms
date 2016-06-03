@@ -25,10 +25,11 @@ namespace na62 {
 
 class EventBuilder;
 class Event;
-//class CedarData;
 class KtagAlgo;
 class RICHAlgo;
 class CHODAlgo;
+class LAVAlgo;
+class MUV3Algo;
 
 class L1TriggerProcessor {
 public:
@@ -132,29 +133,37 @@ private:
 	static uint_fast16_t algoFlagMask[16];
 	static uint_fast16_t algoLogicMask[16];
 	static uint_fast16_t algoDwScMask[16];
-	static uint16_t algoDwScFactor[16][4];
-	static uint8_t algoProcessID[16][4];
+	static uint16_t algoDwScFactor[16][6]; //change the second dimension with the number of implemented algos
+	static uint8_t algoProcessID[16][6];
 
 	static uint_fast16_t chodEnableMask;
 	static uint_fast16_t richEnableMask;
 	static uint_fast16_t cedarEnableMask;
 	static uint_fast16_t lavEnableMask;
+	static uint_fast16_t ircsacEnableMask;
+	static uint_fast16_t muvEnableMask;
 
 	static uint_fast16_t chodFlagMask;
 	static uint_fast16_t richFlagMask;
 	static uint_fast16_t cedarFlagMask;
 	static uint_fast16_t lavFlagMask;
+	static uint_fast16_t ircsacFlagMask;
+	static uint_fast16_t muvFlagMask;
 
-	static int chodProcessID[16]; //default values = -1
+	static int chodProcessID[16];
 	static int richProcessID[16];
 	static int cedarProcessID[16];
 	static int lavProcessID[16];
+	static int ircsacProcessID[16];
+	static int muvProcessID[16];
 
 	// Downscaling variables
 	static uint chodAlgorithmId;
 	static uint richAlgorithmId;
 	static uint cedarAlgorithmId;
 	static uint lavAlgorithmId;
+	static uint ircsacAlgorithmId;
+	static uint muvAlgorithmId;
 
 	// Varie
 	static uint_fast8_t l0TrigWord;   //=1 in 2015
@@ -165,6 +174,8 @@ private:
 	static uint_fast8_t richTrigger;
 	static uint_fast8_t cedarTrigger;
 	static uint_fast8_t lavTrigger;
+	static uint_fast8_t ircsacTrigger;
+	static uint_fast8_t muvTrigger;
 	static uint_fast8_t l1TriggerWords[16];
 
 	static uint MaskIDToNum[16];
