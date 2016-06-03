@@ -14,6 +14,7 @@
 #include <iostream>
 #include "L2Fragment.h"
 
+
 namespace na62 {
 
 std::atomic<uint64_t>* L2TriggerProcessor::L2Triggers_ = new std::atomic<
@@ -31,6 +32,12 @@ uint L2TriggerProcessor::autoFlagFactor = 0;
 uint L2TriggerProcessor::referenceTimeSourceID = 0;
 
 uint L2TriggerProcessor::numberOfEnabledAlgos[16];
+uint L2TriggerProcessor::numberOfFlaggedAlgos[16];
+uint L2TriggerProcessor::maskReductionFactor[16];
+uint_fast16_t L2TriggerProcessor::algoEnableMask[16];
+uint_fast16_t L2TriggerProcessor::algoFlagMask[16];
+uint_fast16_t L2TriggerProcessor::algoLogicMask[16];
+uint_fast16_t L2TriggerProcessor::algoDwScMask[16];
 
 uint_fast8_t L2TriggerProcessor::l0TrigWord = 0;
 uint_fast8_t L2TriggerProcessor::l0DataType = 0;
@@ -38,21 +45,43 @@ uint_fast16_t L2TriggerProcessor::l0TrigFlags = 0;
 
 uint_fast8_t L2TriggerProcessor::l2TriggerWords[16];
 
+uint L2TriggerProcessor::MaskIDToNum[16];
+uint L2TriggerProcessor::NumToMaskID[16];
+
 bool L2TriggerProcessor::isL0PhysicsTrigger = 0;
 bool L2TriggerProcessor::isL0PeriodicTrigger = 0;
 bool L2TriggerProcessor::isL0ControlTrigger = 0;
 bool L2TriggerProcessor::isL2Bypassed = 0;
 uint L2TriggerProcessor::numberOfTriggeredL2Masks = 0;
 bool L2TriggerProcessor::isAllL2AlgoDisable = 0;
+uint_fast8_t L2TriggerProcessor::numberOfEnabledL0Masks = 0;
+
+std::vector<int> L2TriggerProcessor::l0MaskIDs;
 
 void L2TriggerProcessor::initialize(l2Struct &l2Struct) {
+
+	numberOfEnabledL0Masks = l0MaskIDs.size();
 
 	for (int i = 0; i != 0xFF + 1; i++) {
 		L2Triggers_[i] = 0;
 	}
+
+	/*
+	 * Initialisation of individual Algo masks
+	 */
 	for (int i = 0; i != 16; i++) {
+//		LKrAlgo::initialize(l2Struct.l2Mask[i].lkr);
+		NumToMaskID[i] = -1;
+		MaskIDToNum[i] = -1;
 		l2TriggerWords[i] = 0;
+
 		numberOfEnabledAlgos[i] = 0; //TO BE MODIFIED WITH REAL NUMBER !!!!!!!!
+		numberOfFlaggedAlgos[i] = 0;
+		maskReductionFactor[i] = 0;
+		algoEnableMask[i] = 0;
+		algoFlagMask[i] = 0;
+		algoLogicMask[i] = 0;
+		algoDwScMask[i] = 0;
 	}
 
 	bypassProbability = l2Struct.l2Global.l2BypassProbability;
@@ -62,12 +91,14 @@ void L2TriggerProcessor::initialize(l2Struct &l2Struct) {
 	autoFlagFactor = l2Struct.l2Global.l2AutoFlagFactor;
 	referenceTimeSourceID = l2Struct.l2Global.l2ReferenceTimeSourceID;
 
-	/*
-	 * Initialisation of individual Algo masks
-	 */
-//	for (int i = 0; i != 16; i++) {
-//		LKrAlgo::initialize(l2Struct.l2Mask[i].lkr);
-//	}
+	int num = 0;
+	for (int l0Mask : l0MaskIDs) {
+		NumToMaskID[num] = l0Mask;
+		MaskIDToNum[l0Mask] = num;
+//		LOG_INFO("Initialization of Enabled Masks " << num << " " << l0Mask);
+		num++;
+	}
+
 }
 
 uint_fast8_t L2TriggerProcessor::compute(Event* event) {
@@ -202,5 +233,39 @@ void L2TriggerProcessor::async_requestNonZSuppressedLKrData(
 //	cream::L1DistributionHandler::Async_RequestLKRDataUnicast(event,
 //	true, crateCREAMIDs);
 }
+
+void L2TriggerProcessor::writeData(L2Block &l2Block) {
+
+	(l2Block.l2Global).l2BypassProbability = bypassProbability;
+	(l2Block.l2Global).l2FlagMode = flagMode;
+	(l2Block.l2Global).refTimeSourceID = referenceTimeSourceID;
+	(l2Block.l2Global).l2AutoFlagFactor = autoFlagFactor;
+	(l2Block.l2Global).l2ReductionFactor = reductionFactor;
+	(l2Block.l2Global).l2DownscaleFactor = downscaleFactor;
+
+	int numToMaskID;
+	for (int iNum = 0; iNum < numberOfEnabledL0Masks; iNum++) {
+		if (NumToMaskID[iNum] == -1)
+			LOG_ERROR("ERROR! Wrong association of mask ID!");
+		else
+			numToMaskID = NumToMaskID[iNum];
+		(l2Block.l2Mask[iNum]).maskID = numToMaskID;
+		(l2Block.l2Mask[iNum]).triggerWord = l2TriggerWords[numToMaskID];
+		(l2Block.l2Mask[iNum]).numberOfEnabledAlgos =
+				numberOfEnabledAlgos[numToMaskID];
+		(l2Block.l2Mask[iNum]).numberOfFlaggedAlgos =
+				numberOfFlaggedAlgos[numToMaskID];
+
+
+		(l2Block.l2Mask[iNum]).reductionFactor =
+				maskReductionFactor[numToMaskID];
+		(l2Block.l2Mask[iNum]).algoEnableMask = algoEnableMask[numToMaskID];
+		(l2Block.l2Mask[iNum]).algoFlagMask = algoFlagMask[numToMaskID];
+		(l2Block.l2Mask[iNum]).algoLogicMask = algoLogicMask[numToMaskID];
+		(l2Block.l2Mask[iNum]).algoDwScMask = algoDwScMask[numToMaskID];
+
+	}
+}
+
 
 } /* namespace na62 */
