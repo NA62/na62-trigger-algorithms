@@ -299,11 +299,11 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 		 << " LAV: "
 		 << algoDwScFactor[i][(uint) lavAlgorithmId]);
 		 */
-		CHODAlgo::initialize(l1Struct.l1Mask[i].chod, numberOfEnabledL0Masks);
-//		RICHAlgo::initialize(l1Struct.l1Mask[i].rich, numberOfEnabledL0Masks);
-		KtagAlgo::initialize(l1Struct.l1Mask[i].ktag, numberOfEnabledL0Masks);
-		LAVAlgo::initialize(l1Struct.l1Mask[i].lav, numberOfEnabledL0Masks);
-		MUV3Algo::initialize(l1Struct.l1Mask[i].muv, numberOfEnabledL0Masks);
+		CHODAlgo::initialize(i, l1Struct.l1Mask[i].chod);
+//		RICHAlgo::initialize(l1Struct.l1Mask[i].rich);
+		KtagAlgo::initialize(i, l1Struct.l1Mask[i].ktag);
+		LAVAlgo::initialize(i, l1Struct.l1Mask[i].lav);
+		MUV3Algo::initialize(i, l1Struct.l1Mask[i].muv);
 
 		chodProcessID[i] = l1Struct.l1Mask[i].chod.configParams.l1TrigProcessID;
 		richProcessID[i] = l1Struct.l1Mask[i].rich.configParams.l1TrigProcessID;
@@ -503,8 +503,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 							&& (chodProcessID[i] == l1ProcessID)
 							&& SourceIDManager::isChodActive()) {
 						if (!CHODAlgo::isAlgoProcessed()) {
-							chodTrigger = CHODAlgo::processCHODTrigger(decoder,
-									l1Info_);
+							chodTrigger = CHODAlgo::processCHODTrigger(i,
+									decoder, l1Info_);
 //					if (chodTrigger != 0) {
 //						L1Downscaling::processAlgorithm(chodAlgorithmId);
 //					}
@@ -545,8 +545,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 							&& cedarProcessID[i] == l1ProcessID
 							&& SourceIDManager::isCedarActive()) {
 						if (!KtagAlgo::isAlgoProcessed()) {
-							cedarTrigger = KtagAlgo::processKtagTrigger(decoder,
-									l1Info_);
+							cedarTrigger = KtagAlgo::processKtagTrigger(i,
+									decoder, l1Info_);
 //					if (cedarTrigger != 0) {
 //						L1Downscaling::processAlgorithm(cedarAlgorithmId);
 //					}
@@ -569,7 +569,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 							&& lavProcessID[i] == l1ProcessID
 							&& SourceIDManager::isLavActive()) {
 						if (!LAVAlgo::isAlgoProcessed()) {
-							lavTrigger = LAVAlgo::processLAVTrigger(decoder,
+							lavTrigger = LAVAlgo::processLAVTrigger(i, decoder,
 									l1Info_);
 //					if (lavTrigger != 0) {
 //						L1Downscaling::processAlgorithm(lavAlgorithmId);
@@ -592,8 +592,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 							&& muvProcessID[i] == l1ProcessID
 							&& SourceIDManager::isMUV3Active()) {
 						if (!MUV3Algo::isAlgoProcessed()) {
-							muvTrigger = MUV3Algo::processMUV3Trigger0(decoder,
-									l1Info_);
+							muvTrigger = MUV3Algo::processMUV3Trigger0(i,
+									decoder, l1Info_);
 //							if (muvTrigger != 0) {
 //								L1Downscaling::processAlgorithm(muvAlgorithmId);
 //							}
@@ -780,7 +780,9 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 //		L1TriggerProcessor::writeData(*l1Block);
 	}
 
-//	printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %x\n", l1Trigger);
+//	std::bitset<8> l1TrgWrd(l1Trigger);
+//	printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %8x\n", l1Trigger);
+//	LOG_INFO("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger " << l1TrgWrd);
 	L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed); // The second 8 bits are the L1 trigger type word
 	return l1Trigger;
 }

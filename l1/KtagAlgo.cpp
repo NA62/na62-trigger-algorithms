@@ -21,35 +21,34 @@
 #include "../common/decoding/DecoderRange.h"
 #include "../common/decoding/DecoderHandler.h"
 #include "../common/decoding/TrbFragmentDecoder.h"
+#include "L1TriggerProcessor.h"
 
 #define maxNhits 500
 
 namespace na62 {
 
-uint KtagAlgo::algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for MUV3, 5 for Straw
-uint KtagAlgo::algoLogic;
-uint KtagAlgo::algoRefTimeSourceID;
-double KtagAlgo::algoOnlineTimeWindow;
+uint KtagAlgo::algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
+uint KtagAlgo::algoLogic[16];
+uint KtagAlgo::algoRefTimeSourceID[16];
+double KtagAlgo::algoOnlineTimeWindow[16];
 
 bool KtagAlgo::algoProcessed = 0;
 bool KtagAlgo::emptyPacket = 0;
 bool KtagAlgo::badData = 0;
 bool KtagAlgo::isCHODRefTime = 0;
 double KtagAlgo::averageCHODHitTime = 0.;
-uint_fast8_t KtagAlgo::numberOfEnabledL0Masks = 0;
 
-void KtagAlgo::initialize(l1KTAG &l1KtagStruct, uint_fast8_t nEnabledMasks) {
+void KtagAlgo::initialize(uint i, l1KTAG &l1KtagStruct) {
 
 	algoID = l1KtagStruct.configParams.l1TrigMaskID;
-	algoLogic = l1KtagStruct.configParams.l1TrigLogic;
-	algoRefTimeSourceID = l1KtagStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
-	algoOnlineTimeWindow = l1KtagStruct.configParams.l1TrigOnlineTimeWindow;
-	numberOfEnabledL0Masks = nEnabledMasks;
-
+	algoLogic[i] = l1KtagStruct.configParams.l1TrigLogic;
+	algoRefTimeSourceID[i] = l1KtagStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
+	algoOnlineTimeWindow[i] = l1KtagStruct.configParams.l1TrigOnlineTimeWindow;
+//	LOG_INFO("KTAG: mask: " << i << " logic " << algoLogic[i] << " refTimeSourceID " << algoRefTimeSourceID[i] << " online time window " << algoOnlineTimeWindow[i]);
 }
 
-uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder,
-		L1InfoToStorage* l1Info) {
+uint_fast8_t KtagAlgo::processKtagTrigger(uint l0MaskID,
+		DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
 	using namespace l0;
 //  LOG_INFO("Initial Time " << time[0].tv_sec << " " << time[0].tv_usec);
@@ -58,12 +57,13 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder,
 	/*
 	 * TODO: The same logic needs to be developed for RICHRefTime
 	 */
-	if (algoRefTimeSourceID == 1) {
+	if (algoRefTimeSourceID[l0MaskID] == 1) {
 		if (l1Info->isL1CHODProcessed() && averageCHODHitTime != -1.0e+28) {
 			isCHODRefTime = 1;
 			averageCHODHitTime = l1Info->getCHODAverageTime();
 		} else
-			LOG_ERROR("KtagAlgo.cpp: Not able to use averageCHODHitTime as Reference Time even if it is requested!");
+			LOG_ERROR(
+					"KtagAlgo.cpp: Not able to use averageCHODHitTime as Reference Time even if it is requested!");
 	}
 
 	uint sector_occupancy_chod[8] = { 0 };
@@ -74,7 +74,7 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder,
 //TODO: chkmax need to be USED
 	DecoderRange<TrbFragmentDecoder> x = decoder.getCEDARDecoderRange();
 	if (x.begin() == x.end()) {
-		LOG_ERROR ("KTAG: Empty decoder range!");
+		LOG_ERROR("KTAG: Empty decoder range!");
 		badData = 1;
 		return 0;
 	}
@@ -83,7 +83,7 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder,
 //      LOG_INFO("First time check (inside iterator) " << time[1].tv_sec << " " << time[1].tv_usec);
 
 		if (!cedarPacket->isReady() || cedarPacket->isBadFragment()) {
-			LOG_ERROR ("KTAGAlgo: This looks like a Bad Packet!!!! ");
+			LOG_ERROR("KTAGAlgo: This looks like a Bad Packet!!!! ");
 			badData = 1;
 			return 0;
 		}
@@ -98,7 +98,7 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder,
 		double finetime, edgetime, dt_l0tp, dt_chod;
 
 		uint numberOfEdgesOfCurrentBoard =
-		cedarPacket->getNumberOfEdgesStored();
+				cedarPacket->getNumberOfEdgesStored();
 
 //		LOG_INFO("Tel62 ID " << cedarPacket->getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard);
 //      LOG_INFO("time check (inside iterator - end of retrieve) " << time[2].tv_sec << " " << time[2].tv_usec);
@@ -118,27 +118,28 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder,
 			 */
 			if (edge_IDs[iEdge]) {
 				edgetime = (edge_times[iEdge]
-				- decoder.getDecodedEvent()->getTimestamp() * 256.)
-				* 0.097464731802;
+						- decoder.getDecodedEvent()->getTimestamp() * 256.)
+						* 0.097464731802;
 
 				if (!isCHODRefTime) {
 					finetime = decoder.getDecodedEvent()->getFinetime()
-					* 0.097464731802;
+							* 0.097464731802;
 					dt_l0tp = fabs(edgetime - finetime);
 					dt_chod = -1.0e+28;
 				} else
-				dt_chod = fabs(edgetime - averageCHODHitTime);
+					dt_chod = fabs(edgetime - averageCHODHitTime);
 
-				if ((!isCHODRefTime && dt_l0tp < algoOnlineTimeWindow)
-				|| (isCHODRefTime && dt_chod < algoOnlineTimeWindow)) {
+				if ((!isCHODRefTime && dt_l0tp < algoOnlineTimeWindow[l0MaskID])
+						|| (isCHODRefTime
+								&& dt_chod < algoOnlineTimeWindow[l0MaskID])) {
 					const uint trbID = edge_tdcIDs[iEdge] / 4;
 					const uint box = calculateSector(
-					cedarPacket->getFragmentNumber(), trbID);
+							cedarPacket->getFragmentNumber(), trbID);
 
 					if (!isCHODRefTime)
-					sector_occupancy_l0tp[box]++;
+						sector_occupancy_l0tp[box]++;
 					else
-					sector_occupancy_chod[box]++;
+						sector_occupancy_chod[box]++;
 				}
 			}
 		}
@@ -171,7 +172,7 @@ uint_fast8_t KtagAlgo::processKtagTrigger(DecoderHandler& decoder,
 //	LOG_INFO(nEdges_tot << " " << ((time[4].tv_sec - time[0].tv_sec)*1e6 + time[4].tv_usec) - time[0].tv_usec << " " << ((time[5].tv_sec - time[0].tv_sec)*1e6 + time[5].tv_usec) - time[0].tv_usec);
 
 	algoProcessed = 1;
-	if (algoLogic)
+	if (algoLogic[l0MaskID])
 		return ((!isCHODRefTime && nSectors_l0tp > 4)
 				|| (isCHODRefTime && nSectors_chod > 4));
 	else
@@ -195,12 +196,16 @@ bool KtagAlgo::isBadData() {
 	return badData;
 }
 
-void KtagAlgo::writeData(L1Block &l1Block){
+void KtagAlgo::writeData(L1Block &l1Block) {
 
-	for(int iNum=0; iNum<numberOfEnabledL0Masks; iNum++){
-	  (l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoID = algoID;
-	  (l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoProcessed = algoProcessed;
-	  (l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoOnlineTimeWindow = algoOnlineTimeWindow;
+	int numToMaskID;
+	for (int iNum = 0; iNum < L1TriggerProcessor::GetNumberOfEnabledL0Masks(); iNum++) {
+		numToMaskID = L1TriggerProcessor::GetL0MaskNumToMaskID(iNum);
+		if (numToMaskID == -1)
+			LOG_ERROR("ERROR! Wrong association of mask ID!");
+		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoID = algoID;
+		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoProcessed = algoProcessed;
+		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoOnlineTimeWindow = (uint)algoOnlineTimeWindow[numToMaskID];
 	}
 }
 

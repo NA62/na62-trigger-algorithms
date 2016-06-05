@@ -36,8 +36,9 @@ public:
 	CHODAlgo();
 	~CHODAlgo();
 
-	static uint_fast8_t processCHODTrigger(DecoderHandler& decoder, L1InfoToStorage* l1Info);
-	static void initialize(l1CHOD &l1ChodStruct, uint_fast8_t nEnabledMasks);
+	static uint_fast8_t processCHODTrigger(uint l0MaskID,
+			DecoderHandler& decoder, L1InfoToStorage* l1Info);
+	static void initialize(uint i, l1CHOD &l1ChodStruct);
 	static void writeData(L1Block &l1Block);
 
 	static bool isAlgoProcessed();
@@ -48,10 +49,10 @@ public:
 private:
 
 	static CHODParsConfFile* infoCHOD_;
-	static uint algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for MUV3, 5 for Straw
-	static uint algoLogic;
-	static uint algoRefTimeSourceID;
-	static double algoOnlineTimeWindow;
+	static uint algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
+	static uint algoLogic[16];
+	static uint algoRefTimeSourceID[16];
+	static double algoOnlineTimeWindow[16];
 
 	static bool algoProcessed;
 	static bool emptyPacket;
@@ -65,7 +66,6 @@ private:
 //	static int quadrantID;
 	static int planeID;
 	static double averageHitTime;
-	static uint_fast8_t numberOfEnabledL0Masks;
 
 };
 
