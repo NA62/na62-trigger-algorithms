@@ -18,6 +18,8 @@
 #include "../options/TriggerOptions.h"
 #include "../struct/HLTConfParams.h"
 
+#include "L2Fragment.h"
+
 namespace na62 {
 
 class EventBuilder;
@@ -85,6 +87,11 @@ public:
 		return autoFlagFactor;
 	}
 
+	/**
+	 * Fills output L2 structures for merger
+	 */
+	static void writeData(L2Block &l2Block);
+
 private:
 	static std::atomic<uint64_t>* L2Triggers_;
 	static std::atomic<uint64_t> L2InputEvents_;
@@ -93,6 +100,13 @@ private:
 	static std::atomic<uint64_t> L2AcceptedEvents_;
 
 	static uint numberOfEnabledAlgos[16];
+	static uint numberOfFlaggedAlgos[16];
+	static uint maskReductionFactor[16];
+
+	static uint_fast16_t algoEnableMask[16];
+	static uint_fast16_t algoFlagMask[16];
+	static uint_fast16_t algoLogicMask[16];
+	static uint_fast16_t algoDwScMask[16];
 
 	static double bypassProbability;
 	static uint reductionFactor;
@@ -112,6 +126,13 @@ private:
 	static uint_fast8_t l0DataType; //0x1 for physics, 0x2 for periodics, 0x4 for calibrations
 	static uint_fast16_t l0TrigFlags;
 	static uint_fast8_t l2TriggerWords[16];
+
+	static uint MaskIDToNum[16];
+	static uint NumToMaskID[16];
+
+	static uint_fast8_t numberOfEnabledL0Masks;
+
+	static std::vector<int> l0MaskIDs;
 };
 
 } /* namespace na62 */
