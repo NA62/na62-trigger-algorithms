@@ -17,6 +17,7 @@
 #include "newchod_algorithm/ParsConfFile.h"
 #include "L1InfoToStorage.h"
 #include "../struct/HLTConfParams.h"
+#include "L1Fragment.h"
 
 namespace na62 {
 
@@ -33,8 +34,9 @@ public:
 	NewCHODAlgo();
 	~NewCHODAlgo();
 
-	static uint_fast8_t processNewCHODTrigger(DecoderHandler& decoder, L1InfoToStorage* l1Info);
-//	static void initialize(l1NewCHOD &l1NewChodStruct);
+	static uint_fast8_t processNewCHODTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
+//	static void initialize(uint i, l1NewCHOD &l1NewChodStruct);
+	static void writeData(L1Block &l1Block);
 
 	static bool isAlgoProcessed();
 	static void resetAlgoProcessed();
@@ -44,10 +46,10 @@ public:
 private:
 
 	static NewCHODParsConfFile* infoNewCHOD_;
-	static uint algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for MUV3, 5 for Straw
-	static uint algoLogic;
-	static uint algoRefTimeSourceID;
-	static double algoOnlineTimeWindow;
+	static uint algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
+	static uint algoLogic[16];
+	static uint algoRefTimeSourceID[16];
+	static double algoOnlineTimeWindow[16];
 
 	static bool algoProcessed;
 	static bool emptyPacket;
@@ -59,10 +61,7 @@ private:
 	static uint nMaxPMTs;
 	static int PMTID1;
 	static int PMTID2;
-//	static int quadrantID;
-//	static int planeID;
 	static double averageHitTime;
-
 };
 
 } /* namespace na62 */

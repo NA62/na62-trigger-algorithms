@@ -102,6 +102,15 @@ public:
 	static inline uint GetL1AutoFlagFactor() {
 		return autoFlagFactor;
 	}
+	static inline uint GetNumberOfEnabledL0Masks() {
+		return numberOfEnabledL0Masks;
+	}
+	static inline uint GetL0MaskNumToMaskID(uint iNum) {
+		return NumToMaskID[iNum];
+	}
+	static inline uint GetL0MaskIDToMaskNum(uint iMaskID) {
+		return MaskIDToNum[iMaskID];
+	}
 
 	static void initialize(l1Struct &l1Struct);
 
@@ -167,7 +176,7 @@ private:
 
 	// Varie
 	static uint_fast8_t l0TrigWord;   //=1 in 2015
-	static uint_fast8_t l0DataType;   //0x1 for physics, 0x2 for periodics, 0x4 for calibrations
+	static uint_fast8_t l0DataType; //0x1 for physics, 0x2 for periodics, 0x4 for calibrations
 	static uint_fast16_t l0TrigFlags; //16 bit word: bit ith set to 0(1) if L0 mask ith has(has NOT) triggered!
 
 	static uint_fast8_t chodTrigger;
