@@ -2,9 +2,8 @@
  * IRC_SACAlgo.cpp
  *
  *  Created on: 20 May 2016
- *      Author: lorenza
+ *      Author: lorenzaiacobuzio
  */
-
 #include "IRC_SACAlgo.h"
 
 #include <eventBuilding/Event.h>
@@ -37,6 +36,7 @@ int * IRC_SACAlgo::lgGeo = infoIRC_SAC_->getGeoLGMap();
 int IRC_SACAlgo::hit[maxNROchs];
 uint IRC_SACAlgo::nHits;
 double IRC_SACAlgo::averageCHODHitTime = 0.;
+uint_fast8_t IRC_SACAlgo::numberOfEnabledL0Masks = 0;
 
 IRC_SACAlgo::IRC_SACAlgo() {
 }
@@ -44,16 +44,16 @@ IRC_SACAlgo::IRC_SACAlgo() {
 IRC_SACAlgo::~IRC_SACAlgo() {
 // TODO Auto-generated destructor stub
 }
-/*
-void IRC_SACAlgo::initialize(l1IRC_SAC &l1IRC_SACStruct) {
 
-	algoID = l1IRC_SACStruct.configParams.l1TrigMaskID;
-	algoLogic = l1IRC_SACStruct.configParams.l1TrigLogic;
-	algoRefTimeSourceID = l1IRC_SACStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
-	algoOnlineTimeWindow = l1IRC_SACStruct.configParams.l1TrigOnlineTimeWindow;
+void IRC_SACAlgo::initialize(l1IRCSAC &l1IRCSACStruct, uint_fast8_t nEnabledMasks) {
 
+	algoID = l1IRCSACStruct.configParams.l1TrigMaskID;
+	algoLogic = l1IRCSACStruct.configParams.l1TrigLogic;
+	algoRefTimeSourceID = l1IRCSACStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
+	algoOnlineTimeWindow = l1IRCSACStruct.configParams.l1TrigOnlineTimeWindow;
+	numberOfEnabledL0Masks = nEnabledMasks;
 }
-*/
+
 uint_fast8_t IRC_SACAlgo::processIRCSACTrigger(DecoderHandler& decoder,
 		L1InfoToStorage* l1Info) {
 
@@ -73,10 +73,16 @@ uint_fast8_t IRC_SACAlgo::processIRCSACTrigger(DecoderHandler& decoder,
 //	LOG_INFO("IRC_SACAlgo: chodtime " << averageCHODHitTime);
 
 	nHits = 0;
-	uint nEdges_tot = 0;
 
+	//TODO: chkmax need to be USED
+	DecoderRange<TrbFragmentDecoder> x = decoder.getIRCDecoderRange();
+	if (x.begin() == x.end()) {
+		LOG_ERROR("IRC_SAC: Empty decoder range!");
+		badData = 1;
+		return 0;
+	}
 	TrbFragmentDecoder& ircsacPacket =
-				(TrbFragmentDecoder&) decoder.getDecodedIRC_SACFragment(0);
+				(TrbFragmentDecoder&) decoder.getDecodedIRCFragment(0);
 //	LOG_INFO("First time check (inside iterator) " << time[1].tv_sec << " " << time[1].tv_usec);
 
 	 if (!ircsacPacket.isReady() || ircsacPacket.isBadFragment()) {
@@ -93,14 +99,14 @@ uint_fast8_t IRC_SACAlgo::processIRCSACTrigger(DecoderHandler& decoder,
 		/**
 		 * Get Arrays with hit Info
 		 */
-		const uint64_t* const edge_times = ircsacPacket->getTimes();
-		const uint_fast8_t* const edge_chIDs = ircsacPacket->getChIDs();
-		const bool* const edge_IDs = ircsacPacket->getIsLeadings();
-		const uint_fast8_t* const edge_tdcIDs = ircsacPacket->getTdcIDs();
-		const uint_fast16_t edge_trbIDs = ircsacPacket->getFragmentNumber();
+		const uint64_t* const edge_times = ircsacPacket.getTimes();
+		const uint_fast8_t* const edge_chIDs = ircsacPacket.getChIDs();
+		const bool* const edge_IDs = ircsacPacket.getIsLeadings();
+		const uint_fast8_t* const edge_tdcIDs = ircsacPacket.getTdcIDs();
+		const uint_fast16_t edge_trbIDs = ircsacPacket.getFragmentNumber();
 		double finetime, edgetime, dt_l0tp, dt_chod;
 
-		uint numberOfEdgesOfCurrentBoard = ircsacPacket->getNumberOfEdgesStored();
+		uint numberOfEdgesOfCurrentBoard = ircsacPacket.getNumberOfEdgesStored();
 
 //		LOG_INFO("IRC_SAC: Tel62 ID " << ircsacPacket->getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard);
 //		LOG_INFO("Reference detector fine time " << decoder.getDecodedEvent()->getFinetime());
@@ -186,6 +192,15 @@ bool IRC_SACAlgo::isEmptyPacket() {
 
 bool IRC_SACAlgo::isBadData() {
 	return badData;
+}
+
+void IRC_SACAlgo::writeData(L1Block &l1Block){
+
+	for(int iMask=0; iMask<numberOfEnabledL0Masks; iMask++){
+	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoID = algoID;
+	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoProcessed = algoProcessed;
+	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoOnlineTimeWindow = algoOnlineTimeWindow;
+	}
 }
 
 }
