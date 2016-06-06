@@ -20,13 +20,14 @@
 
 #include "../common/decoding/TrbFragmentDecoder.h"
 #include "chod_algorithm/ParsConfFile.h"
+#include "L1TriggerProcessor.h"
 
 namespace na62 {
 
-uint CHODAlgo::algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for MUV3, 5 for Straw
-uint CHODAlgo::algoLogic;
-uint CHODAlgo::algoRefTimeSourceID;
-double CHODAlgo::algoOnlineTimeWindow;
+uint CHODAlgo::algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
+uint CHODAlgo::algoLogic[16];
+uint CHODAlgo::algoRefTimeSourceID[16];
+double CHODAlgo::algoOnlineTimeWindow[16];
 
 bool CHODAlgo::algoProcessed = 0;
 bool CHODAlgo::emptyPacket = 0;
@@ -42,7 +43,6 @@ uint CHODAlgo::nMaxSlabs;
 int CHODAlgo::slabID;
 //int CHODAlgo::quadrantID;
 int CHODAlgo::planeID;
-uint_fast8_t CHODAlgo::numberOfEnabledL0Masks = 0;
 
 CHODAlgo::CHODAlgo() {
 }
@@ -51,17 +51,17 @@ CHODAlgo::~CHODAlgo() {
 // TODO Auto-generated destructor stub
 }
 
-void CHODAlgo::initialize(l1CHOD &l1CHODStruct, uint_fast8_t nEnabledMasks) {
+void CHODAlgo::initialize(uint i, l1CHOD &l1CHODStruct) {
 
 	algoID = l1CHODStruct.configParams.l1TrigMaskID;
-	algoLogic = l1CHODStruct.configParams.l1TrigLogic;
-	algoRefTimeSourceID = l1CHODStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
-	algoOnlineTimeWindow = l1CHODStruct.configParams.l1TrigOnlineTimeWindow;
-	numberOfEnabledL0Masks = nEnabledMasks;
+	algoLogic[i] = l1CHODStruct.configParams.l1TrigLogic;
+	algoRefTimeSourceID[i] = l1CHODStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
+	algoOnlineTimeWindow[i] = l1CHODStruct.configParams.l1TrigOnlineTimeWindow;
+//	LOG_INFO("CHOD: mask " << i << " logic " << algoLogic[i] << " refTimeSourceID " << algoRefTimeSourceID[i] << " online time window " << algoOnlineTimeWindow[i]);
 }
 
-uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder,
-		L1InfoToStorage* l1Info) {
+uint_fast8_t CHODAlgo::processCHODTrigger(uint l0MaskID,
+		DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
 //	LOG_INFO("Initial Time " << time[0].tv_sec << " " << time[0].tv_usec);
 
@@ -122,7 +122,7 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder,
 				dt_l0tp = fabs(edgetime - finetime);
 //				if (fabs(edgetime - finetime) <= 30.) { //if ref detector is LKr
 //				if (fabs(edgetime - finetime) <= 20.) { //otherwise
-				if (dt_l0tp < algoOnlineTimeWindow) { //otherwise
+				if (dt_l0tp < algoOnlineTimeWindow[l0MaskID]) { //otherwise
 
 //  				LOG_INFO("Edge " << iEdge << " ID " << edge_IDs[iEdge]);
 //	   				LOG_INFO("Edge " << iEdge << " chID " << (uint) edge_chIDs[iEdge]);
@@ -137,7 +137,7 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder,
 //					LOG_INFO("CHOD quadrant ID " << quadrantID);
 //					LOG_INFO("CHOD plane ID " << planeID);
 
-					if (algoRefTimeSourceID == 1)
+					if (algoRefTimeSourceID[l0MaskID] == 1)
 						averageHitTime += edgetime;
 
 					if (planeID)
@@ -160,7 +160,7 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder,
 //		}
 //	LOG_INFO(((time[3].tv_sec - time[0].tv_sec)*1e6 + time[3].tv_usec) - time[0].tv_usec);
 
-	if ((algoRefTimeSourceID == 1) && (nHits_V + nHits_H)) {
+	if ((algoRefTimeSourceID[l0MaskID] == 1) && (nHits_V + nHits_H)) {
 		averageHitTime = averageHitTime / (nHits_V + nHits_H);
 	} else
 		averageHitTime = -1.0e+28;
@@ -177,7 +177,7 @@ uint_fast8_t CHODAlgo::processCHODTrigger(DecoderHandler& decoder,
 	averageHitTime = 0;
 //	LOG_INFO("CHODAlgo=============== reset average HitTime " << averageHitTime);
 
-	if (algoLogic)
+	if (algoLogic[l0MaskID])
 		return (((nHits_V + nHits_H) > 0) && ((nHits_V + nHits_H) < nMaxSlabs));
 	else
 		return ((nHits_V + nHits_H) >= nMaxSlabs);
@@ -206,11 +206,14 @@ bool CHODAlgo::isBadData() {
 
 void CHODAlgo::writeData(L1Block &l1Block) {
 
-	for (int iMask = 0; iMask < numberOfEnabledL0Masks; iMask++) {
-		(l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoID = algoID;
-		(l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoProcessed = algoProcessed;
-		(l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoOnlineTimeWindow =
-				algoOnlineTimeWindow;
+	int numToMaskID;
+	for (int iNum = 0; iNum < L1TriggerProcessor::GetNumberOfEnabledL0Masks(); iNum++) {
+		numToMaskID = L1TriggerProcessor::GetL0MaskNumToMaskID(iNum);
+		if (numToMaskID == -1)
+			LOG_ERROR("ERROR! Wrong association of mask ID!");
+		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoID = algoID;
+		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoProcessed = algoProcessed;
+		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoOnlineTimeWindow = (uint)algoOnlineTimeWindow[numToMaskID];
 	}
 }
 

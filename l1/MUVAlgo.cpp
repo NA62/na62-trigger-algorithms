@@ -18,20 +18,20 @@
 #include <options/Logging.h>
 
 #include "../common/decoding/TrbFragmentDecoder.h"
+#include "L1TriggerProcessor.h"
 
 namespace na62 {
 
-uint MUV3Algo::algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for MUV3, 5 for Straw
-uint MUV3Algo::algoLogic;
-uint MUV3Algo::algoRefTimeSourceID;
-double MUV3Algo::algoOnlineTimeWindow;
+uint MUV3Algo::algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
+uint MUV3Algo::algoLogic[16];
+uint MUV3Algo::algoRefTimeSourceID[16];
+double MUV3Algo::algoOnlineTimeWindow[16];
 
 bool MUV3Algo::algoProcessed = 0;
 bool MUV3Algo::emptyPacket = 0;
 bool MUV3Algo::badData = 0;
 bool MUV3Algo::isCHODRefTime = 0;
 double MUV3Algo::averageCHODHitTime = 0.;
-uint_fast8_t MUV3Algo::numberOfEnabledL0Masks = 0;
 
 MUV3ParsConfFile* MUV3Algo::infoMUV3_ = MUV3ParsConfFile::GetInstance();
 int * MUV3Algo::pmtGeo = infoMUV3_->getGeoPMTMap();
@@ -49,17 +49,17 @@ MUV3Algo::~MUV3Algo() {
 // TODO Auto-generated destructor stub
 }
 
-void MUV3Algo::initialize(l1MUV &l1MUV3Struct, uint_fast8_t nEnabledMasks) {
+void MUV3Algo::initialize(uint i, l1MUV &l1MUV3Struct) {
 
 	algoID = l1MUV3Struct.configParams.l1TrigMaskID;
-	algoLogic = l1MUV3Struct.configParams.l1TrigLogic;
-	algoRefTimeSourceID = l1MUV3Struct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
-	algoOnlineTimeWindow = l1MUV3Struct.configParams.l1TrigOnlineTimeWindow;
-	numberOfEnabledL0Masks = nEnabledMasks;
+	algoLogic[i] = l1MUV3Struct.configParams.l1TrigLogic;
+	algoRefTimeSourceID[i] = l1MUV3Struct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
+	algoOnlineTimeWindow[i] = l1MUV3Struct.configParams.l1TrigOnlineTimeWindow;
+//	LOG_INFO("MUV3 mask: " << i << " logic " << algoLogic[i] << " refTimeSourceID " << algoRefTimeSourceID[i] << " online time window " << algoOnlineTimeWindow[i]);
 }
 
-uint_fast8_t MUV3Algo::processMUV3Trigger0(DecoderHandler& decoder,
-		L1InfoToStorage* l1Info) {
+uint_fast8_t MUV3Algo::processMUV3Trigger0(uint l0MaskID,
+		DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
 	using namespace l0;
 //	LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
@@ -68,7 +68,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger0(DecoderHandler& decoder,
 	/*
 	 * TODO: The same logic needs to be developed for RICHRefTime
 	 */
-	if (algoRefTimeSourceID == 1) {
+	if (algoRefTimeSourceID[l0MaskID] == 1) {
 		if (l1Info->isL1CHODProcessed() && averageCHODHitTime != -1.0e+28) {
 			isCHODRefTime = 1;
 			averageCHODHitTime = l1Info->getCHODAverageTime();
@@ -140,8 +140,9 @@ uint_fast8_t MUV3Algo::processMUV3Trigger0(DecoderHandler& decoder,
 					dt_chod = fabs(edgetime - averageCHODHitTime);
 
 //				LOG_INFO("Online Time Window " << algoOnlineTimeWindow << " dt_l0tp " << dt_l0tp << " dt_chod " << dt_chod);
-				if ((!isCHODRefTime && dt_l0tp < algoOnlineTimeWindow)
-						|| (isCHODRefTime && dt_chod < algoOnlineTimeWindow)) {
+				if ((!isCHODRefTime && dt_l0tp < algoOnlineTimeWindow[l0MaskID])
+						|| (isCHODRefTime
+								&& dt_chod < algoOnlineTimeWindow[l0MaskID])) {
 					tileID[pmtID1] = 1;
 				}
 			}
@@ -175,8 +176,8 @@ uint_fast8_t MUV3Algo::processMUV3Trigger0(DecoderHandler& decoder,
 	LOG_ERROR("Attention: no case is provided for this !!!!");
 }
 
-uint_fast8_t MUV3Algo::processMUV3Trigger1(DecoderHandler& decoder,
-		L1InfoToStorage* l1Info) {
+uint_fast8_t MUV3Algo::processMUV3Trigger1(uint l0MaskID,
+		DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
 	using namespace l0;
 	//LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
@@ -185,7 +186,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger1(DecoderHandler& decoder,
 	/*
 	 * TODO: The same logic needs to be developed for RICHRefTime
 	 */
-	if (algoRefTimeSourceID == 1) {
+	if (algoRefTimeSourceID[l0MaskID] == 1) {
 		if (l1Info->isL1CHODProcessed() && averageCHODHitTime != -1.0e+28) {
 			isCHODRefTime = 1;
 			averageCHODHitTime = l1Info->getCHODAverageTime();
@@ -253,7 +254,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger1(DecoderHandler& decoder,
 								|| ((pmtID2 % 12) <= 5 && (pmtID1 % 12) >= 6)) {
 							//LOG_INFO("left and right! pmt1= " << pmtID1 << " pmt2= " << pmtID2);
 							algoProcessed = 1;
-							if (algoLogic)
+							if (algoLogic[l0MaskID])
 								return 1;
 							else
 								return 0;
@@ -268,8 +269,8 @@ uint_fast8_t MUV3Algo::processMUV3Trigger1(DecoderHandler& decoder,
 	return 0;
 }
 
-uint_fast8_t MUV3Algo::processMUV3Trigger2(DecoderHandler& decoder,
-		L1InfoToStorage* l1Info) {
+uint_fast8_t MUV3Algo::processMUV3Trigger2(uint l0MaskID,
+		DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
 	using namespace l0;
 	//LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
@@ -278,7 +279,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger2(DecoderHandler& decoder,
 	/*
 	 * TODO: The same logic needs to be developed for RICHRefTime
 	 */
-	if (algoRefTimeSourceID == 1) {
+	if (algoRefTimeSourceID[l0MaskID] == 1) {
 		if (l1Info->isL1CHODProcessed() && averageCHODHitTime != -1.0e+28) {
 			isCHODRefTime = 1;
 			averageCHODHitTime = l1Info->getCHODAverageTime();
@@ -332,7 +333,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger2(DecoderHandler& decoder,
 								|| fabs(pmtID1 - pmtID2) == 12) {
 //							LOG_INFO("neighbours! pmt1= " << pmtID1 << " pmt2= " << pmtID2);
 							algoProcessed = 1;
-							if (algoLogic)
+							if (algoLogic[l0MaskID])
 								return 1;
 							else
 								return 0;
@@ -363,12 +364,17 @@ bool MUV3Algo::isBadData() {
 	return badData;
 }
 
-void MUV3Algo::writeData(L1Block &l1Block){
+void MUV3Algo::writeData(L1Block &l1Block) {
 
-	for(int iMask=0; iMask<numberOfEnabledL0Masks; iMask++){
-	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoID = algoID;
-	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoProcessed = algoProcessed;
-	  (l1Block.l1Mask[iMask]).l1Algo[algoID].l1AlgoOnlineTimeWindow = algoOnlineTimeWindow;
+	int numToMaskID;
+	for (int iNum = 0; iNum < L1TriggerProcessor::GetNumberOfEnabledL0Masks(); iNum++) {
+		numToMaskID = L1TriggerProcessor::GetL0MaskNumToMaskID(iNum);
+		if (numToMaskID == -1)
+			LOG_ERROR("ERROR! Wrong association of mask ID!");
+		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoID = algoID;
+		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoProcessed = algoProcessed;
+		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoOnlineTimeWindow =
+				(uint) algoOnlineTimeWindow[numToMaskID];
 	}
 }
 }
