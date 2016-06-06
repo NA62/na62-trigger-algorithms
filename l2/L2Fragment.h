@@ -63,6 +63,12 @@ struct L2MASK {
 	uint32_t zz;
 };
 
+struct L2_BLOCK {
+	uint32_t triggerword;
+//	uint16_t globaldownscaling;
+//	uint16_t globalreduction;
+};
+
 }
 
 
