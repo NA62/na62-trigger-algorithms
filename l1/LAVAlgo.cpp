@@ -17,14 +17,14 @@
 #include <options/Logging.h>
 
 #include "../common/decoding/TrbFragmentDecoder.h"
-#include "lav_algorithm/ParsConfFile.h"
+#include "L1TriggerProcessor.h"
 
 namespace na62 {
 
-uint LAVAlgo::algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for MUV3, 5 for Straw
-uint LAVAlgo::algoLogic;
-uint LAVAlgo::algoRefTimeSourceID;
-double LAVAlgo::algoOnlineTimeWindow;
+uint LAVAlgo::algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
+uint LAVAlgo::algoLogic[16];
+uint LAVAlgo::algoRefTimeSourceID[16];
+double LAVAlgo::algoOnlineTimeWindow[16];
 
 bool LAVAlgo::algoProcessed = 0;
 bool LAVAlgo::emptyPacket = 0;
@@ -44,16 +44,16 @@ LAVAlgo::~LAVAlgo() {
 // TODO Auto-generated destructor stub
 }
 
-void LAVAlgo::initialize(l1LAV &l1LAVStruct) {
+void LAVAlgo::initialize(uint i, l1LAV &l1LAVStruct) {
 
 	algoID = l1LAVStruct.configParams.l1TrigMaskID;
-	algoLogic = l1LAVStruct.configParams.l1TrigLogic;
-	algoRefTimeSourceID = l1LAVStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
-	algoOnlineTimeWindow = l1LAVStruct.configParams.l1TrigOnlineTimeWindow;
-
+	algoLogic[i] = l1LAVStruct.configParams.l1TrigLogic;
+	algoRefTimeSourceID[i] = l1LAVStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
+	algoOnlineTimeWindow[i] = l1LAVStruct.configParams.l1TrigOnlineTimeWindow;
+//	LOG_INFO("LAV mask: " << i << " logic " << algoLogic[i] << " refTimeSourceID " << algoRefTimeSourceID[i] << " online time window " << algoOnlineTimeWindow[i]);
 }
 
-uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder,
+uint_fast8_t LAVAlgo::processLAVTrigger(uint l0MaskID, DecoderHandler& decoder,
 		L1InfoToStorage* l1Info) {
 
 	using namespace l0;
@@ -63,11 +63,13 @@ uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder,
 	/*
 	 * TODO: The same logic needs to be developed for RICHRefTime
 	 */
-	if (algoRefTimeSourceID == 1) {
+	if (algoRefTimeSourceID[l0MaskID] == 1) {
 		if (l1Info->isL1CHODProcessed() && averageCHODHitTime != -1.0e+28) {
 			isCHODRefTime = 1;
 			averageCHODHitTime = l1Info->getCHODAverageTime();
-		} else LOG_ERROR("LAVAlgo.cpp: Not able to use averageCHODHitTime as Reference Time even if it is requested!");
+		} else
+			LOG_ERROR(
+					"LAVAlgo.cpp: Not able to use averageCHODHitTime as Reference Time even if it is requested!");
 	}
 //	LOG_INFO("LAVAlgo: chodtime " << averageCHODHitTime);
 
@@ -141,8 +143,9 @@ uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder,
 //				LOG_INFO("dt_l0tp " << dt_l0tp << " dt_chod " << dt_chod);
 
 //				if (dt_l0tp < 20.) {
-				if ((!isCHODRefTime && dt_l0tp < algoOnlineTimeWindow)
-						|| (isCHODRefTime && dt_chod < algoOnlineTimeWindow)) {
+				if ((!isCHODRefTime && dt_l0tp < algoOnlineTimeWindow[l0MaskID])
+						|| (isCHODRefTime
+								&& dt_chod < algoOnlineTimeWindow[l0MaskID])) {
 					if (edge_IDs[iEdge]) {
 						hit[roChIDPerTrb]++;
 
@@ -150,8 +153,8 @@ uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder,
 					} else if (hit[roChIDPerTrb]) {
 						nHits++;
 //						LOG_INFO("Increment nHits " << nHits);
-						if ((nHits >= 3 && !algoLogic)
-								|| (nHits < 3 && algoLogic)) {
+						if ((nHits >= 3 && !algoLogic[l0MaskID])
+								|| (nHits < 3 && algoLogic[l0MaskID])) {
 							algoProcessed = 1;
 							return 0;
 						}
@@ -165,7 +168,8 @@ uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder,
 		nEdges_tot += numberOfEdgesOfCurrentBoard;
 	}
 
-	if (!nEdges_tot) emptyPacket = 1;
+	if (!nEdges_tot)
+		emptyPacket = 1;
 //	LOG_INFO("LAVAlgo.cpp: Analysed Event " << decoder.getDecodedEvent()->getEventNumber() << " - nEdges_tot " << nEdges_tot << " - nHits " << nHits);
 //	LOG_INFO("time check (final)" << time[3].tv_sec << " " << time[3].tv_usec);
 
@@ -177,7 +181,7 @@ uint_fast8_t LAVAlgo::processLAVTrigger(DecoderHandler& decoder,
 
 //	return (nHits < 3);
 	algoProcessed = 1;
-	if (!algoLogic)
+	if (!algoLogic[l0MaskID])
 		return (nHits < 3);
 	else
 		return (nHits >= 3);
@@ -199,6 +203,19 @@ bool LAVAlgo::isBadData() {
 	return badData;
 }
 
+void LAVAlgo::writeData(L1Block &l1Block) {
+
+	int numToMaskID;
+	for (int iNum = 0; iNum < L1TriggerProcessor::GetNumberOfEnabledL0Masks(); iNum++) {
+		numToMaskID = L1TriggerProcessor::GetL0MaskNumToMaskID(iNum);
+		if (numToMaskID == -1)
+			LOG_ERROR("ERROR! Wrong association of mask ID!");
+		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoID = algoID;
+		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoProcessed = algoProcessed;
+		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoOnlineTimeWindow =
+				(uint) algoOnlineTimeWindow[numToMaskID];
+	}
+}
+
 }
 /* namespace na62 */
-

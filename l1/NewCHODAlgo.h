@@ -1,29 +1,27 @@
 /*
- * CHODAlgo.h
+ * NewCHODAlgo.h
  *
- *  Created on: May 11, 2015
- *      Author: angela romano
- *      Email: axr@hep.ph.bham.ac.uk
+ *  Created on: 16 May 2016
+ *      Author: lorenzaiacobuzio
  */
 
 #pragma once
-#ifndef CHODALGORITHM_H_
-#define CHODALGORITHM_H_
+#ifndef NEWCHODALGO_H_
+#define NEWCHODALGO_H_
+
 
 #include <sys/types.h>
 #include <cstdint>
 
 #include "../common/decoding/DecoderHandler.h"
-#include "chod_algorithm/ParsConfFile.h"
+#include "newchod_algorithm/ParsConfFile.h"
 #include "L1InfoToStorage.h"
 #include "../struct/HLTConfParams.h"
 #include "L1Fragment.h"
 
-#define maxNhits 500
-
 namespace na62 {
 
-class CHODAlgo {
+class NewCHODAlgo {
 public:
 	/**
 	 * @param event Event* This is a pointer to the built Event containing all subevents (except those from the LKr)
@@ -33,22 +31,21 @@ public:
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 
-	CHODAlgo();
-	~CHODAlgo();
+	NewCHODAlgo();
+	~NewCHODAlgo();
 
-	static uint_fast8_t processCHODTrigger(uint l0MaskID,
-			DecoderHandler& decoder, L1InfoToStorage* l1Info);
-	static void initialize(uint i, l1CHOD &l1ChodStruct);
+	static uint_fast8_t processNewCHODTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
+//	static void initialize(uint i, l1NewCHOD &l1NewChodStruct);
 	static void writeData(L1Block &l1Block);
 
 	static bool isAlgoProcessed();
 	static void resetAlgoProcessed();
 	static bool isEmptyPacket();
 	static bool isBadData();
-
+//
 private:
 
-	static CHODParsConfFile* infoCHOD_;
+	static NewCHODParsConfFile* infoNewCHOD_;
 	static uint algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
 	static uint algoLogic[16];
 	static uint algoRefTimeSourceID[16];
@@ -57,17 +54,18 @@ private:
 	static bool algoProcessed;
 	static bool emptyPacket;
 	static bool badData;
-	static bool isCHODRefTime;
+	static bool isNewCHODRefTime;
 
-	static int* slabGeo;
-	static uint nHits_V, nHits_H;
-	static uint nMaxSlabs;
-	static int slabID;
-//	static int quadrantID;
-	static int planeID;
+	static int* PMTGeo;
+	static uint nHits;
+	static uint nMaxPMTs;
+	static int PMTID1;
+	static int PMTID2;
 	static double averageHitTime;
-
 };
 
 } /* namespace na62 */
-#endif /* CHODALGORITHM_H_ */
+
+
+
+#endif /* NEWCHODALGO_H_ */

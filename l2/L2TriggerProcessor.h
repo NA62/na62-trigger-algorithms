@@ -18,6 +18,8 @@
 #include "../options/TriggerOptions.h"
 #include "../struct/HLTConfParams.h"
 
+#include "L2Fragment.h"
+
 namespace na62 {
 
 class EventBuilder;
@@ -66,9 +68,6 @@ public:
 	static inline uint64_t GetL2InputReducedStats() {
 		return L2InputReducedEvents_;
 	}
-	static inline uint64_t GetL2BypassedEvents() {
-		return L2BypassedEvents_;
-	}
 	static inline uint64_t GetL2InputEventsPerBurst() {
 		return L2InputEventsPerBurst_;
 	}
@@ -88,13 +87,26 @@ public:
 		return autoFlagFactor;
 	}
 
+	/**
+	 * Fills output L2 structures for merger
+	 */
+	static void writeData(L2Block &l2Block);
+
 private:
 	static std::atomic<uint64_t>* L2Triggers_;
-	static std::atomic<uint64_t> L2BypassedEvents_;
 	static std::atomic<uint64_t> L2InputEvents_;
 	static std::atomic<uint64_t> L2InputReducedEvents_;
 	static std::atomic<uint64_t> L2InputEventsPerBurst_;
 	static std::atomic<uint64_t> L2AcceptedEvents_;
+
+	static uint numberOfEnabledAlgos[16];
+	static uint numberOfFlaggedAlgos[16];
+	static uint maskReductionFactor[16];
+
+	static uint_fast16_t algoEnableMask[16];
+	static uint_fast16_t algoFlagMask[16];
+	static uint_fast16_t algoLogicMask[16];
+	static uint_fast16_t algoDwScMask[16];
 
 	static double bypassProbability;
 	static uint reductionFactor;
@@ -102,6 +114,25 @@ private:
 	static uint flagMode;
 	static uint autoFlagFactor;
 	static uint referenceTimeSourceID;
+
+	static bool isL0PhysicsTrigger;
+	static bool isL0PeriodicTrigger;
+	static bool isL0ControlTrigger;
+	static bool isL2Bypassed;
+	static uint numberOfTriggeredL2Masks;
+	static bool isAllL2AlgoDisable;
+
+	static uint_fast8_t l0TrigWord;
+	static uint_fast8_t l0DataType; //0x1 for physics, 0x2 for periodics, 0x4 for calibrations
+	static uint_fast16_t l0TrigFlags;
+	static uint_fast8_t l2TriggerWords[16];
+
+	static uint MaskIDToNum[16];
+	static uint NumToMaskID[16];
+
+	static uint_fast8_t numberOfEnabledL0Masks;
+
+	static std::vector<int> l0MaskIDs;
 };
 
 } /* namespace na62 */

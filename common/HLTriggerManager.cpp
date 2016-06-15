@@ -11,6 +11,8 @@
 
 namespace na62 {
 
+std::string HLTriggerManager::xmlTriggerFile = "";
+
 HLTriggerManager::HLTriggerManager() {
 	// TODO Auto-generated constructor stub
 }
@@ -32,8 +34,8 @@ void HLTriggerManager::createXMLFile() {
 	test->l2.l2Global.l2AutoFlagFactor = 10;
 	test->l2.l2Global.l2ReductionFactor = 1;
 	test->l2.l2Global.l2DownscaleFactor = 1;
-	test->l2.l2Global.l2FlagMode = 1;
-	test->l2.l2Global.l2ReferenceTimeSourceID = 1;
+	test->l2.l2Global.l2FlagMode = 0;
+	test->l2.l2Global.l2ReferenceTimeSourceID = 0;
 
 	for (int i = 0; i != 16; i++) {
 
@@ -47,114 +49,69 @@ void HLTriggerManager::createXMLFile() {
 		test->l1.l1Mask[i].rich.configParams.l1TrigRefTimeSourceID = 0;
 		test->l1.l1Mask[i].rich.configParams.l1TrigOnlineTimeWindow = -1.;
 
+		test->l1.l1Mask[i].ktag.configParams.l1TrigProcessID = 0;
 		test->l1.l1Mask[i].ktag.configParams.l1TrigMaskID = 2;
+		test->l1.l1Mask[i].ktag.configParams.l1TrigEnable = 0;
 		test->l1.l1Mask[i].ktag.configParams.l1TrigLogic = 1;
+		test->l1.l1Mask[i].ktag.configParams.l1TrigFlag = 0;
 		test->l1.l1Mask[i].ktag.configParams.l1TrigDownScale = 0;
 		test->l1.l1Mask[i].ktag.configParams.l1TrigDSFactor = 1;
+		test->l1.l1Mask[i].ktag.configParams.l1TrigRefTimeSourceID = 0;
+		test->l1.l1Mask[i].ktag.configParams.l1TrigOnlineTimeWindow = 10.;
 
-		if (i != 1 && i != 2 && i != 3) {
-			test->l1.l1Mask[i].ktag.configParams.l1TrigEnable = 0;
-			test->l1.l1Mask[i].ktag.configParams.l1TrigProcessID = -1;
-			test->l1.l1Mask[i].ktag.configParams.l1TrigFlag = 0;
-			test->l1.l1Mask[i].ktag.configParams.l1TrigRefTimeSourceID = 0;
-			test->l1.l1Mask[i].ktag.configParams.l1TrigOnlineTimeWindow = -1.;
-		}
-		if (i == 1 || i == 3) {
-			test->l1.l1Mask[i].ktag.configParams.l1TrigEnable = 1;
-			test->l1.l1Mask[i].ktag.configParams.l1TrigProcessID = 0;
-			test->l1.l1Mask[i].ktag.configParams.l1TrigFlag = 0;
-			test->l1.l1Mask[i].ktag.configParams.l1TrigRefTimeSourceID = 0;
-			test->l1.l1Mask[i].ktag.configParams.l1TrigOnlineTimeWindow = 5.;
-		}
-		if (i == 2) {
-			test->l1.l1Mask[i].ktag.configParams.l1TrigEnable = 1;
-			test->l1.l1Mask[i].ktag.configParams.l1TrigProcessID = 0;
-			test->l1.l1Mask[i].ktag.configParams.l1TrigFlag = 1;
-			test->l1.l1Mask[i].ktag.configParams.l1TrigRefTimeSourceID = 0;
-			test->l1.l1Mask[i].ktag.configParams.l1TrigOnlineTimeWindow = 5.;
-		}
-
+		test->l1.l1Mask[i].chod.configParams.l1TrigProcessID = 1;
 		test->l1.l1Mask[i].chod.configParams.l1TrigMaskID = 0;
+		test->l1.l1Mask[i].chod.configParams.l1TrigEnable = 0;
 		test->l1.l1Mask[i].chod.configParams.l1TrigLogic = 1;
+		test->l1.l1Mask[i].chod.configParams.l1TrigFlag = 0;
 		test->l1.l1Mask[i].chod.configParams.l1TrigDownScale = 0;
 		test->l1.l1Mask[i].chod.configParams.l1TrigDSFactor = 1;
+		test->l1.l1Mask[i].chod.configParams.l1TrigRefTimeSourceID = 0;
+		test->l1.l1Mask[i].chod.configParams.l1TrigOnlineTimeWindow = 10.;
 
-		/*
-		 if (i == 2 || i == 3) {
-		 test->l1.l1Mask[i].chod.configParams.l1TrigDownScale = 1;
-		 test->l1.l1Mask[i].chod.configParams.l1TrigDSFactor = 2;
-		 }
-		 */
-		if (i != 2 && i != 3) {
-			test->l1.l1Mask[i].chod.configParams.l1TrigEnable = 0;
-			test->l1.l1Mask[i].chod.configParams.l1TrigProcessID = -1;
-			test->l1.l1Mask[i].chod.configParams.l1TrigFlag = 0;
-			test->l1.l1Mask[i].chod.configParams.l1TrigRefTimeSourceID = 0;
-			test->l1.l1Mask[i].chod.configParams.l1TrigOnlineTimeWindow = -1.;
-//			test->l1.l1Mask[i].chod.configParams.l1TrigDownScale = 0;
-//			test->l1.l1Mask[i].chod.configParams.l1TrigDSFactor = 1;
-		}
-		if (i == 2) {
-			test->l1.l1Mask[i].chod.configParams.l1TrigEnable = 1;
-			test->l1.l1Mask[i].chod.configParams.l1TrigProcessID = 1;
-			test->l1.l1Mask[i].chod.configParams.l1TrigFlag = 1;
-			test->l1.l1Mask[i].chod.configParams.l1TrigRefTimeSourceID = 0;
-			test->l1.l1Mask[i].chod.configParams.l1TrigOnlineTimeWindow = 10.;
-		}
-		if (i == 3) {
-			test->l1.l1Mask[i].chod.configParams.l1TrigEnable = 1;
-			test->l1.l1Mask[i].chod.configParams.l1TrigProcessID = 1;
-			test->l1.l1Mask[i].chod.configParams.l1TrigFlag = 0;
-			test->l1.l1Mask[i].chod.configParams.l1TrigRefTimeSourceID = 0;
-			test->l1.l1Mask[i].chod.configParams.l1TrigOnlineTimeWindow = 10.;
-		}
-
+		test->l1.l1Mask[i].lav.configParams.l1TrigProcessID = 2;
 		test->l1.l1Mask[i].lav.configParams.l1TrigMaskID = 3;
+		test->l1.l1Mask[i].lav.configParams.l1TrigEnable = 0;
 		test->l1.l1Mask[i].lav.configParams.l1TrigLogic = 0;
+		test->l1.l1Mask[i].lav.configParams.l1TrigFlag = 0;
 		test->l1.l1Mask[i].lav.configParams.l1TrigDownScale = 0;
 		test->l1.l1Mask[i].lav.configParams.l1TrigDSFactor = 1;
+		test->l1.l1Mask[i].lav.configParams.l1TrigRefTimeSourceID = 0;
+		test->l1.l1Mask[i].lav.configParams.l1TrigOnlineTimeWindow = 20.;
 
-		if (i != 2 && i != 3) {
-			test->l1.l1Mask[i].lav.configParams.l1TrigEnable = 0;
-			test->l1.l1Mask[i].lav.configParams.l1TrigProcessID = -1;
-			test->l1.l1Mask[i].lav.configParams.l1TrigFlag = 0;
-			test->l1.l1Mask[i].lav.configParams.l1TrigRefTimeSourceID = 0;
-			test->l1.l1Mask[i].lav.configParams.l1TrigOnlineTimeWindow = -1.;
-		}
-		if (i == 2) {
-			test->l1.l1Mask[i].lav.configParams.l1TrigEnable = 1;
-			test->l1.l1Mask[i].lav.configParams.l1TrigProcessID = 2;
-			test->l1.l1Mask[i].lav.configParams.l1TrigFlag = 1;
-			test->l1.l1Mask[i].lav.configParams.l1TrigRefTimeSourceID = 0;
-			test->l1.l1Mask[i].lav.configParams.l1TrigOnlineTimeWindow = 20.;
-		}
-		if (i == 3) {
-			test->l1.l1Mask[i].lav.configParams.l1TrigEnable = 1;
-			test->l1.l1Mask[i].lav.configParams.l1TrigProcessID = 2;
-			test->l1.l1Mask[i].lav.configParams.l1TrigFlag = 0;
-			test->l1.l1Mask[i].lav.configParams.l1TrigRefTimeSourceID = 0;
-			test->l1.l1Mask[i].lav.configParams.l1TrigOnlineTimeWindow = 20.;
-		}
-		if (i != 1 && i != 2 && i != 3) {
-			test->l1.l1Mask[i].numberOfEnabledAlgos = 0; // No L1 Triggers enabled
-			test->l1.l1Mask[i].numberOfFlaggedAlgos = 0; // No L1 Triggers to be processed and flagged
-		}
-		if (i == 1) {
-			test->l1.l1Mask[i].numberOfEnabledAlgos = 1;
-			test->l1.l1Mask[i].numberOfFlaggedAlgos = 0;
-		}
-		if (i == 2) {
-			test->l1.l1Mask[i].numberOfEnabledAlgos = 3;
-			test->l1.l1Mask[i].numberOfFlaggedAlgos = 3;
-		}
-		if (i == 3) {
-			test->l1.l1Mask[i].numberOfEnabledAlgos = 3;
-			test->l1.l1Mask[i].numberOfFlaggedAlgos = 0;
-		}
-		if (!i)
-			test->l1.l1Mask[i].maskReductionFactor = 5;
-		else
-			test->l1.l1Mask[i].maskReductionFactor = 1;
+		test->l1.l1Mask[i].ircsac.configParams.l1TrigProcessID = 3;
+		test->l1.l1Mask[i].ircsac.configParams.l1TrigMaskID = 4;
+		test->l1.l1Mask[i].ircsac.configParams.l1TrigEnable = 0;
+		test->l1.l1Mask[i].ircsac.configParams.l1TrigLogic = 0;
+		test->l1.l1Mask[i].ircsac.configParams.l1TrigFlag = 0;
+		test->l1.l1Mask[i].ircsac.configParams.l1TrigDownScale = 0;
+		test->l1.l1Mask[i].ircsac.configParams.l1TrigDSFactor = 1;
+		test->l1.l1Mask[i].ircsac.configParams.l1TrigRefTimeSourceID = 0;
+		test->l1.l1Mask[i].ircsac.configParams.l1TrigOnlineTimeWindow = 20.;
+
+		test->l1.l1Mask[i].straw.configParams.l1TrigProcessID = 4;
+		test->l1.l1Mask[i].straw.configParams.l1TrigMaskID = 5;
+		test->l1.l1Mask[i].straw.configParams.l1TrigEnable = 0;
+		test->l1.l1Mask[i].straw.configParams.l1TrigLogic = 1;
+		test->l1.l1Mask[i].straw.configParams.l1TrigFlag = 0;
+		test->l1.l1Mask[i].straw.configParams.l1TrigDownScale = 0;
+		test->l1.l1Mask[i].straw.configParams.l1TrigDSFactor = 1;
+		test->l1.l1Mask[i].straw.configParams.l1TrigRefTimeSourceID = 0;
+		test->l1.l1Mask[i].straw.configParams.l1TrigOnlineTimeWindow = 10.;
+
+		test->l1.l1Mask[i].muv.configParams.l1TrigProcessID = 5;
+		test->l1.l1Mask[i].muv.configParams.l1TrigMaskID = 6;
+		test->l1.l1Mask[i].muv.configParams.l1TrigEnable = 0;
+		test->l1.l1Mask[i].muv.configParams.l1TrigLogic = 1;
+		test->l1.l1Mask[i].muv.configParams.l1TrigFlag = 0;
+		test->l1.l1Mask[i].muv.configParams.l1TrigDownScale = 0;
+		test->l1.l1Mask[i].muv.configParams.l1TrigDSFactor = 1;
+		test->l1.l1Mask[i].muv.configParams.l1TrigRefTimeSourceID = 0;
+		test->l1.l1Mask[i].muv.configParams.l1TrigOnlineTimeWindow = 10.;
+
+		test->l1.l1Mask[i].numberOfEnabledAlgos = 0; // No L1 Triggers enabled
+		test->l1.l1Mask[i].numberOfFlaggedAlgos = 0; // No L1 Triggers to be processed and flagged
+		test->l1.l1Mask[i].maskReductionFactor = 1;
 
 		/*
 		 test->l1.l1Mask[i].l1AlgoEnableMask =
@@ -175,14 +132,16 @@ void HLTriggerManager::createXMLFile() {
 		 */
 	}
 
-	const char* filename =
-			"/Users/romano/Desktop/workspace/na62-trigger-algorithms/struct/HLTConfParams.xml";
+	const char* filename = "xml_trigger_local.xml";
+
 	xml_create_HLTStruct(test, filename);
 }
 
 void HLTriggerManager::fillStructFromXMLFile(HLTStruct &HLTStruct) {
 
-	if (xml_read_file_HLTStruct("/etc/HLTConfParams.xml")== -1)
+	xmlTriggerFile = TriggerOptions::GetString(OPTION_TRIGGER_XML_FILE);
+
+	if (xml_read_file_HLTStruct(xmlTriggerFile.c_str())== -1)
 		LOG_ERROR( "xml_getLastFatalError_HLTStruct()");
 
 	xml_apply_HLTStruct(&HLTStruct);

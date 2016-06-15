@@ -16,6 +16,7 @@
 #include "../common/decoding/DecoderHandler.h"
 #include "L1InfoToStorage.h"
 #include "../struct/HLTConfParams.h"
+#include "L1Fragment.h"
 
 namespace na62 {
 
@@ -30,7 +31,7 @@ public:
 	 *
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
-	static uint_fast8_t processKtagTrigger(DecoderHandler& decoder,L1InfoToStorage* l1Info);
+	static uint_fast8_t processKtagTrigger(uint l0MaskID, DecoderHandler& decoder,L1InfoToStorage* l1Info);
 	/**
 	 * Calculates the sectorID based on the Tel62 and FPGA IDs. Possible results are between 0 and 7
 	 */
@@ -38,7 +39,8 @@ public:
 		return ((tel62ID << 2) | fpgaID) / 3;
 	}
 
-	static void initialize(l1KTAG &l1KtagStruct);
+	static void initialize(uint i, l1KTAG &l1KtagStruct);
+	static void writeData(L1Block &l1Block);
 
 	static bool isAlgoProcessed();
 	static void resetAlgoProcessed();
@@ -46,10 +48,10 @@ public:
 	static bool isBadData();
 
 private:
-	static uint algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for MUV3, 5 for Straw
-	static uint algoLogic;
-	static uint algoRefTimeSourceID;
-	static double algoOnlineTimeWindow;
+	static uint algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
+	static uint algoLogic[16];
+	static uint algoRefTimeSourceID[16];
+	static double algoOnlineTimeWindow[16];
 
 	static bool algoProcessed;
 	static bool emptyPacket;

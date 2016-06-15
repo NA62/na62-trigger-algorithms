@@ -14,15 +14,16 @@
 #include <iostream>
 #include "L2Fragment.h"
 
+
 namespace na62 {
 
 std::atomic<uint64_t>* L2TriggerProcessor::L2Triggers_ = new std::atomic<
 		uint64_t>[0xFF + 1];
-std::atomic<uint64_t> L2TriggerProcessor::L2BypassedEvents_(0);
 std::atomic<uint64_t> L2TriggerProcessor::L2InputEvents_(0);
 std::atomic<uint64_t> L2TriggerProcessor::L2InputReducedEvents_(0);
 std::atomic<uint64_t> L2TriggerProcessor::L2InputEventsPerBurst_(0);
 std::atomic<uint64_t> L2TriggerProcessor::L2AcceptedEvents_(0);
+
 double L2TriggerProcessor::bypassProbability;
 uint L2TriggerProcessor::reductionFactor = 0;
 uint L2TriggerProcessor::downscaleFactor = 0;
@@ -30,16 +31,58 @@ uint L2TriggerProcessor::flagMode = 0;
 uint L2TriggerProcessor::autoFlagFactor = 0;
 uint L2TriggerProcessor::referenceTimeSourceID = 0;
 
+uint L2TriggerProcessor::numberOfEnabledAlgos[16];
+uint L2TriggerProcessor::numberOfFlaggedAlgos[16];
+uint L2TriggerProcessor::maskReductionFactor[16];
+uint_fast16_t L2TriggerProcessor::algoEnableMask[16];
+uint_fast16_t L2TriggerProcessor::algoFlagMask[16];
+uint_fast16_t L2TriggerProcessor::algoLogicMask[16];
+uint_fast16_t L2TriggerProcessor::algoDwScMask[16];
+
+uint_fast8_t L2TriggerProcessor::l0TrigWord = 0;
+uint_fast8_t L2TriggerProcessor::l0DataType = 0;
+uint_fast16_t L2TriggerProcessor::l0TrigFlags = 0;
+
+uint_fast8_t L2TriggerProcessor::l2TriggerWords[16];
+
+uint L2TriggerProcessor::MaskIDToNum[16];
+uint L2TriggerProcessor::NumToMaskID[16];
+
+bool L2TriggerProcessor::isL0PhysicsTrigger = 0;
+bool L2TriggerProcessor::isL0PeriodicTrigger = 0;
+bool L2TriggerProcessor::isL0ControlTrigger = 0;
+bool L2TriggerProcessor::isL2Bypassed = 0;
+uint L2TriggerProcessor::numberOfTriggeredL2Masks = 0;
+bool L2TriggerProcessor::isAllL2AlgoDisable = 0;
+uint_fast8_t L2TriggerProcessor::numberOfEnabledL0Masks = 0;
+
+std::vector<int> L2TriggerProcessor::l0MaskIDs;
+
 void L2TriggerProcessor::initialize(l2Struct &l2Struct) {
+
+	numberOfEnabledL0Masks = l0MaskIDs.size();
 
 	for (int i = 0; i != 0xFF + 1; i++) {
 		L2Triggers_[i] = 0;
 	}
-//	bypassProbability = TriggerOptions::GetDouble(OPTION_L2_BYPASS_PROBABILITY);
-//	l2ReductionFactor = Options::GetInt(OPTION_L2_REDUCTION_FACTOR);
-//	l2DownscaleFactor = Options::GetInt(OPTION_L2_DOWNSCALE_FACTOR);
-//	l2FlagMode = Options::GetInt(OPTION_L2_FLAG_MODE);
-//	l2AutoFlagFactor = Options::GetInt(OPTION_L2_AUTOFLAG_FACTOR);
+
+	/*
+	 * Initialisation of individual Algo masks
+	 */
+	for (int i = 0; i != 16; i++) {
+//		LKrAlgo::initialize(l2Struct.l2Mask[i].lkr);
+		NumToMaskID[i] = -1;
+		MaskIDToNum[i] = -1;
+		l2TriggerWords[i] = 0;
+
+		numberOfEnabledAlgos[i] = 0; //TO BE MODIFIED WITH REAL NUMBER !!!!!!!!
+		numberOfFlaggedAlgos[i] = 0;
+		maskReductionFactor[i] = 0;
+		algoEnableMask[i] = 0;
+		algoFlagMask[i] = 0;
+		algoLogicMask[i] = 0;
+		algoDwScMask[i] = 0;
+	}
 
 	bypassProbability = l2Struct.l2Global.l2BypassProbability;
 	reductionFactor = l2Struct.l2Global.l2ReductionFactor;
@@ -48,12 +91,13 @@ void L2TriggerProcessor::initialize(l2Struct &l2Struct) {
 	autoFlagFactor = l2Struct.l2Global.l2AutoFlagFactor;
 	referenceTimeSourceID = l2Struct.l2Global.l2ReferenceTimeSourceID;
 
-	/*
-	 * Initialisation of individual Algo masks
-	 */
-//	for (int i = 0; i != 16; i++) {
-//		LKrAlgo::initialize(l2Struct.l2Mask[i].lkr);
-//	}
+	int num = 0;
+	for (int l0Mask : l0MaskIDs) {
+		NumToMaskID[num] = l0Mask;
+		MaskIDToNum[l0Mask] = num;
+//		LOG_INFO("Initialization of Enabled Masks " << num << " " << l0Mask);
+		num++;
+	}
 
 }
 
@@ -61,30 +105,55 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 
 	event->readTriggerTypeWordAndFineTime();
 
+	uint_fast8_t l2Trigger = 0;
+	uint_fast8_t l2GlobalFlagTrigger = 0;
+	uint_fast8_t l2MaskFlagTrigger = 0;
+	isL2Bypassed = 0;
+	isAllL2AlgoDisable = 0;
+	numberOfTriggeredL2Masks = 0;
+
 	L2InputEvents_.fetch_add(1, std::memory_order_relaxed);
 //	LOG_INFO("-------------- L2Event number after adding 1 " << L2InputEvents_);
 	L2InputEventsPerBurst_.fetch_add(1, std::memory_order_relaxed);
 //	LOG_INFO("--------------- L2Event number per Burst after adding 1 " << L2InputEventsPerBurst_);
+
+//	LOG_INFO("Global FlagMode " << flagMode << " " << L2InputEvents_ << " " << autoFlagFactor);
+
+	if (flagMode) {
+		l2GlobalFlagTrigger = 1;
+	} else if (autoFlagFactor && (L2InputEvents_ % autoFlagFactor == 0)) {
+		l2GlobalFlagTrigger = 1;
+	}
+//	LOG_INFO("l2GlobalFlagTrigger " << (uint)l2GlobalFlagTrigger);
+
 	/*
 	 * Check if the event should bypass the processing
 	 */
 	if (event->isSpecialTriggerEvent()) {
-		L2Triggers_[TRIGGER_L2_SPECIAL].fetch_add(1, std::memory_order_relaxed);
-		return TRIGGER_L2_SPECIAL;
+		isL2Bypassed = 1;
+		l2Trigger = ((uint) l2GlobalFlagTrigger << 7)
+				| ((l2MaskFlagTrigger != 0) << 6) | (isL2Bypassed << 5)
+				| (isAllL2AlgoDisable << 4) | (numberOfTriggeredL2Masks != 0);
+		L2Triggers_[l2Trigger].fetch_add(1, std::memory_order_relaxed);
+		return l2Trigger;
 	}
-	if (event->isL2Bypassed() || bypassEvent()) {
-		L2BypassedEvents_.fetch_add(1, std::memory_order_relaxed);
-//		LOG_INFO("L2 ByPassed Event number after adding 1 " << L2BypassedEvents_);
-		L2Triggers_[TRIGGER_L2_BYPASS].fetch_add(1, std::memory_order_relaxed);
-		return TRIGGER_L2_BYPASS;
+	if (event->isPulserGTKTriggerEvent() || event->isL2Bypassed()
+			|| bypassEvent()) {
+		isL2Bypassed = 1;
+		l2Trigger = ((uint) l2GlobalFlagTrigger << 7)
+				| ((l2MaskFlagTrigger != 0) << 6) | (isL2Bypassed << 5)
+				| (isAllL2AlgoDisable << 4) | (numberOfTriggeredL2Masks != 0);
+		L2Triggers_[l2Trigger].fetch_add(1, std::memory_order_relaxed);
+		return l2Trigger;
 	}
+
 	/*
 	 * Check if the event fulfills the reduction option
 	 *
 	 */
 //	LOG_INFO("L2Reduction Factor " << reductionFactor);
 //	LOG_INFO("Modulo " << L2InputEvents_ % reductionFactor);
-	if (L2InputEvents_ % reductionFactor != 0)
+	if (reductionFactor && (L2InputEvents_ % reductionFactor != 0))
 		return 0;
 
 	L2InputReducedEvents_.fetch_add(1, std::memory_order_relaxed);
@@ -94,19 +163,47 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 	 * The event is ready to be processed
 	 *
 	 */
-	uint_fast8_t l2FlagTrigger = 0;
-	if (flagMode || (L2InputReducedEvents_ % autoFlagFactor == 0)) {
-		l2FlagTrigger = 1;
-	} else {
-		l2FlagTrigger = 0;
+	l0TrigWord = event->getL0TriggerTypeWord();
+//	LOG_INFO("l0TriggerWord " << std::hex << (uint) l0TrigWord << std::dec);
+	l0TrigFlags = event->getTriggerFlags();
+//	LOG_INFO("l0TriggerFlags " << std::hex << (uint) l0TrigFlags << std::dec);
+	l0DataType = event->getTriggerDataType();
+//	LOG_INFO("l0TriggerDataType " << std::hex << (uint) l0DataType << std::dec);
+
+	isL0PhysicsTrigger = 0;
+	isL0PeriodicTrigger = 0;
+	isL0ControlTrigger = 0;
+
+	if (event->isPhysicsTriggerEvent()) {
+		isL0PhysicsTrigger = 1;
+	}
+	if (event->isPeriodicTriggerEvent()) {
+		isL0PeriodicTrigger = 1;
+		isL2Bypassed = 1;
+	}
+	if (event->isControlTriggerEvent()) {
+		isL0ControlTrigger = 1;
+		isL2Bypassed = 1;
 	}
 
-	uint_fast8_t l2Trigger = 3;
+	if (isL0PhysicsTrigger) {
+		for (int i = 0; i != 16; i++) {
+			l2TriggerWords[i] = 0;
+			if (l0TrigFlags & (1 << i)) {
+				if (!numberOfEnabledAlgos[i])
+					isAllL2AlgoDisable = 1;
+//				LOG_INFO("i " << i << " nEnabledAlgos " << numberOfEnabledAlgos[i] << " isAllAlgoDisable " << isAllL2AlgoDisable);
+			}
+			if (__builtin_popcount((uint) l2TriggerWords[i]))
+				numberOfTriggeredL2Masks++;
+		}
+//		printf("Summary of Triggered Masks: %d\n", numberOfTriggeredL2Masks);
+//		for (int i = 0; i != 16; i++) printf("Summary of Trigger Words: l2Trigger %x\n",l2TriggerWords[i]);
+	}
 
-	l2Trigger |= (l2FlagTrigger << 7);
-//	printf("L2TriggerProcessor.cpp: l2Trigger %x\n", l2Trigger);
-
-	L2Triggers_[l2Trigger].fetch_add(1, std::memory_order_relaxed);
+	l2Trigger = ((uint) l2GlobalFlagTrigger << 7)
+			| ((l2MaskFlagTrigger != 0) << 6) | (isL2Bypassed << 5)
+			| (isAllL2AlgoDisable << 4) | (numberOfTriggeredL2Masks != 0);
 
 	if (l2Trigger != 0) {
 		L2AcceptedEvents_.fetch_add(1, std::memory_order_relaxed);
@@ -115,14 +212,18 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 //Global L2 downscaling
 //		LOG_INFO("L2Downscale Factor " << downscaleFactor);
 //		LOG_INFO("Modulo " << L2AcceptedEvents_ % downscaleFactor);
-		if (L2AcceptedEvents_ % downscaleFactor != 0)
+		if (downscaleFactor && (L2AcceptedEvents_ % downscaleFactor != 0))
 			return 0;
 	}
+
+//	printf("L2TriggerProcessor.cpp: !!!!!!!! Final l2Trigger %x\n", l2Trigger);
+	L2Triggers_[l2Trigger].fetch_add(1, std::memory_order_relaxed);
 	return l2Trigger;
 }
 
 uint_fast8_t L2TriggerProcessor::onNonZSuppressedLKrDataReceived(Event* event) {
-	LOG_INFO("onNonZSuppressedLKrDataReceived - Trigger method not yet implemented!!!!!!!!!!!!");
+	LOG_INFO(
+			"onNonZSuppressedLKrDataReceived - Trigger method not yet implemented!!!!!!!!!!!!");
 	return 1;
 }
 
@@ -132,5 +233,39 @@ void L2TriggerProcessor::async_requestNonZSuppressedLKrData(
 //	cream::L1DistributionHandler::Async_RequestLKRDataUnicast(event,
 //	true, crateCREAMIDs);
 }
+
+void L2TriggerProcessor::writeData(L2Block &l2Block) {
+
+	(l2Block.l2Global).l2BypassProbability = bypassProbability;
+	(l2Block.l2Global).l2FlagMode = flagMode;
+	(l2Block.l2Global).refTimeSourceID = referenceTimeSourceID;
+	(l2Block.l2Global).l2AutoFlagFactor = autoFlagFactor;
+	(l2Block.l2Global).l2ReductionFactor = reductionFactor;
+	(l2Block.l2Global).l2DownscaleFactor = downscaleFactor;
+
+	int numToMaskID;
+	for (int iNum = 0; iNum < numberOfEnabledL0Masks; iNum++) {
+		if (NumToMaskID[iNum] == -1)
+			LOG_ERROR("ERROR! Wrong association of mask ID!");
+		else
+			numToMaskID = NumToMaskID[iNum];
+		(l2Block.l2Mask[iNum]).maskID = numToMaskID;
+		(l2Block.l2Mask[iNum]).triggerWord = l2TriggerWords[numToMaskID];
+		(l2Block.l2Mask[iNum]).numberOfEnabledAlgos =
+				numberOfEnabledAlgos[numToMaskID];
+		(l2Block.l2Mask[iNum]).numberOfFlaggedAlgos =
+				numberOfFlaggedAlgos[numToMaskID];
+
+
+		(l2Block.l2Mask[iNum]).reductionFactor =
+				maskReductionFactor[numToMaskID];
+		(l2Block.l2Mask[iNum]).algoEnableMask = algoEnableMask[numToMaskID];
+		(l2Block.l2Mask[iNum]).algoFlagMask = algoFlagMask[numToMaskID];
+		(l2Block.l2Mask[iNum]).algoLogicMask = algoLogicMask[numToMaskID];
+		(l2Block.l2Mask[iNum]).algoDwScMask = algoDwScMask[numToMaskID];
+
+	}
+}
+
 
 } /* namespace na62 */
