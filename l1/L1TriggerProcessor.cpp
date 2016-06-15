@@ -53,8 +53,8 @@ uint_fast16_t L1TriggerProcessor::algoEnableMask[16];
 uint_fast16_t L1TriggerProcessor::algoFlagMask[16];
 uint_fast16_t L1TriggerProcessor::algoLogicMask[16];
 uint_fast16_t L1TriggerProcessor::algoDwScMask[16];
-uint16_t L1TriggerProcessor::algoDwScFactor[16][6];
-uint8_t L1TriggerProcessor::algoProcessID[16][6];
+uint16_t L1TriggerProcessor::algoDwScFactor[16][10];
+int L1TriggerProcessor::algoProcessID[16][10];
 
 uint_fast16_t L1TriggerProcessor::chodEnableMask = 0;
 uint_fast16_t L1TriggerProcessor::richEnableMask = 0;
@@ -70,13 +70,6 @@ uint_fast16_t L1TriggerProcessor::lavFlagMask = 0;
 uint_fast16_t L1TriggerProcessor::ircsacFlagMask = 0;
 uint_fast16_t L1TriggerProcessor::muvFlagMask = 0;
 
-int L1TriggerProcessor::chodProcessID[16];
-int L1TriggerProcessor::richProcessID[16];
-int L1TriggerProcessor::cedarProcessID[16];
-int L1TriggerProcessor::lavProcessID[16];
-int L1TriggerProcessor::ircsacProcessID[16];
-int L1TriggerProcessor::muvProcessID[16];
-
 uint L1TriggerProcessor::chodAlgorithmId;
 uint L1TriggerProcessor::richAlgorithmId;
 uint L1TriggerProcessor::cedarAlgorithmId;
@@ -87,6 +80,9 @@ uint L1TriggerProcessor::muvAlgorithmId;
 uint_fast8_t L1TriggerProcessor::l0TrigWord = 0;
 uint_fast8_t L1TriggerProcessor::l0DataType = 0;
 uint_fast16_t L1TriggerProcessor::l0TrigFlags = 0;
+uint_fast8_t L1TriggerProcessor::l1Trigger = 0;
+uint_fast8_t L1TriggerProcessor::l1GlobalFlagTrigger = 0;
+uint_fast8_t L1TriggerProcessor::l1MaskFlagTrigger = 0;
 
 uint_fast8_t L1TriggerProcessor::chodTrigger = 0;
 uint_fast8_t L1TriggerProcessor::richTrigger = 0;
@@ -98,6 +94,8 @@ uint_fast8_t L1TriggerProcessor::l1TriggerWords[16];
 
 uint L1TriggerProcessor::MaskIDToNum[16];
 uint L1TriggerProcessor::NumToMaskID[16];
+uint L1TriggerProcessor::AlgoIDToNum[16][10];
+uint L1TriggerProcessor::NumToAlgoID[16][10];
 
 uint_fast8_t L1TriggerProcessor::evtRefFineTime;
 
@@ -111,11 +109,12 @@ uint L1TriggerProcessor::numberOfTriggeredL1Masks = 0;
 bool L1TriggerProcessor::isAlgoEnableForAllL0Masks = 0;
 bool L1TriggerProcessor::isReducedEvent = 0;
 bool L1TriggerProcessor::isAllL1AlgoDisable = 0;
+bool L1TriggerProcessor::isL1WhileTimeout = 0;
 uint_fast8_t L1TriggerProcessor::numberOfEnabledL0Masks = 0;
 
 std::vector<int> L1TriggerProcessor::l0MaskIDs;
-uint_fast32_t L1TriggerProcessor::L1DataPacketLength = 0;
-L1Block* L1TriggerProcessor::l1Block;
+uint_fast32_t L1TriggerProcessor::L1DataPacketSize = 0;
+char * L1TriggerProcessor::buffer(nullptr);
 
 void L1TriggerProcessor::registerReductionAlgorithms() {
 	uint numberOfRegisteredAlgorithms = 0;
@@ -139,6 +138,27 @@ bool L1TriggerProcessor::isRequestZeroSuppressedCreamData(
 	return l1TriggerTypeWord != TRIGGER_L1_SPECIAL;
 }
 
+void L1TriggerProcessor::clear() {
+	l1Trigger = 0;
+	l1GlobalFlagTrigger = 0;
+	l1MaskFlagTrigger = 0;
+	isL1Bypassed = 0;
+	isAllL1AlgoDisable = 0;
+	isL1WhileTimeout = 0;
+	numberOfTriggeredL1Masks = 0;
+	isL0PhysicsTrigger = 0;
+	isL0PeriodicTrigger = 0;
+	isL0ControlTrigger = 0;
+	isReducedEvent = 0;
+	isAlgoEnableForAllL0Masks = 0;
+	chodTrigger = 0;
+	richTrigger = 0;
+	cedarTrigger = 0;
+	lavTrigger = 0;
+	ircsacTrigger = 0;
+	muvTrigger = 0;
+}
+
 void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 	// Seed for rand()
 	srand(time(NULL));
@@ -147,21 +167,32 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 	numberOfEnabledL0Masks = l0MaskIDs.size();
 //	LOG_INFO("numberOfEnabledL0Masks " << (uint)numberOfEnabledL0Masks);
 
-	L1DataPacketLength = sizeof(L1Global)
-			+ numberOfEnabledL0Masks * sizeof(L1Mask);
-	char* payload = new char[(uint) L1DataPacketLength];
-	l1Block = (L1Block *) (payload);
-
 	for (int i = 0; i != 0xFF + 1; i++) {
 		L1Triggers_[i] = 0;
 	}
 	eventCountersByL0MaskByAlgoID_ = new std::atomic<uint64_t>*[16];
+
 	for (int i = 0; i != 16; ++i) {
-		eventCountersByL0MaskByAlgoID_[i] = new std::atomic<uint64_t>[6] { };
+		eventCountersByL0MaskByAlgoID_[i] = new std::atomic<uint64_t>[10] { };
 		L1AcceptedEventsPerL0Mask_[i] = 0;
 		L1InputReducedEventsPerL0Mask_[i] = 0;
-		for (int j = 0; j != 6; ++j) {
+		numberOfEnabledAlgos[i] = 0;
+		numberOfFlaggedAlgos[i] = 0;
+		numberOfEnabledAndFlaggedAlgos[i] = 0;
+		maskReductionFactor[i] = 0;
+		algoEnableMask[i] = 0;
+		algoFlagMask[i] = 0;
+		algoLogicMask[i] = 0;
+		algoDwScMask[i] = 0;
+		NumToMaskID[i] = -1;
+		MaskIDToNum[i] = -1;
+		l1TriggerWords[i] = 0;
+		for (int j = 0; j != 10; ++j) {
 			eventCountersByL0MaskByAlgoID_[i][j] = 0;
+			algoDwScFactor[i][j] = 1;
+			algoProcessID[i][j] = -1;
+			NumToAlgoID[i][j] = -1;
+			AlgoIDToNum[i][j] = -1;
 		}
 	}
 
@@ -179,10 +210,6 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 		/*
 		 * Initialisation of 16 L0 trigger masks
 		 */
-		NumToMaskID[i] = -1;
-		MaskIDToNum[i] = -1;
-		l1TriggerWords[i] = 0;
-
 		if (!i) {
 			chodAlgorithmId = l1Struct.l1Mask[i].chod.configParams.l1TrigMaskID;
 			richAlgorithmId = l1Struct.l1Mask[i].rich.configParams.l1TrigMaskID;
@@ -250,7 +277,7 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 
 		numberOfEnabledAndFlaggedAlgos[i] = __builtin_popcount(
 				(uint) (algoEnableMask[i] & algoFlagMask[i]));
-//		LOG_INFO("number of Enabled algo " << numberOfEnabledAlgos[i] << " Flagged " << numberOfFlaggedAlgos[i] << " EnabledAndFlagged " << numberOfEnabledAndFlaggedAlgos[i]);
+//		LOG_INFO("L0 Mask " << i << " number of Enabled algo " << numberOfEnabledAlgos[i] << " Flagged " << numberOfFlaggedAlgos[i] << " EnabledAndFlagged " << numberOfEnabledAndFlaggedAlgos[i]);
 
 		algoLogicMask[i] = (l1Struct.l1Mask[i].muv.configParams.l1TrigLogic
 				<< muvAlgorithmId)
@@ -287,32 +314,37 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 		algoDwScFactor[i][(uint) muvAlgorithmId] =
 				l1Struct.l1Mask[i].muv.configParams.l1TrigDSFactor;
 
-		/*
-		 std::bitset<8> enableMask(algoEnableMask[i]);
-		 std::bitset<8> dwscMask(algoDwScMask[i]);
-		 LOG_INFO("Downscale Factors CHOD: "
-		 << algoDwScFactor[i][(uint) chodAlgorithmId]
-		 << " RICH: "
-		 << algoDwScFactor[i][(uint) richAlgorithmId]
-		 << " KTAG: "
-		 << algoDwScFactor[i][(uint) cedarAlgorithmId]
-		 << " LAV: "
-		 << algoDwScFactor[i][(uint) lavAlgorithmId]);
-		 */
+		algoProcessID[i][(uint) chodAlgorithmId] =
+				l1Struct.l1Mask[i].chod.configParams.l1TrigProcessID;
+		algoProcessID[i][(uint) richAlgorithmId] =
+				l1Struct.l1Mask[i].rich.configParams.l1TrigProcessID;
+		algoProcessID[i][(uint) cedarAlgorithmId] =
+				l1Struct.l1Mask[i].ktag.configParams.l1TrigProcessID;
+		algoProcessID[i][(uint) lavAlgorithmId] =
+				l1Struct.l1Mask[i].lav.configParams.l1TrigProcessID;
+		algoProcessID[i][(uint) ircsacAlgorithmId] =
+				l1Struct.l1Mask[i].ircsac.configParams.l1TrigProcessID;
+		algoProcessID[i][(uint) muvAlgorithmId] =
+				l1Struct.l1Mask[i].muv.configParams.l1TrigProcessID;
+
+//		LOG_INFO("L0Mask " << i << " ProcessID CHOD: " << algoProcessID[i][(uint) chodAlgorithmId] << " RICH: " << algoProcessID[i][(uint) richAlgorithmId] << " KTAG: " << algoProcessID[i][(uint) cedarAlgorithmId] << " LAV: " << algoProcessID[i][(uint) lavAlgorithmId] << " IRCSAC: " << algoProcessID[i][(uint) ircsacAlgorithmId] << " MUV3: " << algoProcessID[i][(uint) muvAlgorithmId]);
+
+//		std::bitset<8> enableMask(algoEnableMask[i]);
+//		std::bitset<8> flagMask(algoFlagMask[i]);
+//		std::bitset<8> logicMask(algoLogicMask[i]);
+//		std::bitset<8> dwscMask(algoDwScMask[i]);
+//		LOG_INFO("algoEnableMask " << i << " " << enableMask);
+//		LOG_INFO("algoFlagMask " << i << " " << flagMask);
+//		LOG_INFO("algoLogicMask " << i << " " << logicMask);
+//		LOG_INFO("algoDwScMask " << i << " " << dwscMask);
+
+//		LOG_INFO("Downscale Factors CHOD: " << algoDwScFactor[i][(uint) chodAlgorithmId] << " RICH: " << algoDwScFactor[i][(uint) richAlgorithmId] << " KTAG: " << algoDwScFactor[i][(uint) cedarAlgorithmId] << " LAV: " << algoDwScFactor[i][(uint) lavAlgorithmId]);
+
 		CHODAlgo::initialize(i, l1Struct.l1Mask[i].chod);
 //		RICHAlgo::initialize(l1Struct.l1Mask[i].rich);
 		KtagAlgo::initialize(i, l1Struct.l1Mask[i].ktag);
 		LAVAlgo::initialize(i, l1Struct.l1Mask[i].lav);
 		MUV3Algo::initialize(i, l1Struct.l1Mask[i].muv);
-
-		chodProcessID[i] = l1Struct.l1Mask[i].chod.configParams.l1TrigProcessID;
-		richProcessID[i] = l1Struct.l1Mask[i].rich.configParams.l1TrigProcessID;
-		cedarProcessID[i] =
-				l1Struct.l1Mask[i].ktag.configParams.l1TrigProcessID;
-		lavProcessID[i] = l1Struct.l1Mask[i].lav.configParams.l1TrigProcessID;
-		ircsacProcessID[i] =
-				l1Struct.l1Mask[i].ircsac.configParams.l1TrigProcessID;
-		muvProcessID[i] = l1Struct.l1Mask[i].muv.configParams.l1TrigProcessID;
 
 		chodEnableMask |= (l1Struct.l1Mask[i].chod.configParams.l1TrigEnable
 				<< i);
@@ -352,13 +384,30 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 	 std::bitset<16> lavFlag(lavFlagMask);
 	 LOG_INFO("Flag Masks: CHOD " << chodFlag << " KTAG " << cedarFlag << " LAV " << lavFlag);
 	 */
+	L1DataPacketSize = sizeof(L1Global);
+
 	int num = 0;
+	int algoNum = 0;
 	for (int l0Mask : l0MaskIDs) {
 		NumToMaskID[num] = l0Mask;
 		MaskIDToNum[l0Mask] = num;
-//		LOG_INFO("Initialization of Enabled Masks " << num << " " << l0Mask);
+//		LOG_INFO("Initialization of Enabled Masks " << MaskIDToNum[l0Mask] << " " << NumToMaskID[num]);
+		L1DataPacketSize += (sizeof(L1Mask)
+				+ numberOfEnabledAlgos[l0Mask] * sizeof(L1Algo));
+		for (int i = 0; i != 16; i++) {
+			if (algoEnableMask[l0Mask] & (1 << i)) {
+				NumToAlgoID[num][algoNum] = i;
+				AlgoIDToNum[num][i] = algoNum;
+//				LOG_INFO("Initialization of Enabled Algos " << AlgoIDToNum[num][i] << " " << NumToAlgoID[num][algoNum]);
+				algoNum++;
+			}
+		}
 		num++;
+		algoNum = 0;
 	}
+
+//	LOG_INFO("Size of L1 Data Packet " << (uint)L1DataPacketSize);
+	buffer = new char[(uint) L1DataPacketSize]();
 }
 
 uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
@@ -368,12 +417,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	event->readTriggerTypeWordAndFineTime();
 	evtRefFineTime = event->getFinetime();
 
-	uint_fast8_t l1Trigger = 0;
-	uint_fast8_t l1GlobalFlagTrigger = 0;
-	uint_fast8_t l1MaskFlagTrigger = 0;
-	isL1Bypassed = 0;
-	isAllL1AlgoDisable = 0;
-	numberOfTriggeredL1Masks = 0;
+	L1TriggerProcessor::clear();
 
 	L1InputEvents_.fetch_add(1, std::memory_order_relaxed);
 //	LOG_INFO("L1Event number after adding 1 " << L1InputEvents_);
@@ -398,7 +442,9 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 				| ((l1MaskFlagTrigger != 0) << 6) | (isL1Bypassed << 5)
 				| (isAllL1AlgoDisable << 4) | (numberOfTriggeredL1Masks != 0);
 		L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed);
-//		L1TriggerProcessor::writeData(*l1Block);
+//		printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %8x\n",l1Trigger);
+		L1TriggerProcessor::writeL1Data(event);
+//		L1TriggerProcessor::readL1Data(event);
 		return l1Trigger;
 	}
 	if (event->isPulserGTKTriggerEvent() || bypassEvent()) {
@@ -408,7 +454,9 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 				| ((l1MaskFlagTrigger != 0) << 6) | (isL1Bypassed << 5)
 				| (isAllL1AlgoDisable << 4) | (numberOfTriggeredL1Masks != 0);
 		L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed);
-//		L1TriggerProcessor::writeData(*l1Block);
+//		printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %8x\n",l1Trigger);
+		L1TriggerProcessor::writeL1Data(event);
+//		L1TriggerProcessor::readL1Data(event);
 		return l1Trigger;
 	}
 
@@ -442,17 +490,12 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 			SourceIDManager::TS_SOURCEID_NUM)->getFragment(0);
 	event->setTimestamp(tsFragment->getTimestamp());
 
-	isL0PhysicsTrigger = 0;
-	isL0PeriodicTrigger = 0;
-	isL0ControlTrigger = 0;
-	isReducedEvent = 0;
-	isAlgoEnableForAllL0Masks = 0;
-	chodTrigger = 0;
-	richTrigger = 0;
-	cedarTrigger = 0;
-	lavTrigger = 0;
-	ircsacTrigger = 0;
-	muvTrigger = 0;
+	KtagAlgo::clear();
+	CHODAlgo::clear();
+	LAVAlgo::clear();
+	MUV3Algo::clear();
+	l1Info_->resetL1CHODProcessed();
+
 	uint_fast8_t l1TriggerTmp;
 	uint_fast8_t l1FlagTrigger;
 	uint watchingWhileLoops;
@@ -500,7 +543,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 						&& l1ProcessID != numberOfEnabledAlgos[i]) {
 
 					if ((chodEnableMask & (1 << i))
-							&& (chodProcessID[i] == l1ProcessID)
+							&& (algoProcessID[i][chodAlgorithmId] == l1ProcessID)
 							&& SourceIDManager::isChodActive()) {
 						if (!CHODAlgo::isAlgoProcessed()) {
 							chodTrigger = CHODAlgo::processCHODTrigger(i,
@@ -542,7 +585,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 					 break;
 					 */
 					if ((cedarEnableMask & (1 << i))
-							&& cedarProcessID[i] == l1ProcessID
+							&& algoProcessID[i][cedarAlgorithmId] == l1ProcessID
 							&& SourceIDManager::isCedarActive()) {
 						if (!KtagAlgo::isAlgoProcessed()) {
 							cedarTrigger = KtagAlgo::processKtagTrigger(i,
@@ -566,7 +609,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 					}
 
 					if ((lavEnableMask & (1 << i))
-							&& lavProcessID[i] == l1ProcessID
+							&& algoProcessID[i][lavAlgorithmId] == l1ProcessID
 							&& SourceIDManager::isLavActive()) {
 						if (!LAVAlgo::isAlgoProcessed()) {
 							lavTrigger = LAVAlgo::processLAVTrigger(i, decoder,
@@ -589,7 +632,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 					}
 
 					if ((muvEnableMask & (1 << i))
-							&& muvProcessID[i] == l1ProcessID
+							&& algoProcessID[i][muvAlgorithmId] == l1ProcessID
 							&& SourceIDManager::isMUV3Active()) {
 						if (!MUV3Algo::isAlgoProcessed()) {
 							muvTrigger = MUV3Algo::processMUV3Trigger0(i,
@@ -618,9 +661,11 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 				}
 
 				if ((watchingWhileLoops == 10)
-						&& (l1ProcessID != numberOfEnabledAlgos[i]))
+						&& (l1ProcessID != numberOfEnabledAlgos[i])) {
+					isL1WhileTimeout++;
 					LOG_ERROR(
 							"TimeOut while loop: check why enabled algos do not get processed !");
+				}
 
 //				LOG_INFO("watchingWhileLoops " << watchingWhileLoops);
 //				LOG_INFO("isReducedEvent " << isReducedEvent);
@@ -676,19 +721,6 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 
 //		printf("Summary of Triggered Masks: %d\n", numberOfTriggeredL1Masks);
 //		for (int i = 0; i != 16; i++) printf("Summary of Trigger Words: l1Trigger %x\n",l1TriggerWords[i]);
-
-		if (l1Info_->isL1CHODProcessed())
-			l1Info_->resetL1CHODProcessed();
-//	LOG_INFO("Reset L1CHODProcessed boolean " << l1Info_->isL1CHODProcessed());
-
-		if (CHODAlgo::isAlgoProcessed())
-			CHODAlgo::resetAlgoProcessed();
-		if (KtagAlgo::isAlgoProcessed())
-			KtagAlgo::resetAlgoProcessed();
-		if (LAVAlgo::isAlgoProcessed())
-			LAVAlgo::resetAlgoProcessed();
-		if (MUV3Algo::isAlgoProcessed())
-			MUV3Algo::resetAlgoProcessed();
 	}
 
 	/*
@@ -721,45 +753,6 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 			| ((l1MaskFlagTrigger != 0) << 6) | (isL1Bypassed << 5)
 			| (isAllL1AlgoDisable << 4) | (numberOfTriggeredL1Masks != 0);
 
-	/*
-	 if (isL0ControlTrigger) {
-	 l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | (1 << 4)
-	 | (numberOfTriggeredL1Masks != 0);
-	 event->setRrequestZeroSuppressedCreamData(true);
-	 L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed);
-	 printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %x\n",
-	 l1Trigger);
-	 L1TriggerProcessor::writeData(*l1Block);
-	 return l1Trigger;
-	 }
-
-	 if (isL0PeriodicTrigger) {
-	 l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | (1 << 5)
-	 | (numberOfTriggeredL1Masks != 0);
-	 event->setRrequestZeroSuppressedCreamData(true);
-	 L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed);
-	 printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %x\n",
-	 l1Trigger);
-	 L1TriggerProcessor::writeData(*l1Block);
-	 return l1Trigger;
-	 }
-
-	 if (isAllL1AlgoDisable) {
-	 l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | (1 << 6)
-	 | (numberOfTriggeredL1Masks != 0);
-	 event->setRrequestZeroSuppressedCreamData(true);
-	 L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed);
-	 printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %x\n",
-	 l1Trigger);
-	 L1TriggerProcessor::writeData(*l1Block);
-	 return l1Trigger;
-	 }
-	 */
-//	LOG_INFO((uint) l1GlobalFlagTrigger << " " << isDownscaledAndFlaggedEvent << " " << ((uint) l1GlobalFlagTrigger && !isDownscaledAndFlaggedEvent));
-//	l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | (numberOfTriggeredL1Masks != 0);
-//	l1Trigger = (((uint) l1GlobalFlagTrigger || !isDownscaledAndFlaggedEvent) << 7) | l1TriggerWords[2];
-//	l1Trigger = (l1GlobalFlagTrigger << 7) | (lavTrigger << 3) | (cedarTrigger << 2) | (richTrigger << 1) | chodTrigger;
-//	l1Trigger = (cedarTrigger != 0 && chodTrigger != 0);
 	if (l1Trigger != 0) {
 		/*
 		 * TODO: Pass this counter to Nicolas to print number of events before downscaling
@@ -777,7 +770,9 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 		 */
 		event->setRrequestZeroSuppressedCreamData(true);
 		event->setProcessingID(0); // 0 indicates raw data as collected from the detector
-//		L1TriggerProcessor::writeData(*l1Block);
+		L1TriggerProcessor::writeL1Data(event);
+//		L1TriggerProcessor::readL1Data(event);
+
 	}
 
 //	std::bitset<8> l1TrgWrd(l1Trigger);
@@ -787,93 +782,197 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	return l1Trigger;
 }
 
-void L1TriggerProcessor::writeData(L1Block &l1Block) {
+void L1TriggerProcessor::readL1Data(Event* const event) {
+	const l0::MEPFragment* const L1TPEvent =
+			event->getL1ResultSubevent()->getFragment(0);
+	char* pload = (char*) L1TPEvent->getPayload();
+	uint_fast16_t length = (uint_fast16_t) L1TPEvent->getPayloadLength();
+	if ((uint) length != (uint) L1DataPacketSize)
+		LOG_ERROR(
+				"length (in bytes) " << (uint)length << " is different from l1DataPacketsSize " << (uint)L1DataPacketSize);
+	uint32_t dataWord;
+	for (uint i = 0; i != (uint) L1DataPacketSize / 4; i++) {
+		L1Data* dataPacket = (L1Data*) pload + i;
+		std::bitset<32> data((uint) dataPacket->dataWords);
+		LOG_INFO("L1 Data " << data);
+	}
+}
+void L1TriggerProcessor::writeL1Data(Event* const event) {
 
-	(l1Block.l1Global).PCfarmSoftwareID = 0; //Fill with correct value!!!
-	(l1Block.l1Global).refFineTime = evtRefFineTime;
-	(l1Block.l1Global).l0TriggerType = l0TrigWord;
-	(l1Block.l1Global).l0DataType = l0DataType;
-	(l1Block.l1Global).l0TriggerFlags = l0TrigFlags;
-	(l1Block.l1Global).l1BypassProbability = bypassProbability;
-	(l1Block.l1Global).l1FlagMode = flagMode;
-	(l1Block.l1Global).refTimeSourceID = referenceTimeSourceID;
-	(l1Block.l1Global).l1AutoFlagFactor = autoFlagFactor;
-	(l1Block.l1Global).l1ReductionFactor = reductionFactor;
-	(l1Block.l1Global).l1DownscaleFactor = downscaleFactor;
-//	LOG_INFO(
-//			"refFineTime " << (uint)(l1Block.l1Global).refFineTime << " l0TriggerType " << (uint)(l1Block.l1Global).l0TriggerType << " l0DataType " << (uint)(l1Block.l1Global).l0DataType);
-//	LOG_INFO(
-//			"triggerFlags " << (uint)(l1Block.l1Global).l0TriggerFlags << " bypassProb " << (uint)(l1Block.l1Global).l1BypassProbability);
-//	LOG_INFO(
-//			"flagMode " << (uint)(l1Block.l1Global).l1FlagMode << " refTimeSourceID "<< (uint)(l1Block.l1Global).refTimeSourceID);
-//	LOG_INFO(
-//			"autoFlagFactor " << (uint)(l1Block.l1Global).l1AutoFlagFactor << " reductionFactor "<< (uint)(l1Block.l1Global).l1ReductionFactor);
-//	LOG_INFO("downscaleFactor " << (uint)(l1Block.l1Global).l1DownscaleFactor);
+	uint nBlockHeaderWords = 0;
+	uint_fast8_t refTimeSourceID = 0;
+	uint_fast8_t refTimeSourceID_tmp = 0;
+	memset(reinterpret_cast<void*>(buffer), 0, (uint) L1DataPacketSize);
 
+	L1Global* globalPacket = reinterpret_cast<L1Global*>(buffer);
+
+	globalPacket->globalPacketLength = sizeof(L1Global);
+	globalPacket->refFineTime = evtRefFineTime;
+	globalPacket->refTimeSourceID = referenceTimeSourceID;
+	globalPacket->flagMode = flagMode;
+	globalPacket->format = 0;
+	globalPacket->downscaleFactor = downscaleFactor;
+	globalPacket->reductionFactor = reductionFactor;
+	globalPacket->numberOfEnabledMasks = numberOfEnabledL0Masks;
+	globalPacket->bypassProbability = bypassProbability;
+	globalPacket->autoFlagFactor = autoFlagFactor;
+
+	nBlockHeaderWords += sizeof(L1Global); //3 32-bit header words for global part
+
+	/*
+	 LOG_INFO("L0 Trigger Flags " << (uint)l0TrigFlags);
+	 LOG_INFO(
+	 "Global Packet Length " << (uint)globalPacket->globalPacketLength << " refFineTime " << (uint)globalPacket->refFineTime << " RefTimeSourceID "<< (uint)globalPacket->refTimeSourceID << " flagMode " << (uint)globalPacket->flagMode << " format " << (uint)globalPacket->format);
+	 LOG_INFO(
+	 "DownscaleFactor " << (uint)globalPacket->downscaleFactor << " reductionFactor "<< (uint)globalPacket->reductionFactor);
+	 LOG_INFO(
+	 "Number of Enabled Masks " << (uint)globalPacket->numberOfEnabledMasks << " bypassProb " << (uint)globalPacket->bypassProbability << " autoFlagFactor " << (uint)globalPacket->autoFlagFactor);
+	 */
+
+	uint nMaskWords = 0;
 	int numToMaskID;
+	int numToAlgoID;
 	for (int iNum = 0; iNum < numberOfEnabledL0Masks; iNum++) {
 		if (NumToMaskID[iNum] == -1)
 			LOG_ERROR("ERROR! Wrong association of mask ID!");
 		else
 			numToMaskID = NumToMaskID[iNum];
-		(l1Block.l1Mask[iNum]).maskID = numToMaskID;
-		(l1Block.l1Mask[iNum]).triggerWord = l1TriggerWords[numToMaskID];
-		(l1Block.l1Mask[iNum]).numberOfEnabledAlgos =
-				numberOfEnabledAlgos[numToMaskID];
-		(l1Block.l1Mask[iNum]).numberOfFlaggedAlgos =
-				numberOfFlaggedAlgos[numToMaskID];
-		(l1Block.l1Mask[iNum]).reductionFactor =
-				maskReductionFactor[numToMaskID];
-		(l1Block.l1Mask[iNum]).algoEnableMask = algoEnableMask[numToMaskID];
-		(l1Block.l1Mask[iNum]).algoFlagMask = algoFlagMask[numToMaskID];
-		(l1Block.l1Mask[iNum]).algoLogicMask = algoLogicMask[numToMaskID];
-		(l1Block.l1Mask[iNum]).algoDwScMask = algoDwScMask[numToMaskID];
 
-//		LOG_INFO(
-//				"maskID " << (uint)(l1Block.l1Mask[iNum]).maskID << " triggerWord " << (uint)(l1Block.l1Mask[iNum]).triggerWord);
-//		LOG_INFO(
-//				"numberOfEnabledAlgos " << (uint)(l1Block.l1Mask[iNum]).numberOfEnabledAlgos << " numberOfFlaggedAlgos " << (uint)(l1Block.l1Mask[iNum]).numberOfFlaggedAlgos);
-//		LOG_INFO(
-//				"reductionFactor " << (uint)(l1Block.l1Mask[iNum]).reductionFactor << " enableMask "<< (uint)(l1Block.l1Mask[iNum]).algoEnableMask);
-//		LOG_INFO(
-//				"flagMask " << (uint)(l1Block.l1Mask[iNum]).algoFlagMask << " logicMask "<< (uint)(l1Block.l1Mask[iNum]).algoLogicMask);
-//		LOG_INFO("downscaleMask " << (uint)(l1Block.l1Mask[iNum]).algoDwScMask);
+		L1Mask* maskPacket = (L1Mask*) (buffer + nBlockHeaderWords + nMaskWords);
 
-		(l1Block.l1Mask[iNum]).l1Algo[chodAlgorithmId].l1AlgoDSFactor =
-				algoDwScFactor[numToMaskID][chodAlgorithmId];
-		(l1Block.l1Mask[iNum]).l1Algo[cedarAlgorithmId].l1AlgoDSFactor =
-				algoDwScFactor[numToMaskID][cedarAlgorithmId];
-		(l1Block.l1Mask[iNum]).l1Algo[lavAlgorithmId].l1AlgoDSFactor =
-				algoDwScFactor[numToMaskID][lavAlgorithmId];
-		(l1Block.l1Mask[iNum]).l1Algo[ircsacAlgorithmId].l1AlgoDSFactor =
-				algoDwScFactor[numToMaskID][ircsacAlgorithmId];
-		(l1Block.l1Mask[iNum]).l1Algo[muvAlgorithmId].l1AlgoDSFactor =
-				algoDwScFactor[numToMaskID][muvAlgorithmId];
+		maskPacket->numberOfEnabledAlgos = numberOfEnabledAlgos[numToMaskID];
+		maskPacket->triggerWord = l1TriggerWords[numToMaskID];
+		maskPacket->maskID = numToMaskID;
+		if (numberOfEnabledAndFlaggedAlgos[numToMaskID])
+			maskPacket->flags |= (1 << 6);
+		if (!numberOfEnabledAlgos[numToMaskID])
+			maskPacket->flags |= (1 << 4);
+		if (isL1WhileTimeout)
+			maskPacket->flags |= (1 << 2);
+		maskPacket->reductionFactor = maskReductionFactor[numToMaskID];
+		maskPacket->reserved = 0;
 
-//		LOG_INFO(
-//				"chodAlgo " << (uint)chodAlgorithmId << " DSFactor " << (uint)(l1Block.l1Mask[iNum]).l1Algo[chodAlgorithmId].l1AlgoDSFactor);
-//		LOG_INFO(
-//				"cedarAlgo " << (uint)cedarAlgorithmId << " DSFactor " << (uint)(l1Block.l1Mask[iNum]).l1Algo[cedarAlgorithmId].l1AlgoDSFactor);
-//		LOG_INFO(
-//				"lavAlgo " << (uint)lavAlgorithmId << " DSFactor " << (uint)(l1Block.l1Mask[iNum]).l1Algo[lavAlgorithmId].l1AlgoDSFactor);
+		nMaskWords += sizeof(L1Mask); //2 32-bit header words for each mask
 
-		(l1Block.l1Mask[iNum]).l1Algo[chodAlgorithmId].l1AlgoProcessID =
-				chodProcessID[numToMaskID];
-		(l1Block.l1Mask[iNum]).l1Algo[cedarAlgorithmId].l1AlgoProcessID =
-				cedarProcessID[numToMaskID];
-		(l1Block.l1Mask[iNum]).l1Algo[lavAlgorithmId].l1AlgoProcessID =
-				lavProcessID[numToMaskID];
-		(l1Block.l1Mask[iNum]).l1Algo[ircsacAlgorithmId].l1AlgoProcessID =
-				ircsacProcessID[numToMaskID];
-		(l1Block.l1Mask[iNum]).l1Algo[muvAlgorithmId].l1AlgoProcessID =
-				muvProcessID[numToMaskID];
-//		LOG_INFO(
-//				"chodAlgo " << (uint)chodAlgorithmId << " ProcessID " << (uint)(l1Block.l1Mask[iNum]).l1Algo[chodAlgorithmId].l1AlgoProcessID);
-//		LOG_INFO(
-//				"cedarAlgo " << (uint)cedarAlgorithmId << " ProcessID " << (uint)(l1Block.l1Mask[iNum]).l1Algo[cedarAlgorithmId].l1AlgoProcessID);
-//		LOG_INFO(
-//				"lavAlgo " << (uint)lavAlgorithmId << " ProcessID " << (uint)(l1Block.l1Mask[iNum]).l1Algo[lavAlgorithmId].l1AlgoProcessID);
+		/*
+		 LOG_INFO(
+		 "maskID " << (uint) maskPacket->maskID << " triggerWord " << (uint) maskPacket->triggerWord);
+		 LOG_INFO(
+		 "numberOfEnabledAlgos " << (uint)maskPacket->numberOfEnabledAlgos);
+		 LOG_INFO("reductionFactor " << (uint)maskPacket->reductionFactor);
+
+		 std::bitset<8> maskFlag((uint) maskPacket->flags);
+		 LOG_INFO("Flags " << (uint)maskPacket->flags << " " << maskFlag);
+		 */
+
+		for (int iAlgoNum = 0; iAlgoNum < numberOfEnabledAlgos[numToMaskID];
+				iAlgoNum++) {
+			if (NumToAlgoID[iNum][iAlgoNum] == -1)
+				LOG_ERROR("ERROR! Wrong association of algo ID!");
+			else
+				numToAlgoID = NumToAlgoID[iNum][iAlgoNum];
+
+			L1Algo* algoPacket = (L1Algo*) (buffer + nBlockHeaderWords
+					+ nMaskWords);
+
+			if (l0TrigFlags & (1 << numToMaskID)) {
+
+				algoPacket->processID = algoProcessID[numToMaskID][numToAlgoID];
+				algoPacket->algoID = numToAlgoID;
+				algoPacket->downscaleFactor =
+						algoDwScFactor[numToMaskID][numToAlgoID];
+				/*
+				 LOG_INFO(
+				 "Enable " << ((algoEnableMask[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID));
+				 LOG_INFO(
+				 "Flag " << ((algoFlagMask[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID));
+				 LOG_INFO(
+				 "Logic " << ((algoLogicMask[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID));
+				 LOG_INFO(
+				 "DwSc " << ((algoDwScMask[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID));
+				 */
+
+				algoPacket->algoFlags = (((algoEnableMask[numToMaskID]
+						& (1 << numToAlgoID)) >> numToAlgoID) << 6)
+						| (((algoFlagMask[numToMaskID] & (1 << numToAlgoID))
+								>> numToAlgoID) << 4)
+						| (((algoLogicMask[numToMaskID] & (1 << numToAlgoID))
+								>> numToAlgoID) << 2)
+						| (((algoDwScMask[numToMaskID] & (1 << numToAlgoID))
+								>> numToAlgoID));
+
+				writeAlgoPacket(numToAlgoID, algoPacket, numToMaskID);
+
+				refTimeSourceID_tmp = (algoPacket->qualityFlags & 0x3);
+				if (refTimeSourceID != refTimeSourceID_tmp)
+					refTimeSourceID = refTimeSourceID_tmp;
+			} else {
+				algoPacket->numberOfWords = (sizeof(L1Algo) / 4.);
+			}
+
+			nMaskWords += sizeof(L1Algo);
+
+			/*
+			 LOG_INFO("Algo ID " << (uint) algoPacket->algoID << " Algo ProcessID " << (uint)algoPacket->processID);
+			 LOG_INFO("Quality Flags " << (uint) algoPacket->qualityFlags << " Algo Flags " << (uint)algoPacket->algoFlags);
+
+			 std::bitset<8> algoFlag((uint) algoPacket->algoFlags);
+			 std::bitset<8> qualityFlag((uint) algoPacket->qualityFlags);
+			 LOG_INFO("Quality Flags " << qualityFlag << " Algo Flags " << algoFlag);
+
+			 LOG_INFO("Number of Words " << (uint) algoPacket->numberOfWords << " DS Factor " << (uint)algoPacket->downscaleFactor);
+			 LOG_INFO("Online TW " << (uint)algoPacket->onlineTimeWindow);
+			 LOG_INFO("L1 Data[0] " << (uint) algoPacket->l1Data[0] << " L1 Data[1] " << (uint)algoPacket->l1Data[1]);
+			 */
+		}
+
+		maskPacket->referenceTimeSourceID = refTimeSourceID;
+		if (!refTimeSourceID)
+			maskPacket->referenceFineTime = evtRefFineTime;
+		else if (refTimeSourceID == 1 && l1Info_->isL1CHODProcessed())
+			maskPacket->referenceFineTime =
+					(uint8_t) l1Info_->getCHODAverageTime();
+//		LOG_INFO("Mask Ref Finetime " << (uint)maskPacket->referenceFineTime);
+//		LOG_INFO("Mask Ref Finetime Source ID " << (uint)maskPacket->referenceTimeSourceID);
+	}
+
+	const l0::MEPFragment* const L1TPEvent =
+			event->getL1ResultSubevent()->getFragment(0);
+	char* payload = (char*) L1TPEvent->getPayload();
+	memcpy(payload, buffer, L1DataPacketSize);
+}
+
+bool L1TriggerProcessor::writeAlgoPacket(int algoID, L1Algo* algoPacket,
+		uint l0MaskID) {
+	switch (algoID) {
+	case 0:
+		CHODAlgo::writeData(algoPacket, l0MaskID);
+		return true;
+	case 1:
+//		RICHAlgo::writeData(algoPacket,l0MaskID);
+		return true;
+	case 2:
+		KtagAlgo::writeData(algoPacket, l0MaskID);
+		return true;
+	case 3:
+		LAVAlgo::writeData(algoPacket, l0MaskID);
+		return true;
+	case 4:
+//		IRCSACAlgo::writeData(algoPacket,l0MaskID);
+		return true;
+	case 5:
+//		StrawAlgo::writeData(algoPacket,l0MaskID);
+		return true;
+	case 6:
+		MUV3Algo::writeData(algoPacket, l0MaskID);
+		return true;
+	case 7:
+//		NewCHODAlgo::writeData(algoPacket,l0MaskID);
+		return true;
+	default:
+		return false;
 	}
 }
+
 }
 /* namespace na62 */

@@ -38,12 +38,13 @@ public:
 	static uint_fast8_t processMUV3Trigger2(uint l0MaskID, DecoderHandler& decoder,
 			L1InfoToStorage* l1Info);
 	static void initialize(uint i,l1MUV &l1MUV3Struct);
+	static void writeData(L1Algo* algoPacket, uint l0MaskID);
 
 	static bool isAlgoProcessed();
 	static void resetAlgoProcessed();
 	static bool isEmptyPacket();
 	static bool isBadData();
-	static void writeData(L1Block &l1Block);
+	static void clear();
 
 private:
 

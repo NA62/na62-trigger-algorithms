@@ -70,6 +70,7 @@ uint_fast8_t CHODAlgo::processCHODTrigger(uint l0MaskID,
 	nMaxSlabs = 6;
 	nHits_H = 0;
 	nHits_V = 0;
+	averageHitTime = 0.;
 
 //	LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
 //	LOG_INFO("CHODAlgo: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
@@ -174,9 +175,6 @@ uint_fast8_t CHODAlgo::processCHODTrigger(uint l0MaskID,
 //	LOG_INFO("CHODAlgo=============== average HitTime " << averageHitTime);
 //	LOG_INFO("CHODAlgo=============== L1CHODProcessed Flag " << (uint)l1Info->isL1CHODProcessed());
 
-	averageHitTime = 0;
-//	LOG_INFO("CHODAlgo=============== reset average HitTime " << averageHitTime);
-
 	if (algoLogic[l0MaskID])
 		return (((nHits_V + nHits_H) > 0) && ((nHits_V + nHits_H) < nMaxSlabs));
 	else
@@ -204,17 +202,28 @@ bool CHODAlgo::isBadData() {
 	return badData;
 }
 
-void CHODAlgo::writeData(L1Block &l1Block) {
+void CHODAlgo::clear() {
+	algoProcessed = 0;
+	emptyPacket = 0;
+	badData = 0;
+}
 
-	int numToMaskID;
-	for (int iNum = 0; iNum < L1TriggerProcessor::GetNumberOfEnabledL0Masks(); iNum++) {
-		numToMaskID = L1TriggerProcessor::GetL0MaskNumToMaskID(iNum);
-		if (numToMaskID == -1)
-			LOG_ERROR("ERROR! Wrong association of mask ID!");
-		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoID = algoID;
-		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoProcessed = algoProcessed;
-		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoOnlineTimeWindow = (uint)algoOnlineTimeWindow[numToMaskID];
-	}
+void CHODAlgo::writeData(L1Algo* algoPacket, uint l0MaskID) {
+
+	if(algoID != algoPacket->algoID) LOG_ERROR("Algo ID does not match with Algo ID written within the packet!");
+	algoPacket->algoID = algoID;
+	algoPacket->onlineTimeWindow = (uint) algoOnlineTimeWindow[l0MaskID];
+	algoPacket->qualityFlags = (algoProcessed << 6) | (emptyPacket << 4) | (badData << 2) | algoRefTimeSourceID[l0MaskID];
+	algoPacket->l1Data[0] = (uint)nHits_V + nHits_H;
+	if(averageHitTime != -1.0e+28) algoPacket->l1Data[1] = averageHitTime;
+	else algoPacket->l1Data[1] = 0;
+	algoPacket->numberOfWords = (sizeof(L1Algo) / 4.);
+//	LOG_INFO("l0MaskID " << l0MaskID);
+//	LOG_INFO("algoID " << (uint)algoPacket->algoID);
+//	LOG_INFO("quality Flags " << (uint)algoPacket->qualityFlags);
+//	LOG_INFO("online TW " << (uint)algoPacket->onlineTimeWindow);
+//	LOG_INFO("Data Words " << algoPacket->l1Data[0] << " " << algoPacket->l1Data[1]);
+
 }
 
 }
