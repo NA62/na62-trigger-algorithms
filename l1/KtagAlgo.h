@@ -31,7 +31,8 @@ public:
 	 *
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
-	static uint_fast8_t processKtagTrigger(uint l0MaskID, DecoderHandler& decoder,L1InfoToStorage* l1Info);
+	static uint_fast8_t processKtagTrigger(uint l0MaskID,
+			DecoderHandler& decoder, L1InfoToStorage* l1Info);
 	/**
 	 * Calculates the sectorID based on the Tel62 and FPGA IDs. Possible results are between 0 and 7
 	 */
@@ -40,12 +41,13 @@ public:
 	}
 
 	static void initialize(uint i, l1KTAG &l1KtagStruct);
-	static void writeData(L1Block &l1Block);
+	static void writeData(L1Algo* algoPacket, uint l0MaskID);
 
 	static bool isAlgoProcessed();
 	static void resetAlgoProcessed();
 	static bool isEmptyPacket();
 	static bool isBadData();
+	static void clear();
 
 private:
 	static uint algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
@@ -58,6 +60,8 @@ private:
 	static bool badData;
 	static bool isCHODRefTime;
 	static double averageCHODHitTime;
+	static uint nSectors_l0tp;
+	static uint nSectors_chod;
 
 };
 
