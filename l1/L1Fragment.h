@@ -12,48 +12,51 @@
 namespace na62 {
 
 struct L1Global {
-	uint32_t PCfarmSoftwareID;
+//	uint32_t PCfarmSoftwareID;
+	uint8_t globalPacketLength; //length of global packet in bytes
 	uint8_t refFineTime;
-	uint8_t l0TriggerType :4;
-	uint8_t l0DataType :4;
-	uint16_t l0TriggerFlags;
-	uint8_t l1BypassProbability;
-	uint8_t l1FlagMode :4;
 	uint8_t refTimeSourceID :4; //not used yet
-	uint16_t l1AutoFlagFactor;
-	uint16_t l1ReductionFactor;
-	uint16_t l1DownscaleFactor;
+	uint8_t flagMode :4;
+	uint8_t format;
+	uint16_t downscaleFactor;
+	uint16_t reductionFactor;
+	uint8_t numberOfEnabledMasks;
+	uint8_t bypassProbability;
+	uint16_t autoFlagFactor;
 };
 
-struct L1Algo{
-	uint8_t l1AlgoID :4;
-	uint8_t l1AlgoProcessID :4;
-	uint8_t l1AlgoProcessed :2;
-	uint8_t reserved;
-	uint16_t l1AlgoDSFactor;
-	uint8_t l1AlgoOnlineTimeWindow;
-	uint8_t more_reserved;
+struct L1Algo {
+	uint8_t numberOfWords; //number of 32bit words in Algo packet, 2 header words are included
+	uint8_t processID;
+	uint8_t algoID;
+	uint8_t qualityFlags; //isEmptyPacket, isBadData, isProcessed
+	uint16_t downscaleFactor;
+	uint8_t onlineTimeWindow; //half width of online matching time window
+//	uint8_t l1AlgoProcessed :2;
+	uint8_t algoFlags; //enable, logic, flagging, downscale
+//	uint8_t more_reserved;
+	uint32_t l1Data[2];
+};
+
+struct L1Data {
+	uint32_t dataWords;
 };
 
 struct L1Mask {
+	uint8_t numberOfEnabledAlgos;
 	uint8_t triggerWord;
-	uint8_t numberOfEnabledAlgos :4;
-	uint8_t numberOfFlaggedAlgos :4;
-	uint8_t l1ReferenceFineTime;
-	uint8_t l1ReferenceTimeSourceID :4;
+	uint8_t maskID;
+	uint8_t flags;
 	uint16_t reductionFactor;
-	uint8_t algoEnableMask;
-	uint8_t algoLogicMask;
-	uint8_t algoFlagMask;
-	uint8_t algoDwScMask;
-	L1Algo l1Algo[4];
-	uint8_t maskID  :4;
-	uint32_t data  : 28;
+	uint8_t referenceFineTime;
+	uint8_t referenceTimeSourceID :4;
+	uint8_t reserved :4;
 };
 
 struct L1Block {
 	L1Global l1Global;
 	L1Mask l1Mask[16];
+	L1Algo l1Algo[16][16];
 };
 
 struct L1GLOBAL {
@@ -75,7 +78,5 @@ struct L1_BLOCK {
 };
 
 }
-
-
 
 #endif    /*  L1Fragment_H */

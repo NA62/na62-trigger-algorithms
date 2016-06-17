@@ -364,19 +364,35 @@ bool MUV3Algo::isBadData() {
 	return badData;
 }
 
-void MUV3Algo::writeData(L1Block &l1Block) {
-
-	int numToMaskID;
-	for (int iNum = 0; iNum < L1TriggerProcessor::GetNumberOfEnabledL0Masks(); iNum++) {
-		numToMaskID = L1TriggerProcessor::GetL0MaskNumToMaskID(iNum);
-		if (numToMaskID == -1)
-			LOG_ERROR("ERROR! Wrong association of mask ID!");
-		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoID = algoID;
-		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoProcessed = algoProcessed;
-		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoOnlineTimeWindow =
-				(uint) algoOnlineTimeWindow[numToMaskID];
-	}
+void MUV3Algo::clear() {
+	algoProcessed = 0;
+	emptyPacket = 0;
+	badData = 0;
 }
+
+void MUV3Algo::writeData(L1Algo* algoPacket, uint l0MaskID) {
+
+	if (algoID != algoPacket->algoID)
+		LOG_ERROR(
+				"Algo ID does not match with Algo ID written within the packet!");
+	algoPacket->algoID = algoID;
+	algoPacket->onlineTimeWindow = (uint) algoOnlineTimeWindow[l0MaskID];
+	algoPacket->qualityFlags = (algoProcessed << 6) | (emptyPacket << 4)
+			| (badData << 2) | algoRefTimeSourceID[l0MaskID];
+	algoPacket->l1Data[0] = nTiles;
+	if (algoRefTimeSourceID[l0MaskID] == 1)
+		algoPacket->l1Data[1] = averageCHODHitTime;
+	else
+		algoPacket->l1Data[1] = 0;
+	algoPacket->numberOfWords = (sizeof(L1Algo) / 4.);
+//	LOG_INFO("l0MaskID " << l0MaskID);
+//	LOG_INFO("algoID " << (uint)algoPacket->algoID);
+//	LOG_INFO("quality Flags " << (uint)algoPacket->qualityFlags);
+//	LOG_INFO("online TW " << (uint)algoPacket->onlineTimeWindow);
+//	LOG_INFO("Data Words " << algoPacket->l1Data[0] << " " << algoPacket->l1Data[1]);
+
+}
+
 }
 /* namespace na62 */
 

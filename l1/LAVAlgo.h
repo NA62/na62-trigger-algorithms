@@ -40,12 +40,13 @@ public:
 			DecoderHandler& decoder, L1InfoToStorage* l1Info);
 
 	static void initialize(uint i, l1LAV &l1LAVStruct);
-	static void writeData(L1Block &l1Block);
+	static void writeData(L1Algo* algoPacket, uint l0MaskID);
 
 	static bool isAlgoProcessed();
 	static void resetAlgoProcessed();
 	static bool isEmptyPacket();
 	static bool isBadData();
+	static void clear();
 
 private:
 

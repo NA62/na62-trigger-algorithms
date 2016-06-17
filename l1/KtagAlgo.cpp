@@ -37,6 +37,8 @@ bool KtagAlgo::emptyPacket = 0;
 bool KtagAlgo::badData = 0;
 bool KtagAlgo::isCHODRefTime = 0;
 double KtagAlgo::averageCHODHitTime = 0.;
+uint KtagAlgo::nSectors_l0tp = 0;
+uint KtagAlgo::nSectors_chod = 0;
 
 void KtagAlgo::initialize(uint i, l1KTAG &l1KtagStruct) {
 
@@ -152,8 +154,6 @@ uint_fast8_t KtagAlgo::processKtagTrigger(uint l0MaskID,
 //	LOG_INFO("KtagAlgo.cpp: Analysing Event " << decoder.getDecodedEvent()->getEventNumber() << " - Timestamp " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << " - Total Number of edges found " << nEdges_tot);
 //  LOG_INFO("time check (outside for - all Tel62s)" << time[4].tv_sec << " " << time[4].tv_usec);
 
-	uint nSectors_chod = 0;
-	uint nSectors_l0tp = 0;
 	for (uint iSec = 0; iSec != 8; iSec++) {
 		if (!isCHODRefTime && sector_occupancy_l0tp[iSec])
 			nSectors_l0tp++;
@@ -196,17 +196,39 @@ bool KtagAlgo::isBadData() {
 	return badData;
 }
 
-void KtagAlgo::writeData(L1Block &l1Block) {
+void KtagAlgo::clear() {
+	algoProcessed = 0;
+	emptyPacket = 0;
+	badData = 0;
+	isCHODRefTime = 0;
+	nSectors_l0tp = 0;
+	nSectors_chod = 0;
+}
 
-	int numToMaskID;
-	for (int iNum = 0; iNum < L1TriggerProcessor::GetNumberOfEnabledL0Masks(); iNum++) {
-		numToMaskID = L1TriggerProcessor::GetL0MaskNumToMaskID(iNum);
-		if (numToMaskID == -1)
-			LOG_ERROR("ERROR! Wrong association of mask ID!");
-		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoID = algoID;
-		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoProcessed = algoProcessed;
-		(l1Block.l1Mask[iNum]).l1Algo[algoID].l1AlgoOnlineTimeWindow = (uint)algoOnlineTimeWindow[numToMaskID];
-	}
+void KtagAlgo::writeData(L1Algo* algoPacket, uint l0MaskID) {
+
+	if (algoID != algoPacket->algoID)
+		LOG_ERROR(
+				"Algo ID does not match with Algo ID written within the packet!");
+	algoPacket->algoID = algoID;
+	algoPacket->onlineTimeWindow = (uint) algoOnlineTimeWindow[l0MaskID];
+	algoPacket->qualityFlags = (algoProcessed << 6) | (emptyPacket << 4)
+			| (badData << 2) | algoRefTimeSourceID[l0MaskID];
+	if (algoRefTimeSourceID[l0MaskID] == 1)
+		algoPacket->l1Data[0] = nSectors_chod;
+	else
+		algoPacket->l1Data[0] = nSectors_l0tp;
+	if (algoRefTimeSourceID[l0MaskID] == 1)
+		algoPacket->l1Data[1] = averageCHODHitTime;
+	else
+		algoPacket->l1Data[1] = 0;
+	algoPacket->numberOfWords = (sizeof(L1Algo) / 4.);
+//	LOG_INFO("l0MaskID " << l0MaskID);
+//	LOG_INFO("algoID " << (uint)algoPacket->algoID);
+//	LOG_INFO("quality Flags " << (uint)algoPacket->qualityFlags);
+//	LOG_INFO("online TW " << (uint)algoPacket->onlineTimeWindow);
+//	LOG_INFO("Data Words " << algoPacket->l1Data[0] << " " << algoPacket->l1Data[1]);
+
 }
 
 }
