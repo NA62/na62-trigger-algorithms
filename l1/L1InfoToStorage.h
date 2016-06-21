@@ -37,12 +37,50 @@ public:
 		L1CHODProcessed_ = false;
 	}
 
+	void setL1KTAGProcessed() {
+		L1KTAGProcessed_ = true;
+	}
+
+	bool isL1KTAGProcessed() const {
+		return L1KTAGProcessed_;
+	}
+
+	void resetL1KTAGProcessed() {
+		L1KTAGProcessed_ = false;
+	}
+
+	void setL1LAVProcessed() {
+		L1LAVProcessed_ = true;
+	}
+
+	bool isL1LAVProcessed() const {
+		return L1LAVProcessed_;
+	}
+
+	void resetL1LAVProcessed() {
+		L1LAVProcessed_ = false;
+	}
+
+	void setL1MUV3Processed() {
+		L1MUV3Processed_ = true;
+	}
+
+	bool isL1MUV3Processed() const {
+		return L1MUV3Processed_;
+	}
+
+	void resetL1MUV3Processed() {
+		L1MUV3Processed_ = false;
+	}
 private:
 
 	static L1InfoToStorage* theInstance;  // singleton instance
 
 	double chodTime;
 	bool L1CHODProcessed_;
+	bool L1KTAGProcessed_;
+	bool L1LAVProcessed_;
+	bool L1MUV3Processed_;
 
 };
 
