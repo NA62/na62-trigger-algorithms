@@ -20,6 +20,9 @@ L1InfoToStorage::L1InfoToStorage() {
 	LOG_INFO("********************In L1 InfoToStorage");
 	chodTime = 0.;
 	L1CHODProcessed_ = false;
+	L1KTAGProcessed_ = false;
+	L1LAVProcessed_ = false;
+	L1MUV3Processed_ = false;
 }
 
 L1InfoToStorage::~L1InfoToStorage() {
