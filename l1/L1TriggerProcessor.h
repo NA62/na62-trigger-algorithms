@@ -14,6 +14,7 @@
 #include <cstdint>
 #include <atomic>
 
+#include <eventBuilding/Event.h>
 #include "L1InfoToStorage.h"
 #include "../options/TriggerOptions.h"
 #include "../struct/HLTConfParams.h"
@@ -23,13 +24,13 @@
 
 namespace na62 {
 
-class EventBuilder;
-class Event;
-class KtagAlgo;
-class RICHAlgo;
-class CHODAlgo;
-class LAVAlgo;
-class MUV3Algo;
+//class EventBuilder;
+//class Event;
+//class KtagAlgo;
+//class RICHAlgo;
+//class CHODAlgo;
+//class LAVAlgo;
+//class MUV3Algo;
 
 class L1TriggerProcessor {
 public:

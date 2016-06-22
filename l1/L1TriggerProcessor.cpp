@@ -427,7 +427,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 
 	uint_fast8_t l1TriggerTmp;
 	uint_fast8_t l1FlagTrigger;
-	uint watchingWhileLoops;
+	uint watchingWhileLoops = 0;
 
 	if (event->isPhysicsTriggerEvent()) {
 		isL0PhysicsTrigger = 1;

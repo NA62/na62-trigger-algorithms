@@ -13,14 +13,12 @@
 #include <vector>
 #include <string>
 
-using namespace std;
+//using namespace std;
 
 class L1InfoToStorage {
 public:
 	L1InfoToStorage();
 	~L1InfoToStorage();
-
-	static L1InfoToStorage* GetInstance();
 
 	double getCHODAverageTime();
 	void setCHODAverageTime(double time);
@@ -153,8 +151,6 @@ public:
 	}
 
 private:
-
-	static L1InfoToStorage* theInstance;  // singleton instance
 
 	double chodTime;
 
