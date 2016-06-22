@@ -24,40 +24,21 @@
 
 namespace na62 {
 
-uint CHODAlgo::algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
-uint CHODAlgo::algoLogic[16];
-uint CHODAlgo::algoRefTimeSourceID[16];
-double CHODAlgo::algoOnlineTimeWindow[16];
+uint CHODAlgo::AlgoID_; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
+uint CHODAlgo::AlgoLogic_[16];
+uint CHODAlgo::AlgoRefTimeSourceID_[16];
+double CHODAlgo::AlgoOnlineTimeWindow_[16];
 
-bool CHODAlgo::algoProcessed = 0;
-bool CHODAlgo::emptyPacket = 0;
-bool CHODAlgo::badData = 0;
-bool CHODAlgo::isCHODRefTime = 0;
-
-double CHODAlgo::averageHitTime = 0.;
-CHODParsConfFile* CHODAlgo::infoCHOD_ = CHODParsConfFile::GetInstance();
-int * CHODAlgo::slabGeo = infoCHOD_->getGeoSlabMap();
-uint CHODAlgo::nHits_V;
-uint CHODAlgo::nHits_H;
-uint CHODAlgo::nMaxSlabs;
-int CHODAlgo::slabID;
-//int CHODAlgo::quadrantID;
-int CHODAlgo::planeID;
-
-CHODAlgo::CHODAlgo() {
-}
-
-CHODAlgo::~CHODAlgo() {
-// TODO Auto-generated destructor stub
-}
+CHODParsConfFile* CHODAlgo::InfoCHOD_ = CHODParsConfFile::GetInstance();
+int * CHODAlgo::SlabGeo_ = InfoCHOD_->getGeoSlabMap();
 
 void CHODAlgo::initialize(uint i, l1CHOD &l1CHODStruct) {
 
-	algoID = l1CHODStruct.configParams.l1TrigMaskID;
-	algoLogic[i] = l1CHODStruct.configParams.l1TrigLogic;
-	algoRefTimeSourceID[i] = l1CHODStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
-	algoOnlineTimeWindow[i] = l1CHODStruct.configParams.l1TrigOnlineTimeWindow;
-//	LOG_INFO("CHOD: mask " << i << " logic " << algoLogic[i] << " refTimeSourceID " << algoRefTimeSourceID[i] << " online time window " << algoOnlineTimeWindow[i]);
+	AlgoID_ = l1CHODStruct.configParams.l1TrigMaskID;
+	AlgoLogic_[i] = l1CHODStruct.configParams.l1TrigLogic;
+	AlgoRefTimeSourceID_[i] = l1CHODStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
+	AlgoOnlineTimeWindow_[i] = l1CHODStruct.configParams.l1TrigOnlineTimeWindow;
+//	LOG_INFO("CHOD: mask " << i << " logic " << AlgoLogic_[i] << " refTimeSourceID " << AlgoRefTimeSourceID_[i] << " online time window " << AlgoOnlineTimeWindow_[i]);
 }
 
 uint_fast8_t CHODAlgo::processCHODTrigger(uint l0MaskID,
@@ -67,10 +48,10 @@ uint_fast8_t CHODAlgo::processCHODTrigger(uint l0MaskID,
 
 	using namespace l0;
 
-	nMaxSlabs = 6;
-	nHits_H = 0;
-	nHits_V = 0;
-	averageHitTime = 0.;
+	uint nMaxSlabs = 6;
+	uint nHits_H = 0;
+	uint nHits_V = 0;
+	double averageHitTime = 0.;
 
 //	LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
 //	LOG_INFO("CHODAlgo: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
@@ -81,7 +62,8 @@ uint_fast8_t CHODAlgo::processCHODTrigger(uint l0MaskID,
 	if (!chodPacket.isReady() || chodPacket.isBadFragment()) {
 
 		LOG_ERROR("CHODAlgo: This looks like a Bad Packet!!!! ");
-		badData = 1;
+		l1Info->setL1CHODBadData();
+//		badData = 1;
 		return 0;
 	}
 //	LOG_INFO("First time check (inside iterator) " << time[1].tv_sec << " " << time[1].tv_usec);
@@ -93,10 +75,12 @@ uint_fast8_t CHODAlgo::processCHODTrigger(uint l0MaskID,
 	const bool* const edge_IDs = chodPacket.getIsLeadings();
 	const uint_fast8_t* const edge_tdcIDs = chodPacket.getTdcIDs();
 	double finetime, edgetime, dt_l0tp;
+	int slabID, planeID;
 
 	uint numberOfEdgesOfCurrentBoard = chodPacket.getNumberOfEdgesStored();
 	if (!numberOfEdgesOfCurrentBoard)
-		emptyPacket = 1;
+		l1Info->setL1CHODEmptyPacket();
+//		emptyPacket = 1;
 
 	for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
 		/**
@@ -112,7 +96,7 @@ uint_fast8_t CHODAlgo::processCHODTrigger(uint l0MaskID,
 			 * Process only first 128 readout channels, corresponding to low-threshold LAV FEE
 			 *
 			 */
-			if (slabGeo[roChID] < 128) {
+			if (SlabGeo_[roChID] < 128) {
 				edgetime = (edge_times[iEdge]
 						- decoder.getDecodedEvent()->getTimestamp() * 256.)
 						* 0.097464731802;
@@ -123,14 +107,14 @@ uint_fast8_t CHODAlgo::processCHODTrigger(uint l0MaskID,
 				dt_l0tp = fabs(edgetime - finetime);
 //				if (fabs(edgetime - finetime) <= 30.) { //if ref detector is LKr
 //				if (fabs(edgetime - finetime) <= 20.) { //otherwise
-				if (dt_l0tp < algoOnlineTimeWindow[l0MaskID]) { //otherwise
+				if (dt_l0tp < AlgoOnlineTimeWindow_[l0MaskID]) { //otherwise
 
 //  				LOG_INFO("Edge " << iEdge << " ID " << edge_IDs[iEdge]);
 //	   				LOG_INFO("Edge " << iEdge << " chID " << (uint) edge_chIDs[iEdge]);
 //					LOG_INFO("Edge " << iEdge << " tdcID " << (uint) edge_tdcIDs[iEdge]);
 //					LOG_INFO("Edge " << iEdge << " time " << std::hex << edge_times[iEdge] << std::dec);
 
-					slabID = slabGeo[roChID];
+					slabID = SlabGeo_[roChID];
 //					quadrantID = slabID / 16.;
 					planeID = slabID / 64.;
 
@@ -138,7 +122,7 @@ uint_fast8_t CHODAlgo::processCHODTrigger(uint l0MaskID,
 //					LOG_INFO("CHOD quadrant ID " << quadrantID);
 //					LOG_INFO("CHOD plane ID " << planeID);
 
-					if (algoRefTimeSourceID[l0MaskID] == 1)
+					if (AlgoRefTimeSourceID_[l0MaskID] == 1)
 						averageHitTime += edgetime;
 
 					if (planeID)
@@ -161,21 +145,22 @@ uint_fast8_t CHODAlgo::processCHODTrigger(uint l0MaskID,
 //		}
 //	LOG_INFO(((time[3].tv_sec - time[0].tv_sec)*1e6 + time[3].tv_usec) - time[0].tv_usec);
 
-	if ((algoRefTimeSourceID[l0MaskID] == 1) && (nHits_V + nHits_H)) {
+	if ((AlgoRefTimeSourceID_[l0MaskID] == 1) && (nHits_V + nHits_H)) {
 		averageHitTime = averageHitTime / (nHits_V + nHits_H);
 	} else
 		averageHitTime = -1.0e+28;
 
-	algoProcessed = 1;
+//	algoProcessed = 1;
 
 	l1Info->setCHODAverageTime(averageHitTime);
+	l1Info->setL1CHODNHits(nHits_V + nHits_H);
 	l1Info->setL1CHODProcessed();
 
 //	LOG_INFO("CHODAlgo=============== number of Hits " << nHits_V + nHits_H);
 //	LOG_INFO("CHODAlgo=============== average HitTime " << averageHitTime);
 //	LOG_INFO("CHODAlgo=============== L1CHODProcessed Flag " << (uint)l1Info->isL1CHODProcessed());
 
-	if (algoLogic[l0MaskID])
+	if (AlgoLogic_[l0MaskID])
 		return (((nHits_V + nHits_H) > 0) && ((nHits_V + nHits_H) < nMaxSlabs));
 	else
 		return ((nHits_V + nHits_H) >= nMaxSlabs);
@@ -186,37 +171,22 @@ uint_fast8_t CHODAlgo::processCHODTrigger(uint l0MaskID,
 
 }
 
-bool CHODAlgo::isAlgoProcessed() {
-	return algoProcessed;
-}
+void CHODAlgo::writeData(L1Algo* algoPacket, uint l0MaskID,
+		L1InfoToStorage* l1Info) {
 
-void CHODAlgo::resetAlgoProcessed() {
-	algoProcessed = 0;
-}
-
-bool CHODAlgo::isEmptyPacket() {
-	return emptyPacket;
-}
-
-bool CHODAlgo::isBadData() {
-	return badData;
-}
-
-void CHODAlgo::clear() {
-	algoProcessed = 0;
-	emptyPacket = 0;
-	badData = 0;
-}
-
-void CHODAlgo::writeData(L1Algo* algoPacket, uint l0MaskID) {
-
-	if(algoID != algoPacket->algoID) LOG_ERROR("Algo ID does not match with Algo ID written within the packet!");
-	algoPacket->algoID = algoID;
-	algoPacket->onlineTimeWindow = (uint) algoOnlineTimeWindow[l0MaskID];
-	algoPacket->qualityFlags = (algoProcessed << 6) | (emptyPacket << 4) | (badData << 2) | algoRefTimeSourceID[l0MaskID];
-	algoPacket->l1Data[0] = (uint)nHits_V + nHits_H;
-	if(averageHitTime != -1.0e+28) algoPacket->l1Data[1] = averageHitTime;
-	else algoPacket->l1Data[1] = 0;
+	if (AlgoID_ != algoPacket->algoID)
+		LOG_ERROR(
+				"Algo ID does not match with Algo ID written within the packet!");
+	algoPacket->algoID = AlgoID_;
+	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
+	algoPacket->qualityFlags = (l1Info->isL1CHODProcessed() << 6)
+			| (l1Info->isL1CHODEmptyPacket() << 4)
+			| (l1Info->isL1CHODBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
+	algoPacket->l1Data[0] = (uint) l1Info->getL1CHODNHits();
+	if (AlgoRefTimeSourceID_[l0MaskID] == 1)
+		algoPacket->l1Data[1] = l1Info->getCHODAverageTime();
+	else
+		algoPacket->l1Data[1] = 0;
 	algoPacket->numberOfWords = (sizeof(L1Algo) / 4.);
 //	LOG_INFO("l0MaskID " << l0MaskID);
 //	LOG_INFO("algoID " << (uint)algoPacket->algoID);
