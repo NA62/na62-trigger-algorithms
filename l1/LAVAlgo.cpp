@@ -21,36 +21,21 @@
 
 namespace na62 {
 
-uint LAVAlgo::algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
-uint LAVAlgo::algoLogic[16];
-uint LAVAlgo::algoRefTimeSourceID[16];
-double LAVAlgo::algoOnlineTimeWindow[16];
+uint LAVAlgo::AlgoID_; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
+uint LAVAlgo::AlgoLogic_[16];
+uint LAVAlgo::AlgoRefTimeSourceID_[16];
+double LAVAlgo::AlgoOnlineTimeWindow_[16];
 
-bool LAVAlgo::algoProcessed = 0;
-bool LAVAlgo::emptyPacket = 0;
-bool LAVAlgo::badData = 0;
-bool LAVAlgo::isCHODRefTime = 0;
-
-LAVParsConfFile* LAVAlgo::infoLAV_ = LAVParsConfFile::GetInstance();
-int * LAVAlgo::lgGeo = infoLAV_->getGeoLGMap();
-int LAVAlgo::hit[maxNROchs];
-uint LAVAlgo::nHits;
-double LAVAlgo::averageCHODHitTime = 0.;
-
-LAVAlgo::LAVAlgo() {
-}
-
-LAVAlgo::~LAVAlgo() {
-// TODO Auto-generated destructor stub
-}
+LAVParsConfFile* LAVAlgo::InfoLAV_ = LAVParsConfFile::GetInstance();
+int * LAVAlgo::LgGeo_ = InfoLAV_->getGeoLGMap();
 
 void LAVAlgo::initialize(uint i, l1LAV &l1LAVStruct) {
 
-	algoID = l1LAVStruct.configParams.l1TrigMaskID;
-	algoLogic[i] = l1LAVStruct.configParams.l1TrigLogic;
-	algoRefTimeSourceID[i] = l1LAVStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
-	algoOnlineTimeWindow[i] = l1LAVStruct.configParams.l1TrigOnlineTimeWindow;
-//	LOG_INFO("LAV mask: " << i << " logic " << algoLogic[i] << " refTimeSourceID " << algoRefTimeSourceID[i] << " online time window " << algoOnlineTimeWindow[i]);
+	AlgoID_ = l1LAVStruct.configParams.l1TrigMaskID;
+	AlgoLogic_[i] = l1LAVStruct.configParams.l1TrigLogic;
+	AlgoRefTimeSourceID_[i] = l1LAVStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
+	AlgoOnlineTimeWindow_[i] = l1LAVStruct.configParams.l1TrigOnlineTimeWindow;
+//	LOG_INFO("LAV mask: " << i << " logic " << AlgoLogic_[i] << " refTimeSourceID " << AlgoRefTimeSourceID_[i] << " online time window " << AlgoOnlineTimeWindow_[i]);
 }
 
 uint_fast8_t LAVAlgo::processLAVTrigger(uint l0MaskID, DecoderHandler& decoder,
@@ -63,8 +48,10 @@ uint_fast8_t LAVAlgo::processLAVTrigger(uint l0MaskID, DecoderHandler& decoder,
 	/*
 	 * TODO: The same logic needs to be developed for RICHRefTime
 	 */
-	if (algoRefTimeSourceID[l0MaskID] == 1) {
-		if (l1Info->isL1CHODProcessed() && averageCHODHitTime != -1.0e+28) {
+	double averageCHODHitTime = 0.;
+	bool isCHODRefTime = false;
+	if (AlgoRefTimeSourceID_[l0MaskID] == 1) {
+		if (l1Info->isL1CHODProcessed()) {
 			isCHODRefTime = 1;
 			averageCHODHitTime = l1Info->getCHODAverageTime();
 		} else
@@ -73,23 +60,27 @@ uint_fast8_t LAVAlgo::processLAVTrigger(uint l0MaskID, DecoderHandler& decoder,
 	}
 //	LOG_INFO("LAVAlgo: chodtime " << averageCHODHitTime);
 
-	nHits = 0;
+	uint nHits = 0;
 	uint nEdges_tot = 0;
 
 	//TODO: chkmax need to be USED
 	DecoderRange<TrbFragmentDecoder> x = decoder.getLAVDecoderRange();
 	if (x.begin() == x.end()) {
 		LOG_ERROR("LAV: Empty decoder range!");
-		badData = 1;
+		l1Info->setL1LAVBadData();
+//		badData = 1;
 		return 0;
 	}
+
+	int hit[maxNROchs] = {0};
 
 	for (TrbFragmentDecoder* lavPacket : decoder.getLAVDecoderRange()) {
 //	LOG_INFO("First time check (inside iterator) " << time[1].tv_sec << " " << time[1].tv_usec);
 
 		if (!lavPacket->isReady() || lavPacket->isBadFragment()) {
 			LOG_ERROR("LAVAlgo: This looks like a Bad Packet!!!! ");
-			badData = 1;
+			l1Info->setL1LAVBadData();
+//			badData = 1;
 			return 0;
 		}
 
@@ -143,9 +134,9 @@ uint_fast8_t LAVAlgo::processLAVTrigger(uint l0MaskID, DecoderHandler& decoder,
 //				LOG_INFO("dt_l0tp " << dt_l0tp << " dt_chod " << dt_chod);
 
 //				if (dt_l0tp < 20.) {
-				if ((!isCHODRefTime && dt_l0tp < algoOnlineTimeWindow[l0MaskID])
+				if ((!isCHODRefTime && dt_l0tp < AlgoOnlineTimeWindow_[l0MaskID])
 						|| (isCHODRefTime
-								&& dt_chod < algoOnlineTimeWindow[l0MaskID])) {
+								&& dt_chod < AlgoOnlineTimeWindow_[l0MaskID])) {
 					if (edge_IDs[iEdge]) {
 						hit[roChIDPerTrb]++;
 
@@ -153,9 +144,11 @@ uint_fast8_t LAVAlgo::processLAVTrigger(uint l0MaskID, DecoderHandler& decoder,
 					} else if (hit[roChIDPerTrb]) {
 						nHits++;
 //						LOG_INFO("Increment nHits " << nHits);
-						if ((nHits >= 3 && !algoLogic[l0MaskID])
-								|| (nHits < 3 && algoLogic[l0MaskID])) {
-							algoProcessed = 1;
+						if ((nHits >= 3 && !AlgoLogic_[l0MaskID])
+								|| (nHits < 3 && AlgoLogic_[l0MaskID])) {
+							l1Info->setL1LAVNHits(nHits);
+							l1Info->setL1LAVProcessed();
+//							algoProcessed = 1;
 							return 0;
 						}
 					}
@@ -168,8 +161,8 @@ uint_fast8_t LAVAlgo::processLAVTrigger(uint l0MaskID, DecoderHandler& decoder,
 		nEdges_tot += numberOfEdgesOfCurrentBoard;
 	}
 
-	if (!nEdges_tot)
-		emptyPacket = 1;
+	if (!nEdges_tot) l1Info->setL1LAVEmptyPacket();
+//		emptyPacket = 1;
 //	LOG_INFO("LAVAlgo.cpp: Analysed Event " << decoder.getDecodedEvent()->getEventNumber() << " - nEdges_tot " << nEdges_tot << " - nHits " << nHits);
 //	LOG_INFO("time check (final)" << time[3].tv_sec << " " << time[3].tv_usec);
 
@@ -179,48 +172,27 @@ uint_fast8_t LAVAlgo::processLAVTrigger(uint l0MaskID, DecoderHandler& decoder,
 //		}
 //	LOG_INFO(((time[3].tv_sec - time[0].tv_sec)*1e6 + time[3].tv_usec) - time[0].tv_usec);
 
-//	return (nHits < 3);
-	algoProcessed = 1;
-	if (!algoLogic[l0MaskID])
+	l1Info->setL1LAVNHits(nHits);
+	l1Info->setL1LAVProcessed();
+//	algoProcessed = 1;
+	if (!AlgoLogic_[l0MaskID])
 		return (nHits < 3);
 	else
 		return (nHits >= 3);
 }
 
-bool LAVAlgo::isAlgoProcessed() {
-	return algoProcessed;
-}
+void LAVAlgo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info) {
 
-void LAVAlgo::resetAlgoProcessed() {
-	algoProcessed = 0;
-}
-
-bool LAVAlgo::isEmptyPacket() {
-	return emptyPacket;
-}
-
-bool LAVAlgo::isBadData() {
-	return badData;
-}
-
-void LAVAlgo::clear() {
-	algoProcessed = 0;
-	emptyPacket = 0;
-	badData = 0;
-}
-
-void LAVAlgo::writeData(L1Algo* algoPacket, uint l0MaskID) {
-
-	if (algoID != algoPacket->algoID)
+	if (AlgoID_ != algoPacket->algoID)
 		LOG_ERROR(
 				"Algo ID does not match with Algo ID written within the packet!");
-	algoPacket->algoID = algoID;
-	algoPacket->onlineTimeWindow = (uint) algoOnlineTimeWindow[l0MaskID];
-	algoPacket->qualityFlags = (algoProcessed << 6) | (emptyPacket << 4)
-			| (badData << 2) | algoRefTimeSourceID[l0MaskID];
-	algoPacket->l1Data[0] = nHits;
-	if (algoRefTimeSourceID[l0MaskID] == 1)
-		algoPacket->l1Data[1] = averageCHODHitTime;
+	algoPacket->algoID = AlgoID_;
+	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
+	algoPacket->qualityFlags = (l1Info->isL1LAVProcessed() << 6) | (l1Info->isL1LAVEmptyPacket() << 4)
+					| (l1Info->isL1LAVBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
+	algoPacket->l1Data[0] = l1Info->getL1LAVNHits();
+	if (AlgoRefTimeSourceID_[l0MaskID] == 1)
+		algoPacket->l1Data[1] = l1Info->getCHODAverageTime();
 	else
 		algoPacket->l1Data[1] = 0;
 	algoPacket->numberOfWords = (sizeof(L1Algo) / 4.);

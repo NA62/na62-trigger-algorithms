@@ -839,7 +839,7 @@ void L1TriggerProcessor::writeL1Data(Event* const event, const uint_fast8_t* l1T
 						| (((AlgoDwScMask_[numToMaskID] & (1 << numToAlgoID))
 								>> numToAlgoID));
 
-				writeAlgoPacket(numToAlgoID, algoPacket, numToMaskID);
+				L1TriggerProcessor::writeAlgoPacket(numToAlgoID, algoPacket, numToMaskID, l1Info);
 
 				refTimeSourceID_tmp = (algoPacket->qualityFlags & 0x3);
 				if (refTimeSourceID != refTimeSourceID_tmp)
@@ -877,19 +877,19 @@ void L1TriggerProcessor::writeL1Data(Event* const event, const uint_fast8_t* l1T
 }
 
 bool L1TriggerProcessor::writeAlgoPacket(int algoID, L1Algo* algoPacket,
-		uint l0MaskID) {
+		uint l0MaskID, L1InfoToStorage* l1Info) {
 	switch (algoID) {
 	case 0:
-		CHODAlgo::writeData(algoPacket, l0MaskID);
+		CHODAlgo::writeData(algoPacket, l0MaskID, l1Info);
 		return true;
 	case 1:
 //		RICHAlgo::writeData(algoPacket,l0MaskID);
 		return true;
 	case 2:
-		KtagAlgo::writeData(algoPacket, l0MaskID);
+		KtagAlgo::writeData(algoPacket, l0MaskID, l1Info);
 		return true;
 	case 3:
-		LAVAlgo::writeData(algoPacket, l0MaskID);
+		LAVAlgo::writeData(algoPacket, l0MaskID, l1Info);
 		return true;
 	case 4:
 //		IRCSACAlgo::writeData(algoPacket,l0MaskID);
@@ -898,7 +898,7 @@ bool L1TriggerProcessor::writeAlgoPacket(int algoID, L1Algo* algoPacket,
 //		StrawAlgo::writeData(algoPacket,l0MaskID);
 		return true;
 	case 6:
-		MUV3Algo::writeData(algoPacket, l0MaskID);
+		MUV3Algo::writeData(algoPacket, l0MaskID, l1Info);
 		return true;
 	case 7:
 //		NewCHODAlgo::writeData(algoPacket,l0MaskID);

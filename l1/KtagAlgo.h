@@ -41,27 +41,13 @@ public:
 	}
 
 	static void initialize(uint i, l1KTAG &l1KtagStruct);
-	static void writeData(L1Algo* algoPacket, uint l0MaskID);
-
-	static bool isAlgoProcessed();
-	static void resetAlgoProcessed();
-	static bool isEmptyPacket();
-	static bool isBadData();
-	static void clear();
+	static void writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 
 private:
-	static uint algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
-	static uint algoLogic[16];
-	static uint algoRefTimeSourceID[16];
-	static double algoOnlineTimeWindow[16];
-
-	static bool algoProcessed;
-	static bool emptyPacket;
-	static bool badData;
-	static bool isCHODRefTime;
-	static double averageCHODHitTime;
-	static uint nSectors_l0tp;
-	static uint nSectors_chod;
+	static uint AlgoID_; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
+	static uint AlgoLogic_[16];
+	static uint AlgoRefTimeSourceID_[16];
+	static double AlgoOnlineTimeWindow_[16];
 
 };
 

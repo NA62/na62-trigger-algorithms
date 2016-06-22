@@ -69,7 +69,7 @@ public:
 	 */
 	static void writeL1Data(Event* const event, const uint_fast8_t* l1TriggerWords, L1InfoToStorage* l1Info, bool isL1WhileTimeout=false);
 	static void readL1Data(Event* const event);
-	static bool writeAlgoPacket(int algoID, L1Algo* algoPacket, uint l0MaskID);
+	static bool writeAlgoPacket(int algoID, L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 
 	/**
 	 * Placeholder for deciding whether or not to request ZS CREAM data
