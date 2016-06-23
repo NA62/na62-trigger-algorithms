@@ -26,7 +26,7 @@ Track::~Track() {
 }
 
 void Track::setTrack(int a, int b, int c, int q, float d, float e, float f,
-		float g, float r, float s, float t, int* h, int *i, int *l, int *m,
+		float g, float r, float s, float t, int* h, int* i, int* l, int* m,
 		int o, float p, float u, double z) {
 	ncentrali = a;
 	nlaterali = b;

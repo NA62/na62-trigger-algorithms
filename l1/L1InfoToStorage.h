@@ -152,6 +152,34 @@ public:
 		l1MUV3BadData_ = false;
 	}
 
+	void setL1StrawProcessed() {
+		l1StrawProcessed_ = true;
+	}
+	bool isL1StrawProcessed() const {
+		return l1StrawProcessed_;
+	}
+	void resetL1StrawProcessed() {
+		l1StrawProcessed_ = false;
+	}
+	void setL1StrawEmptyPacket() {
+		l1StrawEmptyPacket_ = true;
+	}
+	bool isL1StrawEmptyPacket() const {
+		return l1StrawEmptyPacket_;
+	}
+	void resetL1StrawEmptyPacket() {
+		l1StrawEmptyPacket_ = false;
+	}
+	void setL1StrawBadData() {
+		l1StrawBadData_ = true;
+	}
+	bool isL1StrawBadData() const {
+		return l1StrawBadData_;
+	}
+	void resetL1StrawBadData() {
+		l1StrawBadData_ = false;
+	}
+
 private:
 
 	static L1InfoToStorage* theInstance;  // singleton instance
@@ -162,16 +190,19 @@ private:
 	bool l1KTAGProcessed_;
 	bool l1LAVProcessed_;
 	bool l1MUV3Processed_;
+	bool l1StrawProcessed_;
 
 	bool l1CHODEmptyPacket_;
 	bool l1KTAGEmptyPacket_;
 	bool l1LAVEmptyPacket_;
 	bool l1MUV3EmptyPacket_;
+	bool l1StrawEmptyPacket_;
 
 	bool l1CHODBadData_;
 	bool l1KTAGBadData_;
 	bool l1LAVBadData_;
 	bool l1MUV3BadData_;
+	bool l1StrawBadData_;
 
 	uint nKTAGSectors_l0tp;
 	uint nKTAGSectors_chod;

@@ -128,7 +128,7 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID,
 	}
 
 	algoProcessed = 1;
-
+	return 0;
 	//l1Info->setNewCHODAverageTime(averageHitTime);
 	//l1Info->setL1NewCHODProcessed();
 

@@ -36,6 +36,9 @@ L1InfoToStorage::L1InfoToStorage() {
 	l1MUV3Processed_ = false;
 	l1MUV3EmptyPacket_ = false;
 	l1MUV3BadData_ = false;
+	l1StrawProcessed_ = false;
+	l1StrawEmptyPacket_ = false;
+	l1StrawBadData_ = false;
 }
 
 L1InfoToStorage::~L1InfoToStorage() {

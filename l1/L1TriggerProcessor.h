@@ -30,6 +30,7 @@ class RICHAlgo;
 class CHODAlgo;
 class LAVAlgo;
 class MUV3Algo;
+class strawAlgo;
 
 class L1TriggerProcessor {
 public:
@@ -166,6 +167,7 @@ private:
 	static uint_fast16_t LavEnableMask_;
 	static uint_fast16_t IrcsacEnableMask_;
 	static uint_fast16_t MuvEnableMask_;
+	static uint_fast16_t StrawEnableMask_;
 
 	static uint_fast16_t ChodFlagMask_;
 	static uint_fast16_t RichFlagMask_;
@@ -173,6 +175,7 @@ private:
 	static uint_fast16_t LavFlagMask_;
 	static uint_fast16_t IrcsacFlagMask_;
 	static uint_fast16_t MuvFlagMask_;
+	static uint_fast16_t StrawFlagMask_;
 
 	// Downscaling variables GLM:???
 	static uint ChodAlgorithmId_;
@@ -180,6 +183,7 @@ private:
 	static uint CedarAlgorithmId_;
 	static uint LavAlgorithmId_;
 	static uint IrcsacAlgorithmId_;
+	static uint StrawAlgorithmId_;
 	static uint MuvAlgorithmId_;
 
 	// Converters

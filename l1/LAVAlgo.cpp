@@ -43,7 +43,8 @@ uint_fast8_t LAVAlgo::processLAVTrigger(uint l0MaskID, DecoderHandler& decoder,
 
 	using namespace l0;
 //	LOG_INFO("Initial Time " << time[0].tv_sec << " " << time[0].tv_usec);
-//	LOG_INFO("LAVAlgo: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
+	LOG_INFO(
+			"LAVAlgo: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
 
 	/*
 	 * TODO: The same logic needs to be developed for RICHRefTime
@@ -100,7 +101,8 @@ uint_fast8_t LAVAlgo::processLAVTrigger(uint l0MaskID, DecoderHandler& decoder,
 
 		uint numberOfEdgesOfCurrentBoard = lavPacket->getNumberOfEdgesStored();
 
-//		LOG_INFO("LAV: Tel62 ID " << lavPacket->getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard);
+		LOG_INFO(
+				"LAV: Tel62 ID " << lavPacket->getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard);
 //		LOG_INFO("Reference detector fine time " << decoder.getDecodedEvent()->getFinetime());
 
 		for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
@@ -131,7 +133,7 @@ uint_fast8_t LAVAlgo::processLAVTrigger(uint l0MaskID, DecoderHandler& decoder,
 
 //				LOG_INFO("edgetime (in ns) " << edgetime);
 //				LOG_INFO("finetime (in ns) " << finetime);
-//				LOG_INFO("dt_l0tp " << dt_l0tp << " dt_chod " << dt_chod);
+				LOG_INFO("dt_l0tp " << dt_l0tp << " dt_chod " << dt_chod);
 
 //				if (dt_l0tp < 20.) {
 				if ((!isCHODRefTime && dt_l0tp < AlgoOnlineTimeWindow_[l0MaskID])
@@ -140,7 +142,7 @@ uint_fast8_t LAVAlgo::processLAVTrigger(uint l0MaskID, DecoderHandler& decoder,
 					if (edge_IDs[iEdge]) {
 						hit[roChIDPerTrb]++;
 
-//						LOG_INFO("Increment hit[" << roChIDPerTrb << "] to " << hit[roChIDPerTrb]);
+						LOG_INFO("Increment hit[" << roChIDPerTrb << "] to " << hit[roChIDPerTrb]);
 					} else if (hit[roChIDPerTrb]) {
 						nHits++;
 //						LOG_INFO("Increment nHits " << nHits);
@@ -164,6 +166,7 @@ uint_fast8_t LAVAlgo::processLAVTrigger(uint l0MaskID, DecoderHandler& decoder,
 	if (!nEdges_tot) l1Info->setL1LAVEmptyPacket();
 //		emptyPacket = 1;
 //	LOG_INFO("LAVAlgo.cpp: Analysed Event " << decoder.getDecodedEvent()->getEventNumber() << " - nEdges_tot " << nEdges_tot << " - nHits " << nHits);
+
 //	LOG_INFO("time check (final)" << time[3].tv_sec << " " << time[3].tv_usec);
 
 //	for (int i = 0; i < 3; i++) {
