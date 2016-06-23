@@ -14,6 +14,7 @@
 #include <cstdint>
 #include <atomic>
 
+#include <eventBuilding/Event.h>
 #include "L1InfoToStorage.h"
 #include "../options/TriggerOptions.h"
 #include "../struct/HLTConfParams.h"
@@ -23,14 +24,13 @@
 
 namespace na62 {
 
-class EventBuilder;
-class Event;
-class KtagAlgo;
-class RICHAlgo;
-class CHODAlgo;
-class LAVAlgo;
-class MUV3Algo;
-class strawAlgo;
+//class EventBuilder;
+//class Event;
+//class KtagAlgo;
+//class RICHAlgo;
+//class CHODAlgo;
+//class LAVAlgo;
+//class MUV3Algo;
 
 class L1TriggerProcessor {
 public:
@@ -54,16 +54,6 @@ public:
 		double randomNr = ((double) rand() / (double) RAND_MAX);
 		return randomNr <= BypassProbability_;
 	}
-
-	/**
-	 * Registers all downscaling algorithms. Must be called before Options::Load is executed!
-	 */
-	static void registerDownscalingAlgorithms();
-
-	/**
-	 * Registers all reduction algorithms. Must be called before Options::Load is executed!
-	 */
-	static void registerReductionAlgorithms();
 
 	/**
 	 * Fill in trigger decisions into event structure

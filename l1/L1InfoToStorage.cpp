@@ -14,7 +14,6 @@
 
 #include <sys/time.h>
 
-L1InfoToStorage* L1InfoToStorage::theInstance = nullptr;
 
 L1InfoToStorage::L1InfoToStorage() {
 //	LOG_INFO("********************In L1 InfoToStorage");
@@ -42,15 +41,6 @@ L1InfoToStorage::L1InfoToStorage() {
 }
 
 L1InfoToStorage::~L1InfoToStorage() {
-}
-
-L1InfoToStorage* L1InfoToStorage::GetInstance() {
-
-	if (theInstance == nullptr) {
-		theInstance = new L1InfoToStorage();
-	}
-	return theInstance;
-
 }
 
 double L1InfoToStorage::getCHODAverageTime() {
