@@ -371,6 +371,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID,
 	//		}
 	//		LOG_INFO(ENDL;
 	//	}
+	/*
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
 			for (int h = 0; h < 2; h++) {
@@ -382,7 +383,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID,
 			}
 		}
 	}
-
+*/
 	///////////////////////////////////////Start Clustering inside the view///////////////////////////////////////////////////////
 	LOG_INFO("CLUSTERING INSIDE THE VIEW");
 	gettimeofday(&time[12], 0);
@@ -1046,7 +1047,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID,
 	gettimeofday(&time[13], 0);
 //	LOG_INFO( "Clustering inside the view - Stop " << time[13].tv_sec << " " << time[13].tv_usec );
 //	LOG_INFO( "Clustering inside the view " << ((time[13].tv_sec - time[12].tv_sec)*1e6 + time[13].tv_usec) - time[12].tv_usec );
-
+/*
 	for (int i = 0; i < 4; i++) {
 		for (int g = 0; g < 4; g++) {
 			for (int j = 0; j < nStrawClusters[i][g]; j++) {
@@ -1055,7 +1056,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID,
 			}
 		}
 	}
-
+*/
 	/////////////////////////////////////// Start Clustering inside the chamber ///////////////////////////////////////////////////////
 	/////////////////////////////////////// 0=v, 1=u, 2=x, 3=y
 	LOG_INFO("CLUSTERING INSIDE THE CHAMBER");
@@ -1532,17 +1533,15 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID,
 	gettimeofday(&time[27], 0);
 //	LOG_INFO( "Clustering inside the chamber - Stop " << time[15].tv_sec << " " << time[15].tv_usec );
 //	LOG_INFO( "Clustering inside the chamber " << ((time[15].tv_sec - time[14].tv_sec)*1e6 + time[15].tv_usec) - time[14].tv_usec );
-	if (nEdges_tot && nEdges_tot < 1500)
-		LOG_INFO(
-				((time[1].tv_sec - time[0].tv_sec)*1e6 + time[1].tv_usec) - time[0].tv_usec << "\t" << ((time[4].tv_sec - time[3].tv_sec)*1e6 + time[4].tv_usec) - time[3].tv_usec << "\t" << ((time[6].tv_sec - time[5].tv_sec)*1e6 + time[6].tv_usec) - time[5].tv_usec << "\t" << ((time[8].tv_sec - time[7].tv_sec)*1e6 + time[8].tv_usec) - time[7].tv_usec << "\t" << ((time[10].tv_sec - time[9].tv_sec)*1e6 + time[10].tv_usec) - time[9].tv_usec << "\t" << ((time[11].tv_sec - time[2].tv_sec)*1e6 + time[11].tv_usec) - time[2].tv_usec << "\t" << ((time[13].tv_sec - time[12].tv_sec)*1e6 + time[13].tv_usec) - time[12].tv_usec << "\t" << nEdges_tot << "\t" << ((time[27].tv_sec - time[14].tv_sec)*1e6 + time[27].tv_usec) - time[14].tv_usec << "\t" << ((time[27].tv_sec - time[0].tv_sec)*1e6 + time[27].tv_usec) - time[0].tv_usec << "\t" << ((time[16].tv_sec - time[15].tv_sec)*1e6 + time[16].tv_usec) - time[15].tv_usec << "\t" << ((time[18].tv_sec - time[17].tv_sec)*1e6 + time[18].tv_usec) - time[17].tv_usec << "\t" << ((time[20].tv_sec - time[19].tv_sec)*1e6 + time[20].tv_usec) - time[19].tv_usec << "\t" << ((time[22].tv_sec - time[21].tv_sec)*1e6 + time[22].tv_usec) - time[21].tv_usec << "\t" << ((time[24].tv_sec - time[23].tv_sec)*1e6 + time[24].tv_usec) - time[23].tv_usec << "\t" << ((time[26].tv_sec - time[25].tv_sec)*1e6 + time[26].tv_usec) - time[25].tv_usec);
-
+//	if (nEdges_tot && nEdges_tot < 1500) LOG_INFO(((time[1].tv_sec - time[0].tv_sec)*1e6 + time[1].tv_usec) - time[0].tv_usec << "\t" << ((time[4].tv_sec - time[3].tv_sec)*1e6 + time[4].tv_usec) - time[3].tv_usec << "\t" << ((time[6].tv_sec - time[5].tv_sec)*1e6 + time[6].tv_usec) - time[5].tv_usec << "\t" << ((time[8].tv_sec - time[7].tv_sec)*1e6 + time[8].tv_usec) - time[7].tv_usec << "\t" << ((time[10].tv_sec - time[9].tv_sec)*1e6 + time[10].tv_usec) - time[9].tv_usec << "\t" << ((time[11].tv_sec - time[2].tv_sec)*1e6 + time[11].tv_usec) - time[2].tv_usec << "\t" << ((time[13].tv_sec - time[12].tv_sec)*1e6 + time[13].tv_usec) - time[12].tv_usec << "\t" << nEdges_tot << "\t" << ((time[27].tv_sec - time[14].tv_sec)*1e6 + time[27].tv_usec) - time[14].tv_usec << "\t" << ((time[27].tv_sec - time[0].tv_sec)*1e6 + time[27].tv_usec) - time[0].tv_usec << "\t" << ((time[16].tv_sec - time[15].tv_sec)*1e6 + time[16].tv_usec) - time[15].tv_usec << "\t" << ((time[18].tv_sec - time[17].tv_sec)*1e6 + time[18].tv_usec) - time[17].tv_usec << "\t" << ((time[20].tv_sec - time[19].tv_sec)*1e6 + time[20].tv_usec) - time[19].tv_usec << "\t" << ((time[22].tv_sec - time[21].tv_sec)*1e6 + time[22].tv_usec) - time[21].tv_usec << "\t" << ((time[24].tv_sec - time[23].tv_sec)*1e6 + time[24].tv_usec) - time[23].tv_usec << "\t" << ((time[26].tv_sec - time[25].tv_sec)*1e6 + time[26].tv_usec) - time[25].tv_usec);
+/*
 	for (int i = 0; i < 4; i++) {
 		printf("camera: %d, n punti= %d \n", i, nStrawPointsTemp[i]);
 		for (int j = 0; j < nStrawPointsTemp[i]; j++) {
 			strawPointTemp_[i][j].printPoint2();
 		}
 	}
-
+*/
 	////////////////////////////////////////POINT SELECTION/////////////////////////////////////////////////////////
 	//	LOG_INFO( "POINT SELECTION...!!! " );
 	float point_dx = 0.0;
@@ -1719,19 +1718,18 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID,
 	}
 
 	for (int i = 0; i < 4; i++) {
-		printf("secondo step camera: %d, n punti= %d \n", i,
-				nStrawPointsFinal[i]);
+//		printf("secondo step camera: %d, n punti= %d \n", i,nStrawPointsFinal[i]);
 		for (int j = 0; j < nStrawPointsFinal[i]; j++) {
-			strawPointFinal_[i][j].printPoint2();
+//			strawPointFinal_[i][j].printPoint2();
 			if (nStrawPointsFinal[i] > 0)
 				nChambersHit++;
 		}
 	}
-	printf(
-			"npoint chamber 0 = %d, npoint chamber 1 = %d npoint chamber 3 = %d, npoint chamber 4 = %d\n",
-			nStrawPointsFinal[0], nStrawPointsFinal[1], nStrawPointsFinal[2],
-			nStrawPointsFinal[3]);
+//	printf("npoint chamber 0 = %d, npoint chamber 1 = %d npoint chamber 3 = %d, npoint chamber 4 = %d\n",
+//			nStrawPointsFinal[0], nStrawPointsFinal[1], nStrawPointsFinal[2],
+//			nStrawPointsFinal[3]);
 
+	/*
 	////////////////////// TRACK RECONSTRUCTION ////////////////////////////////////
 	LOG_INFO("Track Reconstruction - Hought ");
 
@@ -2304,7 +2302,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID,
 		//			if(strawTempTrk_[e].ncentrali+strawTempTrk_[e].nlaterali==4)
 		//				FillHisto("track_deltaqx",(temptrk[e].q2x-temptrk[e].q1x));
 	}
-
+*/
 	return 0; //return the Straw Trigger word!
 }
 
