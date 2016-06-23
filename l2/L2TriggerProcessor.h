@@ -15,15 +15,13 @@
 #include <random>
 #include <atomic>
 
+#include "eventBuilding/Event.h"
 #include "../options/TriggerOptions.h"
 #include "../struct/HLTConfParams.h"
 
 #include "L2Fragment.h"
 
 namespace na62 {
-
-class EventBuilder;
-class Event;
 
 class L2TriggerProcessor {
 public:
@@ -51,11 +49,11 @@ public:
 	 * Returns true if the current event should be bypassed instead of being processed
 	 */
 	static inline bool bypassEvent() {
-		if (bypassProbability == 0.0) {
+		if (BypassProbability_ == 0.0) {
 			return false;
 		}
 		double randomNr = ((double) rand() / (double) RAND_MAX);
-		return randomNr <= bypassProbability;
+		return randomNr <= BypassProbability_;
 	}
 	static void initialize(l2Struct &l2Struct);
 
@@ -75,23 +73,25 @@ public:
 		L2InputEventsPerBurst_ = 0;
 	}
 	static inline uint GetL2ReductionFactor() {
-		return reductionFactor;
+		return ReductionFactor_;
 	}
 	static inline uint GetL2DownscaleFactor() {
-		return downscaleFactor;
+		return DownscaleFactor_;
 	}
 	static inline uint GetL2FlagMode() {
-		return flagMode;
+		return FlagMode_;
 	}
 	static inline uint GetL2AutoFlagFactor() {
-		return autoFlagFactor;
+		return AutoFlagFactor_;
 	}
 
 	/**
 	 * Fills output L2 structures for merger
 	 */
-	static void writeData(L2Block &l2Block);
-
+	static void writeData(Event* event, const uint32_t& l2TriggerWord);
+	static inline uint_fast32_t GetL2DataPacketSize() {
+		return L2DataPacketSize_;
+	}
 private:
 	static std::atomic<uint64_t>* L2Triggers_;
 	static std::atomic<uint64_t> L2InputEvents_;
@@ -99,40 +99,29 @@ private:
 	static std::atomic<uint64_t> L2InputEventsPerBurst_;
 	static std::atomic<uint64_t> L2AcceptedEvents_;
 
-	static uint numberOfEnabledAlgos[16];
-	static uint numberOfFlaggedAlgos[16];
-	static uint maskReductionFactor[16];
+	static uint NumberOfEnabledAlgos_[16];
+	static uint NumberOfFlaggedAlgos_[16];
+	static uint MaskReductionFactor_[16];
 
-	static uint_fast16_t algoEnableMask[16];
-	static uint_fast16_t algoFlagMask[16];
-	static uint_fast16_t algoLogicMask[16];
-	static uint_fast16_t algoDwScMask[16];
+	static uint_fast16_t AlgoEnableMask_[16];
+	static uint_fast16_t AlgoFlagMask_[16];
+	static uint_fast16_t AlgoLogicMask_[16];
+	static uint_fast16_t AlgoDwScMask_[16];
 
-	static double bypassProbability;
-	static uint reductionFactor;
-	static uint downscaleFactor;
-	static uint flagMode;
-	static uint autoFlagFactor;
-	static uint referenceTimeSourceID;
+	static double BypassProbability_;
+	static uint ReductionFactor_;
+	static uint DownscaleFactor_;
+	static uint FlagMode_;
+	static uint AutoFlagFactor_;
+	static uint ReferenceTimeSourceID_;
 
-	static bool isL0PhysicsTrigger;
-	static bool isL0PeriodicTrigger;
-	static bool isL0ControlTrigger;
-	static bool isL2Bypassed;
-	static uint numberOfTriggeredL2Masks;
-	static bool isAllL2AlgoDisable;
+	static uint MaskIDToNum_[16];
+	static uint NumToMaskID_[16];
 
-	static uint_fast8_t l0TrigWord;
-	static uint_fast8_t l0DataType; //0x1 for physics, 0x2 for periodics, 0x4 for calibrations
-	static uint_fast16_t l0TrigFlags;
-	static uint_fast8_t l2TriggerWords[16];
+	static uint_fast8_t NumberOfEnabledL0Masks_;
 
-	static uint MaskIDToNum[16];
-	static uint NumToMaskID[16];
-
-	static uint_fast8_t numberOfEnabledL0Masks;
-
-	static std::vector<int> l0MaskIDs;
+	static std::vector<int> L0MaskIDs_;
+	static uint_fast32_t L2DataPacketSize_;
 };
 
 } /* namespace na62 */
