@@ -86,13 +86,6 @@ uint_fast8_t L1TriggerProcessor::NumberOfEnabledL0Masks_ = 0;
 std::vector<int> L1TriggerProcessor::L0MaskIDs_;
 uint_fast32_t L1TriggerProcessor::L1DataPacketSize_ = 0;
 
-void L1TriggerProcessor::registerReductionAlgorithms() {
-
-}
-
-void L1TriggerProcessor::registerDownscalingAlgorithms() {
-
-}
 
 bool L1TriggerProcessor::isRequestZeroSuppressedCreamData(
 		uint_fast8_t l1TriggerTypeWord) {

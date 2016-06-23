@@ -56,16 +56,6 @@ public:
 	}
 
 	/**
-	 * Registers all downscaling algorithms. Must be called before Options::Load is executed!
-	 */
-	static void registerDownscalingAlgorithms();
-
-	/**
-	 * Registers all reduction algorithms. Must be called before Options::Load is executed!
-	 */
-	static void registerReductionAlgorithms();
-
-	/**
 	 * Fill in trigger decisions into event structure
 	 */
 	static void writeL1Data(Event* const event, const uint_fast8_t* l1TriggerWords, L1InfoToStorage* l1Info, bool isL1WhileTimeout=false);
