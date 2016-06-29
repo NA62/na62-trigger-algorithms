@@ -109,6 +109,16 @@ void HLTriggerManager::createXMLFile() {
 		test->l1.l1Mask[i].muv.configParams.l1TrigRefTimeSourceID = 0;
 		test->l1.l1Mask[i].muv.configParams.l1TrigOnlineTimeWindow = 10.;
 
+		test->l1.l1Mask[i].newchod.configParams.l1TrigProcessID = 6;
+		test->l1.l1Mask[i].newchod.configParams.l1TrigMaskID = 7;
+		test->l1.l1Mask[i].newchod.configParams.l1TrigEnable = 0;
+		test->l1.l1Mask[i].newchod.configParams.l1TrigLogic = 1;
+		test->l1.l1Mask[i].newchod.configParams.l1TrigFlag = 0;
+		test->l1.l1Mask[i].newchod.configParams.l1TrigDownScale = 0;
+		test->l1.l1Mask[i].newchod.configParams.l1TrigDSFactor = 1;
+		test->l1.l1Mask[i].newchod.configParams.l1TrigRefTimeSourceID = 0;
+		test->l1.l1Mask[i].newchod.configParams.l1TrigOnlineTimeWindow = 10.;
+
 		test->l1.l1Mask[i].numberOfEnabledAlgos = 0; // No L1 Triggers enabled
 		test->l1.l1Mask[i].numberOfFlaggedAlgos = 0; // No L1 Triggers to be processed and flagged
 		test->l1.l1Mask[i].maskReductionFactor = 1;
