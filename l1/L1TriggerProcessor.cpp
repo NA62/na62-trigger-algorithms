@@ -608,7 +608,6 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 									== l1ProcessID
 							&& SourceIDManager::isIrcActive()) {
 						if (!l1Info.isL1NewCHODProcessed()) {
-							LOG_INFO("I'm processing NewCHOD !!!!");
 							newchodTrigger = NewCHODAlgo::processNewCHODTrigger(
 									i, decoder, &l1Info);
 //							if (newchodTrigger != 0) {
