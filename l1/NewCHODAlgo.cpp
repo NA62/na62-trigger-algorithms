@@ -68,8 +68,6 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID,
 	}
 //	LOG_INFO("First time check (inside iterator) " << time[1].tv_sec << " " << time[1].tv_usec);
 
-	bool pmtID[512] = { false };
-
 	/**
 	 * Get Arrays with hit Info
 	 */
@@ -78,7 +76,7 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID,
 	const bool* const edge_IDs = newchodPacket.getIsLeadings();
 	const uint_fast8_t* const edge_tdcIDs = newchodPacket.getTdcIDs();
 	double finetime, edgetime1, edgetime2, dt1_l0tp, dt2_l0tp;
-	uint PMTID1, PMTID2;
+	int PMTID1, PMTID2;
 
 	uint numberOfEdgesOfCurrentBoard = newchodPacket.getNumberOfEdgesStored();
 	if (!numberOfEdgesOfCurrentBoard)
@@ -92,55 +90,46 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID,
 		 */
 		if (edge_IDs[iEdge]) {
 			const int roChID1 = (edge_tdcIDs[iEdge] * 32) + edge_chIDs[iEdge];
-			if (!pmtID[roChID1]) {
-				pmtID[roChID1] = true;
-				PMTID1 = PmtGeo_[roChID1];
-//				LOG_INFO("iEdge " << iEdge);
-//				LOG_INFO("Readout Channel ID1 " << roChID1);
-//				LOG_INFO("Geom PMT ID1 " << PMTID1);
+			PMTID1 = PmtGeo_[roChID1];
+//			LOG_INFO("iEdge " << iEdge);
+//			LOG_INFO("Readout Channel ID1 " << roChID1);
+//			LOG_INFO("Geom PMT ID1 " << PMTID1);
 
-				if ((PMTID1 / 10) % 10 >= 1 && (PMTID1 / 10) % 10 <= 3) {
-					for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard;
-							jEdge++) {
-						if (edge_IDs[jEdge] && jEdge != iEdge) {
-							const int roChID2 = (edge_tdcIDs[jEdge] * 32)
-									+ edge_chIDs[jEdge];
-							if (!pmtID[roChID2]) {
-								pmtID[roChID2] = true;
-								PMTID2 = PmtGeo_[roChID2];
-//								LOG_INFO("jEdge " << jEdge);
-//								LOG_INFO("Readout Channel ID2 " << roChID2);
-//								LOG_INFO("Geom PMT ID2 " << PMTID2);
+			if ((PMTID1 / 10) % 10 >= 1 && (PMTID1 / 10) % 10 <= 3) {
+				for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard;
+						jEdge++) {
+					if (edge_IDs[jEdge] && jEdge != iEdge) {
+						const int roChID2 = (edge_tdcIDs[jEdge] * 32)
+								+ edge_chIDs[jEdge];
+						PMTID2 = PmtGeo_[roChID2];
+//						LOG_INFO("jEdge " << jEdge);
+//						LOG_INFO("Readout Channel ID2 " << roChID2);
+//						LOG_INFO("Geom PMT ID2 " << PMTID2);
 
-								if (fabs(PMTID1 - PMTID2) == 50
-										&& (PMTID1 / 100) % 10
-												== (PMTID2 / 100) % 10) {
-									finetime = decoder.getDecodedEvent()->getFinetime()
-													* 0.097464731802;
-									edgetime1 = (edge_times[iEdge]
-													- decoder.getDecodedEvent()->getTimestamp() * 256.)
-													* 0.097464731802;
-									edgetime2 = (edge_times[jEdge]
-													- decoder.getDecodedEvent()->getTimestamp() * 256.)
-													* 0.097464731802;
-//									LOG_INFO("finetime (in ns) " << finetime << " edgetime1 (in ns) " << edgetime1 << " edgetime2 " << edgetime2);
+						if (fabs(PMTID1 - PMTID2) == 50
+								&& (PMTID1 / 100) % 10 == (PMTID2 / 100) % 10) {
+							finetime = decoder.getDecodedEvent()->getFinetime()
+									* 0.097464731802;
+							edgetime1 = (edge_times[iEdge]
+									- decoder.getDecodedEvent()->getTimestamp()
+											* 256.) * 0.097464731802;
+							edgetime2 = (edge_times[jEdge]
+									- decoder.getDecodedEvent()->getTimestamp()
+											* 256.) * 0.097464731802;
+//							LOG_INFO("finetime (in ns) " << finetime << " edgetime1 (in ns) " << edgetime1 << " edgetime2 " << edgetime2);
 
-									dt1_l0tp = fabs(edgetime1 - finetime);
-									dt2_l0tp = fabs(edgetime2 - finetime);
+							dt1_l0tp = fabs(edgetime1 - finetime);
+							dt2_l0tp = fabs(edgetime2 - finetime);
 
-//									LOG_INFO("dt1_l0tp "<< dt1_l0tp << " dt2_l0tp " << dt2_l0tp);
-//									LOG_INFO("edge1-edge2 "<<fabs(edgetime1-edgetime2));
-									if ((dt1_l0tp < AlgoOnlineTimeWindow_[l0MaskID])
-											&& (dt2_l0tp < AlgoOnlineTimeWindow_[l0MaskID])
-											&& (fabs(edgetime1 - edgetime2) < 5.)) {
+//							LOG_INFO("dt1_l0tp "<< dt1_l0tp << " dt2_l0tp " << dt2_l0tp);
+//							LOG_INFO("edge1-edge2 "<<fabs(edgetime1-edgetime2));
+							if ((dt1_l0tp < AlgoOnlineTimeWindow_[l0MaskID])
+									&& (dt2_l0tp < AlgoOnlineTimeWindow_[l0MaskID])
+									&& (fabs(edgetime1 - edgetime2) < 5.)) {
 
-										if (AlgoRefTimeSourceID_[l0MaskID] == 1)
-											averageHitTime += edgetime1;
-										nHits++;
-//										l1Info->setL1NewCHODProcessed();
-//										return 1;
-									}
-								}
+								if (AlgoRefTimeSourceID_[l0MaskID] == 1)
+									averageHitTime += edgetime1;
+								nHits++;
 							}
 						}
 					}
@@ -158,14 +147,14 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID,
 	l1Info->setL1NewCHODNHits(nHits);
 	l1Info->setL1NewCHODProcessed();
 
+//	LOG_INFO("NewCHODAlgo=============== number of Hits " << nHits);
+//	LOG_INFO("NewCHODAlgo=============== average HitTime " << averageHitTime);
+//	LOG_INFO("NewCHODAlgo=============== L1NewCHODProcessed Flag " << (uint)l1Info->isL1NewCHODProcessed());
 	if (AlgoLogic_[l0MaskID])
 		return ((nHits > 0) && (nHits < nMaxPMTs));
 	else
 		return (nHits >= nMaxPMTs);
 
-//	LOG_INFO("NewCHODAlgo=============== number of Hits " << nHits);
-//	LOG_INFO("NewCHODAlgo=============== average HitTime " << averageHitTime);
-//	LOG_INFO("NewCHODAlgo=============== L1NewCHODProcessed Flag " << (uint)l1Info->isL1NewCHODProcessed());
 }
 
 void NewCHODAlgo::writeData(L1Algo* algoPacket, uint l0MaskID,
