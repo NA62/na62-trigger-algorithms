@@ -31,38 +31,19 @@ public:
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 
-	NewCHODAlgo();
-	~NewCHODAlgo();
-
 	static uint_fast8_t processNewCHODTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
-//	static void initialize(uint i, l1NewCHOD &l1NewChodStruct);
-	static void writeData(L1Algo* algoPacket, uint l0MaskID);
-
-	static bool isAlgoProcessed();
-	static void resetAlgoProcessed();
-	static bool isEmptyPacket();
-	static bool isBadData();
-	static void clear();
+	static void initialize(uint i,l1NewCHOD &l1NewChodStruct);
+	static void writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 
 private:
 
-	static NewCHODParsConfFile* infoNewCHOD_;
-	static uint algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
-	static uint algoLogic[16];
-	static uint algoRefTimeSourceID[16];
-	static double algoOnlineTimeWindow[16];
+	static NewCHODParsConfFile* InfoNewCHOD_;
+	static uint AlgoID_; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
+	static uint AlgoLogic_[16];
+	static uint AlgoRefTimeSourceID_[16];
+	static double AlgoOnlineTimeWindow_[16];
 
-	static bool algoProcessed;
-	static bool emptyPacket;
-	static bool badData;
-	static bool isNewCHODRefTime;
-
-	static int* PMTGeo;
-	static uint nHits;
-	static uint nMaxPMTs;
-	static int PMTID1;
-	static int PMTID2;
-	static double averageHitTime;
+	static int* PmtGeo_;
 };
 
 } /* namespace na62 */

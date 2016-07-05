@@ -35,6 +35,9 @@ L1InfoToStorage::L1InfoToStorage() {
 	l1MUV3Processed_ = false;
 	l1MUV3EmptyPacket_ = false;
 	l1MUV3BadData_ = false;
+	l1NewCHODProcessed_ = false;
+	l1NewCHODEmptyPacket_ = false;
+	l1NewCHODBadData_ = false;
 }
 
 L1InfoToStorage::~L1InfoToStorage() {
@@ -54,6 +57,22 @@ uint L1InfoToStorage::getL1CHODNHits() {
 
 void L1InfoToStorage::setL1CHODNHits(uint nHits) {
 	nCHODHits = nHits;
+}
+
+double L1InfoToStorage::getNewCHODAverageTime() {
+	return newchodTime;
+}
+
+void L1InfoToStorage::setNewCHODAverageTime(double time) {
+	newchodTime = time;
+}
+
+uint L1InfoToStorage::getL1NewCHODNHits() {
+	return nNewCHODHits;
+}
+
+void L1InfoToStorage::setL1NewCHODNHits(uint nHits) {
+	nNewCHODHits = nHits;
 }
 
 uint L1InfoToStorage::getL1KTAGNSectors_l0tp() {

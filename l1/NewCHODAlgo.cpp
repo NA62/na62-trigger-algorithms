@@ -23,40 +23,24 @@
 
 namespace na62 {
 
-uint NewCHODAlgo::algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
-uint NewCHODAlgo::algoLogic[16];
-uint NewCHODAlgo::algoRefTimeSourceID[16];
-double NewCHODAlgo::algoOnlineTimeWindow[16];
+uint NewCHODAlgo::AlgoID_; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
+uint NewCHODAlgo::AlgoLogic_[16];
+uint NewCHODAlgo::AlgoRefTimeSourceID_[16];
+double NewCHODAlgo::AlgoOnlineTimeWindow_[16];
 
-bool NewCHODAlgo::algoProcessed = 0;
-bool NewCHODAlgo::emptyPacket = 0;
-bool NewCHODAlgo::badData = 0;
-bool NewCHODAlgo::isNewCHODRefTime = 0;
+NewCHODParsConfFile* NewCHODAlgo::InfoNewCHOD_ = NewCHODParsConfFile::GetInstance();
+int * NewCHODAlgo::PmtGeo_ = InfoNewCHOD_->getGeoPMTMap();
 
-double NewCHODAlgo::averageHitTime = 0.;
-NewCHODParsConfFile* NewCHODAlgo::infoNewCHOD_ =
-		NewCHODParsConfFile::GetInstance();
-int * NewCHODAlgo::PMTGeo = infoNewCHOD_->getGeoPMTMap();
-uint NewCHODAlgo::nHits;
-uint NewCHODAlgo::nMaxPMTs;
-int NewCHODAlgo::PMTID1;
-int NewCHODAlgo::PMTID2;
+void NewCHODAlgo::initialize(uint i, l1NewCHOD &l1NewChodStruct) {
 
-NewCHODAlgo::NewCHODAlgo() {
+	AlgoID_ = l1NewChodStruct.configParams.l1TrigMaskID;
+	AlgoLogic_[i] = l1NewChodStruct.configParams.l1TrigLogic;
+	AlgoRefTimeSourceID_[i] =
+			l1NewChodStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
+	AlgoOnlineTimeWindow_[i] =
+			l1NewChodStruct.configParams.l1TrigOnlineTimeWindow;
+// 	LOG_INFO("NewCHOD mask: " << i << " logic " << AlgoLogic_[i] << " refTimeSourceID " << AlgoRefTimeSourceID_[i] << " online time window " << AlgoOnlineTimeWindow_[i]);
 }
-
-NewCHODAlgo::~NewCHODAlgo() {
-// TODO Auto-generated destructor stub
-}
-
-/*void NewCHODAlgo::initialize(uint i, l1NewCHOD &l1NewCHODStruct) {
-
- algoID = l1NewCHODStruct.configParams.l1TrigMaskID;
- algoLogic[i] = l1NewCHODStruct.configParams.l1TrigLogic;
- algoRefTimeSourceID[i] = l1NewCHODStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
- algoOnlineTimeWindow[i] = l1NewCHODStruct.configParams.l1TrigOnlineTimeWindow;
- //	LOG_INFO("NewCHOD mask: " << i << " logic " << algoLogic[i] << " refTimeSourceID " << algoRefTimeSourceID[i] << " online time window " << algoOnlineTimeWindow[i]);
- }*/
 
 uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID,
 		DecoderHandler& decoder, L1InfoToStorage* l1Info) {
@@ -65,9 +49,9 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID,
 
 	using namespace l0;
 
-	nMaxPMTs = 6;
-	nHits = 0;
-	averageHitTime = 0;
+	uint nMaxPMTs = 4;
+	uint nHits = 0;
+	double averageHitTime = 0.;
 
 //	LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
 //	LOG_INFO("NewCHODAlgo: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
@@ -78,10 +62,12 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID,
 	if (!newchodPacket.isReady() || newchodPacket.isBadFragment()) {
 //
 		LOG_ERROR("NewCHODAlgo: This looks like a Bad Packet!!!! ");
-		badData = 1;
+		l1Info->setL1NewCHODBadData();
+//		badData = 1;
 		return 0;
 	}
 //	LOG_INFO("First time check (inside iterator) " << time[1].tv_sec << " " << time[1].tv_usec);
+
 	/**
 	 * Get Arrays with hit Info
 	 */
@@ -89,102 +75,110 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID,
 	const uint_fast8_t* const edge_chIDs = newchodPacket.getChIDs();
 	const bool* const edge_IDs = newchodPacket.getIsLeadings();
 	const uint_fast8_t* const edge_tdcIDs = newchodPacket.getTdcIDs();
-	double finetime, edgetime1, edgetime2;
+	double finetime, edgetime1, edgetime2, dt1_l0tp, dt2_l0tp;
+	int PMTID1, PMTID2;
 
 	uint numberOfEdgesOfCurrentBoard = newchodPacket.getNumberOfEdgesStored();
 	if (!numberOfEdgesOfCurrentBoard)
-		emptyPacket = 1;
+		l1Info->setL1NewCHODEmptyPacket();
+//		emptyPacket = 1;
 
 	for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
-		const int roChID = (edge_tdcIDs[iEdge] * 32) + edge_chIDs[iEdge];
-		PMTID1 = PMTGeo[roChID];
-//		LOG_INFO("Readout Channel ID1 " << roChID);
-//		LOG_INFO("Geom PMT ID1 " << PMTID1);
-		if ((PMTID1 / 10) % 10 >= 1 && (PMTID1 / 10) % 10 <= 3) {
-			for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard;
-					jEdge++) {
-				const int roChID = (edge_tdcIDs[jEdge] * 32)
-						+ edge_chIDs[jEdge];
-				PMTID2 = PMTGeo[roChID];
-				//			LOG_INFO("Readout Channel ID2 " << roChID);
-				//			LOG_INFO("Geom PMT ID2 " << PMTID2);
-				if (fabs(PMTID1 - PMTID2) == 50
-						&& (PMTID1 / 100) % 10 == (PMTID2 / 100) % 10) {
-					finetime = decoder.getDecodedEvent()->getFinetime()
-							* 0.097464731802;
-					edgetime1 = (edge_times[iEdge]
-							- decoder.getDecodedEvent()->getTimestamp() * 256.)
-							* 0.097464731802;
-					edgetime2 = (edge_times[jEdge]
-							- decoder.getDecodedEvent()->getTimestamp() * 256.)
-							* 0.097464731802;
-					if (fabs(edgetime1 - edgetime2) < 5) {
-//						LOG_INFO("edge1-edge2 "<<fabs(edgetime1-edgetime2));
-						return 1;
+		/**
+		 * Process leading edges only
+		 *
+		 */
+		if (edge_IDs[iEdge]) {
+			const int roChID1 = (edge_tdcIDs[iEdge] * 32) + edge_chIDs[iEdge];
+			PMTID1 = PmtGeo_[roChID1];
+//			LOG_INFO("iEdge " << iEdge);
+//			LOG_INFO("Readout Channel ID1 " << roChID1);
+//			LOG_INFO("Geom PMT ID1 " << PMTID1);
+
+			if ((PMTID1 / 10) % 10 >= 1 && (PMTID1 / 10) % 10 <= 3) {
+				for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard;
+						jEdge++) {
+					if (edge_IDs[jEdge] && jEdge != iEdge) {
+						const int roChID2 = (edge_tdcIDs[jEdge] * 32)
+								+ edge_chIDs[jEdge];
+						PMTID2 = PmtGeo_[roChID2];
+//						LOG_INFO("jEdge " << jEdge);
+//						LOG_INFO("Readout Channel ID2 " << roChID2);
+//						LOG_INFO("Geom PMT ID2 " << PMTID2);
+
+						if (fabs(PMTID1 - PMTID2) == 50
+								&& (PMTID1 / 100) % 10 == (PMTID2 / 100) % 10) {
+							finetime = decoder.getDecodedEvent()->getFinetime()
+									* 0.097464731802;
+							edgetime1 = (edge_times[iEdge]
+									- decoder.getDecodedEvent()->getTimestamp()
+											* 256.) * 0.097464731802;
+							edgetime2 = (edge_times[jEdge]
+									- decoder.getDecodedEvent()->getTimestamp()
+											* 256.) * 0.097464731802;
+//							LOG_INFO("finetime (in ns) " << finetime << " edgetime1 (in ns) " << edgetime1 << " edgetime2 " << edgetime2);
+
+							dt1_l0tp = fabs(edgetime1 - finetime);
+							dt2_l0tp = fabs(edgetime2 - finetime);
+
+//							LOG_INFO("dt1_l0tp "<< dt1_l0tp << " dt2_l0tp " << dt2_l0tp);
+//							LOG_INFO("edge1-edge2 "<<fabs(edgetime1-edgetime2));
+							if ((dt1_l0tp < AlgoOnlineTimeWindow_[l0MaskID])
+									&& (dt2_l0tp < AlgoOnlineTimeWindow_[l0MaskID])
+									&& (fabs(edgetime1 - edgetime2) < 5.)) {
+
+								if (AlgoRefTimeSourceID_[l0MaskID] == 1)
+									averageHitTime += edgetime1;
+								nHits++;
+							}
+						}
 					}
 				}
 			}
 		}
 	}
 
-	algoProcessed = 1;
+	if ((AlgoRefTimeSourceID_[l0MaskID] == 1) && nHits) {
+		averageHitTime = averageHitTime / (nHits);
+	} else
+		averageHitTime = -1.0e+28;
 
-	//l1Info->setNewCHODAverageTime(averageHitTime);
-	//l1Info->setL1NewCHODProcessed();
+	l1Info->setNewCHODAverageTime(averageHitTime);
+	l1Info->setL1NewCHODNHits(nHits);
+	l1Info->setL1NewCHODProcessed();
 
-//	LOG_INFO("NewCHODAlgo=============== number of Hits " << nHits_V + nHits_H);
+//	LOG_INFO("NewCHODAlgo=============== number of Hits " << nHits);
 //	LOG_INFO("NewCHODAlgo=============== average HitTime " << averageHitTime);
 //	LOG_INFO("NewCHODAlgo=============== L1NewCHODProcessed Flag " << (uint)l1Info->isL1NewCHODProcessed());
-//	LOG_INFO("NewCHODAlgo=============== reset average HitTime " << averageHitTime);
+	if (AlgoLogic_[l0MaskID])
+		return ((nHits > 0) && (nHits < nMaxPMTs));
+	else
+		return (nHits >= nMaxPMTs);
 
-	/*	if (algoLogic)
-	 return ((nHits > 0) && ((nHits) < nMaxPMTs));
-	 else
-	 return (nHits >= nMaxPMTs);*/
 }
 
-bool NewCHODAlgo::isAlgoProcessed() {
-	return algoProcessed;
-}
+void NewCHODAlgo::writeData(L1Algo* algoPacket, uint l0MaskID,
+		L1InfoToStorage* l1Info) {
 
-void NewCHODAlgo::resetAlgoProcessed() {
-	algoProcessed = 0;
-}
-
-bool NewCHODAlgo::isEmptyPacket() {
-	return emptyPacket;
-}
-
-bool NewCHODAlgo::isBadData() {
-	return badData;
-}
-
-void NewCHODAlgo::clear() {
-	algoProcessed = 0;
-	emptyPacket = 0;
-	badData = 0;
-}
-
-void NewCHODAlgo::writeData(L1Algo* algoPacket, uint l0MaskID) {
-
-	if (algoID != algoPacket->algoID)
+	if (AlgoID_ != algoPacket->algoID)
 		LOG_ERROR(
 				"Algo ID does not match with Algo ID written within the packet!");
-	algoPacket->algoID = algoID;
-	algoPacket->onlineTimeWindow = (uint) algoOnlineTimeWindow[l0MaskID];
-	algoPacket->qualityFlags = (algoProcessed << 6) | (emptyPacket << 4)
-			| (badData << 2) | algoRefTimeSourceID[l0MaskID];
-//	algoPacket->l1Data[0] = (uint) nHits_V + nHits_H;
-	if (averageHitTime != -1.0e+28)
-		algoPacket->l1Data[1] = averageHitTime;
+	algoPacket->algoID = AlgoID_;
+	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
+	algoPacket->qualityFlags = (l1Info->isL1NewCHODProcessed() << 6)
+			| (l1Info->isL1NewCHODEmptyPacket() << 4)
+			| (l1Info->isL1NewCHODBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
+	algoPacket->l1Data[0] = (uint) l1Info->getL1NewCHODNHits();
+	if (AlgoRefTimeSourceID_[l0MaskID] == 1)
+		algoPacket->l1Data[1] = l1Info->getNewCHODAverageTime();
 	else
 		algoPacket->l1Data[1] = 0;
 	algoPacket->numberOfWords = (sizeof(L1Algo) / 4.);
-//	LOG_INFO("l0MaskID " << l0MaskID);
-//	LOG_INFO("algoID " << (uint)algoPacket->algoID);
-//	LOG_INFO("quality Flags " << (uint)algoPacket->qualityFlags);
-//	LOG_INFO("online TW " << (uint)algoPacket->onlineTimeWindow);
-//	LOG_INFO("Data Words " << algoPacket->l1Data[0] << " " << algoPacket->l1Data[1]);
+	//	LOG_INFO("l0MaskID " << l0MaskID);
+	//	LOG_INFO("algoID " << (uint)algoPacket->algoID);
+	//	LOG_INFO("quality Flags " << (uint)algoPacket->qualityFlags);
+	//	LOG_INFO("online TW " << (uint)algoPacket->onlineTimeWindow);
+	//	LOG_INFO("Data Words " << algoPacket->l1Data[0] << " " << algoPacket->l1Data[1]);
 
 }
 

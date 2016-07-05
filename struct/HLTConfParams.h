@@ -60,6 +60,10 @@ typedef struct l1MUV_t {
 	l1MaskSubStruct configParams;
 	int xx;
 } l1MUV;
+typedef struct l1NewCHOD_t {
+	l1MaskSubStruct configParams;
+	int xx;
+} l1NewCHOD;
 
 typedef struct l2LKr_t {
 	l2MaskSubStruct configParams;
@@ -77,6 +81,7 @@ typedef struct l1MaskStruct_t {
 	l1IRCSAC ircsac;
 	l1Straw straw;
 	l1MUV muv;
+	l1NewCHOD newchod;
 	///....all L1 Algorithms
 } l1MaskStruct;
 
