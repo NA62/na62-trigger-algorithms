@@ -44,17 +44,9 @@ uint StrawAlgo::AlgoLogic_[16];
 uint StrawAlgo::AlgoRefTimeSourceID_[16];
 double StrawAlgo::AlgoOnlineTimeWindow_[16];
 
-//bool StrawAlgo::algoProcessed = 0;
-//bool StrawAlgo::emptyPacket = 0;
-//bool StrawAlgo::badData = 0;
-//bool StrawAlgo::isCHODRefTime = 0;
-//double StrawAlgo::averageCHODHitTime = 0.;
-
 STRAWParsConfFile* StrawAlgo::InfoSTRAW_ = STRAWParsConfFile::GetInstance();
 int* StrawAlgo::StrawGeo_ = InfoSTRAW_->getGeoMap();
 double* StrawAlgo::ROMezzaninesT0_ = InfoSTRAW_->getT0();
-
-uint StrawAlgo::chRO[MAXNHITS];
 
 //Defualt Values - TO BE REMOVED ?????
 //double StrawAlgo::t0_main_shift = 6056.19;
@@ -78,6 +70,7 @@ double StrawAlgo::cutlowleading = 0.0; //-10
 double StrawAlgo::cuthighleading = 175.0; //165
 double StrawAlgo::cutlowtrailing = 55.0; //-50
 double StrawAlgo::cuthightrailing = 250.0;
+int StrawAlgo::cutcluster = 6;
 double StrawAlgo::m1leadtrail = 1.35;
 double StrawAlgo::q1leadtrail = -50.0; //-50
 double StrawAlgo::m2leadtrail = 4.8;
@@ -86,47 +79,10 @@ double StrawAlgo::hit3low = 8.6;
 double StrawAlgo::hit3high = 9.0;
 double StrawAlgo::hit2low = 2.9;
 double StrawAlgo::hit2high = 5.8;
-int StrawAlgo::cutcluster = 6;
 
-bool StrawAlgo::tl_flag = 0;
-bool StrawAlgo::skip_flag = 0;
-int StrawAlgo::nHits = 0;
-
-int StrawAlgo::chamberID = -1;
-int StrawAlgo::viewID = -1;
-int StrawAlgo::halfviewID = -1;
-int StrawAlgo::planeID = -1;
-int StrawAlgo::strawID = -1;
-double StrawAlgo::leading = -100000;
-double StrawAlgo::trailing = -100000;
-float StrawAlgo::position = 0.0;
-float StrawAlgo::wireDistance = -100.0;
-
-STRAWChannelID StrawAlgo::strawChannel_;
-DigiManager StrawAlgo::strawDigiMan_;
 float StrawAlgo::fChamberZPosition[4] = { (0.5 * (183311.1 + 183704.9)), (0.5
 		* (193864.1 + 194262.9) + 2.5), (0.5 * (204262.1 + 204655.9)), (0.5
 		* (218688.1 + 219081.9)) };
-Straw StrawAlgo::strawPrecluster_[4][4][2][500];
-int StrawAlgo::nStrawPreclusters[4][4][2];
-Cluster StrawAlgo::strawCluster_[4][4][500];
-int StrawAlgo::nStrawClusters[4][4];
-Point StrawAlgo::strawPointTemp_[4][5000];
-int StrawAlgo::nStrawPointsTemp[4];
-Point StrawAlgo::strawPointTempbis_[4][2000];
-int StrawAlgo::nStrawPointsTempbis[4];
-Point StrawAlgo::strawPointFinal_[4][2000];
-int StrawAlgo::nStrawPointsFinal[4];
-Track StrawAlgo::strawFirstTempTrk_[3000];
-Track StrawAlgo::strawTempTrk_[4000];
-Track StrawAlgo::strawTrkIntermedie_[1000];
-
-StrawAlgo::StrawAlgo() {
-}
-
-StrawAlgo::~StrawAlgo() {
-// TODO Auto-generated destructor stub
-}
 
 void StrawAlgo::initialize(uint i, l1Straw &l1StrawStruct) {
 
@@ -150,10 +106,35 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID,
 	double invsq2 = 1. / sq2;
 
 	uint nEdges_tot = 0;
-	nHits = 0;
-	tl_flag = 0;
-	skip_flag = 0;
+	uint nHits = 0;
+	bool tl_flag = 0;
+	bool skip_flag = 0;
 	int nChambersHit = 0;
+
+	int chamberID = -1;
+	int viewID = -1;
+	int halfviewID = -1;
+	int planeID = -1;
+	int strawID = -1;
+	double leading = -100000.;
+	double trailing = -100000.;
+	float position = 0.0;
+	float wireDistance = -100.0;
+
+	Point strawPointTemp_[4][5000];
+	Point strawPointTempbis_[4][2000];
+	Point strawPointFinal_[4][2000];
+	Cluster strawCluster_[4][4][500];
+	Straw strawPrecluster_[4][4][2][500];
+	Track strawFirstTempTrk_[3000];
+	Track strawTempTrk_[4000];
+	Track strawTrkIntermedie_[1000];
+
+	int nStrawPointsTemp[4];
+	int nStrawPointsTempbis[4];
+	int nStrawPointsFinal[4];
+	int nStrawClusters[4][4];
+	int nStrawPreclusters[4][4][2];
 
 	for (int i = 0; i != 4; ++i) {
 		nStrawPointsTemp[i] = 0;
@@ -166,6 +147,11 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID,
 			}
 		}
 	}
+
+	uint chRO[MAXNHITS] = {0};
+	STRAWChannelID strawChannel_;
+	DigiManager strawDigiMan_;
+
 	gettimeofday(&time[1], 0);
 //	LOG_INFO( "Preparazione Vettori - Stop " << time[1].tv_sec << " " << time[1].tv_usec );
 //	LOG_INFO( "Preparazione Vettori " << ((time[1].tv_sec - time[0].tv_sec)*1e6 + time[1].tv_usec) - time[0].tv_usec );
@@ -208,10 +194,9 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID,
 //			LOG_INFO( "Read Config File and Assign ChannelID - Start " << time[5].tv_sec << " " << time[5].tv_usec );
 
 			tl_flag = 0;
+			strawChannel_.resetChannelID();
 
 			chRO[nHits] = 256 * srbAddr[iEdge] + strawAddr[iEdge];
-
-			strawChannel_.resetChannelID();
 			strawChannel_.decodeChannelID(StrawGeo_[chRO[nHits]]);
 
 			chamberID = strawChannel_.getChamberID();
@@ -219,8 +204,8 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID,
 			halfviewID = strawChannel_.getHalfViewID();
 			planeID = strawChannel_.getPlaneID();
 			strawID = strawChannel_.getStrawID();
-			leading = -100000;
-			trailing = -100000;
+			leading = -100000.;
+			trailing = -100000.;
 			position = 0.0;
 			wireDistance = -100.0;
 

@@ -160,7 +160,8 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 			LavAlgorithmId_ = l1Struct.l1Mask[i].lav.configParams.l1TrigMaskID;
 			IrcsacAlgorithmId_ =
 					l1Struct.l1Mask[i].ircsac.configParams.l1TrigMaskID;
-			StrawAlgorithmId_ = l1Struct.l1Mask[i].straw.configParams.l1TrigMaskID;
+			StrawAlgorithmId_ =
+					l1Struct.l1Mask[i].straw.configParams.l1TrigMaskID;
 			MuvAlgorithmId_ = l1Struct.l1Mask[i].muv.configParams.l1TrigMaskID;
 			NewChodAlgorithmId_ =
 					l1Struct.l1Mask[i].newchod.configParams.l1TrigMaskID;
@@ -215,8 +216,8 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 				<< NewChodAlgorithmId_)
 				| (l1Struct.l1Mask[i].muv.configParams.l1TrigFlag
 						<< MuvAlgorithmId_)
-						| (l1Struct.l1Mask[i].straw.configParams.l1TrigFlag
-												<< StrawAlgorithmId_)
+				| (l1Struct.l1Mask[i].straw.configParams.l1TrigFlag
+						<< StrawAlgorithmId_)
 				| (l1Struct.l1Mask[i].ircsac.configParams.l1TrigFlag
 						<< IrcsacAlgorithmId_)
 				| (l1Struct.l1Mask[i].lav.configParams.l1TrigFlag
@@ -241,8 +242,8 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 				<< NewChodAlgorithmId_)
 				| (l1Struct.l1Mask[i].muv.configParams.l1TrigLogic
 						<< MuvAlgorithmId_)
-						| (l1Struct.l1Mask[i].straw.configParams.l1TrigLogic
-												<< StrawAlgorithmId_)
+				| (l1Struct.l1Mask[i].straw.configParams.l1TrigLogic
+						<< StrawAlgorithmId_)
 				| (l1Struct.l1Mask[i].ircsac.configParams.l1TrigLogic
 						<< IrcsacAlgorithmId_)
 				| (l1Struct.l1Mask[i].lav.configParams.l1TrigLogic
@@ -257,8 +258,8 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 						<< NewChodAlgorithmId_)
 						| (l1Struct.l1Mask[i].muv.configParams.l1TrigDownScale
 								<< MuvAlgorithmId_)
-								| (l1Struct.l1Mask[i].straw.configParams.l1TrigDownScale
-														<< StrawAlgorithmId_)
+						| (l1Struct.l1Mask[i].straw.configParams.l1TrigDownScale
+								<< StrawAlgorithmId_)
 						| (l1Struct.l1Mask[i].ircsac.configParams.l1TrigDownScale
 								<< IrcsacAlgorithmId_)
 						| (l1Struct.l1Mask[i].lav.configParams.l1TrigDownScale
@@ -387,6 +388,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	uint_fast8_t strawTrigger = 0;
 	uint_fast8_t muvTrigger = 0;
 	uint_fast8_t newchodTrigger = 0;
+
 	uint_fast8_t l1TriggerWords[16] = { };
 	L1InfoToStorage l1Info;
 
@@ -606,14 +608,14 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 
 					if ((StrawEnableMask_ & (1 << i))
 							&& AlgoProcessID_[i][StrawAlgorithmId_]
-												 == l1ProcessID
-												 && SourceIDManager::isStrawActive()) {
+									== l1ProcessID
+							&& SourceIDManager::isStrawActive()) {
 						if (!l1Info.isL1StrawProcessed()) {
 							strawTrigger = StrawAlgo::processStrawTrigger(i,
 									decoder, &l1Info);
-							//							if (strawTrigger != 0) {
-							//										L1Downscaling::processAlgorithm(strawAlgorithmId);
-							//									}
+//							if (strawTrigger != 0) {
+//								L1Downscaling::processAlgorithm (strawAlgorithmId);
+//							}
 						}
 						l1ProcessID++;
 						l1TriggerTmp |= (strawTrigger
