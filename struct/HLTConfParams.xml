@@ -111,6 +111,20 @@
         </configParams>
         <xx>0</xx>
       </muv>
+      <newchod>
+        <configParams>
+          <l1TrigProcessID>6</l1TrigProcessID>
+          <l1TrigMaskID>7</l1TrigMaskID>
+          <l1TrigEnable>0</l1TrigEnable>
+          <l1TrigLogic>1</l1TrigLogic>
+          <l1TrigFlag>0</l1TrigFlag>
+          <l1TrigDownScale>0</l1TrigDownScale>
+          <l1TrigDSFactor>1</l1TrigDSFactor>
+          <l1TrigRefTimeSourceID>0</l1TrigRefTimeSourceID>
+          <l1TrigOnlineTimeWindow>10</l1TrigOnlineTimeWindow>
+        </configParams>
+        <xx>0</xx>
+      </newchod>
     </l1Mask>
     <l1Mask id="1">
       <numberOfEnabledAlgos>0</numberOfEnabledAlgos>
@@ -214,6 +228,20 @@
         </configParams>
         <xx>0</xx>
       </muv>
+      <newchod>
+        <configParams>
+          <l1TrigProcessID>6</l1TrigProcessID>
+          <l1TrigMaskID>7</l1TrigMaskID>
+          <l1TrigEnable>0</l1TrigEnable>
+          <l1TrigLogic>1</l1TrigLogic>
+          <l1TrigFlag>0</l1TrigFlag>
+          <l1TrigDownScale>0</l1TrigDownScale>
+          <l1TrigDSFactor>1</l1TrigDSFactor>
+          <l1TrigRefTimeSourceID>0</l1TrigRefTimeSourceID>
+          <l1TrigOnlineTimeWindow>10</l1TrigOnlineTimeWindow>
+        </configParams>
+        <xx>0</xx>
+      </newchod>
     </l1Mask>
     <l1Mask id="2">
       <numberOfEnabledAlgos>0</numberOfEnabledAlgos>
@@ -317,6 +345,20 @@
         </configParams>
         <xx>0</xx>
       </muv>
+      <newchod>
+        <configParams>
+          <l1TrigProcessID>6</l1TrigProcessID>
+          <l1TrigMaskID>7</l1TrigMaskID>
+          <l1TrigEnable>0</l1TrigEnable>
+          <l1TrigLogic>1</l1TrigLogic>
+          <l1TrigFlag>0</l1TrigFlag>
+          <l1TrigDownScale>0</l1TrigDownScale>
+          <l1TrigDSFactor>1</l1TrigDSFactor>
+          <l1TrigRefTimeSourceID>0</l1TrigRefTimeSourceID>
+          <l1TrigOnlineTimeWindow>10</l1TrigOnlineTimeWindow>
+        </configParams>
+        <xx>0</xx>
+      </newchod>
     </l1Mask>
     <l1Mask id="3">
       <numberOfEnabledAlgos>0</numberOfEnabledAlgos>
@@ -420,6 +462,20 @@
         </configParams>
         <xx>0</xx>
       </muv>
+      <newchod>
+        <configParams>
+          <l1TrigProcessID>6</l1TrigProcessID>
+          <l1TrigMaskID>7</l1TrigMaskID>
+          <l1TrigEnable>0</l1TrigEnable>
+          <l1TrigLogic>1</l1TrigLogic>
+          <l1TrigFlag>0</l1TrigFlag>
+          <l1TrigDownScale>0</l1TrigDownScale>
+          <l1TrigDSFactor>1</l1TrigDSFactor>
+          <l1TrigRefTimeSourceID>0</l1TrigRefTimeSourceID>
+          <l1TrigOnlineTimeWindow>10</l1TrigOnlineTimeWindow>
+        </configParams>
+        <xx>0</xx>
+      </newchod>
     </l1Mask>
     <l1Mask id="4">
       <numberOfEnabledAlgos>0</numberOfEnabledAlgos>
@@ -523,6 +579,20 @@
         </configParams>
         <xx>0</xx>
       </muv>
+      <newchod>
+        <configParams>
+          <l1TrigProcessID>6</l1TrigProcessID>
+          <l1TrigMaskID>7</l1TrigMaskID>
+          <l1TrigEnable>0</l1TrigEnable>
+          <l1TrigLogic>1</l1TrigLogic>
+          <l1TrigFlag>0</l1TrigFlag>
+          <l1TrigDownScale>0</l1TrigDownScale>
+          <l1TrigDSFactor>1</l1TrigDSFactor>
+          <l1TrigRefTimeSourceID>0</l1TrigRefTimeSourceID>
+          <l1TrigOnlineTimeWindow>10</l1TrigOnlineTimeWindow>
+        </configParams>
+        <xx>0</xx>
+      </newchod>
     </l1Mask>
     <l1Mask id="5">
       <numberOfEnabledAlgos>0</numberOfEnabledAlgos>
@@ -626,6 +696,20 @@
         </configParams>
         <xx>0</xx>
       </muv>
+      <newchod>
+        <configParams>
+          <l1TrigProcessID>6</l1TrigProcessID>
+          <l1TrigMaskID>7</l1TrigMaskID>
+          <l1TrigEnable>0</l1TrigEnable>
+          <l1TrigLogic>1</l1TrigLogic>
+          <l1TrigFlag>0</l1TrigFlag>
+          <l1TrigDownScale>0</l1TrigDownScale>
+          <l1TrigDSFactor>1</l1TrigDSFactor>
+          <l1TrigRefTimeSourceID>0</l1TrigRefTimeSourceID>
+          <l1TrigOnlineTimeWindow>10</l1TrigOnlineTimeWindow>
+        </configParams>
+        <xx>0</xx>
+      </newchod>
     </l1Mask>
     <l1Mask id="6">
       <numberOfEnabledAlgos>0</numberOfEnabledAlgos>
@@ -729,6 +813,20 @@
         </configParams>
         <xx>0</xx>
       </muv>
+      <newchod>
+        <configParams>
+          <l1TrigProcessID>6</l1TrigProcessID>
+          <l1TrigMaskID>7</l1TrigMaskID>
+          <l1TrigEnable>0</l1TrigEnable>
+          <l1TrigLogic>1</l1TrigLogic>
+          <l1TrigFlag>0</l1TrigFlag>
+          <l1TrigDownScale>0</l1TrigDownScale>
+          <l1TrigDSFactor>1</l1TrigDSFactor>
+          <l1TrigRefTimeSourceID>0</l1TrigRefTimeSourceID>
+          <l1TrigOnlineTimeWindow>10</l1TrigOnlineTimeWindow>
+        </configParams>
+        <xx>0</xx>
+      </newchod>
     </l1Mask>
     <l1Mask id="7">
       <numberOfEnabledAlgos>0</numberOfEnabledAlgos>
@@ -832,6 +930,20 @@
         </configParams>
         <xx>0</xx>
       </muv>
+      <newchod>
+        <configParams>
+          <l1TrigProcessID>6</l1TrigProcessID>
+          <l1TrigMaskID>7</l1TrigMaskID>
+          <l1TrigEnable>0</l1TrigEnable>
+          <l1TrigLogic>1</l1TrigLogic>
+          <l1TrigFlag>0</l1TrigFlag>
+          <l1TrigDownScale>0</l1TrigDownScale>
+          <l1TrigDSFactor>1</l1TrigDSFactor>
+          <l1TrigRefTimeSourceID>0</l1TrigRefTimeSourceID>
+          <l1TrigOnlineTimeWindow>10</l1TrigOnlineTimeWindow>
+        </configParams>
+        <xx>0</xx>
+      </newchod>
     </l1Mask>
     <l1Mask id="8">
       <numberOfEnabledAlgos>0</numberOfEnabledAlgos>
@@ -935,6 +1047,20 @@
         </configParams>
         <xx>0</xx>
       </muv>
+      <newchod>
+        <configParams>
+          <l1TrigProcessID>6</l1TrigProcessID>
+          <l1TrigMaskID>7</l1TrigMaskID>
+          <l1TrigEnable>0</l1TrigEnable>
+          <l1TrigLogic>1</l1TrigLogic>
+          <l1TrigFlag>0</l1TrigFlag>
+          <l1TrigDownScale>0</l1TrigDownScale>
+          <l1TrigDSFactor>1</l1TrigDSFactor>
+          <l1TrigRefTimeSourceID>0</l1TrigRefTimeSourceID>
+          <l1TrigOnlineTimeWindow>10</l1TrigOnlineTimeWindow>
+        </configParams>
+        <xx>0</xx>
+      </newchod>
     </l1Mask>
     <l1Mask id="9">
       <numberOfEnabledAlgos>0</numberOfEnabledAlgos>
@@ -1038,6 +1164,20 @@
         </configParams>
         <xx>0</xx>
       </muv>
+      <newchod>
+        <configParams>
+          <l1TrigProcessID>6</l1TrigProcessID>
+          <l1TrigMaskID>7</l1TrigMaskID>
+          <l1TrigEnable>0</l1TrigEnable>
+          <l1TrigLogic>1</l1TrigLogic>
+          <l1TrigFlag>0</l1TrigFlag>
+          <l1TrigDownScale>0</l1TrigDownScale>
+          <l1TrigDSFactor>1</l1TrigDSFactor>
+          <l1TrigRefTimeSourceID>0</l1TrigRefTimeSourceID>
+          <l1TrigOnlineTimeWindow>10</l1TrigOnlineTimeWindow>
+        </configParams>
+        <xx>0</xx>
+      </newchod>
     </l1Mask>
     <l1Mask id="10">
       <numberOfEnabledAlgos>0</numberOfEnabledAlgos>
@@ -1141,6 +1281,20 @@
         </configParams>
         <xx>0</xx>
       </muv>
+      <newchod>
+        <configParams>
+          <l1TrigProcessID>6</l1TrigProcessID>
+          <l1TrigMaskID>7</l1TrigMaskID>
+          <l1TrigEnable>0</l1TrigEnable>
+          <l1TrigLogic>1</l1TrigLogic>
+          <l1TrigFlag>0</l1TrigFlag>
+          <l1TrigDownScale>0</l1TrigDownScale>
+          <l1TrigDSFactor>1</l1TrigDSFactor>
+          <l1TrigRefTimeSourceID>0</l1TrigRefTimeSourceID>
+          <l1TrigOnlineTimeWindow>10</l1TrigOnlineTimeWindow>
+        </configParams>
+        <xx>0</xx>
+      </newchod>
     </l1Mask>
     <l1Mask id="11">
       <numberOfEnabledAlgos>0</numberOfEnabledAlgos>
@@ -1244,6 +1398,20 @@
         </configParams>
         <xx>0</xx>
       </muv>
+      <newchod>
+        <configParams>
+          <l1TrigProcessID>6</l1TrigProcessID>
+          <l1TrigMaskID>7</l1TrigMaskID>
+          <l1TrigEnable>0</l1TrigEnable>
+          <l1TrigLogic>1</l1TrigLogic>
+          <l1TrigFlag>0</l1TrigFlag>
+          <l1TrigDownScale>0</l1TrigDownScale>
+          <l1TrigDSFactor>1</l1TrigDSFactor>
+          <l1TrigRefTimeSourceID>0</l1TrigRefTimeSourceID>
+          <l1TrigOnlineTimeWindow>10</l1TrigOnlineTimeWindow>
+        </configParams>
+        <xx>0</xx>
+      </newchod>
     </l1Mask>
     <l1Mask id="12">
       <numberOfEnabledAlgos>0</numberOfEnabledAlgos>
@@ -1347,6 +1515,20 @@
         </configParams>
         <xx>0</xx>
       </muv>
+      <newchod>
+        <configParams>
+          <l1TrigProcessID>6</l1TrigProcessID>
+          <l1TrigMaskID>7</l1TrigMaskID>
+          <l1TrigEnable>0</l1TrigEnable>
+          <l1TrigLogic>1</l1TrigLogic>
+          <l1TrigFlag>0</l1TrigFlag>
+          <l1TrigDownScale>0</l1TrigDownScale>
+          <l1TrigDSFactor>1</l1TrigDSFactor>
+          <l1TrigRefTimeSourceID>0</l1TrigRefTimeSourceID>
+          <l1TrigOnlineTimeWindow>10</l1TrigOnlineTimeWindow>
+        </configParams>
+        <xx>0</xx>
+      </newchod>
     </l1Mask>
     <l1Mask id="13">
       <numberOfEnabledAlgos>0</numberOfEnabledAlgos>
@@ -1450,6 +1632,20 @@
         </configParams>
         <xx>0</xx>
       </muv>
+      <newchod>
+        <configParams>
+          <l1TrigProcessID>6</l1TrigProcessID>
+          <l1TrigMaskID>7</l1TrigMaskID>
+          <l1TrigEnable>0</l1TrigEnable>
+          <l1TrigLogic>1</l1TrigLogic>
+          <l1TrigFlag>0</l1TrigFlag>
+          <l1TrigDownScale>0</l1TrigDownScale>
+          <l1TrigDSFactor>1</l1TrigDSFactor>
+          <l1TrigRefTimeSourceID>0</l1TrigRefTimeSourceID>
+          <l1TrigOnlineTimeWindow>10</l1TrigOnlineTimeWindow>
+        </configParams>
+        <xx>0</xx>
+      </newchod>
     </l1Mask>
     <l1Mask id="14">
       <numberOfEnabledAlgos>0</numberOfEnabledAlgos>
@@ -1553,6 +1749,20 @@
         </configParams>
         <xx>0</xx>
       </muv>
+      <newchod>
+        <configParams>
+          <l1TrigProcessID>6</l1TrigProcessID>
+          <l1TrigMaskID>7</l1TrigMaskID>
+          <l1TrigEnable>0</l1TrigEnable>
+          <l1TrigLogic>1</l1TrigLogic>
+          <l1TrigFlag>0</l1TrigFlag>
+          <l1TrigDownScale>0</l1TrigDownScale>
+          <l1TrigDSFactor>1</l1TrigDSFactor>
+          <l1TrigRefTimeSourceID>0</l1TrigRefTimeSourceID>
+          <l1TrigOnlineTimeWindow>10</l1TrigOnlineTimeWindow>
+        </configParams>
+        <xx>0</xx>
+      </newchod>
     </l1Mask>
     <l1Mask id="15">
       <numberOfEnabledAlgos>0</numberOfEnabledAlgos>
@@ -1656,6 +1866,20 @@
         </configParams>
         <xx>0</xx>
       </muv>
+      <newchod>
+        <configParams>
+          <l1TrigProcessID>6</l1TrigProcessID>
+          <l1TrigMaskID>7</l1TrigMaskID>
+          <l1TrigEnable>0</l1TrigEnable>
+          <l1TrigLogic>1</l1TrigLogic>
+          <l1TrigFlag>0</l1TrigFlag>
+          <l1TrigDownScale>0</l1TrigDownScale>
+          <l1TrigDSFactor>1</l1TrigDSFactor>
+          <l1TrigRefTimeSourceID>0</l1TrigRefTimeSourceID>
+          <l1TrigOnlineTimeWindow>10</l1TrigOnlineTimeWindow>
+        </configParams>
+        <xx>0</xx>
+      </newchod>
     </l1Mask>
   </l1>
   <l2>

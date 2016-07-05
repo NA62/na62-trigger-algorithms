@@ -24,6 +24,7 @@
 #include "LAVAlgo.h"
 #include "MUVAlgo.h"
 #include "StrawAlgo.h"
+#include "NewCHODAlgo.h"
 
 namespace na62 {
 
@@ -62,24 +63,27 @@ uint_fast16_t L1TriggerProcessor::RichEnableMask_ = 0;
 uint_fast16_t L1TriggerProcessor::CedarEnableMask_ = 0;
 uint_fast16_t L1TriggerProcessor::LavEnableMask_ = 0;
 uint_fast16_t L1TriggerProcessor::IrcsacEnableMask_ = 0;
-uint_fast16_t L1TriggerProcessor::MuvEnableMask_ = 0;
 uint_fast16_t L1TriggerProcessor::StrawEnableMask_ = 0;
+uint_fast16_t L1TriggerProcessor::MuvEnableMask_ = 0;
+uint_fast16_t L1TriggerProcessor::NewChodEnableMask_ = 0;
 
 uint_fast16_t L1TriggerProcessor::ChodFlagMask_ = 0;
 uint_fast16_t L1TriggerProcessor::RichFlagMask_ = 0;
 uint_fast16_t L1TriggerProcessor::CedarFlagMask_ = 0;
 uint_fast16_t L1TriggerProcessor::LavFlagMask_ = 0;
 uint_fast16_t L1TriggerProcessor::IrcsacFlagMask_ = 0;
-uint_fast16_t L1TriggerProcessor::MuvFlagMask_ = 0;
 uint_fast16_t L1TriggerProcessor::StrawFlagMask_ = 0;
+uint_fast16_t L1TriggerProcessor::MuvFlagMask_ = 0;
+uint_fast16_t L1TriggerProcessor::NewChodFlagMask_ = 0;
 
 uint L1TriggerProcessor::ChodAlgorithmId_;
 uint L1TriggerProcessor::RichAlgorithmId_;
 uint L1TriggerProcessor::CedarAlgorithmId_;
 uint L1TriggerProcessor::LavAlgorithmId_;
 uint L1TriggerProcessor::IrcsacAlgorithmId_;
-uint L1TriggerProcessor::MuvAlgorithmId_;
 uint L1TriggerProcessor::StrawAlgorithmId_;
+uint L1TriggerProcessor::MuvAlgorithmId_;
+uint L1TriggerProcessor::NewChodAlgorithmId_;
 
 uint L1TriggerProcessor::MaskIDToNum_[16];
 uint L1TriggerProcessor::NumToMaskID_[16];
@@ -89,7 +93,6 @@ uint L1TriggerProcessor::NumToAlgoID_[16][10];
 uint_fast8_t L1TriggerProcessor::NumberOfEnabledL0Masks_ = 0;
 std::vector<int> L1TriggerProcessor::L0MaskIDs_;
 uint_fast32_t L1TriggerProcessor::L1DataPacketSize_ = 0;
-
 
 bool L1TriggerProcessor::isRequestZeroSuppressedCreamData(
 		uint_fast8_t l1TriggerTypeWord) {
@@ -157,9 +160,10 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 			LavAlgorithmId_ = l1Struct.l1Mask[i].lav.configParams.l1TrigMaskID;
 			IrcsacAlgorithmId_ =
 					l1Struct.l1Mask[i].ircsac.configParams.l1TrigMaskID;
+			StrawAlgorithmId_ = l1Struct.l1Mask[i].straw.configParams.l1TrigMaskID;
 			MuvAlgorithmId_ = l1Struct.l1Mask[i].muv.configParams.l1TrigMaskID;
-			StrawAlgorithmId_ =
-					l1Struct.l1Mask[i].straw.configParams.l1TrigMaskID;
+			NewChodAlgorithmId_ =
+					l1Struct.l1Mask[i].newchod.configParams.l1TrigMaskID;
 		} else {
 			if ((ChodAlgorithmId_
 					!= l1Struct.l1Mask[i].chod.configParams.l1TrigMaskID)
@@ -174,7 +178,9 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 					|| (StrawAlgorithmId_
 							!= l1Struct.l1Mask[i].straw.configParams.l1TrigMaskID)
 					|| (MuvAlgorithmId_
-							!= l1Struct.l1Mask[i].muv.configParams.l1TrigMaskID))
+							!= l1Struct.l1Mask[i].muv.configParams.l1TrigMaskID)
+					|| (NewChodAlgorithmId_
+							!= l1Struct.l1Mask[i].newchod.configParams.l1TrigMaskID))
 				LOG_ERROR("Mismatch between AlgoID !!!");
 			// Throw Exception!
 		}
@@ -182,18 +188,21 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 		NumberOfFlaggedAlgos_[i] = l1Struct.l1Mask[i].numberOfFlaggedAlgos;
 		MaskReductionFactor_[i] = l1Struct.l1Mask[i].maskReductionFactor;
 
-		AlgoEnableMask_[i] = (l1Struct.l1Mask[i].muv.configParams.l1TrigEnable
-				<< MuvAlgorithmId_)
-				| (l1Struct.l1Mask[i].straw.configParams.l1TrigEnable
-						<< StrawAlgorithmId_)
-				| (l1Struct.l1Mask[i].ircsac.configParams.l1TrigEnable
-						<< IrcsacAlgorithmId_)
-				| (l1Struct.l1Mask[i].lav.configParams.l1TrigEnable
-						<< LavAlgorithmId_)
-				| (l1Struct.l1Mask[i].ktag.configParams.l1TrigEnable
-						<< CedarAlgorithmId_)
-				| (l1Struct.l1Mask[i].chod.configParams.l1TrigEnable
-						<< ChodAlgorithmId_);
+		AlgoEnableMask_[i] =
+				(l1Struct.l1Mask[i].newchod.configParams.l1TrigEnable
+						<< NewChodAlgorithmId_)
+						| (l1Struct.l1Mask[i].muv.configParams.l1TrigEnable
+								<< MuvAlgorithmId_)
+						| (l1Struct.l1Mask[i].straw.configParams.l1TrigEnable
+								<< StrawAlgorithmId_)
+						| (l1Struct.l1Mask[i].ircsac.configParams.l1TrigEnable
+								<< IrcsacAlgorithmId_)
+						| (l1Struct.l1Mask[i].lav.configParams.l1TrigEnable
+								<< LavAlgorithmId_)
+						| (l1Struct.l1Mask[i].ktag.configParams.l1TrigEnable
+								<< CedarAlgorithmId_)
+						| (l1Struct.l1Mask[i].chod.configParams.l1TrigEnable
+								<< ChodAlgorithmId_);
 		if (NumberOfEnabledAlgos_[i]
 				!= __builtin_popcount((uint) AlgoEnableMask_[i])) {
 			LOG_ERROR(
@@ -202,10 +211,12 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 					(uint) AlgoEnableMask_[i]);
 		}
 
-		AlgoFlagMask_[i] = (l1Struct.l1Mask[i].muv.configParams.l1TrigFlag
-				<< MuvAlgorithmId_)
-				| (l1Struct.l1Mask[i].straw.configParams.l1TrigFlag
-						<< StrawAlgorithmId_)
+		AlgoFlagMask_[i] = (l1Struct.l1Mask[i].newchod.configParams.l1TrigFlag
+				<< NewChodAlgorithmId_)
+				| (l1Struct.l1Mask[i].muv.configParams.l1TrigFlag
+						<< MuvAlgorithmId_)
+						| (l1Struct.l1Mask[i].straw.configParams.l1TrigFlag
+												<< StrawAlgorithmId_)
 				| (l1Struct.l1Mask[i].ircsac.configParams.l1TrigFlag
 						<< IrcsacAlgorithmId_)
 				| (l1Struct.l1Mask[i].lav.configParams.l1TrigFlag
@@ -226,10 +237,12 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 				(uint) (AlgoEnableMask_[i] & AlgoFlagMask_[i]));
 //		LOG_INFO("L0 Mask " << i << " number of Enabled algo " << numberOfEnabledAlgos[i] << " Flagged " << numberOfFlaggedAlgos[i] << " EnabledAndFlagged " << numberOfEnabledAndFlaggedAlgos[i]);
 
-		AlgoLogicMask_[i] = (l1Struct.l1Mask[i].muv.configParams.l1TrigLogic
-				<< MuvAlgorithmId_)
-				| (l1Struct.l1Mask[i].straw.configParams.l1TrigLogic
-						<< StrawAlgorithmId_)
+		AlgoLogicMask_[i] = (l1Struct.l1Mask[i].newchod.configParams.l1TrigLogic
+				<< NewChodAlgorithmId_)
+				| (l1Struct.l1Mask[i].muv.configParams.l1TrigLogic
+						<< MuvAlgorithmId_)
+						| (l1Struct.l1Mask[i].straw.configParams.l1TrigLogic
+												<< StrawAlgorithmId_)
 				| (l1Struct.l1Mask[i].ircsac.configParams.l1TrigLogic
 						<< IrcsacAlgorithmId_)
 				| (l1Struct.l1Mask[i].lav.configParams.l1TrigLogic
@@ -239,18 +252,21 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 				| (l1Struct.l1Mask[i].chod.configParams.l1TrigLogic
 						<< ChodAlgorithmId_);
 
-		AlgoDwScMask_[i] = (l1Struct.l1Mask[i].muv.configParams.l1TrigDownScale
-				<< MuvAlgorithmId_)
-				| (l1Struct.l1Mask[i].straw.configParams.l1TrigDownScale
-						<< StrawAlgorithmId_)
-				| (l1Struct.l1Mask[i].ircsac.configParams.l1TrigDownScale
-						<< IrcsacAlgorithmId_)
-				| (l1Struct.l1Mask[i].lav.configParams.l1TrigDownScale
-						<< LavAlgorithmId_)
-				| (l1Struct.l1Mask[i].ktag.configParams.l1TrigDownScale
-						<< CedarAlgorithmId_)
-				| (l1Struct.l1Mask[i].chod.configParams.l1TrigDownScale
-						<< ChodAlgorithmId_);
+		AlgoDwScMask_[i] =
+				(l1Struct.l1Mask[i].newchod.configParams.l1TrigDownScale
+						<< NewChodAlgorithmId_)
+						| (l1Struct.l1Mask[i].muv.configParams.l1TrigDownScale
+								<< MuvAlgorithmId_)
+								| (l1Struct.l1Mask[i].straw.configParams.l1TrigDownScale
+														<< StrawAlgorithmId_)
+						| (l1Struct.l1Mask[i].ircsac.configParams.l1TrigDownScale
+								<< IrcsacAlgorithmId_)
+						| (l1Struct.l1Mask[i].lav.configParams.l1TrigDownScale
+								<< LavAlgorithmId_)
+						| (l1Struct.l1Mask[i].ktag.configParams.l1TrigDownScale
+								<< CedarAlgorithmId_)
+						| (l1Struct.l1Mask[i].chod.configParams.l1TrigDownScale
+								<< ChodAlgorithmId_);
 
 		AlgoDwScFactor_[i][(uint) ChodAlgorithmId_] =
 				l1Struct.l1Mask[i].chod.configParams.l1TrigDSFactor;
@@ -266,6 +282,8 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 				l1Struct.l1Mask[i].straw.configParams.l1TrigDSFactor;
 		AlgoDwScFactor_[i][(uint) MuvAlgorithmId_] =
 				l1Struct.l1Mask[i].muv.configParams.l1TrigDSFactor;
+		AlgoDwScFactor_[i][(uint) NewChodAlgorithmId_] =
+				l1Struct.l1Mask[i].newchod.configParams.l1TrigDSFactor;
 
 		AlgoProcessID_[i][(uint) ChodAlgorithmId_] =
 				l1Struct.l1Mask[i].chod.configParams.l1TrigProcessID;
@@ -281,13 +299,16 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 				l1Struct.l1Mask[i].straw.configParams.l1TrigProcessID;
 		AlgoProcessID_[i][(uint) MuvAlgorithmId_] =
 				l1Struct.l1Mask[i].muv.configParams.l1TrigProcessID;
+		AlgoProcessID_[i][(uint) NewChodAlgorithmId_] =
+				l1Struct.l1Mask[i].newchod.configParams.l1TrigProcessID;
 
 		CHODAlgo::initialize(i, l1Struct.l1Mask[i].chod);
 //		RICHAlgo::initialize(l1Struct.l1Mask[i].rich);
 		KtagAlgo::initialize(i, l1Struct.l1Mask[i].ktag);
 		LAVAlgo::initialize(i, l1Struct.l1Mask[i].lav);
-		MUV3Algo::initialize(i, l1Struct.l1Mask[i].muv);
 		StrawAlgo::initialize(i, l1Struct.l1Mask[i].straw);
+		MUV3Algo::initialize(i, l1Struct.l1Mask[i].muv);
+		NewCHODAlgo::initialize(i, l1Struct.l1Mask[i].newchod);
 
 		ChodEnableMask_ |= (l1Struct.l1Mask[i].chod.configParams.l1TrigEnable
 				<< i);
@@ -303,6 +324,8 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 				<< i);
 		MuvEnableMask_ |=
 				(l1Struct.l1Mask[i].muv.configParams.l1TrigEnable << i);
+		NewChodEnableMask_ |=
+				(l1Struct.l1Mask[i].newchod.configParams.l1TrigEnable << i);
 
 		ChodFlagMask_ |= (l1Struct.l1Mask[i].chod.configParams.l1TrigFlag << i);
 		RichFlagMask_ |= (l1Struct.l1Mask[i].rich.configParams.l1TrigFlag << i);
@@ -314,6 +337,8 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 		StrawFlagMask_ |=
 				(l1Struct.l1Mask[i].straw.configParams.l1TrigFlag << i);
 		MuvFlagMask_ |= (l1Struct.l1Mask[i].muv.configParams.l1TrigFlag << i);
+		NewChodFlagMask_ |= (l1Struct.l1Mask[i].newchod.configParams.l1TrigFlag
+				<< i);
 	}
 
 	L1DataPacketSize_ = sizeof(L1Global);
@@ -359,8 +384,9 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	uint_fast8_t cedarTrigger = 0;
 	uint_fast8_t lavTrigger = 0;
 	uint_fast8_t ircsacTrigger = 0;
-	uint_fast8_t muvTrigger = 0;
 	uint_fast8_t strawTrigger = 0;
+	uint_fast8_t muvTrigger = 0;
+	uint_fast8_t newchodTrigger = 0;
 	uint_fast8_t l1TriggerWords[16] = { };
 	L1InfoToStorage l1Info;
 
@@ -438,12 +464,6 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	l0::MEPFragment* tsFragment = event->getL0SubeventBySourceIDNum(
 			SourceIDManager::TS_SOURCEID_NUM)->getFragment(0);
 	event->setTimestamp(tsFragment->getTimestamp());
-
-//KtagAlgo::clear();
-//CHODAlgo::clear();
-//LAVAlgo::clear();
-//MUV3Algo::clear();
-//l1Info_->resetL1CHODProcessed();
 
 	uint_fast8_t l1TriggerTmp;
 	uint_fast8_t l1FlagTrigger;
@@ -584,6 +604,31 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 						break;
 					}
 
+					if ((StrawEnableMask_ & (1 << i))
+							&& AlgoProcessID_[i][StrawAlgorithmId_]
+												 == l1ProcessID
+												 && SourceIDManager::isStrawActive()) {
+						if (!l1Info.isL1StrawProcessed()) {
+							strawTrigger = StrawAlgo::processStrawTrigger(i,
+									decoder, &l1Info);
+							//							if (strawTrigger != 0) {
+							//										L1Downscaling::processAlgorithm(strawAlgorithmId);
+							//									}
+						}
+						l1ProcessID++;
+						l1TriggerTmp |= (strawTrigger
+								<< (uint) StrawAlgorithmId_);
+						printf("L1TriggerProcessor.cpp: strawTrigger %d\n",
+								strawTrigger);
+					}
+					if ((StrawEnableMask_ & l0TrigFlags) == l0TrigFlags)
+						isAlgoEnableForAllL0Masks = 1;
+					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID
+							&& !((StrawEnableMask_ & StrawFlagMask_) & (1 << i))) {
+						watchingWhileLoops++;
+						break;
+					}
+
 					if ((MuvEnableMask_ & (1 << i))
 							&& AlgoProcessID_[i][MuvAlgorithmId_] == l1ProcessID
 							&& SourceIDManager::isMUV3Active()) {
@@ -607,27 +652,28 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 						break;
 					}
 
-					if ((StrawEnableMask_ & (1 << i))
-							&& AlgoProcessID_[i][StrawAlgorithmId_]
+					if ((NewChodEnableMask_ & (1 << i))
+							&& AlgoProcessID_[i][NewChodAlgorithmId_]
 									== l1ProcessID
-							&& SourceIDManager::isStrawActive()) {
-						if (!l1Info.isL1StrawProcessed()) {
-							strawTrigger = StrawAlgo::processStrawTrigger(i,
-									decoder, &l1Info);
-//							if (strawTrigger != 0) {
-//										L1Downscaling::processAlgorithm(strawAlgorithmId);
-//									}
+							&& SourceIDManager::isIrcActive()) {
+						if (!l1Info.isL1NewCHODProcessed()) {
+							newchodTrigger = NewCHODAlgo::processNewCHODTrigger(
+									i, decoder, &l1Info);
+//							if (newchodTrigger != 0) {
+//								L1Downscaling::processAlgorithm (NewChodAlgorithmId_);
+//							}
 						}
 						l1ProcessID++;
-						l1TriggerTmp |= (strawTrigger
-								<< (uint) StrawAlgorithmId_);
-						printf("L1TriggerProcessor.cpp: strawTrigger %d\n",
-								strawTrigger);
+						l1TriggerTmp |= (newchodTrigger
+								<< (uint) NewChodAlgorithmId_);
+//						printf("L1TriggerProcessor.cpp: newchodTrigger %d\n",
+//								newchodTrigger);
 					}
-					if ((StrawEnableMask_ & l0TrigFlags) == l0TrigFlags)
+					if ((NewChodEnableMask_ & l0TrigFlags) == l0TrigFlags)
 						isAlgoEnableForAllL0Masks = 1;
 					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID
-							&& !((StrawEnableMask_ & StrawFlagMask_) & (1 << i))) {
+							&& !((NewChodEnableMask_ & NewChodFlagMask_)
+									& (1 << i))) {
 						watchingWhileLoops++;
 						break;
 					}
@@ -901,9 +947,8 @@ void L1TriggerProcessor::writeL1Data(Event* const event,
 				refTimeSourceID_tmp = (algoPacket->qualityFlags & 0x3);
 				if (refTimeSourceID != refTimeSourceID_tmp)
 					refTimeSourceID = refTimeSourceID_tmp;
-			} else {
-				algoPacket->numberOfWords = (sizeof(L1Algo) / 4.);
 			}
+			algoPacket->numberOfWords = (sizeof(L1Algo) / 4.);
 
 			nMaskWords += sizeof(L1Algo);
 
@@ -958,7 +1003,7 @@ bool L1TriggerProcessor::writeAlgoPacket(int algoID, L1Algo* algoPacket,
 		MUV3Algo::writeData(algoPacket, l0MaskID, l1Info);
 		return true;
 	case 7:
-//		NewCHODAlgo::writeData(algoPacket,l0MaskID);
+		NewCHODAlgo::writeData(algoPacket, l0MaskID, l1Info);
 		return true;
 	default:
 		return false;
