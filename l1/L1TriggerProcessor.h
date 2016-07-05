@@ -24,14 +24,6 @@
 
 namespace na62 {
 
-//class EventBuilder;
-//class Event;
-//class KtagAlgo;
-//class RICHAlgo;
-//class CHODAlgo;
-//class LAVAlgo;
-//class MUV3Algo;
-
 class L1TriggerProcessor {
 public:
 	/**
@@ -118,7 +110,6 @@ public:
 	}
 
 	static void initialize(l1Struct &l1Struct);
-	//static void clear();
 
 private:
 	static std::atomic<uint64_t>* L1Triggers_;
@@ -156,16 +147,18 @@ private:
 	static uint_fast16_t CedarEnableMask_;
 	static uint_fast16_t LavEnableMask_;
 	static uint_fast16_t IrcsacEnableMask_;
-	static uint_fast16_t MuvEnableMask_;
 	static uint_fast16_t StrawEnableMask_;
+	static uint_fast16_t MuvEnableMask_;
+	static uint_fast16_t NewChodEnableMask_;
 
 	static uint_fast16_t ChodFlagMask_;
 	static uint_fast16_t RichFlagMask_;
 	static uint_fast16_t CedarFlagMask_;
 	static uint_fast16_t LavFlagMask_;
 	static uint_fast16_t IrcsacFlagMask_;
-	static uint_fast16_t MuvFlagMask_;
 	static uint_fast16_t StrawFlagMask_;
+	static uint_fast16_t MuvFlagMask_;
+	static uint_fast16_t NewChodFlagMask_;
 
 	// Downscaling variables GLM:???
 	static uint ChodAlgorithmId_;
@@ -175,6 +168,7 @@ private:
 	static uint IrcsacAlgorithmId_;
 	static uint StrawAlgorithmId_;
 	static uint MuvAlgorithmId_;
+	static uint NewChodAlgorithmId_;
 
 	// Converters
 	static uint MaskIDToNum_[16];

@@ -23,8 +23,14 @@ public:
 	double getCHODAverageTime();
 	void setCHODAverageTime(double time);
 
+	double getNewCHODAverageTime();
+	void setNewCHODAverageTime(double time);
+
 	uint getL1CHODNHits();
 	void setL1CHODNHits(uint nHits);
+
+	uint getL1NewCHODNHits();
+	void setL1NewCHODNHits(uint nHits);
 
 	uint getL1KTAGNSectors_l0tp();
 	void setL1KTAGNSectors_l0tp(uint nSectors);
@@ -64,6 +70,34 @@ public:
 	}
 	void resetL1CHODBadData() {
 		l1CHODBadData_ = false;
+	}
+
+	void setL1NewCHODProcessed() {
+		l1NewCHODProcessed_ = true;
+	}
+	bool isL1NewCHODProcessed() const {
+		return l1NewCHODProcessed_;
+	}
+	void resetL1NewCHODProcessed() {
+		l1NewCHODProcessed_ = false;
+	}
+	void setL1NewCHODEmptyPacket() {
+		l1NewCHODEmptyPacket_ = true;
+	}
+	bool isL1NewCHODEmptyPacket() const {
+		return l1NewCHODEmptyPacket_;
+	}
+	void resetL1NewCHODEmptyPacket() {
+		l1NewCHODEmptyPacket_ = false;
+	}
+	void setL1NewCHODBadData() {
+		l1NewCHODBadData_ = true;
+	}
+	bool isL1NewCHODBadData() const {
+		return l1NewCHODBadData_;
+	}
+	void resetL1NewCHODBadData() {
+		l1NewCHODBadData_ = false;
 	}
 
 	void setL1KTAGProcessed() {
@@ -181,30 +215,35 @@ public:
 private:
 
 	double chodTime;
+	double newchodTime;
 
 	bool l1CHODProcessed_;
 	bool l1KTAGProcessed_;
 	bool l1LAVProcessed_;
-	bool l1MUV3Processed_;
 	bool l1StrawProcessed_;
+	bool l1MUV3Processed_;
+	bool l1NewCHODProcessed_;
 
 	bool l1CHODEmptyPacket_;
 	bool l1KTAGEmptyPacket_;
 	bool l1LAVEmptyPacket_;
-	bool l1MUV3EmptyPacket_;
 	bool l1StrawEmptyPacket_;
+	bool l1MUV3EmptyPacket_;
+	bool l1NewCHODEmptyPacket_;
 
 	bool l1CHODBadData_;
 	bool l1KTAGBadData_;
 	bool l1LAVBadData_;
-	bool l1MUV3BadData_;
 	bool l1StrawBadData_;
+	bool l1MUV3BadData_;
+	bool l1NewCHODBadData_;
 
 	uint nKTAGSectors_l0tp;
 	uint nKTAGSectors_chod;
 	uint nCHODHits;
 	uint nLAVHits;
 	uint nMUV3Tiles;
+	uint nNewCHODHits;
 
 };
 
