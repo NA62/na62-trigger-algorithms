@@ -170,7 +170,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(DecoderHandler& decoder) {
 	}
 
 //	LOG_INFO("Angela: " << decoder.getDecodedEvent()->getEventNumber() << "\t" << decoder.getDecodedEvent()->getTimestamp() << "\t" << nEdges_tot);
-	return 0; //return the Straw Trigger word!
+	return 1; //return the Straw Trigger word!
 }
 
 float StrawAlgo::posTubNew(int chamber, int view, int plane, int jstraw) {
