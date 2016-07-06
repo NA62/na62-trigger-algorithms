@@ -11,18 +11,16 @@
 
 namespace na62 {
 
-Track::Track() : hitc(nullptr), camerec(nullptr), hitl(nullptr), camerel(nullptr) {
-	// TODO Auto-generated constructor stub
+Track::Track(){
+// TODO Auto-generated constructor stub
 	ncentrali = nlaterali = ncondivisi = ncamcondivise = usato = 0;
 	my = qy = m1x = q1x = m2x = q2x = pz = zvertex = trailing = cda = 0.;
+	for ( int i=0; i<6; i++ )
+	    hitc[i]=camerec[i]=hitl[i]=camerel[i]=0;
 }
 
 Track::~Track() {
 	// TODO Auto-generated destructor stub
-	if (hitc != nullptr) delete[] hitc;
-	if (camerec != nullptr) delete[] camerec;
-	if (hitl != nullptr) delete[] hitl;
-	if (camerel != nullptr) delete[] camerel;
 }
 
 void Track::setTrack(int a, int b, int c, int q, float d, float e, float f,
@@ -39,16 +37,12 @@ void Track::setTrack(int a, int b, int c, int q, float d, float e, float f,
 	m2x = r;
 	q2x = s;
 	pz = t;
-//	for (int index = 0; index < 6; index++) {
-//		hitc[index] = h[index];
-//		camerec[index] = i[index];
-//		hitl[index] = l[index];
-//		camerel[index] = m[index];
-//	}
-	hitc = h;
-	camerec = i;
-	hitl = l;
-	camerel = m;
+	for (int index = 0; index < 6; index++) {
+		hitc[index] = h[index];
+		camerec[index] = i[index];
+		hitl[index] = l[index];
+		camerel[index] = m[index];
+	}
 	usato = o;
 	zvertex = p;
 	cda = u;

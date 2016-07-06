@@ -18,9 +18,13 @@
 #include "L1InfoToStorage.h"
 #include "../struct/HLTConfParams.h"
 #include "L1Fragment.h"
+#include "straw_algorithm/Track.h"
 
 #define MAXNHITS 1000
 #define MAXNROCHS 512
+
+#define rangem 160
+#define rangeq 200
 
 namespace na62 {
 
@@ -76,6 +80,9 @@ private:
 	static int cutcluster;
 
 	static float fChamberZPosition[4];
+
+	static Point qbeam;
+	static Point mbeam;
 
 }
 ;
