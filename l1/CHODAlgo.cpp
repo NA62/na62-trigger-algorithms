@@ -160,10 +160,9 @@ uint_fast8_t CHODAlgo::processCHODTrigger(uint l0MaskID,
 //	LOG_INFO("CHODAlgo=============== average HitTime " << averageHitTime);
 //	LOG_INFO("CHODAlgo=============== L1CHODProcessed Flag " << (uint)l1Info->isL1CHODProcessed());
 
-	if (AlgoLogic_[l0MaskID])
-		return (((nHits_V + nHits_H) > 0) && ((nHits_V + nHits_H) < nMaxSlabs));
-	else
-		return ((nHits_V + nHits_H) >= nMaxSlabs);
+//	if (AlgoLogic_[l0MaskID])
+	return (((nHits_V + nHits_H) > 0) && ((nHits_V + nHits_H) < nMaxSlabs));
+//	else return ((nHits_V + nHits_H) >= nMaxSlabs);
 
 //	return (((nHits_V == 1) && (nHits_H == 1))
 //			|| ((nHits_V == 2) && (nHits_H == 1))
