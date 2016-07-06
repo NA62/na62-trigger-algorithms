@@ -25,14 +25,10 @@ public:
 	float m2x;
 	float q1x;
 	float q2x;
-	int* hitc; //elenco hit presenti nella casella centrale
-	int* camerec; //camere degli hit nella casella centrale
-	int* hitl; //elenco hit in altre caselle intorno
-	int* camerel; //camere degli hit nelle caselle intorno
-//	int hitc[6]; //elenco hit presenti nella casella centrale
-//	int camerec[6]; //camere degli hit nella casella centrale
-//	int hitl[6]; //elenco hit in altre caselle intorno
-//	int camerel[6]; //camere degli hit nelle caselle intorno
+	int hitc[6]; //elenco hit presenti nella casella centrale
+	int camerec[6]; //camere degli hit nella casella centrale
+	int hitl[6]; //elenco hit in altre caselle intorno
+	int camerel[6]; //camere degli hit nelle caselle intorno
 	int usato;
 	float zvertex;
 	float pz;

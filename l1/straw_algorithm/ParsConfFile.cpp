@@ -14,17 +14,13 @@
 #include <string.h>
 
 STRAWParsConfFile* STRAWParsConfFile::theInstance = nullptr;
-int STRAWParsConfFile::nROChannels = 0;
-int STRAWParsConfFile::geoMap[8192];
-string STRAWParsConfFile::fileT0 = " ";
-double STRAWParsConfFile::fROMezzaninesT0[512];
 
 STRAWParsConfFile::STRAWParsConfFile() {
 
 //	LOG_INFO("In STRAW ParsConfFile");
 
 	ConfFileReader fileName_(
-			"/Users/romano/Desktop/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer_online.2015.conf");
+			"/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer_online.2015.conf");
 
 	int maxChannelID = 0;
 	int loopChannels = 0;
@@ -94,10 +90,10 @@ int STRAWParsConfFile::getNROChannels() {
 
 void STRAWParsConfFile::readT0() {
 
-//	LOG_INFO("In STRAW ParsConfFile - T0 Mezzanines file " << fileT0);
+	LOG_INFO("In STRAW ParsConfFile - T0 Mezzanines file " << fileT0);
 
 	ConfFileReader fileT0_(
-			"/Users/romano/Desktop/workspace/na62-trigger-algorithms/l1/straw_algorithm/" + fileT0);
+			"/workspace/na62-trigger-algorithms/l1/straw_algorithm/" + fileT0);
 
 	if (!fileT0_.isValid())
 	LOG_INFO("STRAW T0 file not found");
