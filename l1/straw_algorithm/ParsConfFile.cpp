@@ -62,6 +62,7 @@ STRAWParsConfFile::STRAWParsConfFile() {
 			}
 			if (fileName_.getField<string>(1).find("ROMezzaninesT0FileInput=")
 					!= string::npos) {
+//				LOG_INFO("Selecting T0File " << fileName_.getField<string>(2));
 				fileT0 = fileName_.getField<string>(2);
 			}
 		}
@@ -90,7 +91,7 @@ int STRAWParsConfFile::getNROChannels() {
 
 void STRAWParsConfFile::readT0() {
 
-	LOG_INFO("In STRAW ParsConfFile - T0 Mezzanines file " << fileT0);
+//	LOG_INFO("In STRAW ParsConfFile - T0 Mezzanines file " << fileT0);
 
 	ConfFileReader fileT0_(
 			"/workspace/na62-trigger-algorithms/l1/straw_algorithm/" + fileT0);

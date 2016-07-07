@@ -28,7 +28,8 @@ uint NewCHODAlgo::AlgoLogic_[16];
 uint NewCHODAlgo::AlgoRefTimeSourceID_[16];
 double NewCHODAlgo::AlgoOnlineTimeWindow_[16];
 
-NewCHODParsConfFile* NewCHODAlgo::InfoNewCHOD_ = NewCHODParsConfFile::GetInstance();
+NewCHODParsConfFile* NewCHODAlgo::InfoNewCHOD_ =
+		NewCHODParsConfFile::GetInstance();
 int * NewCHODAlgo::PmtGeo_ = InfoNewCHOD_->getGeoPMTMap();
 
 void NewCHODAlgo::initialize(uint i, l1NewCHOD &l1NewChodStruct) {
@@ -124,7 +125,8 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID,
 //							LOG_INFO("dt1_l0tp "<< dt1_l0tp << " dt2_l0tp " << dt2_l0tp);
 //							LOG_INFO("edge1-edge2 "<<fabs(edgetime1-edgetime2));
 							if ((dt1_l0tp < AlgoOnlineTimeWindow_[l0MaskID])
-									&& (dt2_l0tp < AlgoOnlineTimeWindow_[l0MaskID])
+									&& (dt2_l0tp
+											< AlgoOnlineTimeWindow_[l0MaskID])
 									&& (fabs(edgetime1 - edgetime2) < 5.)) {
 
 								if (AlgoRefTimeSourceID_[l0MaskID] == 1)
@@ -150,10 +152,9 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID,
 //	LOG_INFO("NewCHODAlgo=============== number of Hits " << nHits);
 //	LOG_INFO("NewCHODAlgo=============== average HitTime " << averageHitTime);
 //	LOG_INFO("NewCHODAlgo=============== L1NewCHODProcessed Flag " << (uint)l1Info->isL1NewCHODProcessed());
-	if (AlgoLogic_[l0MaskID])
-		return ((nHits > 0) && (nHits < nMaxPMTs));
-	else
-		return (nHits >= nMaxPMTs);
+//	if (AlgoLogic_[l0MaskID])
+	return ((nHits > 0) && (nHits < nMaxPMTs));
+//	else return (nHits >= nMaxPMTs);
 
 }
 
@@ -167,7 +168,8 @@ void NewCHODAlgo::writeData(L1Algo* algoPacket, uint l0MaskID,
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
 	algoPacket->qualityFlags = (l1Info->isL1NewCHODProcessed() << 6)
 			| (l1Info->isL1NewCHODEmptyPacket() << 4)
-			| (l1Info->isL1NewCHODBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
+			| (l1Info->isL1NewCHODBadData() << 2)
+			| AlgoRefTimeSourceID_[l0MaskID];
 	algoPacket->l1Data[0] = (uint) l1Info->getL1NewCHODNHits();
 	if (AlgoRefTimeSourceID_[l0MaskID] == 1)
 		algoPacket->l1Data[1] = l1Info->getNewCHODAverageTime();

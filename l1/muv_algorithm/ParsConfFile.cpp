@@ -21,13 +21,13 @@ MUV3ParsConfFile* MUV3ParsConfFile::theInstance = nullptr;
 
 MUV3ParsConfFile::MUV3ParsConfFile() {
 
-//	LOG_INFO<< "In MUV3 ParseConfFile" << ENDL;
+//	LOG_INFO("In MUV3 ParseConfFile");
 
 	ConfFileReader fileName_(
 			"/workspace/na62-trigger-algorithms/l1/muv_algorithm/config/MUV3.2016.conf");
 
 	if (!fileName_.isValid())
-		LOG_INFO("Config file not found");
+		LOG_INFO("MUV3 Config file not found");
 
 	if (fileName_.isValid()) {
 
