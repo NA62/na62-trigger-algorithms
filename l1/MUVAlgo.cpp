@@ -245,7 +245,8 @@ uint_fast8_t MUV3Algo::processMUV3Trigger1(uint l0MaskID,
 			for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard;
 					jEdge++) {
 				if (edge_IDs[jEdge] && jEdge != iEdge) {
-					const int roChID2 = (edge_tdcIDs[jEdge] * 32) + edge_chIDs[jEdge];
+					const int roChID2 = (edge_tdcIDs[jEdge] * 32)
+							+ edge_chIDs[jEdge];
 					if (PmtGeo_[roChID2] > 151)
 						pmtID2 = PmtGeo_[roChID2] - 200;
 					else
@@ -260,10 +261,9 @@ uint_fast8_t MUV3Algo::processMUV3Trigger1(uint l0MaskID,
 							 */
 							l1Info->setL1MUV3Processed();
 //							algoProcessed = 1;
-							if (AlgoLogic_[l0MaskID])
-								return 1;
-							else
-								return 0;
+//							if (AlgoLogic_[l0MaskID])
+							return 1;
+//							else return 0;
 						}
 					}
 				}
@@ -333,7 +333,8 @@ uint_fast8_t MUV3Algo::processMUV3Trigger2(uint l0MaskID,
 			for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard;
 					jEdge++) {
 				if (edge_IDs[jEdge] && jEdge != iEdge) {
-					const int roChID2 = (edge_tdcIDs[jEdge] * 32) + edge_chIDs[jEdge];
+					const int roChID2 = (edge_tdcIDs[jEdge] * 32)
+							+ edge_chIDs[jEdge];
 					if (PmtGeo_[roChID2] > 151)
 						pmtID2 = PmtGeo_[roChID2] - 200;
 					else
@@ -349,10 +350,9 @@ uint_fast8_t MUV3Algo::processMUV3Trigger2(uint l0MaskID,
 							 */
 							l1Info->setL1MUV3Processed();
 //							algoProcessed = 1;
-							if (AlgoLogic_[l0MaskID])
-								return 1;
-							else
-								return 0;
+//							if (AlgoLogic_[l0MaskID])
+							return 1;
+//							else return 0;
 						}
 					}
 				}
@@ -364,14 +364,16 @@ uint_fast8_t MUV3Algo::processMUV3Trigger2(uint l0MaskID,
 	return 0;
 }
 
-void MUV3Algo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info) {
+void MUV3Algo::writeData(L1Algo* algoPacket, uint l0MaskID,
+		L1InfoToStorage* l1Info) {
 
 	if (AlgoID_ != algoPacket->algoID)
 		LOG_ERROR(
 				"Algo ID does not match with Algo ID written within the packet!");
 	algoPacket->algoID = AlgoID_;
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
-	algoPacket->qualityFlags = (l1Info->isL1MUV3Processed() << 6) | (l1Info->isL1MUV3EmptyPacket() << 4)
+	algoPacket->qualityFlags = (l1Info->isL1MUV3Processed() << 6)
+			| (l1Info->isL1MUV3EmptyPacket() << 4)
 			| (l1Info->isL1MUV3BadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
 	algoPacket->l1Data[0] = l1Info->getL1MUV3NTiles();
 	if (AlgoRefTimeSourceID_[l0MaskID] == 1)
