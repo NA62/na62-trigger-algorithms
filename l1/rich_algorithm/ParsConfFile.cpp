@@ -19,7 +19,7 @@ RICHParsConfFile* RICHParsConfFile::theInstance = nullptr;
 
 RICHParsConfFile::RICHParsConfFile() {
 
-	//LOG_INFO("In RICH ParseConfFile");
+//	LOG_INFO("In RICH ParseConfFile");
 
 //	struct timeval timePars1;
 //	struct timeval timePars2;
@@ -32,7 +32,7 @@ RICHParsConfFile::RICHParsConfFile() {
 			"/workspace/na62-trigger-algorithms/l1/rich_algorithm/config/RICH.conf");
 
 	if (!fileName_.isValid())
-		LOG_INFO("Config file not found");
+		LOG_INFO("RICH Config file not found");
 
 	if (fileName_.isValid()) {
 

@@ -25,7 +25,7 @@ NewCHODParsConfFile::NewCHODParsConfFile() {
 			"/workspace/na62-trigger-algorithms/l1/newchod_algorithm/config/NewCHOD.conf");
 
 	if (!fileName_.isValid())
-		LOG_INFO("Config file not found");
+		LOG_INFO("NewCHOD Config file not found");
 
 	if (fileName_.isValid()) {
 
