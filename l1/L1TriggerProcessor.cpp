@@ -226,17 +226,16 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 						<< CedarAlgorithmId_)
 				| (l1Struct.l1Mask[i].chod.configParams.l1TrigFlag
 						<< ChodAlgorithmId_);
-		if (NumberOfFlaggedAlgos_[i]
-				!= __builtin_popcount((uint) AlgoFlagMask_[i])) {
-			LOG_ERROR(
-					"Mismatch between NumberOfFlaggedAlgos and algoFlagMask !!!");
-			NumberOfFlaggedAlgos_[i] = __builtin_popcount(
-					(uint) AlgoFlagMask_[i]);
-		}
 
 		NumberOfEnabledAndFlaggedAlgos_[i] = __builtin_popcount(
 				(uint) (AlgoEnableMask_[i] & AlgoFlagMask_[i]));
 //		LOG_INFO("L0 Mask " << i << " number of Enabled algo " << numberOfEnabledAlgos[i] << " Flagged " << numberOfFlaggedAlgos[i] << " EnabledAndFlagged " << numberOfEnabledAndFlaggedAlgos[i]);
+
+		if (NumberOfFlaggedAlgos_[i] != NumberOfEnabledAndFlaggedAlgos_[i]) {
+			LOG_ERROR(
+					"Mismatch between NumberOfFlaggedAlgos and algoEnable&FlagMask !!!");
+			NumberOfFlaggedAlgos_[i] = NumberOfEnabledAndFlaggedAlgos_[i];
+		}
 
 		AlgoLogicMask_[i] = (l1Struct.l1Mask[i].newchod.configParams.l1TrigLogic
 				<< NewChodAlgorithmId_)
@@ -521,15 +520,22 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 						if (!l1Info.isL1CHODProcessed()) {
 							chodTrigger = CHODAlgo::processCHODTrigger(i,
 									decoder, &l1Info);
-//					if (chodTrigger != 0) {
-//						L1Downscaling::processAlgorithm(chodAlgorithmId);
-//					}
+//							if (chodTrigger != 0) {
+//								L1Downscaling::processAlgorithm (chodAlgorithmId);
+//							}
 						}
 						l1ProcessID++;
-						l1TriggerTmp |=
-								(chodTrigger << (uint) ChodAlgorithmId_);
 //						printf("L1TriggerProcessor.cpp: chodTrigger %d\n",
 //								chodTrigger);
+
+						if (AlgoLogicMask_[i] & (1 << (uint) ChodAlgorithmId_))
+							l1TriggerTmp |= (chodTrigger
+									<< (uint) ChodAlgorithmId_);
+						else
+							l1TriggerTmp |= (not chodTrigger
+									<< (uint) ChodAlgorithmId_);
+//						printf("L1TriggerProcessor.cpp: tmpTrigger %d\n",
+//								l1TriggerTmp);
 					}
 					if ((ChodEnableMask_ & l0TrigFlags) == l0TrigFlags)
 						isAlgoEnableForAllL0Masks = 1;
@@ -570,10 +576,17 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 //					}
 						}
 						l1ProcessID++;
-						l1TriggerTmp |= (cedarTrigger
-								<< (uint) CedarAlgorithmId_);
 //						printf("L1TriggerProcessor.cpp: cedarTrigger %d\n",
 //								cedarTrigger);
+
+						if (AlgoLogicMask_[i] & (1 << (uint) CedarAlgorithmId_))
+							l1TriggerTmp |= (cedarTrigger
+									<< (uint) CedarAlgorithmId_);
+						else
+							l1TriggerTmp |= (not cedarTrigger
+									<< (uint) CedarAlgorithmId_);
+//						printf("L1TriggerProcessor.cpp: tmpTrigger %d\n",
+//								l1TriggerTmp);
 					}
 					if ((CedarEnableMask_ & l0TrigFlags) == l0TrigFlags)
 						isAlgoEnableForAllL0Masks = 1;
@@ -594,9 +607,17 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 //					}
 						}
 						l1ProcessID++;
-						l1TriggerTmp |= (lavTrigger << (uint) LavAlgorithmId_);
 //						printf("L1TriggerProcessor.cpp: lavTrigger %d\n",
 //								lavTrigger);
+
+						if (AlgoLogicMask_[i] & (1 << (uint) LavAlgorithmId_))
+							l1TriggerTmp |= (lavTrigger
+									<< (uint) LavAlgorithmId_);
+						else
+							l1TriggerTmp |= (not lavTrigger
+									<< (uint) LavAlgorithmId_);
+//						printf("L1TriggerProcessor.cpp: tmpTrigger %d\n",
+//								l1TriggerTmp);
 					}
 					if ((LavEnableMask_ & l0TrigFlags) == l0TrigFlags)
 						isAlgoEnableForAllL0Masks = 1;
@@ -642,9 +663,17 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 //							}
 						}
 						l1ProcessID++;
-						l1TriggerTmp |= (muvTrigger << (uint) MuvAlgorithmId_);
 //						printf("L1TriggerProcessor.cpp: muvTrigger %d\n",
 //								muvTrigger);
+
+						if (AlgoLogicMask_[i] & (1 << (uint) MuvAlgorithmId_))
+							l1TriggerTmp |= (muvTrigger
+									<< (uint) MuvAlgorithmId_);
+						else
+							l1TriggerTmp |= (not muvTrigger
+									<< (uint) MuvAlgorithmId_);
+//						printf("L1TriggerProcessor.cpp: tmpTrigger %d\n",
+//								l1TriggerTmp);
 					}
 					if ((MuvEnableMask_ & l0TrigFlags) == l0TrigFlags)
 						isAlgoEnableForAllL0Masks = 1;
@@ -666,10 +695,18 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 //							}
 						}
 						l1ProcessID++;
-						l1TriggerTmp |= (newchodTrigger
-								<< (uint) NewChodAlgorithmId_);
 //						printf("L1TriggerProcessor.cpp: newchodTrigger %d\n",
 //								newchodTrigger);
+
+						if (AlgoLogicMask_[i]
+								& (1 << (uint) NewChodAlgorithmId_))
+							l1TriggerTmp |= (newchodTrigger
+									<< (uint) NewChodAlgorithmId_);
+						else
+							l1TriggerTmp |= (not newchodTrigger
+									<< (uint) NewChodAlgorithmId_);
+//						printf("L1TriggerProcessor.cpp: tmpTrigger %d\n",
+//								l1TriggerTmp);
 					}
 					if ((NewChodEnableMask_ & l0TrigFlags) == l0TrigFlags)
 						isAlgoEnableForAllL0Masks = 1;

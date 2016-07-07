@@ -2781,14 +2781,8 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID,
 		strawTrkIntermedie_[e].printTrack();
 	}
 
-	//	LOG_INFO( "Preparazione Vettori " << ((time[1].tv_sec - time[0].tv_sec)*1e6 + time[1].tv_usec) - time[0].tv_usec );
-	//	LOG_INFO( " End Preclustering - initial time " << ((time[11].tv_sec - time[0].tv_sec)*1e6 + time[11].tv_usec) - time[0].tv_usec );
-	//	LOG_INFO( "Clustering inside the view " << ((time[13].tv_sec - time[12].tv_sec)*1e6 + time[13].tv_usec) - time[12].tv_usec );
-	//	LOG_INFO( "Clustering inside the view fino all'inizio " << ((time[13].tv_sec - time[0].tv_sec)*1e6 + time[13].tv_usec) - time[0].tv_usec );
-	//	LOG_INFO( "Clustering inside the chamber " << ((time[27].tv_sec - time[14].tv_sec)*1e6 + time[27].tv_usec) - time[14].tv_usec );
-	//	LOG_INFO( "ntotali hit "<< ntotalhit<<", ntotal precluster "<<ntotalPreclusters<<", ntotal view cluster "<<ntotalviewcluster<<", Clustering inside the chamber - initial " << ((time[27].tv_sec - time[0].tv_sec)*1e6 + time[27].tv_usec) - time[0].tv_usec );
-
-	return 0; //return the Straw Trigger word!
+//	LOG_INFO("Angela: " << decoder.getDecodedEvent()->getEventNumber() << "\t" << decoder.getDecodedEvent()->getTimestamp() << "\t" << nEdges_tot);
+	return 1; //return the Straw Trigger word!
 }
 
 float StrawAlgo::posTubNew(int chamber, int view, int plane, int jstraw) {

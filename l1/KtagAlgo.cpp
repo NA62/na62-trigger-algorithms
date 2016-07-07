@@ -145,7 +145,8 @@ uint_fast8_t KtagAlgo::processKtagTrigger(uint l0MaskID,
 		nEdges_tot += numberOfEdgesOfCurrentBoard;
 	}
 
-	if (!nEdges_tot) l1Info->setL1KTAGEmptyPacket();
+	if (!nEdges_tot)
+		l1Info->setL1KTAGEmptyPacket();
 //		emptyPacket = 1;
 //	LOG_INFO("KtagAlgo.cpp: Analysing Event " << decoder.getDecodedEvent()->getEventNumber() << " - Timestamp " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << " - Total Number of edges found " << nEdges_tot);
 //  LOG_INFO("time check (outside for - all Tel62s)" << time[4].tv_sec << " " << time[4].tv_usec);
@@ -169,27 +170,29 @@ uint_fast8_t KtagAlgo::processKtagTrigger(uint l0MaskID,
 //	LOG_INFO(std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec << " " << nEdges_tot << " " << nSectors << " " << ((time[4].tv_sec - time[0].tv_sec)*1e6 + time[4].tv_usec) - time[0].tv_usec << " " << ((time[5].tv_sec - time[0].tv_sec)*1e6 + time[5].tv_usec) - time[0].tv_usec);
 //	LOG_INFO(nEdges_tot << " " << ((time[4].tv_sec - time[0].tv_sec)*1e6 + time[4].tv_usec) - time[0].tv_usec << " " << ((time[5].tv_sec - time[0].tv_sec)*1e6 + time[5].tv_usec) - time[0].tv_usec);
 
-	if(!isCHODRefTime) l1Info->setL1KTAGNSectors_l0tp(nSectors_l0tp);
-	else l1Info->setL1KTAGNSectors_chod(nSectors_chod);
+	if (!isCHODRefTime)
+		l1Info->setL1KTAGNSectors_l0tp(nSectors_l0tp);
+	else
+		l1Info->setL1KTAGNSectors_chod(nSectors_chod);
 	l1Info->setL1KTAGProcessed();
 //	algoProcessed = 1;
 
-	if (AlgoLogic_[l0MaskID])
-		return ((!isCHODRefTime && nSectors_l0tp > 4)
-				|| (isCHODRefTime && nSectors_chod > 4));
-	else
-		return ((!isCHODRefTime && nSectors_l0tp <= 4)
-				|| (isCHODRefTime && nSectors_chod <= 4));
+//	if (AlgoLogic_[l0MaskID])
+	return ((!isCHODRefTime && nSectors_l0tp > 4)
+			|| (isCHODRefTime && nSectors_chod > 4));
+//	else return ((!isCHODRefTime && nSectors_l0tp <= 4) || (isCHODRefTime && nSectors_chod <= 4));
 }
 
-void KtagAlgo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info) {
+void KtagAlgo::writeData(L1Algo* algoPacket, uint l0MaskID,
+		L1InfoToStorage* l1Info) {
 
 	if (AlgoID_ != algoPacket->algoID)
 		LOG_ERROR(
 				"Algo ID does not match with Algo ID written within the packet!");
 	algoPacket->algoID = AlgoID_;
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
-	algoPacket->qualityFlags = (l1Info->isL1KTAGProcessed() << 6) | (l1Info->isL1KTAGEmptyPacket() << 4)
+	algoPacket->qualityFlags = (l1Info->isL1KTAGProcessed() << 6)
+			| (l1Info->isL1KTAGEmptyPacket() << 4)
 			| (l1Info->isL1KTAGBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
 	if (AlgoRefTimeSourceID_[l0MaskID] == 1)
 		algoPacket->l1Data[0] = l1Info->getL1KTAGNSectors_chod();
