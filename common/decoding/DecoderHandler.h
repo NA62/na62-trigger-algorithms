@@ -16,9 +16,12 @@
 #include <eventBuilding/Event.h>
 #include <l0/Subevent.h>
 #include <sys/types.h>
+#include <functional>
+#include <memory>
 
 #include "DecoderRange.h"
 #include "TrbFragmentDecoder.h"
+#include "SrbFragmentDecoder.h"
 
 namespace na62 {
 class Event;
@@ -28,65 +31,118 @@ class Event;
  * Define a macro to add functionality for a detector
  */
 #define ADD_TRB(DETECTOR)																										\
-private:																														\
 																																\
-	std::vector<TrbFragmentDecoder> DETECTOR##Decoders; /* One TrbFragmentDecoder for every MEP fragment 	*/					\
-																																\
-																																\
-	/**																															\
+private: 																														\
+                                																								\
+    std::unique_ptr<TrbFragmentDecoder, std::function<void(TrbFragmentDecoder*)>> DETECTOR##Decoders; /* One SrbFragmentDecoder for every MEP fragment 	*/ \
+    /**																															\
 	 * This method must be called before you access the DETECTOR##Decoders														\
 	 * It prepares the decoding if it has not already been done (idempotence)													\
-	 */																															\
+	 */																								 							\
 	void prepare##DETECTOR##Usage() {																							\
-		if ( DETECTOR##Decoders.empty() ) {																						\
+		if ( !DETECTOR##Decoders) {																								\
 			/* initialize all Decoders. They will be in "unready" state for now so you still									\
 			 * have to call readData() for all of them before accessing the decoded data										\
 			 */ 																												\
-			DETECTOR##Decoders.resize(getNumberOf##DETECTOR##Fragments());														\
+			auto deleter = [](TrbFragmentDecoder* p) { delete[] p; };															\
+			DETECTOR##Decoders = std::unique_ptr<TrbFragmentDecoder, decltype(deleter)>(new TrbFragmentDecoder[getNumberOf##DETECTOR##Fragments()], deleter );		\
+			const l0::Subevent* const subevent = event_->get##DETECTOR##Subevent(); 											\
+			for (uint i = 0; i != getNumberOf##DETECTOR##Fragments(); i++) {													\
+				DETECTOR##Decoders.get()[i].setDataSource(subevent, i);															\
+			}																													\
 		}																														\
 	}																															\
 																																\
-public:																															\
+public: 																														\
+			 																													\
 	/**																															\
-	 * Returns the decoded data of the <fragmentNumber>th fragment of ##DETECTOR##	data										\
-	 */																															\
-	const TrbFragmentDecoder getDecoded##DETECTOR##Fragment(const uint fragmentNumber) {										\
-		prepare##DETECTOR##Usage();																								\
-		if (!DETECTOR##Decoders[fragmentNumber].isReady()) {																	\
-			const l0::Subevent* const subevent = event_->get##DETECTOR##Subevent();												\
-			DETECTOR##Decoders[fragmentNumber].readData( fragmentNumber,														\
-					subevent->getFragment(fragmentNumber),																		\
-					event_->getTimestamp());																					\
+	 * Returns the decoded data of the <fragmentNumber>th fragment of DETECTOR## data											\
+	 */																	\
+	const TrbFragmentDecoder& getDecoded##DETECTOR##Fragment(			\
+			const uint fragmentNumber) {								\
+		prepare##DETECTOR##Usage();										\
+																		\
+		/*readData is idempotent so just call it every time*/			\
+		DETECTOR##Decoders.get()[fragmentNumber].readData(event_->getTimestamp());	\
+		return DETECTOR##Decoders.get()[fragmentNumber];							\
+	} 																	\
+																		\
+	/**																	\
+	 * Returns the number of available fragments for the DETECTOR##		\
+	 */																	\
+	uint getNumberOf##DETECTOR##Fragments() const { 					\
+		const l0::Subevent* const subevent = event_->get##DETECTOR##Subevent();\
+		return subevent->getNumberOfFragments(); 						\
+	} 																	\
+																		\
+	/**  																\
+	 * Returns an iterator for range based loops which automatically decodes data in a lazy way 						\
+	 */																	\
+	DecoderRange<TrbFragmentDecoder> get##DETECTOR##DecoderRange() {	\
+		prepare##DETECTOR##Usage();										\
+		TrbFragmentDecoder* first = &DETECTOR##Decoders.get()[0];		\
+																		\
+		return DecoderRange<TrbFragmentDecoder>(first,					\
+				first + getNumberOf##DETECTOR##Fragments(), this);		\
+																		\
+	}																	\
+
+#define ADD_SRB(DETECTOR)												\
+																		\
+private: 																\
+                                										\
+    std::unique_ptr<SrbFragmentDecoder, std::function<void(SrbFragmentDecoder*)>> DETECTOR##Decoders; /* One TrbFragmentDecoder for every MEP fragment 	*/ \
+    /**																															\
+	 * This method must be called before you access the DETECTOR##Decoders														\
+	 * It prepares the decoding if it has not already been done (idempotence)													\
+	 */																								 							\
+	void prepare##DETECTOR##Usage() {																							\
+		if ( !DETECTOR##Decoders) {																								\
+			/* initialize all Decoders. They will be in "unready" state for now so you still									\
+			 * have to call readData() for all of them before accessing the decoded data										\
+			 */ 																												\
+			auto deleter = [](SrbFragmentDecoder* p) { delete[] p; };															\
+			DETECTOR##Decoders = std::unique_ptr<SrbFragmentDecoder, decltype(deleter)>(new SrbFragmentDecoder[getNumberOf##DETECTOR##Fragments()], deleter );		\
+			const l0::Subevent* const subevent = event_->get##DETECTOR##Subevent(); 											\
+			for (uint i = 0; i != getNumberOf##DETECTOR##Fragments(); i++) {													\
+				DETECTOR##Decoders.get()[i].setDataSource(subevent, i);															\
+			}																													\
 		}																														\
-		return DETECTOR##Decoders[fragmentNumber];																				\
-	} 																															\
+	}																															\
 																																\
+public: 																														\
+			 																													\
 	/**																															\
-	 * Returns the number of available fragments for the ##DETECTOR##															\
-	 */																															\
-	uint getNumberOf##DETECTOR##Fragments() const { 																			\
-		const l0::Subevent* const subevent = event_->get##DETECTOR##Subevent(); 												\
-		return subevent->getNumberOfFragments(); 																				\
-	} 																															\
-	  																															\
-	/**  																														\
-	 * Returns an iterator for range based loops which automatically decodes data in a lazy way 								\
-	 */   																														\
-	DecoderRange<TrbFragmentDecoder> get##DETECTOR##DecoderRange() {															\
-		prepare##DETECTOR##Usage();																								\
-		TrbFragmentDecoder* first = &DETECTOR##Decoders[0];																		\
-																																\
-		return DecoderRange<TrbFragmentDecoder>(first, first + DETECTOR##Decoders.size(), 										\
-				[this, first](TrbFragmentDecoder* decoder)																		\
-				{																												\
-					if(!decoder->isReady()) {																					\
-						const uint_fast16_t fragmentID = decoder - first;														\
-						const l0::Subevent* const subevent = event_->get##DETECTOR##Subevent();									\
-						DETECTOR##Decoders[fragmentID].readData(fragmentID, 													\
-									subevent->getFragment(fragmentID), event_->getTimestamp());									\
-					} 																											\
-				}); 																											\
-	}
+	 * Returns the decoded data of the <fragmentNumber>th fragment of DETECTOR## data											\
+	 */																	\
+	const SrbFragmentDecoder& getDecoded##DETECTOR##Fragment(			\
+			const uint fragmentNumber) {								\
+		prepare##DETECTOR##Usage();										\
+																		\
+		/*readData is idempotent so just call it every time*/			\
+		DETECTOR##Decoders.get()[fragmentNumber].readData(event_->getTimestamp());	\
+		return DETECTOR##Decoders.get()[fragmentNumber];							\
+	} 																	\
+																		\
+	/**																	\
+	 * Returns the number of available fragments for the DETECTOR##		\
+	 */																	\
+	uint getNumberOf##DETECTOR##Fragments() const { 					\
+		const l0::Subevent* const subevent = event_->get##DETECTOR##Subevent();\
+		return subevent->getNumberOfFragments(); 						\
+	} 																	\
+																		\
+	/**  																\
+	 * Returns an iterator for range based loops which automatically decodes data in a lazy way 						\
+	 */																	\
+	DecoderRange<SrbFragmentDecoder> get##DETECTOR##DecoderRange() {	\
+		prepare##DETECTOR##Usage();										\
+		SrbFragmentDecoder* first = &DETECTOR##Decoders.get()[0];		\
+																		\
+		return DecoderRange<SrbFragmentDecoder>(first,					\
+				first + getNumberOf##DETECTOR##Fragments(), this);		\
+																		\
+	}																	\
 
 namespace na62 {
 
@@ -97,12 +153,21 @@ public:
 	DecoderHandler(Event* const event);
 	virtual ~DecoderHandler();
 
+	Event* getDecodedEvent() {
+		return event_;
+	}
+
 	/*
 	 * Add functionality for all detectors
 	 */
-ADD_TRB(CEDAR)
 
 ADD_TRB(CHOD)
+ADD_TRB(RICH)
+ADD_TRB(CEDAR)
+ADD_TRB(LAV)
+ADD_SRB(STRAW)
+ADD_TRB(MUV3)
+ADD_TRB(IRC)
 
 private:
 	Event* const event_;

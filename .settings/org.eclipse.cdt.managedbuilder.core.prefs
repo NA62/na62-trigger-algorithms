@@ -1,0 +1,10 @@
+eclipse.preferences.version=1
+environment/buildEnvironmentInclude/cdt.managedbuild.config.gnu.lib.debug.1021636035/CPATH/delimiter=\:
+environment/buildEnvironmentInclude/cdt.managedbuild.config.gnu.lib.debug.1021636035/CPATH/operation=replace
+environment/buildEnvironmentInclude/cdt.managedbuild.config.gnu.lib.debug.1021636035/CPATH/value=/mnt/sw/LCG/include
+environment/buildEnvironmentInclude/cdt.managedbuild.config.gnu.lib.debug.1021636035/CPLUS_INCLUDE_PATH/delimiter=\:
+environment/buildEnvironmentInclude/cdt.managedbuild.config.gnu.lib.debug.1021636035/CPLUS_INCLUDE_PATH/operation=remove
+environment/buildEnvironmentInclude/cdt.managedbuild.config.gnu.lib.debug.1021636035/C_INCLUDE_PATH/delimiter=\:
+environment/buildEnvironmentInclude/cdt.managedbuild.config.gnu.lib.debug.1021636035/C_INCLUDE_PATH/operation=remove
+environment/buildEnvironmentInclude/cdt.managedbuild.config.gnu.lib.debug.1021636035/append=true
+environment/buildEnvironmentInclude/cdt.managedbuild.config.gnu.lib.debug.1021636035/appendContributed=true

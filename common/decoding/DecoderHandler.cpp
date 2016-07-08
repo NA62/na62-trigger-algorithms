@@ -15,7 +15,6 @@ DecoderHandler::DecoderHandler(Event* const event) :
 }
 
 DecoderHandler::~DecoderHandler() {
-
 }
 
 } /* namespace na62 */

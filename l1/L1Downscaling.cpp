@@ -1,13 +1,13 @@
 /*
  * L1Downscaling.cpp
+
  *
- *  Created on: Mar 2, 2015
+ *  Created on: Jun 24, 2015
  *      Author: Jonas Kunze (kunze.jonas@gmail.com)
  */
 
-#include "L1Downscaling.h"
-
 #include <options/Options.h>
+#include "L1Downscaling.h"
 
 namespace na62 {
 
@@ -22,6 +22,9 @@ void L1Downscaling::initialize() {
 	eventCountersByAlgoID_ = new std::atomic<int>(downscaleFactors_.size());
 }
 
+uint L1Downscaling::getNumberOfRegisteredAlgorithms(){
+	return algorithmTitles_.size();
+}
 uint L1Downscaling::registerAlgorithm(std::string algorithmTitle) {
 	// Check if the algo has already been registered
 	if (std::find(algorithmTitles_.begin(), algorithmTitles_.end(),
@@ -39,4 +42,8 @@ uint L1Downscaling::registerAlgorithm(std::string algorithmTitle) {
 	return algorithmTitles_.size() - 1;
 }
 
+
 } /* namespace na62 */
+
+
+

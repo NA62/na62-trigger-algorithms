@@ -18,9 +18,9 @@
  */
 #define OPTION_TRIGGER_CONFIG_FILE (char*)"triggerConfigFile"
 
-#define OPTION_L1_BYPASS_PROBABILITY (char*)"L1BypassProbability"
+#define OPTION_TRIGGER_XML_FILE (char*)"triggerXMLFile"
 
-#define OPTION_L2_BYPASS_PROBABILITY (char*)"L2BypassProbability"
+#define OPTION_ACTIVE_L0_MASKS (char*)"activeL0MaskIDs"
 
 // Here you can add your Options like e.g.
 // #define OPTION_YOUR_OPTION_NAME (char*)"nameUsedAs--Flag"
@@ -42,9 +42,13 @@ public:
 						"/etc/na62-trigger.conf"),
 				"Config file for trigger specific options")
 
-				(OPTION_L1_BYPASS_PROBABILITY, po::value<double>()->default_value(0.), "Probability for every event to bypass L1 and L2 processing")
+		(OPTION_TRIGGER_XML_FILE,
+				po::value<std::string>()->default_value(
+						"/lkrpn0/RunControl/PCFarm/Trigger/config_START_RUN.cfg"),
+				"XML Trigger file for trigger configuration")
 
-				(OPTION_L2_BYPASS_PROBABILITY, po::value<double>()->default_value(0.), "Probability for every event to bypass L2 processing if it did not bypass L1 already")
+		(OPTION_ACTIVE_L0_MASKS, po::value<std::string>()->required(),
+				"List of Active L0 Masks to be used")
 
 				/*
 				 * Add your Option here like following:

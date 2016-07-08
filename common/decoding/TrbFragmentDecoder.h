@@ -11,11 +11,13 @@
 
 #include <sys/types.h>
 #include <cstdint>
+#include <boost/noncopyable.hpp>
 
 namespace na62 {
 
 // forward declarations
 namespace l0 {
+class Subevent;
 class MEPFragment;
 }
 
@@ -45,8 +47,8 @@ struct TrbDataHeader {
  * struct containing FPGA header
  */
 struct FPGADataHeader {
-	uint noFrames :8;
 	uint noNonEmptyFrames :8;
+	uint noFrames :8; //Reserved in 2015 data format
 	uint FPGAID :8;
 	uint errFlags :8;
 }__attribute__ ((__packed__));
@@ -71,8 +73,28 @@ struct TrbData {
 	uint ID :4;        //0x4 (leading time), 0x5 (trailing time)
 }__attribute__ ((__packed__));
 
-class TrbFragmentDecoder {
+/**
+ * struct containing Error header (2015 data format)
+ */
+struct ErrorDataHeader {
+	uint frame0ErrWords :8;
+	uint frame1ErrWords :8;
+	uint nErrWords :16;
+}__attribute__ ((__packed__));
+
+/**
+ * struct containing Error data
+ */
+struct ErrData {
+	uint32_t errWord :32;
+}__attribute__ ((__packed__));
+
+class TrbFragmentDecoder: private boost::noncopyable {
 	friend class DecoderHandler; // Only Decoder may access readData and isReady
+
+public:
+	TrbFragmentDecoder();
+	virtual ~TrbFragmentDecoder();
 
 	/**
 	 * Returns true if readData has already been called an the getter functions are ready to be called
@@ -84,19 +106,13 @@ class TrbFragmentDecoder {
 	/**
 	 * Reads the raw data and fills the edge arrays
 	 */
-	void readData(const uint_fast16_t,
-			const l0::MEPFragment* const trbDataFragment,
-			const uint_fast32_t timestamp);
-
-public:
-	TrbFragmentDecoder();
-	virtual ~TrbFragmentDecoder();
+	void readData(uint_fast32_t timestamp);
 
 	/**
 	 * Method returning the total number of edges found per Tel62 board
 	 *
 	 */
-	inline uint getNumberOfEdgesPerTrb() const {
+	inline uint getNumberOfEdgesStored() const {
 		return nEdges_tot;
 	}
 
@@ -125,11 +141,11 @@ public:
 	}
 
 	/**
-	 * Method returning an array of edge IDs (ID=4 for leading, ID=5 for trailing)
+	 * Returns an array of booleans for every edge declaring whether the edge is a leading (true) or trailing (false) edge
 	 *
 	 */
-	inline const uint_fast8_t* getIDs() const {
-		return edgeIDs;
+	inline const bool* getIsLeadings() const {
+		return edgeIsLeading;
 	}
 
 	/**
@@ -139,16 +155,20 @@ public:
 		return fragmentNumber_;
 	}
 
+	void setDataSource(const l0::Subevent* subevent,
+			uint_fast16_t fragmentNumber) {
+		subevent_ = subevent;
+		fragmentNumber_ = fragmentNumber;
+	}
+	bool isBadFragment() {
+		return isBadFrag_;
+	}
+
 private:
 	uint64_t frameTS;
 	uint64_t time;
-	uint nFPGAs;
-	uint nFrames;
-	uint nWordsPerFrame;
-	uint nWords_tot;
-	uint nEdges;
 	uint nEdges_tot;	//total number of edges per Tel62 board
-
+	bool isBadFrag_;
 	/**
 	 * Arrays with edge info
 	 *
@@ -156,8 +176,9 @@ private:
 	uint64_t* edgeTimes;
 	uint_fast8_t * edgeChIDs;
 	uint_fast8_t* edgeTdcIDs;
-	uint_fast8_t* edgeIDs;
+	bool* edgeIsLeading;
 
+	const l0::Subevent* subevent_;
 	uint_fast16_t fragmentNumber_;
 };
 

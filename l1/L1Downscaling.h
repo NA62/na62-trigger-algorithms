@@ -1,7 +1,7 @@
 /*
  * L1Downscaling.h
  *
- *  Created on: Mar 2, 2015
+ *  Created on: Jun 24, 2015
  *      Author: Jonas Kunze (kunze.jonas@gmail.com)
  */
 
@@ -25,8 +25,8 @@ public:
 	 * may only be called once at startup before the Options are initialized!
 	 *
 	 * The parameter algorithmTitle will be used to initialize the Options so that the option
-	 * --`algorithmTitle` exists as parameter for the PC-farm and test framework with the default
-	 * value of 0.0 (no downscaling)
+	 * --`algodownscaling_algoName` exists as parameter for the PC-farm and test framework with the default
+	 * value of 1 (no downscaling)
 	 *
 	 * The returned algorithm ID should be used to decide whether or not the algorithm should be
 	 * processed in the following way:
@@ -38,6 +38,8 @@ public:
 	 * 	}
 	 */
 	static uint registerAlgorithm(std::string algorithmTitle);
+
+	static uint getNumberOfRegisteredAlgorithms();
 
 	static void initialize();
 
@@ -57,7 +59,7 @@ public:
 		}
 #endif
 		return ++(eventCountersByAlgoID_[algorithmID])
-				% downscaleFactors_[algorithmID] != 0;
+				% downscaleFactors_[algorithmID] == 0;
 	}
 
 private:
@@ -66,6 +68,12 @@ private:
 	static std::vector<uint> downscaleFactors_;
 };
 
+
 } /* namespace na62 */
 
 #endif /* L1_L1DOWNSCALING_H_ */
+
+
+
+
+

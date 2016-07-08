@@ -24,19 +24,17 @@ BOOST_AUTO_TEST_CASE( TestSearchPMT ) {
 	uint NTel62 = 6;
 	uint Nfpga = 4;
 
-	uint result = 1;
+	uint result = 0;
 	uint count = 0;
 
 	for (uint iTel = 0; iTel < NTel62; iTel++) {
 		for (uint ifpga = 0; ifpga < Nfpga; ifpga++) {
 			if (count && !(count % 3))
 				result++;
-//			LOG_INFO<< iTel << " " << ifpga << " " << result << ENDL;
-			BOOST_CHECK(KtagAlgo::searchPMT(iTel, ifpga) == result);
+			BOOST_CHECK(KtagAlgo::calculateSector(iTel, ifpga) == result);
 			count++;
 		}
 	}
-
 }
 
 } /* namespace na62 */
