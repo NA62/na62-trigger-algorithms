@@ -16,11 +16,12 @@
 #include "../common/decoding/DecoderHandler.h"
 #include "chod_algorithm/ParsConfFile.h"
 #include "L1InfoToStorage.h"
+#include "../struct/HLTConfParams.h"
+#include "L1Fragment.h"
 
 #define maxNhits 500
 
 namespace na62 {
-
 
 class CHODAlgo {
 public:
@@ -32,20 +33,20 @@ public:
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 
-	CHODAlgo();
-	~CHODAlgo();
-	static uint_fast8_t processCHODTrigger(DecoderHandler& decoder, L1InfoToStorage* l1Info);
+	static uint_fast8_t processCHODTrigger(uint l0MaskID,
+			DecoderHandler& decoder, L1InfoToStorage* l1Info);
+	static void initialize(uint i, l1CHOD &l1ChodStruct);
+	static void writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 
 private:
 
-	static CHODParsConfFile* infoCHOD_;
-	static int* slabGeo;
-	static uint nHits_V, nHits_H;
-	static uint nMaxSlabs;
-	static int slabID;
-//	static int quadrantID;
-	static int planeID;
-	static double averageHitTime;
+	static CHODParsConfFile* InfoCHOD_;
+	static uint AlgoID_; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
+	static uint AlgoLogic_[16];
+	static uint AlgoRefTimeSourceID_[16];
+	static double AlgoOnlineTimeWindow_[16];
+
+	static int* SlabGeo_;
 
 };
 

@@ -12,23 +12,22 @@
 #include <sys/types.h>
 #include <random>
 #include <cstdint>
-//#include <options/MyOptions.h>
+#include <atomic>
 
+#include <eventBuilding/Event.h>
 #include "L1InfoToStorage.h"
+#include "../options/TriggerOptions.h"
+#include "../struct/HLTConfParams.h"
+#include "L1Downscaling.h"
+#include "L1Reduction.h"
+#include "L1Fragment.h"
 
 namespace na62 {
-
-class EventBuilder;
-class Event;
-//class CedarData;
-class KtagAlgo;
-class RICHAlgo;
-class CHODAlgo;
 
 class L1TriggerProcessor {
 public:
 	/**
-	 * @param event Event* This is a pointer to the built Event containing all subevents (except those from the LKr)
+	 * @param event Event* This is a pointer to the built Event containing all subevents (except those from the LKr and GTK)
 	 *
 	 * The event pointer may not be deleted by this method as it is deleted by the EventBuilder
 	 *
@@ -41,22 +40,19 @@ public:
 	 * Returns true if the current event should be bypassed instead of being processed
 	 */
 	static inline bool bypassEvent() {
-		if (bypassProbability == 0.0) {
+		if (BypassProbability_ == 0.0) {
 			return false;
 		}
 		double randomNr = ((double) rand() / (double) RAND_MAX);
-		return randomNr <= bypassProbability;
+		return randomNr <= BypassProbability_;
 	}
 
 	/**
-	 * Registers all downscaling algorithms. Must be called before Options::Load is executed!
+	 * Fill in trigger decisions into event structure
 	 */
-	static void registerDownscalingAlgorithms();
-
-	/**
-	 * Registers all reduction algorithms. Must be called before Options::Load is executed!
-	 */
-	static void registerReductionAlgorithms();
+	static void writeL1Data(Event* const event, const uint_fast8_t* l1TriggerWords, L1InfoToStorage* l1Info, bool isL1WhileTimeout=false);
+	static void readL1Data(Event* const event);
+	static bool writeAlgoPacket(int algoID, L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 
 	/**
 	 * Placeholder for deciding whether or not to request ZS CREAM data
@@ -64,17 +60,126 @@ public:
 	static bool isRequestZeroSuppressedCreamData(
 			uint_fast8_t l1TriggerTypeWord);
 
-	static void initialize(double _bypassProbability);
+	static inline std::atomic<uint64_t>* GetL1TriggerStats() {
+		return L1Triggers_;
+	}
+	static inline uint64_t GetL1InputStats() {
+		return L1InputEvents_;
+	}
+	static inline uint64_t GetL1InputReducedStats() {
+		return L1InputReducedEvents_;
+	}
+	static inline uint64_t GetL1InputEventsPerBurst() {
+		return L1InputEventsPerBurst_;
+	}
+	static void ResetL1InputEventsPerBurst() {
+		L1InputEventsPerBurst_ = 0;
+	}
+	static inline uint GetL1DownscaleFactor() {
+		return DownscaleFactor_;
+	}
+	static inline uint GetL1ReductionFactor() {
+		return ReductionFactor_;
+	}
+	static inline bool GetL1FlagMode() {
+		return FlagMode_;
+	}
+	static inline uint GetL1AutoFlagFactor() {
+		return AutoFlagFactor_;
+	}
+	static inline uint_fast8_t GetNumberOfEnabledL0Masks() {
+		return NumberOfEnabledL0Masks_;
+	}
+	static inline uint GetL0MaskNumToMaskID(uint iNum) {
+		return NumToMaskID_[iNum];
+	}
+	static inline uint GetL0MaskIDToMaskNum(uint iMaskID) {
+		return MaskIDToNum_[iMaskID];
+	}
+	static inline uint GetNumberOfEnabledAlgoPerMask(uint iMaskID) {
+		return NumberOfEnabledAlgos_[iMaskID];
+	}
+	static inline uint GetAlgoNumToAlgoID(uint iMaskID, uint iNum) {
+		return NumToAlgoID_[iMaskID][iNum];
+	}
+	static inline uint GetAlgoIDToAlgoNum(uint iMaskID, uint iAlgoID) {
+		return AlgoIDToNum_[iMaskID][iAlgoID];
+	}
+	static inline uint_fast32_t GetL1DataPacketSize() {
+		return L1DataPacketSize_;
+	}
+
+	static void initialize(l1Struct &l1Struct);
 
 private:
-	static L1InfoToStorage* l1Info_;
-	static double bypassProbability;
+	static std::atomic<uint64_t>* L1Triggers_;
+	static std::atomic<uint64_t>* L1AcceptedEventsPerL0Mask_;
+	static std::atomic<uint64_t>* L1InputReducedEventsPerL0Mask_;
+	static std::atomic<uint64_t>** EventCountersByL0MaskByAlgoID_;
+	static std::atomic<uint64_t> L1InputEvents_;
+	static std::atomic<uint64_t> L1InputReducedEvents_;
+	static std::atomic<uint64_t> L1InputEventsPerBurst_;
+	static std::atomic<uint64_t> L1AcceptedEvents_;
 
-	static uint cedarAlgorithmId;
-	static uint chodAlgorithmId;
-	static uint richAlgorithmId;
-	static uint lavAlgorithmId;
-};
+	//Global L1 configuration parameters (for all L0 masks)
+	static double BypassProbability_;
+	static uint ReductionFactor_;
+	static uint DownscaleFactor_;
+	static bool FlagMode_;
+	static uint AutoFlagFactor_;
+	static uint ReferenceTimeSourceID_;
+
+	// L1 Mask configuration parameters (for 16 L0 masks)
+	static uint NumberOfEnabledAlgos_[16];
+	static uint NumberOfFlaggedAlgos_[16];
+	static uint NumberOfEnabledAndFlaggedAlgos_[16];
+	static uint MaskReductionFactor_[16];
+
+	static uint_fast16_t AlgoEnableMask_[16];
+	static uint_fast16_t AlgoFlagMask_[16];
+	static uint_fast16_t AlgoLogicMask_[16];
+	static uint_fast16_t AlgoDwScMask_[16];
+	static uint16_t AlgoDwScFactor_[16][10]; //change the second dimension with the number of implemented algos
+	static int AlgoProcessID_[16][10];
+
+	static uint_fast16_t ChodEnableMask_;
+	static uint_fast16_t RichEnableMask_;
+	static uint_fast16_t CedarEnableMask_;
+	static uint_fast16_t LavEnableMask_;
+	static uint_fast16_t IrcsacEnableMask_;
+	static uint_fast16_t MuvEnableMask_;
+	static uint_fast16_t NewChodEnableMask_;
+
+	static uint_fast16_t ChodFlagMask_;
+	static uint_fast16_t RichFlagMask_;
+	static uint_fast16_t CedarFlagMask_;
+	static uint_fast16_t LavFlagMask_;
+	static uint_fast16_t IrcsacFlagMask_;
+	static uint_fast16_t MuvFlagMask_;
+	static uint_fast16_t NewChodFlagMask_;
+
+	// Downscaling variables GLM:???
+	static uint ChodAlgorithmId_;
+	static uint RichAlgorithmId_;
+	static uint CedarAlgorithmId_;
+	static uint LavAlgorithmId_;
+	static uint IrcsacAlgorithmId_;
+	static uint MuvAlgorithmId_;
+	static uint NewChodAlgorithmId_;
+
+	// Converters
+	static uint MaskIDToNum_[16];
+	static uint NumToMaskID_[16];
+	static uint AlgoIDToNum_[16][10]; //change the second dimension with the number of implemented algos
+	static uint NumToAlgoID_[16][10];
+
+	static uint_fast8_t NumberOfEnabledL0Masks_;
+	static std::vector<int> L0MaskIDs_;
+
+	static uint_fast32_t L1DataPacketSize_;
+
+}
+;
 
 } /* namespace na62 */
 #endif /* TRIGGERPROCESSOR_H_ */

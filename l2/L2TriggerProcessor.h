@@ -13,11 +13,15 @@
 #include <cstdint>
 #include <vector>
 #include <random>
+#include <atomic>
+
+#include "eventBuilding/Event.h"
+#include "../options/TriggerOptions.h"
+#include "../struct/HLTConfParams.h"
+
+#include "L2Fragment.h"
 
 namespace na62 {
-
-class EventBuilder;
-class Event;
 
 class L2TriggerProcessor {
 public:
@@ -45,16 +49,79 @@ public:
 	 * Returns true if the current event should be bypassed instead of being processed
 	 */
 	static inline bool bypassEvent() {
-		if (bypassProbability == 0.0) {
+		if (BypassProbability_ == 0.0) {
 			return false;
 		}
 		double randomNr = ((double) rand() / (double) RAND_MAX);
-		return randomNr <= bypassProbability;
+		return randomNr <= BypassProbability_;
 	}
-	static void initialize(double _bypassProbability);
+	static void initialize(l2Struct &l2Struct);
 
+	static inline std::atomic<uint64_t>* GetL2TriggerStats() {
+		return L2Triggers_;
+	}
+	static inline uint64_t GetL2InputStats() {
+		return L2InputEvents_;
+	}
+	static inline uint64_t GetL2InputReducedStats() {
+		return L2InputReducedEvents_;
+	}
+	static inline uint64_t GetL2InputEventsPerBurst() {
+		return L2InputEventsPerBurst_;
+	}
+	static void ResetL2InputEventsPerBurst() {
+		L2InputEventsPerBurst_ = 0;
+	}
+	static inline uint GetL2ReductionFactor() {
+		return ReductionFactor_;
+	}
+	static inline uint GetL2DownscaleFactor() {
+		return DownscaleFactor_;
+	}
+	static inline uint GetL2FlagMode() {
+		return FlagMode_;
+	}
+	static inline uint GetL2AutoFlagFactor() {
+		return AutoFlagFactor_;
+	}
+
+	/**
+	 * Fills output L2 structures for merger
+	 */
+	static void writeData(Event* event, const uint32_t& l2TriggerWord);
+	static inline uint_fast32_t GetL2DataPacketSize() {
+		return L2DataPacketSize_;
+	}
 private:
-	static double bypassProbability;
+	static std::atomic<uint64_t>* L2Triggers_;
+	static std::atomic<uint64_t> L2InputEvents_;
+	static std::atomic<uint64_t> L2InputReducedEvents_;
+	static std::atomic<uint64_t> L2InputEventsPerBurst_;
+	static std::atomic<uint64_t> L2AcceptedEvents_;
+
+	static uint NumberOfEnabledAlgos_[16];
+	static uint NumberOfFlaggedAlgos_[16];
+	static uint MaskReductionFactor_[16];
+
+	static uint_fast16_t AlgoEnableMask_[16];
+	static uint_fast16_t AlgoFlagMask_[16];
+	static uint_fast16_t AlgoLogicMask_[16];
+	static uint_fast16_t AlgoDwScMask_[16];
+
+	static double BypassProbability_;
+	static uint ReductionFactor_;
+	static uint DownscaleFactor_;
+	static uint FlagMode_;
+	static uint AutoFlagFactor_;
+	static uint ReferenceTimeSourceID_;
+
+	static uint MaskIDToNum_[16];
+	static uint NumToMaskID_[16];
+
+	static uint_fast8_t NumberOfEnabledL0Masks_;
+
+	static std::vector<int> L0MaskIDs_;
+	static uint_fast32_t L2DataPacketSize_;
 };
 
 } /* namespace na62 */
