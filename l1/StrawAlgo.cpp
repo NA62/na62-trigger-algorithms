@@ -85,6 +85,17 @@ double StrawAlgo::hit3high = 9.0;
 double StrawAlgo::hit2low = 2.9;
 double StrawAlgo::hit2high = 5.8;
 
+Point StrawAlgo::strawPointTemp_[4][5000];
+Point StrawAlgo::strawPointTempbis_[4][2000];
+Point StrawAlgo::strawPointFinal_[4][2000];
+Cluster StrawAlgo::strawCluster_[4][4][500];
+Straw StrawAlgo::strawPrecluster_[4][4][2][500];
+Track StrawAlgo::strawFirstTempTrk_[3000];
+Track StrawAlgo::strawTempTrk_[4000];
+Track StrawAlgo::strawTrkIntermedie_[1000];
+
+std::mutex StrawAlgo::strawMutex;
+
 float StrawAlgo::fChamberZPosition[4] = { (0.5 * (183311.1 + 183704.9)), (0.5 * (193864.1 + 194262.9) + 2.5), (0.5 * (204262.1 + 204655.9)),
 		(0.5 * (218688.1 + 219081.9)) };
 
@@ -106,11 +117,13 @@ void StrawAlgo::initialize(uint i, l1Straw &l1StrawStruct) {
 
 uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
+	std::lock_guard<std::mutex> lock(strawMutex);
+
 //	printf("\nnevent = %d, raw timestamp = %u, fine timestamp = %u, ClockPeriod %lf \n", decoder.getDecodedEvent()->getEventNumber(),
 //			decoder.getDecodedEvent()->getTimestamp(), decoder.getDecodedEvent()->getFinetime(), CLOCK_PERIOD);
 
 	struct timeval time[30];
-	gettimeofday(&time[0], 0);
+	//gettimeofday(&time[0], 0);
 	//LOG_INFO( "Initial Time - Start " << time[0].tv_sec << " " << time[0].tv_usec );
 
 	using namespace l0;
@@ -152,15 +165,6 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 	float position = 0.0;
 	float wireDistance = -100.0;
 
-	Point strawPointTemp_[4][5000];
-	Point strawPointTempbis_[4][2000];
-	Point strawPointFinal_[4][2000];
-	Cluster strawCluster_[4][4][500];
-	Straw strawPrecluster_[4][4][2][500];
-	Track strawFirstTempTrk_[3000];
-	Track strawTempTrk_[4000];
-	Track strawTrkIntermedie_[1000];
-
 	int nStrawPointsTemp[4];
 	int nStrawPointsTempbis[4];
 	int nStrawPointsFinal[4];
@@ -191,7 +195,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 		for (int b = 0; b < rangeq; b++)
 			hought[a][b] = 0;
 
-	gettimeofday(&time[1], 0);
+	//gettimeofday(&time[1], 0);
 	//	LOG_INFO( "Preparazione Vettori - Stop " << time[1].tv_sec << " " << time[1].tv_usec );
 	//	LOG_INFO( "Preparazione Vettori " << ((time[1].tv_sec - time[0].tv_sec)*1e6 + time[1].tv_usec) - time[0].tv_usec );
 
@@ -304,10 +308,8 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 				if ((strawPrecluster_[chamberID][viewID][halfviewID][j].plane == planeID)
 						&& (strawPrecluster_[chamberID][viewID][halfviewID][j].tube == strawID)) {
 					tl_flag = 1;
-					if ((edgeIsLeading[iEdge])
-							&& (leading < strawPrecluster_[chamberID][viewID][halfviewID][j].leading
-									|| strawPrecluster_[chamberID][viewID][halfviewID][j].leading <= -10)
-							&& (leading > -10 && leading < 300)) {
+					if ((edgeIsLeading[iEdge]) &&(leading < strawPrecluster_[chamberID][viewID][halfviewID][j].leading
+							|| strawPrecluster_[chamberID][viewID][halfviewID][j].leading <= -10) && (leading > -10 && leading < 300)) {
 						if (leading < 1)
 							wireDistance = strawDigiMan_.rTDependenceData(1.0);
 						else
@@ -358,7 +360,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 		nEdges_tot += numberOfEdgesOfCurrentBoard;
 	}
 
-	gettimeofday(&time[11], 0);
+	//gettimeofday(&time[11], 0);
 	//	LOG_INFO( "Access All Straw Data Packets & PreClustering - Stop " << time[11].tv_sec << " " << time[11].tv_usec );
 	//////////////////////////////// End of loop for Pre-clustering ///////////////////////////////////////////////
 	//	LOG_INFO( "Angela: " << decoder.getDecodedEvent()->getEventNumber() << "\t" << decoder.getDecodedEvent()->getTimestamp() << "\t" << nEdges_tot );
@@ -396,7 +398,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 
 	///////////////////////////////////////Start Clustering inside the view///////////////////////////////////////////////////////
 	//LOG_INFO("\n CLUSTERING INSIDE THE VIEW \n");
-	gettimeofday(&time[12], 0);
+	//gettimeofday(&time[12], 0);
 	//	LOG_INFO( "Clustering inside the view - Start " << time[12].tv_sec << " " << time[12].tv_usec );
 
 	float positionh = 0.0;
@@ -837,7 +839,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 			}
 		}
 	}
-	gettimeofday(&time[13], 0);
+	//gettimeofday(&time[13], 0);
 	//	LOG_INFO( "Clustering inside the view - Stop " << time[13].tv_sec << " " << time[13].tv_usec );
 	//	LOG_INFO( "Clustering inside the view " << ((time[13].tv_sec - time[12].tv_sec)*1e6 + time[13].tv_usec) - time[12].tv_usec );
 	//	LOG_INFO( "Clustering inside the view fino all'inizio" << ((time[13].tv_sec - time[0].tv_sec)*1e6 + time[13].tv_usec) - time[0].tv_usec );
@@ -856,7 +858,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 	/////////////////////////////////////// 0=v, 1=u, 2=x, 3=y
 	//LOG_INFO("CLUSTERING INSIDE THE CHAMBER");
 
-	gettimeofday(&time[14], 0);
+	//gettimeofday(&time[14], 0);
 	//	LOG_INFO( "Clustering inside the chamber - Start " << time[14].tv_sec << " " << time[14].tv_usec );
 
 	float coordinate_temp = 0.0;
@@ -1242,7 +1244,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 		}
 		//gettimeofday(&time[26], 0);
 	}
-	gettimeofday(&time[27], 0);
+	//gettimeofday(&time[27], 0);
 	//	LOG_INFO( "Clustering inside the chamber - Stop " << time[15].tv_sec << " " << time[15].tv_usec );
 	//	LOG_INFO( "Clustering inside the chamber " << ((time[27].tv_sec - time[14].tv_sec)*1e6 + time[27].tv_usec) - time[14].tv_usec );
 	//	LOG_INFO( "Clustering inside the chamber - initial " << ((time[27].tv_sec - time[0].tv_sec)*1e6 + time[27].tv_usec) - time[0].tv_usec );
@@ -1868,8 +1870,8 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 //	for (int e = 0; e < ntrk; e++) {
 //		printf("\n traccia: n = %d\n", e);
 //		strawTempTrk_[e].printTrack();
-		//			if(strawTempTrk_[e].ncentrali+strawTempTrk_[e].nlaterali==4)
-		//				FillHisto("track_deltaqx",(strawTempTrk_[e].q2x-strawTempTrk_[e].q1x));
+	//			if(strawTempTrk_[e].ncentrali+strawTempTrk_[e].nlaterali==4)
+	//				FillHisto("track_deltaqx",(strawTempTrk_[e].q2x-strawTempTrk_[e].q1x));
 //	}
 
 	ntracletcondivisi = 0;
@@ -2255,7 +2257,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 		} else
 //			printf("cut: traccia %d è stata taglia via\n", e);
 
-		qtrack1.setPoint(0.0, strawTrkIntermedie_[e].q1x, strawTrkIntermedie_[e].qy, 0.0, 0.0, 0, 0);
+			qtrack1.setPoint(0.0, strawTrkIntermedie_[e].q1x, strawTrkIntermedie_[e].qy, 0.0, 0.0, 0, 0);
 		mtrack1.setPoint(1.0, strawTrkIntermedie_[e].m1x, strawTrkIntermedie_[e].my, 0.0, 0.0, 0, 0);
 
 		for (int f = e + 1; f < ntrkintermedie; f++) {

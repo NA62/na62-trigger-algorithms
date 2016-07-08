@@ -600,7 +600,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 
 					watchingWhileLoops++;
 					if (!l1ProcessID && watchingWhileLoops)
-						LOG_ERROR("No Algorithms are being processed within the While Loop !");
+						LOG_ERROR("No Algorithms are being processed within the first While Loop !");
 				}
 
 				if ((watchingWhileLoops == 10) && (l1ProcessID != NumberOfEnabledAlgos_[i])) {
@@ -684,7 +684,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 
 	l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | ((l1MaskFlagTrigger != 0) << 6)
 
-	| (isL1Bypassed << 5) | (isAllL1AlgoDisable << 4) | (numberOfTriggeredL1Masks != 0);
+	| (isL1Bypassed << 5) | (isAllL1AlgoDisable << 4) | (isL1WhileTimeout << 3) | (numberOfTriggeredL1Masks != 0);
 
 	if (l1Trigger != 0) {
 		/*
@@ -703,7 +703,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 		 */
 		event->setRrequestZeroSuppressedCreamData(true);
 		event->setProcessingID(0); // 0 indicates raw data as collected from the detector
-		L1TriggerProcessor::writeL1Data(event, l1TriggerWords, &l1Info,isL1WhileTimeout);
+		L1TriggerProcessor::writeL1Data(event, l1TriggerWords, &l1Info, isL1WhileTimeout);
 //		L1TriggerProcessor::readL1Data(event);
 
 	}

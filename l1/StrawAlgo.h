@@ -12,6 +12,7 @@
 
 #include <sys/types.h>
 #include <cstdint>
+#include <mutex>
 
 #include "../common/decoding/DecoderHandler.h"
 #include "straw_algorithm/ParsConfFile.h"
@@ -46,13 +47,12 @@ public:
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 	static void initialize(uint i, l1Straw &l1StrawStruct);
-	static uint_fast8_t processStrawTrigger(uint l0MaskID,DecoderHandler& decoder, L1InfoToStorage* l1Info);
+	static uint_fast8_t processStrawTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
 	static void writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 
 	static float posTubNew(int chamber, int view, int plane, int jstraw);
 	static int strawAcceptance(int n, double *coor, int zone);
-	static int cdaVertex(Point qfascio, Point qtraccia, Point mfascio,
-			Point mtraccia, float* cda, Point* vertice);
+	static int cdaVertex(Point qfascio, Point qtraccia, Point mfascio, Point mtraccia, float* cda, Point* vertice);
 
 private:
 	static STRAWParsConfFile* InfoSTRAW_;
@@ -83,6 +83,16 @@ private:
 
 	static Point qbeam;
 	static Point mbeam;
+	static Point strawPointTemp_[4][5000];
+	static Point strawPointTempbis_[4][2000];
+	static Point strawPointFinal_[4][2000];
+	static Cluster strawCluster_[4][4][500];
+	static Straw strawPrecluster_[4][4][2][500];
+	static Track strawFirstTempTrk_[3000];
+	static Track strawTempTrk_[4000];
+	static Track strawTrkIntermedie_[1000];
+
+	static std::mutex strawMutex;
 
 }
 ;
