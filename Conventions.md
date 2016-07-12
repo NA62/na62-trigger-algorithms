@@ -52,4 +52,3 @@ public:
 
 - Use ```nullptr``` instead of ```NULL``` 
 - Initializer lists: ```MyStruct vector = {0.23f, 42.5f};```
-- See more at [wiki](http://en.wikipedia.org/wiki/C%2B%2B11)
