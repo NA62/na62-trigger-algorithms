@@ -29,7 +29,7 @@
 #include "straw_algorithm/Point.h"
 #include "straw_algorithm/Track.h"
 
-#define INVISIBLE_SHIFT 27 //28.4 //27
+#define INVISIBLE_SHIFT 25.2 //28.4 //27
 #define CLOCK_PERIOD 24.951059536
 //#define rangem 160//160
 #define passo 0.0004//0.0002
@@ -69,7 +69,13 @@ double* StrawAlgo::ROMezzaninesT0_ = InfoSTRAW_->getT0();
 ////////// Run 5358 - 1% Beam Intensity ///////
 //double StrawAlgo::t0_main_shift = 5986.95;
 ////////// Run 5495 - 3% Beam Intensity ///////
-double StrawAlgo::t0_main_shift = 5989.12;
+//double StrawAlgo::t0_main_shift = 5989.12;
+////////// Run 5525 - 3% Beam Intensity ///////
+//double StrawAlgo::t0_main_shift = 5992.36;
+////////// Run 5552 - 3% Beam Intensity ///////
+//double StrawAlgo::t0_main_shift = 5989.60;
+////////// Run 5565 - 3% Beam Intensity ///////
+double StrawAlgo::t0_main_shift = 5991.45;
 
 double StrawAlgo::cutlowleading = 0.0; //-10
 double StrawAlgo::cuthighleading = 175.0; //165
