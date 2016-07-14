@@ -22,6 +22,7 @@ L1InfoToStorage::L1InfoToStorage() {
 	nKTAGSectors_chod = 0;
 	nCHODHits = 0;
 	nLAVHits = 0;
+	nIRCSACHits = 0;
 	nMUV3Tiles = 0;
 	l1CHODProcessed_ = false;
 	l1CHODEmptyPacket_ = false;
@@ -32,6 +33,9 @@ L1InfoToStorage::L1InfoToStorage() {
 	l1LAVProcessed_ = false;
 	l1LAVEmptyPacket_ = false;
 	l1LAVBadData_ = false;
+	l1IRCSACProcessed_ = false;
+	l1IRCSACEmptyPacket_ = false;
+	l1IRCSACBadData_ = false;
 	l1MUV3Processed_ = false;
 	l1MUV3EmptyPacket_ = false;
 	l1MUV3BadData_ = false;
@@ -96,6 +100,13 @@ uint L1InfoToStorage::getL1LAVNHits() {
 }
 void L1InfoToStorage::setL1LAVNHits(uint nHits) {
 	nLAVHits = nHits;
+}
+
+uint L1InfoToStorage::getL1IRCSACNHits() {
+	return nIRCSACHits;
+}
+void L1InfoToStorage::setL1IRCSACNHits(uint nHits) {
+	nIRCSACHits = nHits;
 }
 
 uint L1InfoToStorage::getL1MUV3NTiles() {
