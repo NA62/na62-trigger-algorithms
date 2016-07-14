@@ -33,37 +33,19 @@ public:
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 
-	IRC_SACAlgo();
-	~IRC_SACAlgo();
-
-	static uint_fast8_t processIRCSACTrigger(DecoderHandler& decoder,L1InfoToStorage* l1Info);
-
-	static void initialize(l1IRCSAC &l1IRCSACStruct, uint_fast8_t nEnabledMasks);
-	static void writeData(L1Block &l1Block);
-
-	static bool isAlgoProcessed();
-	static void resetAlgoProcessed();
-	static bool isEmptyPacket();
-	static bool isBadData();
+	static uint_fast8_t processIRCSACTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
+	static void initialize(uint i, l1IRCSAC &l1IRCSACStruct);
+	static void writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 
 private:
 
-	static IRCSACParsConfFile* infoIRC_SAC_;
-	static uint algoID; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for MUV3, 5 for Straw
-	static uint algoLogic;
-	static uint algoRefTimeSourceID;
-	static double algoOnlineTimeWindow;
+	static IRCSACParsConfFile* InfoIRCSAC_;
+	static uint AlgoID_; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
+	static uint AlgoLogic_[16];
+	static uint AlgoRefTimeSourceID_[16];
+	static double AlgoOnlineTimeWindow_[16];
 
-	static bool algoProcessed;
-	static bool emptyPacket;
-	static bool badData;
-	static bool isCHODRefTime;
-
-	static int* lgGeo;
-	static int hit[maxNROchs];
-	static uint nHits;
-	static double averageCHODHitTime;
-	static uint_fast8_t numberOfEnabledL0Masks;
+	static int* LgGeo_;
 
 };
 

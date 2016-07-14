@@ -20,13 +20,12 @@ IRCSACParsConfFile* IRCSACParsConfFile::theInstance = nullptr;
 
 IRCSACParsConfFile::IRCSACParsConfFile() {
 
-//	LOG_INFO<< "In IRCSAC ParseConfFile" << ENDL;
+//	LOG_INFO("In IRCSAC ParseConfFile");
 
-	ConfFileReader fileName_(
-			"/home/lorenza/workspace/na62-trigger-algorithms/l1/ircsac_algorithm/config/IRCSAC.conf");
+	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/ircsac_algorithm/config/IRCSAC.conf");
 
 	if (!fileName_.isValid())
-		LOG_INFO("Config file not found");
+		LOG_INFO("IRC SAC Config file not found");
 
 	if (fileName_.isValid()) {
 
@@ -41,8 +40,7 @@ IRCSACParsConfFile::IRCSACParsConfFile() {
 				nroChannels = fileName_.getField<int>(2);
 //				LOG_INFO << "nroChannels " << nroChannels << ENDL;
 			}
-			if (fileName_.getField<string>(1).find("ChRemap_")
-					!= string::npos) {
+			if (fileName_.getField<string>(1).find("ChRemap_") != string::npos) {
 				for (int iCh = 0; iCh < nroChannels / 16; ++iCh) {
 					char name[1000];
 					sprintf(name, "ChRemap_%04d=", iCh);
@@ -52,8 +50,7 @@ IRCSACParsConfFile::IRCSACParsConfFile() {
 
 					if (fileName_.getField<string>(1) == remap) {
 						for (int jCh = 0; jCh < 16; jCh++) {
-							geoPMTMap[iCh * 16 + jCh] =
-									fileName_.getField<int>(jCh + 2);
+							geoPMTMap[iCh * 16 + jCh] = fileName_.getField<int>(jCh + 2);
 							//LOG_INFO << "geoPMTMap= " << geoPMTMap[iCh * 16 + jCh]<<ENDL;
 						}
 					}
@@ -78,6 +75,4 @@ IRCSACParsConfFile* IRCSACParsConfFile::GetInstance() {
 int* IRCSACParsConfFile::getGeoLGMap() {
 	return geoPMTMap;
 }
-
-
 
