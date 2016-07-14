@@ -75,7 +75,10 @@ double* StrawAlgo::ROMezzaninesT0_ = InfoSTRAW_->getT0();
 ////////// Run 5552 - 3% Beam Intensity ///////
 //double StrawAlgo::t0_main_shift = 5989.60;
 ////////// Run 5565 - 3% Beam Intensity ///////
-double StrawAlgo::t0_main_shift = 5991.45;
+//double StrawAlgo::t0_main_shift = 5991.45;
+////////// Run 5586 - 3% Beam Intensity ///////
+double StrawAlgo::t0_main_shift = 5996.65;
+
 
 double StrawAlgo::cutlowleading = 0.0; //-10
 double StrawAlgo::cuthighleading = 175.0; //165
