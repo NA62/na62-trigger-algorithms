@@ -50,15 +50,15 @@ public:
 	/**
 	 * Fill in trigger decisions into event structure
 	 */
-	static void writeL1Data(Event* const event, const uint_fast8_t* l1TriggerWords, L1InfoToStorage* l1Info, bool isL1WhileTimeout=false);
+	static void writeL1Data(Event* const event, const uint_fast8_t* l1TriggerWords, L1InfoToStorage* l1Info, bool isL1WhileTimeout = false);
 	static void readL1Data(Event* const event);
 	static bool writeAlgoPacket(int algoID, L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
+	static std::string algoIdToTriggerName(uint algoID);
 
 	/**
 	 * Placeholder for deciding whether or not to request ZS CREAM data
 	 */
-	static bool isRequestZeroSuppressedCreamData(
-			uint_fast8_t l1TriggerTypeWord);
+	static bool isRequestZeroSuppressedCreamData(uint_fast8_t l1TriggerTypeWord);
 
 	static inline std::atomic<uint64_t>* GetL1TriggerStats() {
 		return L1Triggers_;
@@ -108,6 +108,12 @@ public:
 	static inline uint_fast32_t GetL1DataPacketSize() {
 		return L1DataPacketSize_;
 	}
+	static inline uint64_t GetL1AcceptedEventsPerL0Mask(uint iMaskID) {
+		return L1AcceptedEventsPerL0Mask_[iMaskID];
+	}
+	static inline uint64_t GetEventCountersByL0MaskByAlgoID(uint iMaskID, uint iAlgoID) {
+		return EventCountersByL0MaskByAlgoID_[iMaskID][iAlgoID];
+	}
 
 	static void initialize(l1Struct &l1Struct);
 
@@ -146,8 +152,8 @@ private:
 	static uint_fast16_t RichEnableMask_;
 	static uint_fast16_t CedarEnableMask_;
 	static uint_fast16_t LavEnableMask_;
-	static uint_fast16_t IrcsacEnableMask_;
 	static uint_fast16_t StrawEnableMask_;
+	static uint_fast16_t IrcSacEnableMask_;
 	static uint_fast16_t MuvEnableMask_;
 	static uint_fast16_t NewChodEnableMask_;
 
@@ -155,8 +161,8 @@ private:
 	static uint_fast16_t RichFlagMask_;
 	static uint_fast16_t CedarFlagMask_;
 	static uint_fast16_t LavFlagMask_;
-	static uint_fast16_t IrcsacFlagMask_;
 	static uint_fast16_t StrawFlagMask_;
+	static uint_fast16_t IrcSacFlagMask_;
 	static uint_fast16_t MuvFlagMask_;
 	static uint_fast16_t NewChodFlagMask_;
 
@@ -165,8 +171,8 @@ private:
 	static uint RichAlgorithmId_;
 	static uint CedarAlgorithmId_;
 	static uint LavAlgorithmId_;
-	static uint IrcsacAlgorithmId_;
 	static uint StrawAlgorithmId_;
+	static uint IrcSacAlgorithmId_;
 	static uint MuvAlgorithmId_;
 	static uint NewChodAlgorithmId_;
 
