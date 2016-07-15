@@ -604,7 +604,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 								|| (l1TriggerTmp & (AlgoEnableMask_[i] & (0xFF - AlgoFlagMask_[i]))))) {
 					L1AcceptedEventsPerL0Mask_[i].fetch_add(1, std::memory_order_relaxed);
 
-					LOG_INFO("L1 Accepted Event Per L0 mask " << i << " number after adding 1 " << L1AcceptedEventsPerL0Mask_[i]);
+//					LOG_INFO("L1 Accepted Event Per L0 mask " << i << " number after adding 1 " << L1AcceptedEventsPerL0Mask_[i]);
 //					LOG_INFO("TrigTmp " << (uint) l1TriggerTmp << " dwscMask " << (uint) algoDwScMask[i]);
 //					LOG_INFO("downscale Factor " << algoDwScFactor[i][__builtin_ctz( (uint) algoDwScMask[i])]);
 //					LOG_INFO("Modulo " << L1AcceptedEventsPerL0Mask_[i] % algoDwScFactor[i][__builtin_ctz( (uint) algoDwScMask[i])]);
