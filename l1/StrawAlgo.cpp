@@ -77,7 +77,13 @@ double* StrawAlgo::ROMezzaninesT0_ = InfoSTRAW_->getT0();
 ////////// Run 5565 - 3% Beam Intensity ///////
 //double StrawAlgo::t0_main_shift = 5991.45;
 ////////// Run 5586 - 3% Beam Intensity ///////
-double StrawAlgo::t0_main_shift = 5996.65;
+//double StrawAlgo::t0_main_shift = 5996.65;
+////////// Run 5617 - 16% Beam Intensity ///////
+//double StrawAlgo::t0_main_shift = 5990.55;
+////////// Run 5646 - 16% Beam Intensity ///////
+//double StrawAlgo::t0_main_shift = 5992.89;
+////////// Run 5666 - 16% Beam Intensity ///////
+double StrawAlgo::t0_main_shift = 5991.01;
 
 
 double StrawAlgo::cutlowleading = 0.0; //-10
@@ -136,6 +142,12 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 	//LOG_INFO( "Initial Time - Start " << time[0].tv_sec << " " << time[0].tv_usec );
 
 	using namespace l0;
+
+	int flag_l1 = 0;
+	int flag_l1_exotic = 0;
+	int flag_l1_limit[1000] = { 0 };
+	int flag_l1_three[1000] = { 0 };
+	int flag_l1_tretracks = 0;
 
 	double sq2 = sqrt(2);
 	double invsq2 = 1. / sq2;
@@ -2241,11 +2253,6 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 //		strawTrkIntermedie_[e].printTrack();
 //	}
 
-	int flag_l1 = 0;
-	int flag_l1_limit[1000] = { 0 };
-	int flag_l1_three[1000] = { 0 };
-	int flag_l1_tretracks = 0;
-
 	//casi a 3 tracce
 	Point mtrack1;
 	Point qtrack1;
@@ -2281,6 +2288,9 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 			}
 		}
 
+		if(strawTrkIntermedie_[e].m1x - strawTrkIntermedie_[e].m2x < 0)
+			flag_l1_exotic = 1;
+
 		if (flag_l1_limit[e] > 0 and flag_l1_three[e] == 0)
 			flag_l1 = 1;
 
@@ -2299,6 +2309,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 //		LOG_INFO("                Evento a tre traccie \n");
 
 	return flag_l1; //return the Straw Trigger word!
+	//return flag_l1_exotic; //return the Straw exotic Trigger word!
 }
 
 float StrawAlgo::posTubNew(int chamber, int view, int plane, int jstraw) {
