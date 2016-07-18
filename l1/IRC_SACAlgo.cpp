@@ -163,8 +163,9 @@ void IRC_SACAlgo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* 
 		LOG_ERROR("Algo ID does not match with Algo ID written within the packet!");
 	algoPacket->algoID = AlgoID_;
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
+//	algoPacket->qualityFlags = (l1Info->isL1IRCSACProcessed() << 6) | (l1Info->isL1IRCSACEmptyPacket() << 4) | (l1Info->isL1IRCSACBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
 	algoPacket->qualityFlags = (l1Info->isL1IRCSACProcessed() << 6) | (l1Info->isL1IRCSACEmptyPacket() << 4)
-			| (l1Info->isL1IRCSACBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
+			| (l1Info->isL1IRCSACBadData() << 2) | ((uint) l1Info->getL1IRCSACTrgWrd());
 	algoPacket->l1Data[0] = l1Info->getL1IRCSACNHits();
 	if (AlgoRefTimeSourceID_[l0MaskID] == 1)
 		algoPacket->l1Data[1] = l1Info->getCHODAverageTime();

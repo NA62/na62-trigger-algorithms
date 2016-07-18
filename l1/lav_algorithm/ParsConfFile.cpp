@@ -25,11 +25,11 @@ LAVParsConfFile::LAVParsConfFile() {
 			"/workspace/na62-trigger-algorithms/l1/lav_algorithm/config/LAV.conf");
 
 	if (!fileName_.isValid())
-		LOG_INFO("Config file not found");
+		LOG_INFO("LAV Config file not found");
 
 	if (fileName_.isValid()) {
 
-//		LOG_INFO("LAV configuration file open");
+		LOG_INFO("LAV configuration file open");
 
 		while (fileName_.nextLine()) {
 

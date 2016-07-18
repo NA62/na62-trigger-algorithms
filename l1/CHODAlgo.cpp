@@ -41,8 +41,7 @@ void CHODAlgo::initialize(uint i, l1CHOD &l1CHODStruct) {
 //	LOG_INFO("CHOD: mask " << i << " logic " << AlgoLogic_[i] << " refTimeSourceID " << AlgoRefTimeSourceID_[i] << " online time window " << AlgoOnlineTimeWindow_[i]);
 }
 
-uint_fast8_t CHODAlgo::processCHODTrigger(uint l0MaskID,
-		DecoderHandler& decoder, L1InfoToStorage* l1Info) {
+uint_fast8_t CHODAlgo::processCHODTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
 //	LOG_INFO("Initial Time " << time[0].tv_sec << " " << time[0].tv_usec);
 
@@ -57,8 +56,7 @@ uint_fast8_t CHODAlgo::processCHODTrigger(uint l0MaskID,
 //	LOG_INFO("CHODAlgo: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
 //	LOG_INFO("Average Hit Time (initial value) " << averageHitTime);
 
-	TrbFragmentDecoder& chodPacket =
-			(TrbFragmentDecoder&) decoder.getDecodedCHODFragment(0);
+	TrbFragmentDecoder& chodPacket = (TrbFragmentDecoder&) decoder.getDecodedCHODFragment(0);
 	if (!chodPacket.isReady() || chodPacket.isBadFragment()) {
 
 		LOG_ERROR("CHODAlgo: This looks like a Bad Packet!!!! ");
@@ -97,11 +95,8 @@ uint_fast8_t CHODAlgo::processCHODTrigger(uint l0MaskID,
 			 *
 			 */
 			if (SlabGeo_[roChID] < 128) {
-				edgetime = (edge_times[iEdge]
-						- decoder.getDecodedEvent()->getTimestamp() * 256.)
-						* 0.097464731802;
-				finetime = decoder.getDecodedEvent()->getFinetime()
-						* 0.097464731802;
+				edgetime = (edge_times[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
+				finetime = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
 //				LOG_INFO("finetime (in ns) " << finetime << " edgetime (in ns) " << edgetime);
 
 				dt_l0tp = fabs(edgetime - finetime);
@@ -170,17 +165,15 @@ uint_fast8_t CHODAlgo::processCHODTrigger(uint l0MaskID,
 
 }
 
-void CHODAlgo::writeData(L1Algo* algoPacket, uint l0MaskID,
-		L1InfoToStorage* l1Info) {
+void CHODAlgo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info) {
 
 	if (AlgoID_ != algoPacket->algoID)
-		LOG_ERROR(
-				"Algo ID does not match with Algo ID written within the packet!");
+		LOG_ERROR("Algo ID does not match with Algo ID written within the packet!");
 	algoPacket->algoID = AlgoID_;
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
-	algoPacket->qualityFlags = (l1Info->isL1CHODProcessed() << 6)
-			| (l1Info->isL1CHODEmptyPacket() << 4)
-			| (l1Info->isL1CHODBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
+//	algoPacket->qualityFlags = (l1Info->isL1CHODProcessed() << 6) | (l1Info->isL1CHODEmptyPacket() << 4) | (l1Info->isL1CHODBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
+	algoPacket->qualityFlags = (l1Info->isL1CHODProcessed() << 6) | (l1Info->isL1CHODEmptyPacket() << 4) | (l1Info->isL1CHODBadData() << 2)
+			| ((uint) l1Info->getL1CHODTrgWrd());
 	algoPacket->l1Data[0] = (uint) l1Info->getL1CHODNHits();
 	if (AlgoRefTimeSourceID_[l0MaskID] == 1)
 		algoPacket->l1Data[1] = l1Info->getCHODAverageTime();
