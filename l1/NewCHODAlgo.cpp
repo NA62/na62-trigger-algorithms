@@ -28,23 +28,19 @@ uint NewCHODAlgo::AlgoLogic_[16];
 uint NewCHODAlgo::AlgoRefTimeSourceID_[16];
 double NewCHODAlgo::AlgoOnlineTimeWindow_[16];
 
-NewCHODParsConfFile* NewCHODAlgo::InfoNewCHOD_ =
-		NewCHODParsConfFile::GetInstance();
+NewCHODParsConfFile* NewCHODAlgo::InfoNewCHOD_ = NewCHODParsConfFile::GetInstance();
 int * NewCHODAlgo::PmtGeo_ = InfoNewCHOD_->getGeoPMTMap();
 
 void NewCHODAlgo::initialize(uint i, l1NewCHOD &l1NewChodStruct) {
 
 	AlgoID_ = l1NewChodStruct.configParams.l1TrigMaskID;
 	AlgoLogic_[i] = l1NewChodStruct.configParams.l1TrigLogic;
-	AlgoRefTimeSourceID_[i] =
-			l1NewChodStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
-	AlgoOnlineTimeWindow_[i] =
-			l1NewChodStruct.configParams.l1TrigOnlineTimeWindow;
+	AlgoRefTimeSourceID_[i] = l1NewChodStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
+	AlgoOnlineTimeWindow_[i] = l1NewChodStruct.configParams.l1TrigOnlineTimeWindow;
 // 	LOG_INFO("NewCHOD mask: " << i << " logic " << AlgoLogic_[i] << " refTimeSourceID " << AlgoRefTimeSourceID_[i] << " online time window " << AlgoOnlineTimeWindow_[i]);
 }
 
-uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID,
-		DecoderHandler& decoder, L1InfoToStorage* l1Info) {
+uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
 //	LOG_INFO("Initial Time " << time[0].tv_sec << " " << time[0].tv_usec);
 
@@ -58,8 +54,7 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID,
 //	LOG_INFO("NewCHODAlgo: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
 //	LOG_INFO("Average Hit Time (initial value) " << averageHitTime);
 
-	TrbFragmentDecoder& newchodPacket =
-			(TrbFragmentDecoder&) decoder.getDecodedIRCFragment(0);
+	TrbFragmentDecoder& newchodPacket = (TrbFragmentDecoder&) decoder.getDecodedIRCFragment(0);
 	if (!newchodPacket.isReady() || newchodPacket.isBadFragment()) {
 //
 		LOG_ERROR("NewCHODAlgo: This looks like a Bad Packet!!!! ");
@@ -97,26 +92,18 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID,
 //			LOG_INFO("Geom PMT ID1 " << PMTID1);
 
 			if ((PMTID1 / 10) % 10 >= 1 && (PMTID1 / 10) % 10 <= 3) {
-				for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard;
-						jEdge++) {
+				for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard; jEdge++) {
 					if (edge_IDs[jEdge] && jEdge != iEdge) {
-						const int roChID2 = (edge_tdcIDs[jEdge] * 32)
-								+ edge_chIDs[jEdge];
+						const int roChID2 = (edge_tdcIDs[jEdge] * 32) + edge_chIDs[jEdge];
 						PMTID2 = PmtGeo_[roChID2];
 //						LOG_INFO("jEdge " << jEdge);
 //						LOG_INFO("Readout Channel ID2 " << roChID2);
 //						LOG_INFO("Geom PMT ID2 " << PMTID2);
 
-						if (fabs(PMTID1 - PMTID2) == 50
-								&& (PMTID1 / 100) % 10 == (PMTID2 / 100) % 10) {
-							finetime = decoder.getDecodedEvent()->getFinetime()
-									* 0.097464731802;
-							edgetime1 = (edge_times[iEdge]
-									- decoder.getDecodedEvent()->getTimestamp()
-											* 256.) * 0.097464731802;
-							edgetime2 = (edge_times[jEdge]
-									- decoder.getDecodedEvent()->getTimestamp()
-											* 256.) * 0.097464731802;
+						if (fabs(PMTID1 - PMTID2) == 50 && (PMTID1 / 100) % 10 == (PMTID2 / 100) % 10) {
+							finetime = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
+							edgetime1 = (edge_times[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
+							edgetime2 = (edge_times[jEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
 //							LOG_INFO("finetime (in ns) " << finetime << " edgetime1 (in ns) " << edgetime1 << " edgetime2 " << edgetime2);
 
 							dt1_l0tp = fabs(edgetime1 - finetime);
@@ -124,9 +111,7 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID,
 
 //							LOG_INFO("dt1_l0tp "<< dt1_l0tp << " dt2_l0tp " << dt2_l0tp);
 //							LOG_INFO("edge1-edge2 "<<fabs(edgetime1-edgetime2));
-							if ((dt1_l0tp < AlgoOnlineTimeWindow_[l0MaskID])
-									&& (dt2_l0tp
-											< AlgoOnlineTimeWindow_[l0MaskID])
+							if ((dt1_l0tp < AlgoOnlineTimeWindow_[l0MaskID]) && (dt2_l0tp < AlgoOnlineTimeWindow_[l0MaskID])
 									&& (fabs(edgetime1 - edgetime2) < 5.)) {
 
 								if (AlgoRefTimeSourceID_[l0MaskID] == 1)
@@ -158,18 +143,15 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID,
 
 }
 
-void NewCHODAlgo::writeData(L1Algo* algoPacket, uint l0MaskID,
-		L1InfoToStorage* l1Info) {
+void NewCHODAlgo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info) {
 
 	if (AlgoID_ != algoPacket->algoID)
-		LOG_ERROR(
-				"Algo ID does not match with Algo ID written within the packet!");
+		LOG_ERROR("Algo ID does not match with Algo ID written within the packet!");
 	algoPacket->algoID = AlgoID_;
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
-	algoPacket->qualityFlags = (l1Info->isL1NewCHODProcessed() << 6)
-			| (l1Info->isL1NewCHODEmptyPacket() << 4)
-			| (l1Info->isL1NewCHODBadData() << 2)
-			| AlgoRefTimeSourceID_[l0MaskID];
+//	algoPacket->qualityFlags = (l1Info->isL1NewCHODProcessed() << 6) | (l1Info->isL1NewCHODEmptyPacket() << 4) | (l1Info->isL1NewCHODBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
+	algoPacket->qualityFlags = (l1Info->isL1NewCHODProcessed() << 6) | (l1Info->isL1NewCHODEmptyPacket() << 4)
+			| (l1Info->isL1NewCHODBadData() << 2) | ((uint) l1Info->getL1NewCHODTrgWrd());
 	algoPacket->l1Data[0] = (uint) l1Info->getL1NewCHODNHits();
 	if (AlgoRefTimeSourceID_[l0MaskID] == 1)
 		algoPacket->l1Data[1] = l1Info->getNewCHODAverageTime();

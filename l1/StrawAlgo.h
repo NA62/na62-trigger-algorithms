@@ -48,7 +48,7 @@ public:
 	 */
 	static void initialize(uint i, l1Straw &l1StrawStruct);
 	static uint_fast8_t processStrawTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
-	static void writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
+	static void writeData(L1StrawAlgo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 
 	static float posTubNew(int chamber, int view, int plane, int jstraw);
 	static int strawAcceptance(int n, double *coor, int zone);
@@ -63,6 +63,7 @@ private:
 
 	static int* StrawGeo_;
 	static double* ROMezzaninesT0_;
+	static double StationT0_;
 
 	static double t0_main_shift;
 	static double cutlowleading;

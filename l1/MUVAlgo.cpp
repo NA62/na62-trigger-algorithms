@@ -39,8 +39,7 @@ void MUV3Algo::initialize(uint i, l1MUV &l1MUV3Struct) {
 //	LOG_INFO("MUV3 mask: " << i << " logic " << AlgoLogic_[i] << " refTimeSourceID " << AlgoRefTimeSourceID_[i] << " online time window " << AlgoOnlineTimeWindow_[i]);
 }
 
-uint_fast8_t MUV3Algo::processMUV3Trigger0(uint l0MaskID,
-		DecoderHandler& decoder, L1InfoToStorage* l1Info) {
+uint_fast8_t MUV3Algo::processMUV3Trigger0(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
 	using namespace l0;
 //	LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
@@ -56,12 +55,10 @@ uint_fast8_t MUV3Algo::processMUV3Trigger0(uint l0MaskID,
 			isCHODRefTime = 1;
 			averageCHODHitTime = l1Info->getCHODAverageTime();
 		} else
-			LOG_ERROR(
-					"MUV3Algo.cpp: Not able to use averageCHODHitTime as Reference Time even if it is requested!");
+			LOG_ERROR("MUV3Algo.cpp: Not able to use averageCHODHitTime as Reference Time even if it is requested!");
 	}
 
-	TrbFragmentDecoder& muv3Packet =
-			(TrbFragmentDecoder&) decoder.getDecodedMUV3Fragment(0);
+	TrbFragmentDecoder& muv3Packet = (TrbFragmentDecoder&) decoder.getDecodedMUV3Fragment(0);
 	if (!muv3Packet.isReady() || muv3Packet.isBadFragment()) {
 
 		LOG_ERROR("MUV3Algo: This looks like a Bad Packet!!!! ");
@@ -114,14 +111,11 @@ uint_fast8_t MUV3Algo::processMUV3Trigger0(uint l0MaskID,
 				pmtID1 = PmtGeo_[roChID];
 
 			if (pmtID1 < 144) {
-				edgetime = (edge_times[iEdge]
-						- decoder.getDecodedEvent()->getTimestamp() * 256.)
-						* 0.097464731802;
+				edgetime = (edge_times[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
 //				LOG_INFO("edgetime (in ns) " << edgetime);
 
 				if (!isCHODRefTime) {
-					finetime = decoder.getDecodedEvent()->getFinetime()
-							* 0.097464731802;
+					finetime = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
 //					LOG_INFO("finetime (in ns) " << finetime);
 					dt_l0tp = fabs(edgetime - finetime);
 					dt_chod = -1.0e+28;
@@ -130,8 +124,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger0(uint l0MaskID,
 
 //				LOG_INFO("Online Time Window " << algoOnlineTimeWindow << " dt_l0tp " << dt_l0tp << " dt_chod " << dt_chod);
 				if ((!isCHODRefTime && dt_l0tp < AlgoOnlineTimeWindow_[l0MaskID])
-						|| (isCHODRefTime
-								&& dt_chod < AlgoOnlineTimeWindow_[l0MaskID])) {
+						|| (isCHODRefTime && dt_chod < AlgoOnlineTimeWindow_[l0MaskID])) {
 					tileID[pmtID1] = 1;
 				}
 			}
@@ -156,9 +149,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger0(uint l0MaskID,
 		l1Info->setL1MUV3Processed();
 //		algoProcessed = 1;
 		return 0;
-	} else if ((fabs(pmtID[0] - pmtID[1]) == 1
-			&& ((pmtID[0] + pmtID[1]) % 24) != 23)
-			|| fabs(pmtID[0] - pmtID[1]) == 12) {
+	} else if ((fabs(pmtID[0] - pmtID[1]) == 1 && ((pmtID[0] + pmtID[1]) % 24) != 23) || fabs(pmtID[0] - pmtID[1]) == 12) {
 		l1Info->setL1MUV3NTiles(nTiles);
 		l1Info->setL1MUV3Processed();
 //		algoProcessed = 1;
@@ -173,8 +164,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger0(uint l0MaskID,
 	LOG_ERROR("Attention: no case is provided for this !!!!");
 }
 
-uint_fast8_t MUV3Algo::processMUV3Trigger1(uint l0MaskID,
-		DecoderHandler& decoder, L1InfoToStorage* l1Info) {
+uint_fast8_t MUV3Algo::processMUV3Trigger1(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
 	using namespace l0;
 	//LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
@@ -190,12 +180,10 @@ uint_fast8_t MUV3Algo::processMUV3Trigger1(uint l0MaskID,
 			isCHODRefTime = 1;
 			averageCHODHitTime = l1Info->getCHODAverageTime();
 		} else
-			LOG_ERROR(
-					"MUV3Algo.cpp: Not able to use averageCHODHitTime as Reference Time even if it is requested!");
+			LOG_ERROR("MUV3Algo.cpp: Not able to use averageCHODHitTime as Reference Time even if it is requested!");
 	}
 
-	TrbFragmentDecoder& muv3Packet =
-			(TrbFragmentDecoder&) decoder.getDecodedMUV3Fragment(0);
+	TrbFragmentDecoder& muv3Packet = (TrbFragmentDecoder&) decoder.getDecodedMUV3Fragment(0);
 	if (!muv3Packet.isReady() || muv3Packet.isBadFragment()) {
 
 		LOG_ERROR("MUV3Algo: This looks like a Bad Packet!!!! ");
@@ -242,19 +230,16 @@ uint_fast8_t MUV3Algo::processMUV3Trigger1(uint l0MaskID,
 				pmtID1 = PmtGeo_[roChID1] - 200;
 			else
 				pmtID1 = PmtGeo_[roChID1];
-			for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard;
-					jEdge++) {
+			for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard; jEdge++) {
 				if (edge_IDs[jEdge] && jEdge != iEdge) {
-					const int roChID2 = (edge_tdcIDs[jEdge] * 32)
-							+ edge_chIDs[jEdge];
+					const int roChID2 = (edge_tdcIDs[jEdge] * 32) + edge_chIDs[jEdge];
 					if (PmtGeo_[roChID2] > 151)
 						pmtID2 = PmtGeo_[roChID2] - 200;
 					else
 						pmtID2 = PmtGeo_[roChID2];
 
 					if (pmtID1 < 144 && pmtID2 < 144) {
-						if (((pmtID1 % 12) <= 5 && (pmtID2 % 12) >= 6)
-								|| ((pmtID2 % 12) <= 5 && (pmtID1 % 12) >= 6)) {
+						if (((pmtID1 % 12) <= 5 && (pmtID2 % 12) >= 6) || ((pmtID2 % 12) <= 5 && (pmtID1 % 12) >= 6)) {
 							//LOG_INFO("left and right! pmt1= " << pmtID1 << " pmt2= " << pmtID2);
 							/*
 							 * Must add time constraints!!!!!
@@ -276,8 +261,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger1(uint l0MaskID,
 	return 0;
 }
 
-uint_fast8_t MUV3Algo::processMUV3Trigger2(uint l0MaskID,
-		DecoderHandler& decoder, L1InfoToStorage* l1Info) {
+uint_fast8_t MUV3Algo::processMUV3Trigger2(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
 	using namespace l0;
 	//LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
@@ -293,12 +277,10 @@ uint_fast8_t MUV3Algo::processMUV3Trigger2(uint l0MaskID,
 			isCHODRefTime = 1;
 			averageCHODHitTime = l1Info->getCHODAverageTime();
 		} else
-			LOG_ERROR(
-					"MUV3Algo.cpp: Not able to use averageCHODHitTime as Reference Time even if it is requested!");
+			LOG_ERROR("MUV3Algo.cpp: Not able to use averageCHODHitTime as Reference Time even if it is requested!");
 	}
 
-	TrbFragmentDecoder& muv3Packet =
-			(TrbFragmentDecoder&) decoder.getDecodedMUV3Fragment(0);
+	TrbFragmentDecoder& muv3Packet = (TrbFragmentDecoder&) decoder.getDecodedMUV3Fragment(0);
 	if (!muv3Packet.isReady() || muv3Packet.isBadFragment()) {
 
 		LOG_ERROR("MUV3Algo: This looks like a Bad Packet!!!! ");
@@ -330,20 +312,16 @@ uint_fast8_t MUV3Algo::processMUV3Trigger2(uint l0MaskID,
 				pmtID1 = PmtGeo_[roChID1] - 200;
 			else
 				pmtID1 = PmtGeo_[roChID1];
-			for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard;
-					jEdge++) {
+			for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard; jEdge++) {
 				if (edge_IDs[jEdge] && jEdge != iEdge) {
-					const int roChID2 = (edge_tdcIDs[jEdge] * 32)
-							+ edge_chIDs[jEdge];
+					const int roChID2 = (edge_tdcIDs[jEdge] * 32) + edge_chIDs[jEdge];
 					if (PmtGeo_[roChID2] > 151)
 						pmtID2 = PmtGeo_[roChID2] - 200;
 					else
 						pmtID2 = PmtGeo_[roChID2];
 
 					if (pmtID1 < 144 && pmtID2 < 144) {
-						if ((fabs(pmtID1 - pmtID2) == 1
-								&& ((pmtID1 + pmtID2) % 24) != 23)
-								|| fabs(pmtID1 - pmtID2) == 12) {
+						if ((fabs(pmtID1 - pmtID2) == 1 && ((pmtID1 + pmtID2) % 24) != 23) || fabs(pmtID1 - pmtID2) == 12) {
 //							LOG_INFO("neighbours! pmt1= " << pmtID1 << " pmt2= " << pmtID2);
 							/*
 							 * Must add time constraints!!!!!
@@ -364,17 +342,15 @@ uint_fast8_t MUV3Algo::processMUV3Trigger2(uint l0MaskID,
 	return 0;
 }
 
-void MUV3Algo::writeData(L1Algo* algoPacket, uint l0MaskID,
-		L1InfoToStorage* l1Info) {
+void MUV3Algo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info) {
 
 	if (AlgoID_ != algoPacket->algoID)
-		LOG_ERROR(
-				"Algo ID does not match with Algo ID written within the packet!");
+		LOG_ERROR("Algo ID does not match with Algo ID written within the packet!");
 	algoPacket->algoID = AlgoID_;
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
-	algoPacket->qualityFlags = (l1Info->isL1MUV3Processed() << 6)
-			| (l1Info->isL1MUV3EmptyPacket() << 4)
-			| (l1Info->isL1MUV3BadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
+//	algoPacket->qualityFlags = (l1Info->isL1MUV3Processed() << 6) | (l1Info->isL1MUV3EmptyPacket() << 4) | (l1Info->isL1MUV3BadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
+	algoPacket->qualityFlags = (l1Info->isL1MUV3Processed() << 6) | (l1Info->isL1MUV3EmptyPacket() << 4) | (l1Info->isL1MUV3BadData() << 2)
+			| ((uint) l1Info->getL1MUV3TrgWrd());
 	algoPacket->l1Data[0] = l1Info->getL1MUV3NTiles();
 	if (AlgoRefTimeSourceID_[l0MaskID] == 1)
 		algoPacket->l1Data[1] = l1Info->getCHODAverageTime();

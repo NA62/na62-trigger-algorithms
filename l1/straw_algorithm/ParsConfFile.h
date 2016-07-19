@@ -25,8 +25,12 @@ public:
 
 	int* getGeoMap();
 	int getNROChannels();
+
 	void readT0();
 	double* getT0();
+
+	void readStationT0();
+	double getStationT0();
 
 private:
 
@@ -34,8 +38,12 @@ private:
 
 	int nROChannels;
 	int geoMap[8192];
+
 	string fileT0;
 	double fROMezzaninesT0[512]; //from offline - to be removed
+
+	string fileStationT0;
+	double fStationT0;
 
 };
 

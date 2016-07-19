@@ -174,8 +174,9 @@ void LAVAlgo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1In
 		LOG_ERROR("Algo ID does not match with Algo ID written within the packet!");
 	algoPacket->algoID = AlgoID_;
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
+//	algoPacket->qualityFlags = (l1Info->isL1LAVProcessed() << 6) | (l1Info->isL1LAVEmptyPacket() << 4) | (l1Info->isL1LAVBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
 	algoPacket->qualityFlags = (l1Info->isL1LAVProcessed() << 6) | (l1Info->isL1LAVEmptyPacket() << 4) | (l1Info->isL1LAVBadData() << 2)
-			| AlgoRefTimeSourceID_[l0MaskID];
+			| ((uint) l1Info->getL1LAVTrgWrd());
 	algoPacket->l1Data[0] = l1Info->getL1LAVNHits();
 	if (AlgoRefTimeSourceID_[l0MaskID] == 1)
 		algoPacket->l1Data[1] = l1Info->getCHODAverageTime();
