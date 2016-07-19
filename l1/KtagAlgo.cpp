@@ -41,8 +41,7 @@ void KtagAlgo::initialize(uint i, l1KTAG &l1KtagStruct) {
 //	LOG_INFO("KTAG: mask: " << i << " logic " << AlgoLogic_[i] << " refTimeSourceID " << AlgoRefTimeSourceID_[i] << " online time window " << AlgoOnlineTimeWindow_[i]);
 }
 
-uint_fast8_t KtagAlgo::processKtagTrigger(uint l0MaskID,
-		DecoderHandler& decoder, L1InfoToStorage* l1Info) {
+uint_fast8_t KtagAlgo::processKtagTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
 	using namespace l0;
 //  LOG_INFO("Initial Time " << time[0].tv_sec << " " << time[0].tv_usec);
@@ -58,8 +57,7 @@ uint_fast8_t KtagAlgo::processKtagTrigger(uint l0MaskID,
 			isCHODRefTime = 1;
 			averageCHODHitTime = l1Info->getCHODAverageTime();
 		} else
-			LOG_ERROR(
-					"KtagAlgo.cpp: Not able to use averageCHODHitTime as Reference Time even if it is requested!");
+			LOG_ERROR("KtagAlgo.cpp: Not able to use averageCHODHitTime as Reference Time even if it is requested!");
 	}
 
 	uint sector_occupancy_chod[8] = { 0 };
@@ -95,8 +93,7 @@ uint_fast8_t KtagAlgo::processKtagTrigger(uint l0MaskID,
 		const uint_fast8_t* const edge_tdcIDs = cedarPacket->getTdcIDs();
 		double finetime, edgetime, dt_l0tp, dt_chod;
 
-		uint numberOfEdgesOfCurrentBoard =
-				cedarPacket->getNumberOfEdgesStored();
+		uint numberOfEdgesOfCurrentBoard = cedarPacket->getNumberOfEdgesStored();
 
 //		LOG_INFO("Tel62 ID " << cedarPacket->getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard);
 //      LOG_INFO("time check (inside iterator - end of retrieve) " << time[2].tv_sec << " " << time[2].tv_usec);
@@ -115,24 +112,19 @@ uint_fast8_t KtagAlgo::processKtagTrigger(uint l0MaskID,
 			 *
 			 */
 			if (edge_IDs[iEdge]) {
-				edgetime = (edge_times[iEdge]
-						- decoder.getDecodedEvent()->getTimestamp() * 256.)
-						* 0.097464731802;
+				edgetime = (edge_times[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
 
 				if (!isCHODRefTime) {
-					finetime = decoder.getDecodedEvent()->getFinetime()
-							* 0.097464731802;
+					finetime = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
 					dt_l0tp = fabs(edgetime - finetime);
 					dt_chod = -1.0e+28;
 				} else
 					dt_chod = fabs(edgetime - averageCHODHitTime);
-
+//				LOG_INFO("dt_l0tp " << dt_l0tp << " dt_chod " << dt_chod);
 				if ((!isCHODRefTime && dt_l0tp < AlgoOnlineTimeWindow_[l0MaskID])
-						|| (isCHODRefTime
-								&& dt_chod < AlgoOnlineTimeWindow_[l0MaskID])) {
+						|| (isCHODRefTime && dt_chod < AlgoOnlineTimeWindow_[l0MaskID])) {
 					const uint trbID = edge_tdcIDs[iEdge] / 4;
-					const uint box = calculateSector(
-							cedarPacket->getFragmentNumber(), trbID);
+					const uint box = calculateSector(cedarPacket->getFragmentNumber(), trbID);
 
 					if (!isCHODRefTime)
 						sector_occupancy_l0tp[box]++;
@@ -178,22 +170,19 @@ uint_fast8_t KtagAlgo::processKtagTrigger(uint l0MaskID,
 //	algoProcessed = 1;
 
 //	if (AlgoLogic_[l0MaskID])
-	return ((!isCHODRefTime && nSectors_l0tp > 4)
-			|| (isCHODRefTime && nSectors_chod > 4));
+	return ((!isCHODRefTime && nSectors_l0tp > 4) || (isCHODRefTime && nSectors_chod > 4));
 //	else return ((!isCHODRefTime && nSectors_l0tp <= 4) || (isCHODRefTime && nSectors_chod <= 4));
 }
 
-void KtagAlgo::writeData(L1Algo* algoPacket, uint l0MaskID,
-		L1InfoToStorage* l1Info) {
+void KtagAlgo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info) {
 
 	if (AlgoID_ != algoPacket->algoID)
-		LOG_ERROR(
-				"Algo ID does not match with Algo ID written within the packet!");
+		LOG_ERROR("Algo ID does not match with Algo ID written within the packet!");
 	algoPacket->algoID = AlgoID_;
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
-	algoPacket->qualityFlags = (l1Info->isL1KTAGProcessed() << 6)
-			| (l1Info->isL1KTAGEmptyPacket() << 4)
-			| (l1Info->isL1KTAGBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
+//	algoPacket->qualityFlags = (l1Info->isL1KTAGProcessed() << 6) | (l1Info->isL1KTAGEmptyPacket() << 4) | (l1Info->isL1KTAGBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
+	algoPacket->qualityFlags = (l1Info->isL1KTAGProcessed() << 6) | (l1Info->isL1KTAGEmptyPacket() << 4) | (l1Info->isL1KTAGBadData() << 2)
+			| ((uint)l1Info->getL1KTAGTrgWrd());
 	if (AlgoRefTimeSourceID_[l0MaskID] == 1)
 		algoPacket->l1Data[0] = l1Info->getL1KTAGNSectors_chod();
 	else
