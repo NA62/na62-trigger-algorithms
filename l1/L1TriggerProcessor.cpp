@@ -83,6 +83,9 @@ uint L1TriggerProcessor::IrcSacAlgorithmId_;
 uint L1TriggerProcessor::MuvAlgorithmId_;
 uint L1TriggerProcessor::NewChodAlgorithmId_;
 
+int L1TriggerProcessor::StrawAlgoType_[16];
+int L1TriggerProcessor::MUVAlgoType_[16];
+
 uint L1TriggerProcessor::MaskIDToNum_[16];
 uint L1TriggerProcessor::NumToMaskID_[16];
 uint L1TriggerProcessor::AlgoIDToNum_[16][10];
@@ -124,6 +127,8 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 		AlgoDwScMask_[i] = 0;
 		NumToMaskID_[i] = -1;
 		MaskIDToNum_[i] = -1;
+		StrawAlgoType_[i] = -1;
+		MUVAlgoType_[i] = -1;
 		for (int j = 0; j != 10; ++j) {
 			EventCountersByL0MaskByAlgoID_[i][j] = 0;
 			AlgoDwScFactor_[i][j] = 1;
@@ -267,6 +272,11 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 		IrcSacFlagMask_ |= (l1Struct.l1Mask[i].ircsac.configParams.l1TrigFlag << i);
 		MuvFlagMask_ |= (l1Struct.l1Mask[i].muv.configParams.l1TrigFlag << i);
 		NewChodFlagMask_ |= (l1Struct.l1Mask[i].newchod.configParams.l1TrigFlag << i);
+
+		StrawAlgoType_[i] = l1Struct.l1Mask[i].straw.xx;
+		MUVAlgoType_[i] = l1Struct.l1Mask[i].muv.xx;
+//		LOG_INFO("L0Mask " << i << " StrawAlgoType " << StrawAlgoType_[i]);
+//		LOG_INFO("L0Mask " << i << " MUVAlgoType " << MUVAlgoType_[i]);
 	}
 
 	L1DataPacketSize_ = sizeof(L1Global);
@@ -276,8 +286,12 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 	for (int l0Mask : L0MaskIDs_) {
 		NumToMaskID_[num] = l0Mask;
 		MaskIDToNum_[l0Mask] = num;
-//		LOG_INFO("Initialization of Enabled Masks " << MaskIDToNum[l0Mask] << " " << NumToMaskID[num]);
-		L1DataPacketSize_ += (sizeof(L1Mask) + NumberOfEnabledAlgos_[l0Mask] * sizeof(L1Algo));
+//		LOG_INFO("Initialization of Enabled Masks " << MaskIDToNum_[l0Mask] << " " << NumToMaskID_[num]);
+//		LOG_INFO("is Straw enabled on mask " << l0Mask << " ? " << (uint)(StrawEnableMask_ & (1 << l0Mask)));
+		if (!(StrawEnableMask_ & (1 << l0Mask)))
+			L1DataPacketSize_ += (sizeof(L1Mask) + NumberOfEnabledAlgos_[l0Mask] * sizeof(L1Algo));
+		else
+			L1DataPacketSize_ += (sizeof(L1Mask) + (NumberOfEnabledAlgos_[l0Mask] - 1) * sizeof(L1Algo)) + sizeof(L1StrawAlgo);
 		for (int i = 0; i != 16; i++) {
 			if (AlgoEnableMask_[l0Mask] & (1 << i)) {
 				NumToAlgoID_[num][algoNum] = i;
@@ -289,6 +303,9 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 		num++;
 		algoNum = 0;
 	}
+//	LOG_INFO("L1 Global " << sizeof(L1Global) << " L1Mask " << sizeof(L1Mask));
+//	LOG_INFO("L1Algo " << sizeof(L1Algo) << " L1StrawAlgo " << sizeof(L1StrawAlgo));
+//	LOG_INFO("L1 Data Packet Size " << (uint)L1DataPacketSize_);
 }
 
 uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
@@ -405,7 +422,6 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 		isL1Bypassed = 1;
 	}
 	uint_fast16_t l0TrigFlags = event->getTriggerFlags();
-
 	if (isL0PhysicsTrigger) {
 		for (int i = 0; i != 16; i++) {
 			l1TriggerWords[i] = 0;
@@ -570,10 +586,18 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 						l1ProcessID++;
 //						printf("L1TriggerProcessor.cpp: strawTrigger %d\n", strawTrigger);
 
-						if (AlgoLogicMask_[i] & (1 << (uint) StrawAlgorithmId_))
+						/*
+						 * StrawAlgoType_[i]: 0 for pnn, 1 for exotics
+						 */
+//						if(StrawAlgoType_[i]) strawTrigger = (strawTrigger & 1);
+//						else if (StrawAlgoType_[i]==1) strawTrigger = (strawTrigger & 2) >> 1;
+						if (AlgoLogicMask_[i] & (1 << (uint) StrawAlgorithmId_)) {
 							l1TriggerTmp |= (strawTrigger << (uint) StrawAlgorithmId_);
-						else
+							l1Info.setL1StrawTrgWrd(strawTrigger);
+						} else {
 							l1TriggerTmp |= (not strawTrigger << (uint) StrawAlgorithmId_);
+							l1Info.setL1StrawTrgWrd(not strawTrigger);
+						}
 //						printf("L1TriggerProcessor.cpp: tmpTrigger %d\n", l1TriggerTmp);
 
 					}
@@ -809,11 +833,18 @@ void L1TriggerProcessor::writeL1Data(Event* const event, const uint_fast8_t* l1T
 	uint nMaskWords = 0;
 	int numToMaskID;
 	int numToAlgoID;
+	bool isStrawAlgoEnabled;
+
 	for (int iNum = 0; iNum < NumberOfEnabledL0Masks_; iNum++) {
+		isStrawAlgoEnabled = false;
+
 		if (NumToMaskID_[iNum] == -1)
 			LOG_ERROR("ERROR! Wrong association of mask ID!");
 		else
 			numToMaskID = NumToMaskID_[iNum];
+
+		if (StrawEnableMask_ & (1 << numToMaskID))
+			isStrawAlgoEnabled = true;
 
 		L1Mask* maskPacket = (L1Mask*) (payload + nBlockHeaderWords + nMaskWords);
 
@@ -846,36 +877,70 @@ void L1TriggerProcessor::writeL1Data(Event* const event, const uint_fast8_t* l1T
 			else
 				numToAlgoID = NumToAlgoID_[iNum][iAlgoNum];
 
-			L1Algo* algoPacket = (L1Algo*) (payload + nBlockHeaderWords + nMaskWords);
+			if (isStrawAlgoEnabled && (numToAlgoID == StrawAlgorithmId_)) {
 
-			if (l0TrigFlags & (1 << numToMaskID)) {
+				L1StrawAlgo* strawAlgoPacket = (L1StrawAlgo*) (payload + nBlockHeaderWords + nMaskWords);
 
-//				LOG_INFO("NumToAlgoID " << numToAlgoID);
-				algoPacket->processID = AlgoProcessID_[numToMaskID][numToAlgoID];
-				algoPacket->algoID = numToAlgoID;
-				algoPacket->downscaleFactor = AlgoDwScFactor_[numToMaskID][numToAlgoID];
+				if (l0TrigFlags & (1 << numToMaskID)) {
 
-//				LOG_INFO("Enable " << ((AlgoEnableMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID));
-//				LOG_INFO("Flag " << ((AlgoFlagMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID));
-//				LOG_INFO("Logic " << ((AlgoLogicMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID));
-//				LOG_INFO("DwSc " << ((AlgoDwScMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID));
+//					LOG_INFO("NumToAlgoID " << numToAlgoID);
+					strawAlgoPacket->processID = AlgoProcessID_[numToMaskID][numToAlgoID];
+					strawAlgoPacket->algoID = numToAlgoID;
+					strawAlgoPacket->downscaleFactor = AlgoDwScFactor_[numToMaskID][numToAlgoID];
 
-				algoPacket->algoFlags = (((AlgoEnableMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID) << 6)
-						| (((AlgoFlagMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID) << 4)
-						| (((AlgoLogicMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID) << 2)
-						| (((AlgoDwScMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID));
+//					LOG_INFO("Enable " << ((AlgoEnableMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID));
+//					LOG_INFO("Flag " << ((AlgoFlagMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID));
+//					LOG_INFO("Logic " << ((AlgoLogicMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID));
+//					LOG_INFO("DwSc " << ((AlgoDwScMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID));
 
-				L1TriggerProcessor::writeAlgoPacket(numToAlgoID, algoPacket, numToMaskID, l1Info);
+					strawAlgoPacket->algoFlags = (((AlgoEnableMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID) << 6)
+							| (((AlgoFlagMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID) << 4)
+							| (((AlgoLogicMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID) << 2)
+							| (((AlgoDwScMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID));
 
-				refTimeSourceID_tmp = (algoPacket->qualityFlags & 0x3);
-				if (refTimeSourceID != refTimeSourceID_tmp)
-					refTimeSourceID = refTimeSourceID_tmp;
-			} else
-				std::memset(algoPacket, 0, sizeof(L1Algo));
+					L1TriggerProcessor::writeStrawAlgoPacket(numToAlgoID, strawAlgoPacket, numToMaskID, l1Info);
+//					StrawAlgo::writeData(strawAlgoPacket, numToMaskID, l1Info);
 
-			algoPacket->numberOfWords = (sizeof(L1Algo) / 4.);
+					refTimeSourceID_tmp = (strawAlgoPacket->qualityFlags & 0x3);
+					if (refTimeSourceID != refTimeSourceID_tmp)
+						refTimeSourceID = refTimeSourceID_tmp;
+				} else
+					std::memset(strawAlgoPacket, 0, sizeof(L1StrawAlgo));
 
-			nMaskWords += sizeof(L1Algo);
+				strawAlgoPacket->numberOfWords = (sizeof(L1StrawAlgo) / 4.);
+				nMaskWords += sizeof(L1StrawAlgo);
+
+			} else {
+				L1Algo* algoPacket = (L1Algo*) (payload + nBlockHeaderWords + nMaskWords);
+
+				if (l0TrigFlags & (1 << numToMaskID)) {
+
+//					LOG_INFO("NumToAlgoID " << numToAlgoID);
+					algoPacket->processID = AlgoProcessID_[numToMaskID][numToAlgoID];
+					algoPacket->algoID = numToAlgoID;
+					algoPacket->downscaleFactor = AlgoDwScFactor_[numToMaskID][numToAlgoID];
+
+//					LOG_INFO("Enable " << ((AlgoEnableMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID));
+//					LOG_INFO("Flag " << ((AlgoFlagMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID));
+//					LOG_INFO("Logic " << ((AlgoLogicMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID));
+//					LOG_INFO("DwSc " << ((AlgoDwScMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID));
+
+					algoPacket->algoFlags = (((AlgoEnableMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID) << 6)
+							| (((AlgoFlagMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID) << 4)
+							| (((AlgoLogicMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID) << 2)
+							| (((AlgoDwScMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID));
+
+					L1TriggerProcessor::writeAlgoPacket(numToAlgoID, algoPacket, numToMaskID, l1Info);
+
+					refTimeSourceID_tmp = (algoPacket->qualityFlags & 0x3);
+					if (refTimeSourceID != refTimeSourceID_tmp)
+						refTimeSourceID = refTimeSourceID_tmp;
+				} else
+					std::memset(algoPacket, 0, sizeof(L1Algo));
+
+				algoPacket->numberOfWords = (sizeof(L1Algo) / 4.);
+				nMaskWords += sizeof(L1Algo);
+			}
 
 //			LOG_INFO("Algo ID " << (uint) algoPacket->algoID << " Algo ProcessID " << (uint)algoPacket->processID);
 //			LOG_INFO("Quality Flags " << (uint) algoPacket->qualityFlags << " Algo Flags " << (uint)algoPacket->algoFlags);
@@ -887,7 +952,6 @@ void L1TriggerProcessor::writeL1Data(Event* const event, const uint_fast8_t* l1T
 //			LOG_INFO("Number of Words " << (uint) algoPacket->numberOfWords << " DS Factor " << (uint)algoPacket->downscaleFactor);
 //			LOG_INFO("Online TW " << (uint)algoPacket->onlineTimeWindow);
 //			LOG_INFO("L1 Data[0] " << (uint) algoPacket->l1Data[0] << " L1 Data[1] " << (uint)algoPacket->l1Data[1]);
-
 		}
 
 		maskPacket->referenceTimeSourceID = refTimeSourceID;
@@ -918,14 +982,24 @@ bool L1TriggerProcessor::writeAlgoPacket(int algoID, L1Algo* algoPacket, uint l0
 	case 4:
 		IRC_SACAlgo::writeData(algoPacket, l0MaskID, l1Info);
 		return true;
-	case 5:
-		StrawAlgo::writeData(algoPacket, l0MaskID, l1Info);
-		return true;
+//	case 5:
+//		StrawAlgo::writeData(algoPacket, l0MaskID, l1Info);
+//		return true;
 	case 6:
 		MUV3Algo::writeData(algoPacket, l0MaskID, l1Info);
 		return true;
 	case 7:
 		NewCHODAlgo::writeData(algoPacket, l0MaskID, l1Info);
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool L1TriggerProcessor::writeStrawAlgoPacket(int algoID, L1StrawAlgo* strawAlgoPacket, uint l0MaskID, L1InfoToStorage* l1Info) {
+	switch (algoID) {
+	case 5:
+		StrawAlgo::writeData(strawAlgoPacket, l0MaskID, l1Info);
 		return true;
 	default:
 		return false;

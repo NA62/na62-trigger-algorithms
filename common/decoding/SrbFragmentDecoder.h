@@ -110,15 +110,18 @@ public:
 		return fragmentNumber_;
 	}
 
-	void setDataSource(const l0::Subevent* subevent,
-			uint_fast16_t fragmentNumber) {
+	void setDataSource(const l0::Subevent* subevent, uint_fast16_t fragmentNumber) {
 		subevent_ = subevent;
 		fragmentNumber_ = fragmentNumber;
+	}
+	bool isBadFragment() {
+		return isBadFrag_;
 	}
 
 private:
 	int64_t firstTSCoarseTime;
 	uint nEdges_tot;	//total number of edges per SRB board
+	bool isBadFrag_;
 
 	/**
 	 * Arrays with edge info

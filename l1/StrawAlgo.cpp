@@ -47,6 +47,7 @@ double StrawAlgo::AlgoOnlineTimeWindow_[16];
 STRAWParsConfFile* StrawAlgo::InfoSTRAW_ = STRAWParsConfFile::GetInstance();
 int* StrawAlgo::StrawGeo_ = InfoSTRAW_->getGeoMap();
 double* StrawAlgo::ROMezzaninesT0_ = InfoSTRAW_->getT0();
+double StrawAlgo::StationT0_ = InfoSTRAW_->getStationT0();
 
 //Defualt Values - TO BE REMOVED
 //double StrawAlgo::t0_main_shift = 6056.19;
@@ -82,9 +83,8 @@ double* StrawAlgo::ROMezzaninesT0_ = InfoSTRAW_->getT0();
 //double StrawAlgo::t0_main_shift = 5990.55;
 ////////// Run 5646 - 16% Beam Intensity ///////
 //double StrawAlgo::t0_main_shift = 5992.89;
-////////// Run 5666 - 16% Beam Intensity ///////
+////////// Run 5670 - 16% Beam Intensity ///////
 double StrawAlgo::t0_main_shift = 5991.01;
-
 
 double StrawAlgo::cutlowleading = 0.0; //-10
 double StrawAlgo::cuthighleading = 175.0; //165
@@ -232,6 +232,15 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 		//	gettimeofday(&time[3], 0);
 		//	LOG_INFO( "Access Packets - Start " << time[3].tv_sec << " " << time[3].tv_usec );
 
+		if (!strawPacket_->isReady() || strawPacket_->isBadFragment()) {
+			LOG_ERROR("STRAWAlgo: This looks like a Bad Packet!!!! ");
+			l1Info->setL1StrawBadData();
+			return 0;
+		}
+
+		/**
+		 * Get Arrays with hit Info
+		 */
 		const uint_fast8_t* strawAddr = strawPacket_->getStrawIDs();
 		const double* edgeTime = strawPacket_->getTimes();
 		const bool* edgeIsLeading = strawPacket_->getIsLeadings();
@@ -281,26 +290,20 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 			 */
 
 			if (edgeIsLeading[iEdge]) {
-				leading = (double) edgeTime[iEdge] + (double) t0_main_shift - (double) ROMezzaninesT0_[srbAddr[iEdge] * 16 + coverAddr]
+				leading = (double) edgeTime[iEdge] + (double) StationT0_ - (double) ROMezzaninesT0_[srbAddr[iEdge] * 16 + coverAddr]
 						+ (double) INVISIBLE_SHIFT - (((double) decoder.getDecodedEvent()->getFinetime() * CLOCK_PERIOD) / 256 + 0.5);
 				//			if(edgeIsLeading[iEdge]) leading = (double)edgeTime[iEdge];
-				//				printf("time components %lf %lf %lf %lf %lf\n", edgeTime[iEdge],
-				//						t0_main_shift,
-				//						fROMezzaninesT0[srbAddr[iEdge] * 16 + coverAddr],
-				//						(double) INVISIBLE_SHIFT,
-				//						(((double) decoder.getDecodedEvent()->getFinetime()
-				//								* CLOCK_PERIOD) / 256 + 0.5));
+//				printf("time components %lf %lf %lf %lf %lf\n", edgeTime[iEdge], StationT0_,
+//						ROMezzaninesT0_[srbAddr[iEdge] * 16 + coverAddr], (double) INVISIBLE_SHIFT,
+//						(((double) decoder.getDecodedEvent()->getFinetime() * CLOCK_PERIOD) / 256 + 0.5));
 			}
 			if (!edgeIsLeading[iEdge]) {
-				trailing = (double) edgeTime[iEdge] + (double) t0_main_shift - (double) ROMezzaninesT0_[srbAddr[iEdge] * 16 + coverAddr]
+				trailing = (double) edgeTime[iEdge] + (double) StationT0_ - (double) ROMezzaninesT0_[srbAddr[iEdge] * 16 + coverAddr]
 						+ (double) INVISIBLE_SHIFT - (((double) decoder.getDecodedEvent()->getFinetime() * CLOCK_PERIOD) / 256 + 0.5);
 				//			if(!edgeIsLeading[iEdge]) trailing = (double)edgeTime[iEdge];
-				//				printf("time components %lf %lf %lf %lf %lf\n", edgeTime[iEdge],
-				//						t0_main_shift,
-				//						fROMezzaninesT0[srbAddr[iEdge] * 16 + coverAddr],
-				//						(double) INVISIBLE_SHIFT,
-				//						(((double) decoder.getDecodedEvent()->getFinetime()
-				//								* CLOCK_PERIOD) / 256 + 0.5));
+//				printf("time components %lf %lf %lf %lf %lf\n", edgeTime[iEdge], StationT0_,
+//						ROMezzaninesT0_[srbAddr[iEdge] * 16 + coverAddr], (double) INVISIBLE_SHIFT,
+//						(((double) decoder.getDecodedEvent()->getFinetime() * CLOCK_PERIOD) / 256 + 0.5));
 			}
 			/*			printf("number hit %d hit: %d %d %d %d %d %lf %lf %d %d %d\n",
 			 iEdge, chamberID, viewID, halfviewID, planeID, strawID,
@@ -329,8 +332,10 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 				if ((strawPrecluster_[chamberID][viewID][halfviewID][j].plane == planeID)
 						&& (strawPrecluster_[chamberID][viewID][halfviewID][j].tube == strawID)) {
 					tl_flag = 1;
-					if ((edgeIsLeading[iEdge]) &&(leading < strawPrecluster_[chamberID][viewID][halfviewID][j].leading
-							|| strawPrecluster_[chamberID][viewID][halfviewID][j].leading <= -10) && (leading > -10 && leading < 300)) {
+					if ((edgeIsLeading[iEdge])
+							&& (leading < strawPrecluster_[chamberID][viewID][halfviewID][j].leading
+									|| strawPrecluster_[chamberID][viewID][halfviewID][j].leading <= -10)
+							&& (leading > -10 && leading < 300)) {
 						if (leading < 1)
 							wireDistance = strawDigiMan_.rTDependenceData(1.0);
 						else
@@ -380,6 +385,9 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 		}
 		nEdges_tot += numberOfEdgesOfCurrentBoard;
 	}
+
+	if (!nEdges_tot)
+		l1Info->setL1StrawEmptyPacket();
 
 	//gettimeofday(&time[11], 0);
 	//	LOG_INFO( "Access All Straw Data Packets & PreClustering - Stop " << time[11].tv_sec << " " << time[11].tv_usec );
@@ -2266,6 +2274,10 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 	 }*/
 
 	for (int e = 0; e < ntrkintermedie; e++) {
+		if (e < 5) {
+			l1Info->setL1StrawTrack_P(e, strawTrkIntermedie_[e].pz);
+			l1Info->setL1StrawTrack_Vz(e, strawTrkIntermedie_[e].zvertex);
+		}
 		if (strawTrkIntermedie_[e].zvertex > -100000 and strawTrkIntermedie_[e].zvertex < 180000 and strawTrkIntermedie_[e].cda < 200
 				and strawTrkIntermedie_[e].pz < 50000) {
 //			printf("cut: traccia %d ha passato i tagli\n", e);
@@ -2288,7 +2300,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 			}
 		}
 
-		if(strawTrkIntermedie_[e].m1x - strawTrkIntermedie_[e].m2x < 0)
+		if (strawTrkIntermedie_[e].m1x - strawTrkIntermedie_[e].m2x < 0)
 			flag_l1_exotic = 1;
 
 		if (flag_l1_limit[e] > 0 and flag_l1_three[e] == 0)
@@ -2308,6 +2320,8 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 //	if (flag_l1_tretracks == 1)
 //		LOG_INFO("                Evento a tre traccie \n");
 
+	l1Info->setL1StrawNTracks(ntrkintermedie);
+	l1Info->setL1StrawProcessed();
 	return flag_l1; //return the Straw Trigger word!
 	//return flag_l1_exotic; //return the Straw exotic Trigger word!
 }
@@ -2503,19 +2517,24 @@ int StrawAlgo::cdaVertex(Point qbeam, Point qtrack, Point mbeam, Point mtrack, f
 
 }
 
-void StrawAlgo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info) {
+void StrawAlgo::writeData(L1StrawAlgo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info) {
 
 	if (AlgoID_ != algoPacket->algoID)
 		LOG_ERROR("Algo ID does not match with Algo ID written within the packet!");
 	algoPacket->algoID = AlgoID_;
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
+//	algoPacket->qualityFlags = (l1Info->isL1StrawProcessed() << 6) | (l1Info->isL1StrawEmptyPacket() << 4) | (l1Info->isL1StrawBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
 	algoPacket->qualityFlags = (l1Info->isL1StrawProcessed() << 6) | (l1Info->isL1StrawEmptyPacket() << 4)
-			| (l1Info->isL1StrawBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
-	algoPacket->l1Data[0] = 0;
+			| (l1Info->isL1StrawBadData() << 2) | ((uint) l1Info->getL1StrawTrgWrd());
+	for(uint iTrk=0; iTrk!=5; iTrk++){
+//		LOG_INFO("track index " << iTrk << " momentum " << l1Info->getL1StrawTrack_P(iTrk));
+//		LOG_INFO("track index " << iTrk << " vertex " << l1Info->getL1StrawTrack_Vz(iTrk));
+		algoPacket->l1Data[iTrk] = ((uint)l1Info->getL1StrawTrack_P(iTrk) << 16) |  (uint)l1Info->getL1StrawTrack_Vz(iTrk);
+	}
 	if (AlgoRefTimeSourceID_[l0MaskID] == 1)
-		algoPacket->l1Data[1] = l1Info->getCHODAverageTime();
+		algoPacket->l1Data[5] = l1Info->getCHODAverageTime();
 	else
-		algoPacket->l1Data[1] = 0;
+		algoPacket->l1Data[5] = 0;
 	algoPacket->numberOfWords = (sizeof(L1Algo) / 4.);
 //	LOG_INFO("l0MaskID " << l0MaskID);
 //	LOG_INFO("algoID " << (uint)algoPacket->algoID);

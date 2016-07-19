@@ -53,6 +53,7 @@ public:
 	static void writeL1Data(Event* const event, const uint_fast8_t* l1TriggerWords, L1InfoToStorage* l1Info, bool isL1WhileTimeout = false);
 	static void readL1Data(Event* const event);
 	static bool writeAlgoPacket(int algoID, L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
+	static bool writeStrawAlgoPacket(int algoID, L1StrawAlgo* strawAlgoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 	static std::string algoIdToTriggerName(uint algoID);
 
 	/**
@@ -175,6 +176,9 @@ private:
 	static uint IrcSacAlgorithmId_;
 	static uint MuvAlgorithmId_;
 	static uint NewChodAlgorithmId_;
+
+	static int StrawAlgoType_[16];
+	static int MUVAlgoType_[16];
 
 	// Converters
 	static uint MaskIDToNum_[16];

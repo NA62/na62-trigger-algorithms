@@ -38,6 +38,9 @@ public:
 	uint_fast8_t getL1NewCHODTrgWrd();
 	void setL1NewCHODTrgWrd(uint_fast8_t trigger);
 
+	uint_fast8_t getL1StrawTrgWrd();
+	void setL1StrawTrgWrd(uint_fast8_t trigger);
+
 	double getCHODAverageTime();
 	void setCHODAverageTime(double time);
 
@@ -64,6 +67,15 @@ public:
 
 	uint getL1NewCHODNHits();
 	void setL1NewCHODNHits(uint nHits);
+
+	uint getL1StrawNTracks();
+	void setL1StrawNTracks(uint nTracks);
+
+	double getL1StrawTrack_P(uint iTrack);
+	void setL1StrawTrack_P(uint iTrack, double momentum);
+
+	double getL1StrawTrack_Vz(uint iTrackk);
+	void setL1StrawTrack_Vz(uint iTrack, double vertex);
 
 	void setL1CHODProcessed() {
 		l1CHODProcessed_ = true;
@@ -272,6 +284,7 @@ private:
 	uint_fast8_t l1IRCSACTrgWrd_;
 	uint_fast8_t l1MUV3TrgWrd_;
 	uint_fast8_t l1NewCHODTrgWrd_;
+	uint_fast8_t l1StrawTrgWrd_;
 
 	bool l1CHODProcessed_;
 	bool l1KTAGProcessed_;
@@ -304,6 +317,10 @@ private:
 	uint nIRCSACHits;
 	uint nMUV3Tiles;
 	uint nNewCHODHits;
+	uint nStrawTracks;
+
+	double track_p[5];
+	double track_vz[5];
 
 };
 
