@@ -143,6 +143,7 @@ private:
 	static uint MaskReductionFactor_[16];
 
 	static uint_fast16_t AlgoEnableMask_[16];
+	static uint_fast16_t AlgoEnableCutMask_[16];
 	static uint_fast16_t AlgoFlagMask_[16];
 	static uint_fast16_t AlgoLogicMask_[16];
 	static uint_fast16_t AlgoDwScMask_[16];
