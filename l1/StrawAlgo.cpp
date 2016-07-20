@@ -2531,11 +2531,12 @@ void StrawAlgo::writeData(L1StrawAlgo* algoPacket, uint l0MaskID, L1InfoToStorag
 //		LOG_INFO("track index " << iTrk << " vertex " << l1Info->getL1StrawTrack_Vz(iTrk));
 		algoPacket->l1Data[iTrk] = ((uint)l1Info->getL1StrawTrack_P(iTrk) << 16) |  (uint)l1Info->getL1StrawTrack_Vz(iTrk);
 	}
-	if (AlgoRefTimeSourceID_[l0MaskID] == 1)
-		algoPacket->l1Data[5] = l1Info->getCHODAverageTime();
-	else
-		algoPacket->l1Data[5] = 0;
-	algoPacket->numberOfWords = (sizeof(L1Algo) / 4.);
+	algoPacket->l1Data[5] = l1Info->getL1StrawNTracks();
+//	if (AlgoRefTimeSourceID_[l0MaskID] == 1)
+//		algoPacket->l1Data[5] = l1Info->getCHODAverageTime();
+//	else
+//		algoPacket->l1Data[5] = 0;
+	algoPacket->numberOfWords = (sizeof(L1StrawAlgo) / 4.);
 //	LOG_INFO("l0MaskID " << l0MaskID);
 //	LOG_INFO("algoID " << (uint)algoPacket->algoID);
 //	LOG_INFO("quality Flags " << (uint)algoPacket->qualityFlags);
