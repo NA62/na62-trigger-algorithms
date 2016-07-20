@@ -49,6 +49,7 @@ uint L1TriggerProcessor::NumberOfFlaggedAlgos_[16];
 uint L1TriggerProcessor::NumberOfEnabledAndFlaggedAlgos_[16];
 uint L1TriggerProcessor::MaskReductionFactor_[16];
 uint_fast16_t L1TriggerProcessor::AlgoEnableMask_[16];
+uint_fast16_t L1TriggerProcessor::AlgoEnableCutMask_[16];
 uint_fast16_t L1TriggerProcessor::AlgoFlagMask_[16];
 uint_fast16_t L1TriggerProcessor::AlgoLogicMask_[16];
 uint_fast16_t L1TriggerProcessor::AlgoDwScMask_[16];
@@ -115,6 +116,7 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 		NumberOfEnabledAndFlaggedAlgos_[i] = 0;
 		MaskReductionFactor_[i] = 0;
 		AlgoEnableMask_[i] = 0;
+		AlgoEnableCutMask_[i] = 0;
 		AlgoFlagMask_[i] = 0;
 		AlgoLogicMask_[i] = 0;
 		AlgoDwScMask_[i] = 0;
@@ -186,13 +188,18 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 
 //		std::bitset<16> enableMask(AlgoEnableMask_[i]);
 //		std::bitset<16> flagMask(AlgoFlagMask_[i]);
-//		std::bitset<16> enableflagMask(AlgoEnableMask_[i] & AlgoFlagMask_[i]);
+//		std::bitset<16> enableFlagMask(AlgoEnableMask_[i] & AlgoFlagMask_[i]);
+//		std::bitset<16> enableCutMask(AlgoEnableMask_[i] & (0xFF - AlgoFlagMask_[i]));
 //		LOG_INFO("enableMask " << enableMask);
 //		LOG_INFO("flagMask " << flagMask);
-//		LOG_INFO("enableflagMask " << enableflagMask);
+//		LOG_INFO("enableFlagMask " << enableFlagMask);
+//		LOG_INFO("enableCutMask " << enableCutMask);
+
+		AlgoEnableCutMask_[i] = AlgoEnableMask_[i] & (0xFF - AlgoFlagMask_[i]);
 		NumberOfEnabledAndFlaggedAlgos_[i] = __builtin_popcount((uint) (AlgoEnableMask_[i] & AlgoFlagMask_[i]));
 //		LOG_INFO("L0 Mask " << i << " number of Enabled algo " << NumberOfEnabledAlgos_[i]);
 //		LOG_INFO(" number of Flagged algo " << NumberOfFlaggedAlgos_[i] << " EnabledAndFlagged " << NumberOfEnabledAndFlaggedAlgos_[i]);
+//		LOG_INFO(" number of Enabled algo " << NumberOfEnabledAlgos_[i] << " EnabledAndCut " << __builtin_popcount((uint) AlgoEnableCutMask_[i]));
 
 		if (NumberOfFlaggedAlgos_[i] != NumberOfEnabledAndFlaggedAlgos_[i]) {
 			LOG_ERROR("Mismatch between NumberOfFlaggedAlgos and algoEnable&FlagMask !!!");
@@ -436,7 +443,9 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 					}
 					if ((ChodEnableMask_ & l0TrigFlags) == l0TrigFlags)
 						isAlgoEnableForAllL0Masks = 1;
-					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID && !((ChodEnableMask_ & ChodFlagMask_) & (1 << i))) {
+//					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID && !((ChodEnableMask_ & ChodFlagMask_) & (1 << i))) {
+					if (((AlgoEnableMask_[i] & (1 << ChodAlgorithmId_)) && !(l1TriggerTmp & (1 << ChodAlgorithmId_))) && l1ProcessID
+							&& !((ChodEnableMask_ & ChodFlagMask_) & (1 << i))) {
 						watchingWhileLoops++;
 						break;
 					}
@@ -483,7 +492,9 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 					}
 					if ((CedarEnableMask_ & l0TrigFlags) == l0TrigFlags)
 						isAlgoEnableForAllL0Masks = 1;
-					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID && !((CedarEnableMask_ & CedarFlagMask_) & (1 << i))) {
+//					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID && !((CedarEnableMask_ & CedarFlagMask_) & (1 << i))) {
+					if (((AlgoEnableMask_[i] & (1 << CedarAlgorithmId_)) && !(l1TriggerTmp & (1 << CedarAlgorithmId_))) && l1ProcessID
+							&& !((CedarEnableMask_ & CedarFlagMask_) & (1 << i))) {
 						watchingWhileLoops++;
 						break;
 					}
@@ -510,7 +521,9 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 					}
 					if ((LavEnableMask_ & l0TrigFlags) == l0TrigFlags)
 						isAlgoEnableForAllL0Masks = 1;
-					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID && !((LavEnableMask_ & LavFlagMask_) & (1 << i))) {
+//					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID && !((LavEnableMask_ & LavFlagMask_) & (1 << i))) {
+					if (((AlgoEnableMask_[i] & (1 << LavAlgorithmId_)) && !(l1TriggerTmp & (1 << LavAlgorithmId_))) && l1ProcessID
+							&& !((LavEnableMask_ & LavFlagMask_) & (1 << i))) {
 						watchingWhileLoops++;
 						break;
 					}
@@ -537,7 +550,9 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 					}
 					if ((IrcSacEnableMask_ & l0TrigFlags) == l0TrigFlags)
 						isAlgoEnableForAllL0Masks = 1;
-					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID && !((IrcSacEnableMask_ & IrcSacFlagMask_) & (1 << i))) {
+//					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID && !((IrcSacEnableMask_ & IrcSacFlagMask_) & (1 << i))) {
+					if (((AlgoEnableMask_[i] & (1 << IrcSacAlgorithmId_)) && !(l1TriggerTmp & (1 << IrcSacAlgorithmId_))) && l1ProcessID
+							&& !((IrcSacEnableMask_ & IrcSacFlagMask_) & (1 << i))) {
 						watchingWhileLoops++;
 						break;
 					}
@@ -564,7 +579,9 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 					}
 					if ((MuvEnableMask_ & l0TrigFlags) == l0TrigFlags)
 						isAlgoEnableForAllL0Masks = 1;
-					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID && !((MuvEnableMask_ & MuvFlagMask_) & (1 << i))) {
+//					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID && !((MuvEnableMask_ & MuvFlagMask_) & (1 << i))) {
+					if (((AlgoEnableMask_[i] & (1 << MuvAlgorithmId_)) && !(l1TriggerTmp & (1 << MuvAlgorithmId_))) && l1ProcessID
+							&& !((MuvEnableMask_ & MuvFlagMask_) & (1 << i))) {
 						watchingWhileLoops++;
 						break;
 					}
@@ -591,7 +608,9 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 					}
 					if ((NewChodEnableMask_ & l0TrigFlags) == l0TrigFlags)
 						isAlgoEnableForAllL0Masks = 1;
-					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID && !((NewChodEnableMask_ & NewChodFlagMask_) & (1 << i))) {
+//					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID && !((NewChodEnableMask_ & NewChodFlagMask_) & (1 << i))) {
+					if (((AlgoEnableMask_[i] & (1 << NewChodAlgorithmId_)) && !(l1TriggerTmp & (1 << NewChodAlgorithmId_))) && l1ProcessID
+							&& !((NewChodEnableMask_ & NewChodFlagMask_) & (1 << i))) {
 						watchingWhileLoops++;
 						break;
 					}
@@ -611,11 +630,14 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 //				LOG_INFO("l1ProcessID " << l1ProcessID);
 //				LOG_INFO("numberOfEnabledAlgos " << numberOfEnabledAlgos[i]);
 
-//				printf("L1TriggerProcessor.cpp: l1Trigger (!!TMP!!) %x\n",l1TriggerTmp);
-//				LOG_INFO("isReducedEvent " << isReducedEvent << " EnableMask " << algoEnableMask[i] << " trigTmp & EnableMask " << (l1TriggerTmp & algoEnableMask[i]) << " l1FlagTrig " << (uint) l1FlagTrigger);
+//				printf("L1TriggerProcessor.cpp: l1Trigger (!!TMP!!) %x\n", l1TriggerTmp);
+//				LOG_INFO("isReducedEvent " << isReducedEvent);
+//				LOG_INFO("EnableMask " << AlgoEnableMask_[i] << " trigTmp & EnableMask " << (l1TriggerTmp & AlgoEnableMask_[i]));
+//				LOG_INFO(" l1FlagTrig " << (uint) l1FlagTrigger);
+//				LOG_INFO("trigTemp & EnableCutMask " << (l1TriggerTmp & AlgoEnableCutMask_[i]));
 				if (!isReducedEvent
 						&& (!AlgoEnableMask_[i] || ((l1TriggerTmp & AlgoEnableMask_[i]) == AlgoEnableMask_[i])
-								|| (l1TriggerTmp & (AlgoEnableMask_[i] & (0xFF - AlgoFlagMask_[i]))))) {
+								|| ((l1TriggerTmp & AlgoEnableCutMask_[i]) == AlgoEnableCutMask_[i]))) {
 					L1AcceptedEventsPerL0Mask_[i].fetch_add(1, std::memory_order_relaxed);
 
 //					LOG_INFO("L1 Accepted Event Per L0 mask " << i << " number after adding 1 " << L1AcceptedEventsPerL0Mask_[i]);
