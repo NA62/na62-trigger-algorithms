@@ -818,7 +818,6 @@ void L1TriggerProcessor::writeL1Data(Event* const event, const uint_fast8_t* l1T
 	uint nBlockHeaderWords = 0;
 	uint_fast8_t refTimeSourceID = 0;
 	uint_fast8_t refTimeSourceID_tmp = 0;
-	uint_fast16_t l0TrigFlags = event->getTriggerFlags();
 
 	const l0::MEPFragment* const L1TPEvent = event->getL1ResultSubevent()->getFragment(0);
 
@@ -903,7 +902,7 @@ void L1TriggerProcessor::writeL1Data(Event* const event, const uint_fast8_t* l1T
 
 				L1StrawAlgo* strawAlgoPacket = (L1StrawAlgo*) (payload + nBlockHeaderWords + nMaskWords);
 
-				if (l0TrigFlags & (1 << numToMaskID)) {
+				if (event->getTriggerFlags() & (1 << numToMaskID)) {
 
 //					LOG_INFO("NumToAlgoID " << numToAlgoID);
 					strawAlgoPacket->processID = AlgoProcessID_[numToMaskID][numToAlgoID];
@@ -935,7 +934,7 @@ void L1TriggerProcessor::writeL1Data(Event* const event, const uint_fast8_t* l1T
 			} else {
 				L1Algo* algoPacket = (L1Algo*) (payload + nBlockHeaderWords + nMaskWords);
 
-				if (l0TrigFlags & (1 << numToMaskID)) {
+				if (event->getTriggerFlags() & (1 << numToMaskID)) {
 
 //					LOG_INFO("NumToAlgoID " << numToAlgoID);
 					algoPacket->processID = AlgoProcessID_[numToMaskID][numToAlgoID];
