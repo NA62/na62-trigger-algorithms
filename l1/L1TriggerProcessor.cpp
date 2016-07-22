@@ -335,6 +335,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 	uint_fast8_t cedarTrigger = 0;
 	uint_fast8_t lavTrigger = 0;
 	uint_fast8_t ircsacTrigger = 0;
+	uint_fast8_t strawTriggerTmp = 0;
 	uint_fast8_t strawTrigger = 0;
 	uint_fast8_t muvTrigger = 0;
 	uint_fast8_t newchodTrigger = 0;
@@ -593,7 +594,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 					if ((StrawEnableMask_ & (1 << i)) && AlgoProcessID_[i][StrawAlgorithmId_] == l1ProcessID
 							&& SourceIDManager::isStrawActive()) {
 						if (!l1Info.isL1StrawProcessed()) {
-							strawTrigger = StrawAlgo::processStrawTrigger(i, decoder, &l1Info);
+							strawTriggerTmp = StrawAlgo::processStrawTrigger(i, decoder, &l1Info);
 //							if (strawTrigger != 0) {
 //								L1Downscaling::processAlgorithm (strawAlgorithmId);
 //							}
@@ -604,8 +605,11 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 						/*
 						 * StrawAlgoType_[i]: 0 for pnn, 1 for exotics
 						 */
-//						if(StrawAlgoType_[i]) strawTrigger = (strawTrigger & 1);
-//						else if (StrawAlgoType_[i]==1) strawTrigger = (strawTrigger & 2) >> 1;
+						if (!StrawAlgoType_[i])
+							strawTrigger = (strawTriggerTmp & 0x1);
+						else if (StrawAlgoType_[i] == 1)
+							strawTrigger = (strawTriggerTmp & 0x2) >> 1;
+
 						if (AlgoLogicMask_[i] & (1 << (uint) StrawAlgorithmId_)) {
 							l1TriggerTmp |= (strawTrigger << (uint) StrawAlgorithmId_);
 							l1Info.setL1StrawTrgWrd(strawTrigger);
@@ -898,11 +902,12 @@ void L1TriggerProcessor::writeL1Data(Event* const event, const uint_fast8_t* l1T
 			else
 				numToAlgoID = NumToAlgoID_[iNum][iAlgoNum];
 
+//			LOG_INFO("isStrawEnabled " << isStrawAlgoEnabled << " " << (numToAlgoID == StrawAlgorithmId_));
 			if (isStrawAlgoEnabled && (numToAlgoID == StrawAlgorithmId_)) {
 
 				L1StrawAlgo* strawAlgoPacket = (L1StrawAlgo*) (payload + nBlockHeaderWords + nMaskWords);
 
-				if (event->getTriggerFlags() & (1 << numToMaskID)) {
+				if (((uint)event->getTriggerFlags()) & (1 << numToMaskID)) {
 
 //					LOG_INFO("NumToAlgoID " << numToAlgoID);
 					strawAlgoPacket->processID = AlgoProcessID_[numToMaskID][numToAlgoID];
@@ -934,7 +939,7 @@ void L1TriggerProcessor::writeL1Data(Event* const event, const uint_fast8_t* l1T
 			} else {
 				L1Algo* algoPacket = (L1Algo*) (payload + nBlockHeaderWords + nMaskWords);
 
-				if (event->getTriggerFlags() & (1 << numToMaskID)) {
+				if (((uint)event->getTriggerFlags()) & (1 << numToMaskID)) {
 
 //					LOG_INFO("NumToAlgoID " << numToAlgoID);
 					algoPacket->processID = AlgoProcessID_[numToMaskID][numToAlgoID];
