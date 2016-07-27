@@ -2363,8 +2363,11 @@ int StrawAlgo::strawAcceptance(int n, double *coor, int zone) {
 //	default:
 //		return 0;
 //	}
-	if (((Vx && Vy && !Vu && !Vv) || (Vx && !Vy && Vu && !Vv) || (Vx && !Vy && !Vu && Vv) || (!Vx && Vy && Vu && !Vv)
-			|| (!Vx && Vy && !Vu && Vv) || (!Vx && !Vy && Vu && Vv)))
+
+	//if (((Vx && Vy && !Vu && !Vv) || (Vx && !Vy && Vu && !Vv) || (Vx && !Vy && !Vu && Vv) || (!Vx && Vy && Vu && !Vv)
+	//		|| (!Vx && Vy && !Vu && Vv) || (!Vx && !Vy && Vu && Vv)))
+	// simpler way...
+	if (Vx + Vy + Vu + Vv == 2)
 		return 1;
 	return 0;
 }
