@@ -21,6 +21,7 @@
 #include "L1Downscaling.h"
 #include "L1Reduction.h"
 #include "L1Fragment.h"
+#include "StrawAlgo.h"
 
 namespace na62 {
 
@@ -34,7 +35,7 @@ public:
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 
-	static uint_fast8_t compute(Event* const event);
+	static uint_fast8_t compute(Event* const event, StrawAlgo& strawalgo);
 
 	/**
 	 * Returns true if the current event should be bypassed instead of being processed

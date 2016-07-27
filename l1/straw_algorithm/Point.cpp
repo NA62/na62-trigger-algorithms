@@ -16,6 +16,11 @@ Point::Point() {
 	x = y = z = trailing = viewDistance = 0.;
 }
 
+Point::Point(float a, float b, float c, double f, float e, int g, int d)
+{
+	setPoint(a, b, c, f, e, g, d);
+}
+
 Point::~Point() {
 	// TODO Auto-generated destructor stub
 }

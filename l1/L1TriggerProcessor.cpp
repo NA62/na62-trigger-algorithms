@@ -315,7 +315,7 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 //	LOG_INFO("L1 Data Packet Size " << (uint)L1DataPacketSize_);
 }
 
-uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
+uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalgo) {
 
 //using namespace l0;
 	uint_fast8_t l1Trigger = 0;
@@ -594,7 +594,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event) {
 					if ((StrawEnableMask_ & (1 << i)) && AlgoProcessID_[i][StrawAlgorithmId_] == l1ProcessID
 							&& SourceIDManager::isStrawActive()) {
 						if (!l1Info.isL1StrawProcessed()) {
-							strawTriggerTmp = StrawAlgo::processStrawTrigger(i, decoder, &l1Info);
+							strawTriggerTmp = strawalgo.processStrawTrigger(i, decoder, &l1Info);
 //							if (strawTrigger != 0) {
 //								L1Downscaling::processAlgorithm (strawAlgorithmId);
 //							}
@@ -925,7 +925,6 @@ void L1TriggerProcessor::writeL1Data(Event* const event, const uint_fast8_t* l1T
 							| (((AlgoDwScMask_[numToMaskID] & (1 << numToAlgoID)) >> numToAlgoID));
 
 					L1TriggerProcessor::writeStrawAlgoPacket(numToAlgoID, strawAlgoPacket, numToMaskID, l1Info);
-//					StrawAlgo::writeData(strawAlgoPacket, numToMaskID, l1Info);
 
 					refTimeSourceID_tmp = (strawAlgoPacket->qualityFlags & 0x3);
 					if (refTimeSourceID != refTimeSourceID_tmp)

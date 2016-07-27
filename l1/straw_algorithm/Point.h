@@ -13,6 +13,7 @@ namespace na62 {
 class Point {
 public:
 	Point();
+	Point(float a, float b, float c, double f, float e, int g, int d);
 	virtual ~Point();
 
 	float x;
