@@ -16,11 +16,9 @@ namespace na62 {
 
 class DigiManager {
 public:
-	DigiManager();
-	virtual ~DigiManager();
-	double rTDependence(double);
-	double rTParametricDependence(double);
-	double rTDependenceData(double);
+	static double rTDependence(double);
+	static double rTParametricDependence(double);
+	static double rTDependenceData(double);
 
 private:
 };

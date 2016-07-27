@@ -20,6 +20,9 @@
 #include "../struct/HLTConfParams.h"
 #include "L1Fragment.h"
 #include "straw_algorithm/Track.h"
+#include "straw_algorithm/Point.h"
+#include "straw_algorithm/Cluster.h"
+#include "straw_algorithm/Straw.h"
 
 #define MAXNHITS 1000
 #define MAXNROCHS 512
@@ -30,12 +33,6 @@
 namespace na62 {
 
 class Event;
-class Straw;
-class Cluster;
-class Point;
-class Track;
-class STRAWChannelID;
-class DigiManager;
 
 class StrawAlgo {
 public:
@@ -46,13 +43,14 @@ public:
 	 *
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
+	StrawAlgo();
 	static void initialize(uint i, l1Straw &l1StrawStruct);
-	static uint_fast8_t processStrawTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
+	uint_fast8_t processStrawTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
 	static void writeData(L1StrawAlgo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 
 	static float posTubNew(int chamber, int view, int plane, int jstraw);
-	static int strawAcceptance(int n, double *coor, int zone);
-	static int cdaVertex(Point qfascio, Point qtraccia, Point mfascio, Point mtraccia, float* cda, Point* vertice);
+	static int strawAcceptance(int n, double* coor, int zone);
+	static int cdaVertex(const Point& qbeam, Point& qtrack, const Point& mbeam, Point& mtrack, float& cda, Point& vertex);
 
 private:
 	static STRAWParsConfFile* InfoSTRAW_;
@@ -65,35 +63,42 @@ private:
 	static double* ROMezzaninesT0_;
 	static double StationT0_;
 
-	static double t0_main_shift;
-	static double cutlowleading;
-	static double cuthighleading;
-	static double cutlowtrailing;
-	static double cuthightrailing;
-	static double m1leadtrail;
-	static double q1leadtrail;
-	static double m2leadtrail;
-	static double q2leadtrail;
-	static double hit3low;
-	static double hit3high;
-	static double hit2low;
-	static double hit2high;
-	static int cutcluster;
+	static const double CutLowLeading_;
+	static const double CutHighLeading_;
+	static const double CutLowTrailing_;
+	static const double CutHighTrailing_;
+	static const double M1LeadTrail_;
+	static const double Q1LeadTrail_;
+	static const double M2LeadTrail_;
+	static const double Q2LeadTrail_;
+	static const double Hit3Low_;
+	static const double Hit3High_;
+	static const double Hit2Low_;
+	static const double Hit2High_;
+	static const int CutCluster_;
 
-	static float fChamberZPosition[4];
+	static const float ChamberZPosition_[4];
 
-	static Point qbeam;
-	static Point mbeam;
-	static Point strawPointTemp_[4][5000];
-	static Point strawPointTempbis_[4][2000];
-	static Point strawPointFinal_[4][2000];
-	static Cluster strawCluster_[4][4][500];
-	static Straw strawPrecluster_[4][4][2][500];
-	static Track strawFirstTempTrk_[3000];
-	static Track strawTempTrk_[4000];
-	static Track strawTrkIntermedie_[1000];
+	static const double XOffset_[4][4];
+	// Offset along Z axis, XOffset_[view][plane]
+	static const double XOffCh_[4][4];
+	// Offset along Z axis, XOffCh_[chamber][view]
+	static const float HoleChamberMax_[4][4];
+	static const float HoleChamberMin_[4][4];
 
-	static std::mutex strawMutex;
+	static const Point QBeam_;
+	static const Point MBeam_;
+	Point strawPointTemp_[4][5000];
+	Point strawPointTempbis_[4][2000];
+	Point strawPointFinal_[4][2000];
+	Cluster strawCluster_[4][4][500];
+	Straw strawPrecluster_[4][4][2][500];
+	Track strawFirstTempTrk_[3000];
+	Track strawTempTrk_[4000];
+	Track strawTrkIntermedie_[1000];
+
+	static const double Sq2_;
+	static const double InvSq2_;
 
 }
 ;
