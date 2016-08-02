@@ -27,8 +27,8 @@
 #define MAXNHITS 1000
 #define MAXNROCHS 512
 
-#define rangem 160
-#define rangeq 200
+#define RANGEM 160
+#define RANGEQ 200
 
 namespace na62 {
 
@@ -44,13 +44,13 @@ public:
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 	StrawAlgo();
-	static void initialize(uint i, l1Straw &l1StrawStruct);
+	static void initialize(uint i, l1Straw& l1StrawStruct);
 	uint_fast8_t processStrawTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
 	static void writeData(L1StrawAlgo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 
-	static float posTubNew(int chamber, int view, int plane, int jstraw);
-	static int strawAcceptance(int n, double* coor, int zone);
-	static int cdaVertex(const Point& qbeam, Point& qtrack, const Point& mbeam, Point& mtrack, float& cda, Point& vertex);
+	static float posTubNew(int chamber, int view, int plane, int jStraw);
+	static int strawAcceptance(int n, double* coordinate, int zone);
+	static void cdaVertex(const Point& qBeam, Point& qTrack, const Point& mBeam, Point& mTrack, float& cda, Point& vertex);
 
 private:
 	static STRAWParsConfFile* InfoSTRAW_;
@@ -100,8 +100,7 @@ private:
 	static const double Sq2_;
 	static const double InvSq2_;
 
-}
-;
+};
 
 } /* namespace na62 */
 #endif
