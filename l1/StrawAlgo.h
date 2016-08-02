@@ -44,13 +44,13 @@ public:
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 	StrawAlgo();
-	static void initialize(uint I, l1Straw& L1StrawStruct);
-	uint_fast8_t processStrawTrigger(uint L0MaskID, DecoderHandler& Decoder, L1InfoToStorage* L1Info);
+	static void initialize(uint i, l1Straw& l1StrawStruct);
+	uint_fast8_t processStrawTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
 	static void writeData(L1StrawAlgo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 
-	static float posTubNew(int Chamber, int View, int Plane, int jStraw);
-	static int strawAcceptance(int N, double* Coordinate, int Zone);
-	static void cdaVertex(const Point& QBeam, Point& QTrack, const Point& MBeam, Point& MTrack, float& CDA, Point& Vertex);
+	static float posTubNew(int chamber, int view, int plane, int jStraw);
+	static int strawAcceptance(int n, double* coordinate, int zone);
+	static void cdaVertex(const Point& qBeam, Point& qTrack, const Point& mBeam, Point& mTrack, float& cda, Point& vertex);
 
 private:
 	static STRAWParsConfFile* InfoSTRAW_;
@@ -100,8 +100,7 @@ private:
 	static const double Sq2_;
 	static const double InvSq2_;
 
-}
-;
+};
 
 } /* namespace na62 */
 #endif

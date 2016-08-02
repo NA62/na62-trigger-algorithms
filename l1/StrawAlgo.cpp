@@ -32,7 +32,7 @@
 #define INVISIBLE_SHIFT 25.2 //28.4 //27
 #define CLOCK_PERIOD 24.951059536
 //#define rangem 160//160
-#define passo 0.0004//0.0002
+#define PASSO 0.0004//0.0002
 //#define rangeq 200//200
 #define LMAGNET 3000
 #define ZMAGNET 197645
@@ -125,17 +125,17 @@ StrawAlgo::StrawAlgo() {
 	// Nothing to do at this time
 }
 
-void StrawAlgo::initialize(uint I, l1Straw &L1StrawStruct) {
+void StrawAlgo::initialize(uint i, l1Straw& l1StrawStruct) {
 
-	AlgoID_ = L1StrawStruct.configParams.l1TrigMaskID;
-	AlgoLogic_[I] = L1StrawStruct.configParams.l1TrigLogic;
-	AlgoRefTimeSourceID_[I] = L1StrawStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
-	AlgoOnlineTimeWindow_[I] = L1StrawStruct.configParams.l1TrigOnlineTimeWindow;
+	AlgoID_ = l1StrawStruct.configParams.l1TrigMaskID;
+	AlgoLogic_[i] = l1StrawStruct.configParams.l1TrigLogic;
+	AlgoRefTimeSourceID_[i] = l1StrawStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
+	AlgoOnlineTimeWindow_[i] = l1StrawStruct.configParams.l1TrigOnlineTimeWindow;
 
 	//	LOG_INFO("Straw mask: " << i << " logic " << AlgoLogic_[i] << " refTimeSourceID " << AlgoRefTimeSourceID_[i] << " online time window " << AlgoOnlineTimeWindow_[i]);
 }
 
-uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decoder, L1InfoToStorage* L1Info) {
+uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
 	struct timeval time[30];
 	//gettimeofday(&time[0], 0);
@@ -143,59 +143,59 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 
 	using namespace l0;
 
-	int FlagL1 = 0;
-	int FlagL1Pnn = 0;
-	int FlagL1Exotic = 0;
-	int FlagL1Limit[1000];
-	int FlagL1Three[1000] = { 0 };
-	int FlagL1TreTracks = 0;
+	int flagL1 = 0;
+	int flagL1Pnn = 0;
+	int flagL1Exotic = 0;
+	int flagL1Limit[1000];
+	int flagL1Three[1000] = { 0 };
+	int flagL1TreTracks = 0;
 
-	uint NEdgesTotal = 0;
-	uint NHits = 0;
-	bool TLFlags = 0;
-	int NChambersHit = 0;
+	uint nEdgesTotal = 0;
+	uint nHits = 0;
+	bool tlFlags = 0;
+	int nChambersHit = 0;
 
-	int NTotalHit = 0; //just for debug
-	int NTotalViewCluster = 0; //just for debug
-	int NTotalPreclusters = 0; //just for debug
+	int nTotalHit = 0; //just for debug
+	int nTotalViewCluster = 0; //just for debug
+	int nTotalPreclusters = 0; //just for debug
 
-	int NTracletCondivisi;
-	int NTrackIntermedie;
+	int nTracletCondivisi;
+	int nTrackIntermedie;
 
-	Track TrackIntermedieTemp;
-	float TrackIntermedieTemp_my;
-	float TrackIntermedieTemp_qy;
-	float TrackIntermedieTemp_m1x;
-	float TrackIntermedieTemp_q1x;
-	float TrackIntermedieTemp_m2x;
-	float TrackIntermedieTemp_q2x;
+	Track trackIntermedieTemp;
+	float trackIntermedieTemp_my;
+	float trackIntermedieTemp_qy;
+	float trackIntermedieTemp_m1x;
+	float trackIntermedieTemp_q1x;
+	float trackIntermedieTemp_m2x;
+	float trackIntermedieTemp_q2x;
 
-	int TempCondivise;
+	int tempCondivise;
 
-	int NStrawPointsTemp[4] = { 0 };
-	int NStrawPointsTempBis[4] = { 0 };
-	int NStrawPointsFinal[4] = { 0 };
-	int NStrawClusters[4][4];
-	int NStrawPreclusters[4][4][2];
+	int nStrawPointsTemp[4] = { 0 };
+	int nStrawPointsTempBis[4] = { 0 };
+	int nStrawPointsFinal[4] = { 0 };
+	int nStrawClusters[4][4];
+	int nStrawPreclusters[4][4][2];
 
 	for (int i = 0; i != 4; ++i) {
 		for (int j = 0; j != 4; ++j) {
-			NStrawClusters[i][j] = 0;
+			nStrawClusters[i][j] = 0;
 			// These two are addressed directly to avoid adding another loop
 			// for just two items
-			NStrawPreclusters[i][j][0] = 0;
-			NStrawPreclusters[i][j][1] = 0;
+			nStrawPreclusters[i][j][0] = 0;
+			nStrawPreclusters[i][j][1] = 0;
 		}
 	}
 
-	Point QTrack;
-	Point MTrack;
-	Point Vertex;
-	long long Hought[RANGEM][RANGEQ];
+	Point qTrack;
+	Point mTrack;
+	Point vertex;
+	long long hought[RANGEM][RANGEQ];
 
 	for (int a = 0; a < RANGEM; a++)
 		for (int b = 0; b < RANGEQ; b++)
-			Hought[a][b] = 0;
+			hought[a][b] = 0;
 
 	//gettimeofday(&time[1], 0);
 	//	LOG_INFO( "Preparazione Vettori - Stop " << time[1].tv_sec << " " << time[1].tv_usec );
@@ -209,13 +209,13 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 	 */
 	//gettimeofday(&time[2], 0);
 	//	LOG_INFO( "Access All Straw Data Packets & PreClustering - Start " << time[2].tv_sec << " " << time[2].tv_usec );
-	for (SrbFragmentDecoder* strawPacket_ : Decoder.getSTRAWDecoderRange()) {
+	for (SrbFragmentDecoder* strawPacket_ : decoder.getSTRAWDecoderRange()) {
 		//	gettimeofday(&time[3], 0);
 		//	LOG_INFO( "Access Packets - Start " << time[3].tv_sec << " " << time[3].tv_usec );
 
 		if (!strawPacket_->isReady() || strawPacket_->isBadFragment()) {
 			LOG_ERROR("STRAWAlgo: This looks like a Bad Packet!!!! ");
-			L1Info->setL1StrawBadData();
+			l1Info->setL1StrawBadData();
 			return 0;
 		}
 
@@ -229,7 +229,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 
 		uint numberOfEdgesOfCurrentBoard = strawPacket_->getNumberOfEdgesStored();
 
-		NTotalHit += numberOfEdgesOfCurrentBoard;
+		nTotalHit += numberOfEdgesOfCurrentBoard;
 
 		//gettimeofday(&time[4], 0);
 		//		LOG_INFO( "Access Packets - Stop " << time[4].tv_sec << " " << time[4].tv_usec );
@@ -242,18 +242,18 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 			//	gettimeofday(&time[5], 0);
 			//	LOG_INFO( "Read Config File and Assign ChannelID - Start " << time[5].tv_sec << " " << time[5].tv_usec );
 
-			TLFlags = 0;
+			tlFlags = 0;
 
 			const int roChID = 256 * srbAddr[iEdge] + strawAddr[iEdge];
 
-			int ChamberID = StrawGeo_[roChID] / 1952;
-			int ViewID = (StrawGeo_[roChID] % 1952) / 488;
-			int HalfViewID = (StrawGeo_[roChID] % 488) / 244;
-			int PlaneID = (StrawGeo_[roChID] % 244) / 122;
-			int StrawID = StrawGeo_[roChID] % 122;
-			float Leading = -100000.;
-			float Trailing = -100000.;
-			float WireDistance = -100.0;
+			int chamberID = StrawGeo_[roChID] / 1952;
+			int viewID = (StrawGeo_[roChID] % 1952) / 488;
+			int halfViewID = (StrawGeo_[roChID] % 488) / 244;
+			int planeID = (StrawGeo_[roChID] % 244) / 122;
+			int strawID = StrawGeo_[roChID] % 122;
+			float leading = -100000.;
+			float trailing = -100000.;
+			float wireDistance = -100.0;
 
 			int coverAddr = ((strawAddr[iEdge] & 0xf0) >> 4);
 			//LOG_INFO( "SrbAddr " << (uint)srbAddr[iEdge] << " StrawAddr "<< (uint)strawAddr[iEdge] << " CoverAddr " << coverAddr << " fR0Mezz Index " << srbAddr[iEdge] * 16 + coverAddr );
@@ -268,19 +268,19 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 			 */
 
 			if (edgeIsLeading[iEdge]) {
-				Leading = (double) edgeTime[iEdge] - (double) StationT0_ - (double) ROMezzaninesT0_[srbAddr[iEdge] * 16 + coverAddr]
-						+ (double) INVISIBLE_SHIFT - (((double) Decoder.getDecodedEvent()->getFinetime() * CLOCK_PERIOD) / 256 + 0.5);
+				leading = (double) edgeTime[iEdge] - (double) StationT0_ - (double) ROMezzaninesT0_[srbAddr[iEdge] * 16 + coverAddr]
+						+ (double) INVISIBLE_SHIFT - (((double) decoder.getDecodedEvent()->getFinetime() * CLOCK_PERIOD) / 256 + 0.5);
 			}
 			if (!edgeIsLeading[iEdge]) {
-				Trailing = (double) edgeTime[iEdge] - (double) StationT0_ - (double) ROMezzaninesT0_[srbAddr[iEdge] * 16 + coverAddr]
-						+ (double) INVISIBLE_SHIFT - (((double) Decoder.getDecodedEvent()->getFinetime() * CLOCK_PERIOD) / 256 + 0.5);
+				trailing = (double) edgeTime[iEdge] - (double) StationT0_ - (double) ROMezzaninesT0_[srbAddr[iEdge] * 16 + coverAddr]
+						+ (double) INVISIBLE_SHIFT - (((double) decoder.getDecodedEvent()->getFinetime() * CLOCK_PERIOD) / 256 + 0.5);
 			}
 			//gettimeofday(&time[6], 0);
 			//LOG_INFO( "Read Config File and Assign ChannelID - Stop " << time[6].tv_sec << " " << time[6].tv_usec );
 			//LOG_INFO( "Read Conf file and Assign ChannelID and time" << ((time[6].tv_sec - time[5].tv_sec)*1e6 + time[6].tv_usec) - time[5].tv_usec );
 			//gettimeofday(&time[7], 0);
 			//	LOG_INFO( "Access Straw Map - Start " << time[7].tv_sec << " " << time[7].tv_usec );
-			float Position = posTubNew(ChamberID, ViewID, HalfViewID * 2 + PlaneID, StrawID);
+			float position = posTubNew(chamberID, viewID, halfViewID * 2 + planeID, strawID);
 
 			//gettimeofday(&time[8], 0);
 			//	LOG_INFO( "Access Straw Map - Stop " << time[8].tv_sec << " " << time[8].tv_usec );
@@ -292,54 +292,54 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 			//	LOG_INFO( "Preclustering - Start " << time[9].tv_sec << " " << time[9].tv_usec );
 			//LOG_INFO( "Preparazione degli hit " << ((time[9].tv_sec - time[0].tv_sec)*1e6 + time[9].tv_usec) - time[0].tv_usec );
 
-			for (int j = 0; j != NStrawPreclusters[ChamberID][ViewID][HalfViewID]; ++j) {
-				if ((strawPrecluster_[ChamberID][ViewID][HalfViewID][j].plane == PlaneID)
-						&& (strawPrecluster_[ChamberID][ViewID][HalfViewID][j].tube == StrawID)) {
-					TLFlags = 1;
+			for (int j = 0; j != nStrawPreclusters[chamberID][viewID][halfViewID]; ++j) {
+				if ((strawPrecluster_[chamberID][viewID][halfViewID][j].plane == planeID)
+						&& (strawPrecluster_[chamberID][viewID][halfViewID][j].tube == strawID)) {
+					tlFlags = 1;
 					if ((edgeIsLeading[iEdge])
-							&& (Leading < strawPrecluster_[ChamberID][ViewID][HalfViewID][j].leading
-									|| strawPrecluster_[ChamberID][ViewID][HalfViewID][j].leading <= -10)
-							&& (Leading > -10 && Leading < 300)) {
-						if (Leading < 1)
-							WireDistance = DigiManager::rTDependenceData(1.0);
+							&& (leading < strawPrecluster_[chamberID][viewID][halfViewID][j].leading
+									|| strawPrecluster_[chamberID][viewID][halfViewID][j].leading <= -10)
+							&& (leading > -10 && leading < 300)) {
+						if (leading < 1)
+							wireDistance = DigiManager::rTDependenceData(1.0);
 						else
-							WireDistance = DigiManager::rTDependenceData(Leading / 1000);
+							wireDistance = DigiManager::rTDependenceData(leading / 1000);
 
-						strawPrecluster_[ChamberID][ViewID][HalfViewID][j].leading = Leading;
-						strawPrecluster_[ChamberID][ViewID][HalfViewID][j].wiredistance = WireDistance;
+						strawPrecluster_[chamberID][viewID][halfViewID][j].leading = leading;
+						strawPrecluster_[chamberID][viewID][halfViewID][j].wiredistance = wireDistance;
 					}
 					else if ((!edgeIsLeading[iEdge])
-							&& (strawPrecluster_[ChamberID][ViewID][HalfViewID][j].trailing < -100
-									|| strawPrecluster_[ChamberID][ViewID][HalfViewID][j].trailing < Trailing)
-							&& (Trailing > -100 && Trailing < 300)) {
-						strawPrecluster_[ChamberID][ViewID][HalfViewID][j].trailing = Trailing;
+							&& (strawPrecluster_[chamberID][viewID][halfViewID][j].trailing < -100
+									|| strawPrecluster_[chamberID][viewID][halfViewID][j].trailing < trailing)
+							&& (trailing > -100 && trailing < 300)) {
+						strawPrecluster_[chamberID][viewID][halfViewID][j].trailing = trailing;
 					}
 				}
 			}
-			if (!TLFlags) {
-				if (Leading > -100)
-					if (Leading < 1)
-						WireDistance = 0.0;
+			if (!tlFlags) {
+				if (leading > -100)
+					if (leading < 1)
+						wireDistance = 0.0;
 					else
-						WireDistance = DigiManager::rTDependenceData(Leading / 1000);
+						wireDistance = DigiManager::rTDependenceData(leading / 1000);
 				else
-					WireDistance = -100.0;
+					wireDistance = -100.0;
 
-				strawPrecluster_[ChamberID][ViewID][HalfViewID][NStrawPreclusters[ChamberID][ViewID][HalfViewID]].setStraw(ChamberID,
-						ViewID, HalfViewID, PlaneID, StrawID, Leading, Trailing, 0, srbAddr[iEdge], Position, WireDistance);
-				NStrawPreclusters[ChamberID][ViewID][HalfViewID]++;
+				strawPrecluster_[chamberID][viewID][halfViewID][nStrawPreclusters[chamberID][viewID][halfViewID]].setStraw(chamberID,
+						viewID, halfViewID, planeID, strawID, leading, trailing, 0, srbAddr[iEdge], position, wireDistance);
+				nStrawPreclusters[chamberID][viewID][halfViewID]++;
 			}
 
-			NHits++;
+			nHits++;
 			//gettimeofday(&time[10], 0);
 			//			LOG_INFO( "Preclustering - Stop " << time[10].tv_sec << " " << time[10].tv_usec );
 			//LOG_INFO( "Preclustering (xDigi) " << ((time[10].tv_sec - time[9].tv_sec)*1e6 + time[10].tv_usec) - time[9].tv_usec );
 		}
-		NEdgesTotal += numberOfEdgesOfCurrentBoard;
+		nEdgesTotal += numberOfEdgesOfCurrentBoard;
 	}
 
-	if (!NEdgesTotal)
-		L1Info->setL1StrawEmptyPacket();
+	if (!nEdgesTotal)
+		l1Info->setL1StrawEmptyPacket();
 
 	//gettimeofday(&time[11], 0);
 	//	LOG_INFO( "Access All Straw Data Packets & PreClustering - Stop " << time[11].tv_sec << " " << time[11].tv_usec );
@@ -361,7 +361,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
 			for (int h = 0; h < 2; h++) {
-				NTotalPreclusters += NStrawPreclusters[i][j][h];
+				nTotalPreclusters += nStrawPreclusters[i][j][h];
 			}
 		}
 	}
@@ -371,19 +371,19 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 	//gettimeofday(&time[12], 0);
 	//	LOG_INFO( "Clustering inside the view - Start " << time[12].tv_sec << " " << time[12].tv_usec );
 
-	float PositionH = 0.0;
-	float PositionJ = 0.0;
-	float MeanDistance = 0.0;
-	float DeltaDistance = 0.0;
-	float DeltaDistanceTriplets = 0.0;
-	float TempDistance = 0.0;
-	double TrailingCluster = 0.0;
+	float positionH = 0.0;
+	float positionJ = 0.0;
+	float meanDistance = 0.0;
+	float deltaDistance = 0.0;
+	float deltaDistanceTriplets = 0.0;
+	float tempDistance = 0.0;
+	double trailingCluster = 0.0;
 
 	for (int i = 0; i < 4; i++) {
 		for (int g = 0; g < 4; g++) {
 			//triplette 1
 
-			for (int j = 0; j < NStrawPreclusters[i][g][0]; j++) { //hit loop
+			for (int j = 0; j < nStrawPreclusters[i][g][0]; j++) { //hit loop
 
 				// cluster con 3 hit (2 della stessa mezza vista)
 				if (((strawPrecluster_[i][g][0][j].leading < (M1LeadTrail_ * strawPrecluster_[i][g][0][j].trailing + Q1LeadTrail_)
@@ -392,7 +392,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 								&& strawPrecluster_[i][g][0][j].trailing < CutHighTrailing_))
 						|| strawPrecluster_[i][g][0][j].trailing < -99999)
 						&& (strawPrecluster_[i][g][0][j].leading > CutLowLeading_ && strawPrecluster_[i][g][0][j].leading < CutHighLeading_)) {
-					for (int h = j + 1; h < NStrawPreclusters[i][g][0] && !strawPrecluster_[i][g][0][j].used; h++) {
+					for (int h = j + 1; h < nStrawPreclusters[i][g][0] && !strawPrecluster_[i][g][0][j].used; h++) {
 						//prendo un hit appertenente al piano 2 o 3
 
 						if (((strawPrecluster_[i][g][0][h].leading < (M1LeadTrail_ * strawPrecluster_[i][g][0][h].trailing + Q1LeadTrail_)
@@ -403,44 +403,44 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 								|| strawPrecluster_[i][g][0][h].trailing < -99999)
 								&& (strawPrecluster_[i][g][0][h].leading > CutLowLeading_
 										&& strawPrecluster_[i][g][0][h].leading < CutHighLeading_)) {
-							TempDistance = strawPrecluster_[i][g][0][j].position - strawPrecluster_[i][g][0][h].position;
-							if (TempDistance < 9 && TempDistance > -9 && !strawPrecluster_[i][g][0][h].used) {
-								if (TempDistance > 0) {
-									PositionH = strawPrecluster_[i][g][0][h].position + strawPrecluster_[i][g][0][h].wiredistance;
-									PositionJ = strawPrecluster_[i][g][0][j].position - strawPrecluster_[i][g][0][j].wiredistance;
+							tempDistance = strawPrecluster_[i][g][0][j].position - strawPrecluster_[i][g][0][h].position;
+							if (tempDistance < 9 && tempDistance > -9 && !strawPrecluster_[i][g][0][h].used) {
+								if (tempDistance > 0) {
+									positionH = strawPrecluster_[i][g][0][h].position + strawPrecluster_[i][g][0][h].wiredistance;
+									positionJ = strawPrecluster_[i][g][0][j].position - strawPrecluster_[i][g][0][j].wiredistance;
 								}
 								else {
-									PositionH = strawPrecluster_[i][g][0][h].position - strawPrecluster_[i][g][0][h].wiredistance;
-									PositionJ = strawPrecluster_[i][g][0][j].position + strawPrecluster_[i][g][0][j].wiredistance;
+									positionH = strawPrecluster_[i][g][0][h].position - strawPrecluster_[i][g][0][h].wiredistance;
+									positionJ = strawPrecluster_[i][g][0][j].position + strawPrecluster_[i][g][0][j].wiredistance;
 								}
 
-								MeanDistance = (PositionH + PositionJ) / 2;
+								meanDistance = (positionH + positionJ) / 2;
 
-								DeltaDistanceTriplets = strawPrecluster_[i][g][0][h].wiredistance
+								deltaDistanceTriplets = strawPrecluster_[i][g][0][h].wiredistance
 										+ strawPrecluster_[i][g][0][j].wiredistance;
 
 								if (strawPrecluster_[i][g][0][h].trailing > -200 && strawPrecluster_[i][g][0][j].trailing > -200)
-									TrailingCluster = (strawPrecluster_[i][g][0][h].trailing + strawPrecluster_[i][g][0][j].trailing) / 2;
+									trailingCluster = (strawPrecluster_[i][g][0][h].trailing + strawPrecluster_[i][g][0][j].trailing) / 2;
 								else {
 									if (strawPrecluster_[i][g][0][h].trailing <= -200)
-										TrailingCluster = strawPrecluster_[i][g][0][j].trailing;
+										trailingCluster = strawPrecluster_[i][g][0][j].trailing;
 									else
-										TrailingCluster = strawPrecluster_[i][g][0][h].trailing;
+										trailingCluster = strawPrecluster_[i][g][0][h].trailing;
 								}
 
-								if (DeltaDistanceTriplets > Hit3Low_ && DeltaDistanceTriplets < Hit3High_) {
-									strawCluster_[i][g][NStrawClusters[i][g]].setCluster(strawPrecluster_[i][g][0][h].chamber,
-											strawPrecluster_[i][g][0][h].view, MeanDistance, TrailingCluster, DeltaDistanceTriplets, 0);
+								if (deltaDistanceTriplets > Hit3Low_ && deltaDistanceTriplets < Hit3High_) {
+									strawCluster_[i][g][nStrawClusters[i][g]].setCluster(strawPrecluster_[i][g][0][h].chamber,
+											strawPrecluster_[i][g][0][h].view, meanDistance, trailingCluster, deltaDistanceTriplets, 0);
 
-									NStrawClusters[i][g]++;
+									nStrawClusters[i][g]++;
 									strawPrecluster_[i][g][0][h].used = 1;
 									strawPrecluster_[i][g][0][j].used = 1;
 
-									for (int l = 0; l < NStrawPreclusters[i][g][1]; l++) {
+									for (int l = 0; l < nStrawPreclusters[i][g][1]; l++) {
 										//cerco lo hit 3 negli altri 2 piani
 
-										TempDistance = fabs(MeanDistance - strawPrecluster_[i][g][1][l].position);
-										if (TempDistance < 5 && !strawPrecluster_[i][g][1][l].used) {
+										tempDistance = fabs(meanDistance - strawPrecluster_[i][g][1][l].position);
+										if (tempDistance < 5 && !strawPrecluster_[i][g][1][l].used) {
 											strawPrecluster_[i][g][1][l].used = 1;
 										}
 									}
@@ -452,7 +452,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 			}
 			//triplette 2, cambio mezza vista
 
-			for (int j = 0; j < NStrawPreclusters[i][g][1]; j++) {
+			for (int j = 0; j < nStrawPreclusters[i][g][1]; j++) {
 				//hit loop
 
 				// cluster con 3 hit (due della stessa mezza vista)
@@ -464,7 +464,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 						&& (strawPrecluster_[i][g][1][j].leading > CutLowLeading_ && strawPrecluster_[i][g][1][j].leading < CutHighLeading_)) {
 					// End of conditional logic
 
-					for (int h = j + 1; h < NStrawPreclusters[i][g][1] && !strawPrecluster_[i][g][1][j].used; h++) {
+					for (int h = j + 1; h < nStrawPreclusters[i][g][1] && !strawPrecluster_[i][g][1][j].used; h++) {
 						//prendo un hit appertenente al piano 2 o 3
 
 						if (((strawPrecluster_[i][g][1][h].leading < (M1LeadTrail_ * strawPrecluster_[i][g][1][h].trailing + Q1LeadTrail_)
@@ -477,48 +477,48 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 										&& strawPrecluster_[i][g][1][h].leading < CutHighLeading_)) {
 							// End of conditional logic
 
-							TempDistance = strawPrecluster_[i][g][1][j].position - strawPrecluster_[i][g][1][h].position;
+							tempDistance = strawPrecluster_[i][g][1][j].position - strawPrecluster_[i][g][1][h].position;
 
-							if (TempDistance < 9 && TempDistance > -9 && !strawPrecluster_[i][g][1][h].used) {
-								if (TempDistance > 0) {
-									PositionH = strawPrecluster_[i][g][1][h].position + strawPrecluster_[i][g][1][h].wiredistance;
-									PositionJ = strawPrecluster_[i][g][1][j].position - strawPrecluster_[i][g][1][j].wiredistance;
+							if (tempDistance < 9 && tempDistance > -9 && !strawPrecluster_[i][g][1][h].used) {
+								if (tempDistance > 0) {
+									positionH = strawPrecluster_[i][g][1][h].position + strawPrecluster_[i][g][1][h].wiredistance;
+									positionJ = strawPrecluster_[i][g][1][j].position - strawPrecluster_[i][g][1][j].wiredistance;
 								}
 								else {
-									PositionH = strawPrecluster_[i][g][1][h].position - strawPrecluster_[i][g][1][h].wiredistance;
-									PositionJ = strawPrecluster_[i][g][1][j].position + strawPrecluster_[i][g][1][j].wiredistance;
+									positionH = strawPrecluster_[i][g][1][h].position - strawPrecluster_[i][g][1][h].wiredistance;
+									positionJ = strawPrecluster_[i][g][1][j].position + strawPrecluster_[i][g][1][j].wiredistance;
 								}
 
-								MeanDistance = (PositionH + PositionJ) / 2;
+								meanDistance = (positionH + positionJ) / 2;
 
-								DeltaDistanceTriplets = strawPrecluster_[i][g][1][h].wiredistance
+								deltaDistanceTriplets = strawPrecluster_[i][g][1][h].wiredistance
 										+ strawPrecluster_[i][g][1][j].wiredistance;
 
 								if (strawPrecluster_[i][g][1][h].trailing > -200 && strawPrecluster_[i][g][1][j].trailing > -200) {
-									TrailingCluster = (strawPrecluster_[i][g][1][h].trailing + strawPrecluster_[i][g][1][j].trailing) / 2;
+									trailingCluster = (strawPrecluster_[i][g][1][h].trailing + strawPrecluster_[i][g][1][j].trailing) / 2;
 								}
 								else {
 									if (strawPrecluster_[i][g][1][h].trailing <= -200) {
-										TrailingCluster = strawPrecluster_[i][g][1][j].trailing;
+										trailingCluster = strawPrecluster_[i][g][1][j].trailing;
 									}
 									else {
-										TrailingCluster = strawPrecluster_[i][g][1][h].trailing;
+										trailingCluster = strawPrecluster_[i][g][1][h].trailing;
 									}
 								}
 
-								if (DeltaDistanceTriplets > Hit3Low_ && DeltaDistanceTriplets < Hit3High_) {
-									strawCluster_[i][g][NStrawClusters[i][g]].setCluster(strawPrecluster_[i][g][1][h].chamber,
-											strawPrecluster_[i][g][1][h].view, MeanDistance, TrailingCluster, DeltaDistanceTriplets, 0);
+								if (deltaDistanceTriplets > Hit3Low_ && deltaDistanceTriplets < Hit3High_) {
+									strawCluster_[i][g][nStrawClusters[i][g]].setCluster(strawPrecluster_[i][g][1][h].chamber,
+											strawPrecluster_[i][g][1][h].view, meanDistance, trailingCluster, deltaDistanceTriplets, 0);
 
-									NStrawClusters[i][g]++;
+									nStrawClusters[i][g]++;
 									strawPrecluster_[i][g][1][h].used = 1;
 									strawPrecluster_[i][g][1][j].used = 1;
 
-									for (int l = 0; l < NStrawPreclusters[i][g][0]; l++) {
+									for (int l = 0; l < nStrawPreclusters[i][g][0]; l++) {
 										//cerco il 3 hit negli altri 2 piani
 
-										TempDistance = fabs(MeanDistance - strawPrecluster_[i][g][0][l].position);
-										if (TempDistance < 5 && !strawPrecluster_[i][g][0][l].used) {
+										tempDistance = fabs(meanDistance - strawPrecluster_[i][g][0][l].position);
+										if (tempDistance < 5 && !strawPrecluster_[i][g][0][l].used) {
 											strawPrecluster_[i][g][0][l].used = 1;
 										}
 									}
@@ -528,7 +528,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 					}
 
 					//cluster con 2 hit
-					for (int h = 0; h < NStrawPreclusters[i][g][0] && !strawPrecluster_[i][g][1][j].used; h++) {
+					for (int h = 0; h < nStrawPreclusters[i][g][0] && !strawPrecluster_[i][g][1][j].used; h++) {
 						//prendo un hit appertenente al piano 2 o 3
 
 						if (((strawPrecluster_[i][g][0][h].leading < (M1LeadTrail_ * strawPrecluster_[i][g][0][h].trailing + Q1LeadTrail_)
@@ -541,77 +541,77 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 										&& strawPrecluster_[i][g][0][h].leading < CutHighLeading_)) {
 							// End of conditional logic
 
-							TempDistance = fabs(strawPrecluster_[i][g][1][j].position - strawPrecluster_[i][g][0][h].position);
-							if (TempDistance < 9 && !strawPrecluster_[i][g][0][h].used) {
+							tempDistance = fabs(strawPrecluster_[i][g][1][j].position - strawPrecluster_[i][g][0][h].position);
+							if (tempDistance < 9 && !strawPrecluster_[i][g][0][h].used) {
 								switch (strawPrecluster_[i][g][1][j].plane) {
 								case (0):
 									if (!strawPrecluster_[i][g][0][h].plane) {
 										if (!g || g == 2) {
-											PositionH = strawPrecluster_[i][g][0][h].position + strawPrecluster_[i][g][0][h].wiredistance;
-											PositionJ = strawPrecluster_[i][g][1][j].position - strawPrecluster_[i][g][1][j].wiredistance;
+											positionH = strawPrecluster_[i][g][0][h].position + strawPrecluster_[i][g][0][h].wiredistance;
+											positionJ = strawPrecluster_[i][g][1][j].position - strawPrecluster_[i][g][1][j].wiredistance;
 										}
 										else {
-											PositionH = strawPrecluster_[i][g][0][h].position - strawPrecluster_[i][g][0][h].wiredistance;
-											PositionJ = strawPrecluster_[i][g][1][j].position + strawPrecluster_[i][g][1][j].wiredistance;
+											positionH = strawPrecluster_[i][g][0][h].position - strawPrecluster_[i][g][0][h].wiredistance;
+											positionJ = strawPrecluster_[i][g][1][j].position + strawPrecluster_[i][g][1][j].wiredistance;
 										}
 
-										MeanDistance = (PositionH + PositionJ) / 2;
+										meanDistance = (positionH + positionJ) / 2;
 
-										DeltaDistance = strawPrecluster_[i][g][0][h].wiredistance
+										deltaDistance = strawPrecluster_[i][g][0][h].wiredistance
 												+ strawPrecluster_[i][g][1][j].wiredistance;
 
 										if (strawPrecluster_[i][g][0][h].trailing > -200 && strawPrecluster_[i][g][1][j].trailing > -200) {
-											TrailingCluster =
+											trailingCluster =
 													(strawPrecluster_[i][g][0][h].trailing + strawPrecluster_[i][g][1][j].trailing) / 2;
 										}
 										else {
 											if (strawPrecluster_[i][g][0][h].trailing <= -200) {
-												TrailingCluster = strawPrecluster_[i][g][1][j].trailing;
+												trailingCluster = strawPrecluster_[i][g][1][j].trailing;
 											}
 											else {
-												TrailingCluster = strawPrecluster_[i][g][0][h].trailing;
+												trailingCluster = strawPrecluster_[i][g][0][h].trailing;
 											}
 										}
 
-										if (DeltaDistance > Hit2Low_ && DeltaDistance < Hit2High_) {
-											strawCluster_[i][g][NStrawClusters[i][g]].setCluster(strawPrecluster_[i][g][0][h].chamber,
-													strawPrecluster_[i][g][0][h].view, MeanDistance, TrailingCluster, DeltaDistance, 0);
-											NStrawClusters[i][g]++;
+										if (deltaDistance > Hit2Low_ && deltaDistance < Hit2High_) {
+											strawCluster_[i][g][nStrawClusters[i][g]].setCluster(strawPrecluster_[i][g][0][h].chamber,
+													strawPrecluster_[i][g][0][h].view, meanDistance, trailingCluster, deltaDistance, 0);
+											nStrawClusters[i][g]++;
 											strawPrecluster_[i][g][0][h].used = 1;
 											strawPrecluster_[i][g][1][j].used = 1;
 										}
 									}
 									else {
 										if (!g || g == 2) {
-											PositionH = strawPrecluster_[i][g][0][h].position - strawPrecluster_[i][g][0][h].wiredistance;
-											PositionJ = strawPrecluster_[i][g][1][j].position + strawPrecluster_[i][g][1][j].wiredistance;
+											positionH = strawPrecluster_[i][g][0][h].position - strawPrecluster_[i][g][0][h].wiredistance;
+											positionJ = strawPrecluster_[i][g][1][j].position + strawPrecluster_[i][g][1][j].wiredistance;
 										}
 										else {
-											PositionH = strawPrecluster_[i][g][0][h].position + strawPrecluster_[i][g][0][h].wiredistance;
-											PositionJ = strawPrecluster_[i][g][1][j].position - strawPrecluster_[i][g][1][j].wiredistance;
+											positionH = strawPrecluster_[i][g][0][h].position + strawPrecluster_[i][g][0][h].wiredistance;
+											positionJ = strawPrecluster_[i][g][1][j].position - strawPrecluster_[i][g][1][j].wiredistance;
 										}
 
-										MeanDistance = (PositionH + PositionJ) / 2;
+										meanDistance = (positionH + positionJ) / 2;
 
-										DeltaDistance = strawPrecluster_[i][g][0][h].wiredistance
+										deltaDistance = strawPrecluster_[i][g][0][h].wiredistance
 												+ strawPrecluster_[i][g][1][j].wiredistance;
 
 										if (strawPrecluster_[i][g][0][h].trailing > -200 && strawPrecluster_[i][g][1][j].trailing > -200)
-											TrailingCluster =
+											trailingCluster =
 													(strawPrecluster_[i][g][0][h].trailing + strawPrecluster_[i][g][1][j].trailing) / 2;
 										else {
 											if (strawPrecluster_[i][g][0][h].trailing <= -200) {
-												TrailingCluster = strawPrecluster_[i][g][1][j].trailing;
+												trailingCluster = strawPrecluster_[i][g][1][j].trailing;
 											}
 											else {
-												TrailingCluster = strawPrecluster_[i][g][0][h].trailing;
+												trailingCluster = strawPrecluster_[i][g][0][h].trailing;
 											}
 										}
 
-										if (DeltaDistance > Hit2Low_ && DeltaDistance < Hit2High_) {
-											strawCluster_[i][g][NStrawClusters[i][g]].setCluster(strawPrecluster_[i][g][0][h].chamber,
-													strawPrecluster_[i][g][0][h].view, MeanDistance, TrailingCluster, DeltaDistance, 0);
-											NStrawClusters[i][g]++;
+										if (deltaDistance > Hit2Low_ && deltaDistance < Hit2High_) {
+											strawCluster_[i][g][nStrawClusters[i][g]].setCluster(strawPrecluster_[i][g][0][h].chamber,
+													strawPrecluster_[i][g][0][h].view, meanDistance, trailingCluster, deltaDistance, 0);
+											nStrawClusters[i][g]++;
 											strawPrecluster_[i][g][0][h].used = 1;
 											strawPrecluster_[i][g][1][j].used = 1;
 										}
@@ -621,68 +621,68 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 								case (1):
 									if (!strawPrecluster_[i][g][0][h].plane) {
 										if (!g || g == 2) {
-											PositionH = strawPrecluster_[i][g][0][h].position - strawPrecluster_[i][g][0][h].wiredistance;
-											PositionJ = strawPrecluster_[i][g][1][j].position + strawPrecluster_[i][g][1][j].wiredistance;
+											positionH = strawPrecluster_[i][g][0][h].position - strawPrecluster_[i][g][0][h].wiredistance;
+											positionJ = strawPrecluster_[i][g][1][j].position + strawPrecluster_[i][g][1][j].wiredistance;
 										}
 										else {
-											PositionH = strawPrecluster_[i][g][0][h].position + strawPrecluster_[i][g][0][h].wiredistance;
-											PositionJ = strawPrecluster_[i][g][1][j].position - strawPrecluster_[i][g][1][j].wiredistance;
+											positionH = strawPrecluster_[i][g][0][h].position + strawPrecluster_[i][g][0][h].wiredistance;
+											positionJ = strawPrecluster_[i][g][1][j].position - strawPrecluster_[i][g][1][j].wiredistance;
 										}
 
-										MeanDistance = (PositionH + PositionJ) / 2;
+										meanDistance = (positionH + positionJ) / 2;
 
-										DeltaDistance = strawPrecluster_[i][g][0][h].wiredistance
+										deltaDistance = strawPrecluster_[i][g][0][h].wiredistance
 												+ strawPrecluster_[i][g][1][j].wiredistance;
 
 										if (strawPrecluster_[i][g][0][h].trailing > -200 && strawPrecluster_[i][g][1][j].trailing > -200)
-											TrailingCluster =
+											trailingCluster =
 													(strawPrecluster_[i][g][0][h].trailing + strawPrecluster_[i][g][1][j].trailing) / 2;
 										else {
 											if (strawPrecluster_[i][g][0][h].trailing <= -200)
-												TrailingCluster = strawPrecluster_[i][g][1][j].trailing;
+												trailingCluster = strawPrecluster_[i][g][1][j].trailing;
 											else
-												TrailingCluster = strawPrecluster_[i][g][0][h].trailing;
+												trailingCluster = strawPrecluster_[i][g][0][h].trailing;
 										}
 
-										if (DeltaDistance > Hit2Low_ && DeltaDistance < Hit2High_) {
-											strawCluster_[i][g][NStrawClusters[i][g]].setCluster(strawPrecluster_[i][g][0][h].chamber,
-													strawPrecluster_[i][g][0][h].view, MeanDistance, TrailingCluster, DeltaDistance, 0);
-											NStrawClusters[i][g]++;
+										if (deltaDistance > Hit2Low_ && deltaDistance < Hit2High_) {
+											strawCluster_[i][g][nStrawClusters[i][g]].setCluster(strawPrecluster_[i][g][0][h].chamber,
+													strawPrecluster_[i][g][0][h].view, meanDistance, trailingCluster, deltaDistance, 0);
+											nStrawClusters[i][g]++;
 											strawPrecluster_[i][g][0][h].used = 1;
 											strawPrecluster_[i][g][1][j].used = 1;
 										}
 									}
 									else {
 										if (!g || g == 2) {
-											PositionH = strawPrecluster_[i][g][0][h].position + strawPrecluster_[i][g][0][h].wiredistance;
-											PositionJ = strawPrecluster_[i][g][1][j].position - strawPrecluster_[i][g][1][j].wiredistance;
+											positionH = strawPrecluster_[i][g][0][h].position + strawPrecluster_[i][g][0][h].wiredistance;
+											positionJ = strawPrecluster_[i][g][1][j].position - strawPrecluster_[i][g][1][j].wiredistance;
 										}
 										else {
-											PositionH = strawPrecluster_[i][g][0][h].position - strawPrecluster_[i][g][0][h].wiredistance;
-											PositionJ = strawPrecluster_[i][g][1][j].position + strawPrecluster_[i][g][1][j].wiredistance;
+											positionH = strawPrecluster_[i][g][0][h].position - strawPrecluster_[i][g][0][h].wiredistance;
+											positionJ = strawPrecluster_[i][g][1][j].position + strawPrecluster_[i][g][1][j].wiredistance;
 										}
 
-										MeanDistance = (PositionH + PositionJ) / 2;
+										meanDistance = (positionH + positionJ) / 2;
 
-										DeltaDistance = strawPrecluster_[i][g][0][h].wiredistance
+										deltaDistance = strawPrecluster_[i][g][0][h].wiredistance
 												+ strawPrecluster_[i][g][1][j].wiredistance;
 
 										if (strawPrecluster_[i][g][0][h].trailing > -200 && strawPrecluster_[i][g][1][j].trailing > -200)
-											TrailingCluster =
+											trailingCluster =
 													(strawPrecluster_[i][g][0][h].trailing + strawPrecluster_[i][g][1][j].trailing) / 2;
 										else {
 											if (strawPrecluster_[i][g][0][h].trailing <= -200) {
-												TrailingCluster = strawPrecluster_[i][g][1][j].trailing;
+												trailingCluster = strawPrecluster_[i][g][1][j].trailing;
 											}
 											else {
-												TrailingCluster = strawPrecluster_[i][g][0][h].trailing;
+												trailingCluster = strawPrecluster_[i][g][0][h].trailing;
 											}
 										}
 
-										if (DeltaDistance > Hit2Low_ && DeltaDistance < Hit2High_) {
-											strawCluster_[i][g][NStrawClusters[i][g]].setCluster(strawPrecluster_[i][g][0][h].chamber,
-													strawPrecluster_[i][g][0][h].view, MeanDistance, TrailingCluster, DeltaDistance, 0);
-											NStrawClusters[i][g]++;
+										if (deltaDistance > Hit2Low_ && deltaDistance < Hit2High_) {
+											strawCluster_[i][g][nStrawClusters[i][g]].setCluster(strawPrecluster_[i][g][0][h].chamber,
+													strawPrecluster_[i][g][0][h].view, meanDistance, trailingCluster, deltaDistance, 0);
+											nStrawClusters[i][g]++;
 											strawPrecluster_[i][g][0][h].used = 1;
 											strawPrecluster_[i][g][1][j].used = 1;
 										}
@@ -708,47 +708,47 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 	//gettimeofday(&time[14], 0);
 	//	LOG_INFO( "Clustering inside the chamber - Start " << time[14].tv_sec << " " << time[14].tv_usec );
 
-	float CoordinateTemp = 0.0;
-	float ViewDistance = 0.0;
-	float ViewDistance4 = 0.0;
-	float XTemp = 0.0;
-	float YTemp = 0.0;
+	float coordinateTemp = 0.0;
+	float viewDistance = 0.0;
+	float viewDistance4 = 0.0;
+	float xTemp = 0.0;
+	float yTemp = 0.0;
 
 	//tracks reco
-	float QY = 0.0;
-	double Coordinate[2];
+	float qy = 0.0;
+	double coordinate[2];
 
 	for (int i = 0; i < 4; i++) {
 		////////////ciclo dei punti a 4 viste//////////////////
 		//gettimeofday(&time[15], 0);
-		NTotalViewCluster += NStrawClusters[i][3] + NStrawClusters[i][2] + NStrawClusters[i][1] + NStrawClusters[i][0];
-		for (int a = 0; a < NStrawClusters[i][3]; a++) { //clusters [a] is inside y
+		nTotalViewCluster += nStrawClusters[i][3] + nStrawClusters[i][2] + nStrawClusters[i][1] + nStrawClusters[i][0];
+		for (int a = 0; a < nStrawClusters[i][3]; a++) { //clusters [a] is inside y
 
-			for (int b = 0; b < NStrawClusters[i][2]; b++) { //we loop on x view
+			for (int b = 0; b < nStrawClusters[i][2]; b++) { //we loop on x view
 
-				for (int c = 0; c < NStrawClusters[i][1]; c++) { //we loop on u  views
-					CoordinateTemp = (strawCluster_[i][3][a].coordinate + strawCluster_[i][2][b].coordinate) / Sq2_;
-					ViewDistance = fabs(strawCluster_[i][1][c].coordinate - CoordinateTemp);
+				for (int c = 0; c < nStrawClusters[i][1]; c++) { //we loop on u  views
+					coordinateTemp = (strawCluster_[i][3][a].coordinate + strawCluster_[i][2][b].coordinate) / Sq2_;
+					viewDistance = fabs(strawCluster_[i][1][c].coordinate - coordinateTemp);
 
-					if (ViewDistance < CutCluster_) {
-						for (int d = 0; d < NStrawClusters[i][0]; d++) { //v views
-							CoordinateTemp = (strawCluster_[i][2][b].coordinate - strawCluster_[i][3][a].coordinate) / Sq2_;
-							ViewDistance4 = fabs(strawCluster_[i][0][d].coordinate - CoordinateTemp);
+					if (viewDistance < CutCluster_) {
+						for (int d = 0; d < nStrawClusters[i][0]; d++) { //v views
+							coordinateTemp = (strawCluster_[i][2][b].coordinate - strawCluster_[i][3][a].coordinate) / Sq2_;
+							viewDistance4 = fabs(strawCluster_[i][0][d].coordinate - coordinateTemp);
 
-							if (ViewDistance4 < CutCluster_) {
-								XTemp = strawCluster_[i][2][b].coordinate;
-								YTemp = strawCluster_[i][3][a].coordinate;
+							if (viewDistance4 < CutCluster_) {
+								xTemp = strawCluster_[i][2][b].coordinate;
+								yTemp = strawCluster_[i][3][a].coordinate;
 
-								if (ViewDistance < ViewDistance4) {
-									strawPointTemp_[i][NStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], XTemp, YTemp,
+								if (viewDistance < viewDistance4) {
+									strawPointTemp_[i][nStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], xTemp, yTemp,
 											(strawCluster_[i][3][a].trailing + strawCluster_[i][2][b].trailing
-													+ strawCluster_[i][1][c].trailing + strawCluster_[i][0][d].trailing) / 4, ViewDistance,
+													+ strawCluster_[i][1][c].trailing + strawCluster_[i][0][d].trailing) / 4, viewDistance,
 											4, 0);
 								}
 								else {
-									strawPointTemp_[i][NStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], XTemp, YTemp,
+									strawPointTemp_[i][nStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], xTemp, yTemp,
 											(strawCluster_[i][3][a].trailing + strawCluster_[i][2][b].trailing
-													+ strawCluster_[i][1][c].trailing + strawCluster_[i][0][d].trailing) / 4, ViewDistance4,
+													+ strawCluster_[i][1][c].trailing + strawCluster_[i][0][d].trailing) / 4, viewDistance4,
 											4, 0);
 								}
 								strawCluster_[i][0][d].used = 1;
@@ -756,7 +756,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 								strawCluster_[i][2][b].used = 1;
 								strawCluster_[i][3][a].used = 1;
 
-								NStrawPointsTemp[i]++;
+								nStrawPointsTemp[i]++;
 
 							}
 						}
@@ -767,55 +767,55 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 		//gettimeofday(&time[16], 0);
 		//////////////////////////// primo ciclo dei punti a 3 viste prima yx cercando in v o u, poi uv cercando in x o y
 		//gettimeofday(&time[17], 0);
-		for (int a = 0; a < NStrawClusters[i][3]; a++) { //clusters [a] is inside y
-			for (int b = 0; b < NStrawClusters[i][2]; b++) { //we loop on x view
-				for (int c = 0; c < NStrawClusters[i][1]; c++) { //we loop on u  views
+		for (int a = 0; a < nStrawClusters[i][3]; a++) { //clusters [a] is inside y
+			for (int b = 0; b < nStrawClusters[i][2]; b++) { //we loop on x view
+				for (int c = 0; c < nStrawClusters[i][1]; c++) { //we loop on u  views
 					if ((strawCluster_[i][1][c].used != 1 && strawCluster_[i][2][b].used != 1)
 							|| (strawCluster_[i][1][c].used != 1 && strawCluster_[i][3][a].used != 1)
 							|| (strawCluster_[i][2][b].used != 1 && strawCluster_[i][3][a].used != 1)) {
 						// End of conditional logic
 
-						CoordinateTemp = (strawCluster_[i][3][a].coordinate + strawCluster_[i][2][b].coordinate) / Sq2_;
-						ViewDistance = fabs(strawCluster_[i][1][c].coordinate - CoordinateTemp);
+						coordinateTemp = (strawCluster_[i][3][a].coordinate + strawCluster_[i][2][b].coordinate) / Sq2_;
+						viewDistance = fabs(strawCluster_[i][1][c].coordinate - coordinateTemp);
 
-						if (ViewDistance < CutCluster_) {
-							XTemp = strawCluster_[i][2][b].coordinate;
-							YTemp = strawCluster_[i][3][a].coordinate;
+						if (viewDistance < CutCluster_) {
+							xTemp = strawCluster_[i][2][b].coordinate;
+							yTemp = strawCluster_[i][3][a].coordinate;
 
-							strawPointTemp_[i][NStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], XTemp, YTemp,
+							strawPointTemp_[i][nStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], xTemp, yTemp,
 									(strawCluster_[i][3][a].trailing + strawCluster_[i][2][b].trailing + strawCluster_[i][1][c].trailing)
-											/ 3, ViewDistance, 3, 0);
+											/ 3, viewDistance, 3, 0);
 
 							strawCluster_[i][1][c].used = 2;
 							strawCluster_[i][2][b].used = 2;
 							strawCluster_[i][3][a].used = 2;
 
-							NStrawPointsTemp[i]++;
+							nStrawPointsTemp[i]++;
 						}
 					}
 				}
-				for (int c = 0; c < NStrawClusters[i][0]; c++) { //we loop on v views
+				for (int c = 0; c < nStrawClusters[i][0]; c++) { //we loop on v views
 					if ((strawCluster_[i][0][c].used != 1 && strawCluster_[i][2][b].used != 1)
 							|| (strawCluster_[i][0][c].used != 1 && strawCluster_[i][3][a].used != 1)
 							|| (strawCluster_[i][2][b].used != 1 && strawCluster_[i][3][a].used != 1)) {
 						// End of conditional logic
 
-						CoordinateTemp = (strawCluster_[i][2][b].coordinate - strawCluster_[i][3][a].coordinate) / Sq2_;
-						ViewDistance = fabs(strawCluster_[i][0][c].coordinate - CoordinateTemp);
+						coordinateTemp = (strawCluster_[i][2][b].coordinate - strawCluster_[i][3][a].coordinate) / Sq2_;
+						viewDistance = fabs(strawCluster_[i][0][c].coordinate - coordinateTemp);
 
-						if (ViewDistance < CutCluster_) {
-							XTemp = strawCluster_[i][2][b].coordinate;
-							YTemp = strawCluster_[i][3][a].coordinate;
+						if (viewDistance < CutCluster_) {
+							xTemp = strawCluster_[i][2][b].coordinate;
+							yTemp = strawCluster_[i][3][a].coordinate;
 
-							strawPointTemp_[i][NStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], XTemp, YTemp,
+							strawPointTemp_[i][nStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], xTemp, yTemp,
 									(strawCluster_[i][3][a].trailing + strawCluster_[i][2][b].trailing + strawCluster_[i][0][c].trailing)
-											/ 3, ViewDistance, 3, 0);
+											/ 3, viewDistance, 3, 0);
 
 							strawCluster_[i][0][c].used = 2;
 							strawCluster_[i][2][b].used = 2;
 							strawCluster_[i][3][a].used = 2;
 
-							NStrawPointsTemp[i]++;
+							nStrawPointsTemp[i]++;
 						}
 					}
 				}
@@ -826,64 +826,64 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 
 		//gettimeofday(&time[19], 0);
 		//		LOG_INFO( nStrawClusters[i][0] );
-		for (int a = 0; a < NStrawClusters[i][0]; a++) { //v
+		for (int a = 0; a < nStrawClusters[i][0]; a++) { //v
 			// if(strawCluster_[i][0][a].used != 1)
 			// {
 			//			LOG_INFO( nStrawClusters[i][1] );
 			// }
-			for (int b = 0; b < NStrawClusters[i][1]; b++) { //u
+			for (int b = 0; b < nStrawClusters[i][1]; b++) { //u
 				// if(strawCluster_[i][1][b].used != 1)
 				// {
 				// 			LOG_INFO( nStrawClusters[i][2] );
 				// }
-				for (int c = 0; c < NStrawClusters[i][2]; c++) { //x
+				for (int c = 0; c < nStrawClusters[i][2]; c++) { //x
 					if ((strawCluster_[i][0][a].used != 1 && strawCluster_[i][1][b].used != 1)
 							|| (strawCluster_[i][0][a].used != 1 && strawCluster_[i][2][c].used != 1)
 							|| (strawCluster_[i][1][b].used != 1 && strawCluster_[i][2][c].used != 1)) {
 						// End of conditional logic
 
-						CoordinateTemp = (strawCluster_[i][0][a].coordinate + strawCluster_[i][1][b].coordinate) / Sq2_;
-						ViewDistance = fabs(strawCluster_[i][2][c].coordinate - CoordinateTemp);
+						coordinateTemp = (strawCluster_[i][0][a].coordinate + strawCluster_[i][1][b].coordinate) / Sq2_;
+						viewDistance = fabs(strawCluster_[i][2][c].coordinate - coordinateTemp);
 
-						if (ViewDistance < CutCluster_) {
-							XTemp = strawCluster_[i][2][c].coordinate;
-							YTemp = (strawCluster_[i][1][b].coordinate - strawCluster_[i][0][a].coordinate) / Sq2_;
+						if (viewDistance < CutCluster_) {
+							xTemp = strawCluster_[i][2][c].coordinate;
+							yTemp = (strawCluster_[i][1][b].coordinate - strawCluster_[i][0][a].coordinate) / Sq2_;
 
-							strawPointTemp_[i][NStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], XTemp, YTemp,
+							strawPointTemp_[i][nStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], xTemp, yTemp,
 									(strawCluster_[i][0][a].trailing + strawCluster_[i][1][b].trailing + strawCluster_[i][2][c].trailing)
-											/ 3, ViewDistance, 3, 0);
+											/ 3, viewDistance, 3, 0);
 
 							strawCluster_[i][0][a].used = 2;
 							strawCluster_[i][1][b].used = 2;
 							strawCluster_[i][2][c].used = 2;
 
-							NStrawPointsTemp[i]++;
+							nStrawPointsTemp[i]++;
 						}
 					}
 				}
 				//				LOG_INFO( nStrawClusters[i][3] );
-				for (int c = 0; c < NStrawClusters[i][3]; c++) { //y
+				for (int c = 0; c < nStrawClusters[i][3]; c++) { //y
 					if ((strawCluster_[i][0][a].used != 1 && strawCluster_[i][1][b].used != 1)
 							|| (strawCluster_[i][0][a].used != 1 && strawCluster_[i][3][c].used != 1)
 							|| (strawCluster_[i][1][b].used != 1 && strawCluster_[i][3][c].used != 1)) {
 						// End of condititional logic
 
-						CoordinateTemp = (strawCluster_[i][1][b].coordinate - strawCluster_[i][0][a].coordinate) / Sq2_;
-						ViewDistance = fabs(strawCluster_[i][3][c].coordinate - CoordinateTemp);
+						coordinateTemp = (strawCluster_[i][1][b].coordinate - strawCluster_[i][0][a].coordinate) / Sq2_;
+						viewDistance = fabs(strawCluster_[i][3][c].coordinate - coordinateTemp);
 
-						if (ViewDistance < CutCluster_) {
-							XTemp = (strawCluster_[i][0][a].coordinate + strawCluster_[i][1][b].coordinate) / Sq2_;
-							YTemp = strawCluster_[i][3][c].coordinate;
+						if (viewDistance < CutCluster_) {
+							xTemp = (strawCluster_[i][0][a].coordinate + strawCluster_[i][1][b].coordinate) / Sq2_;
+							yTemp = strawCluster_[i][3][c].coordinate;
 
-							strawPointTemp_[i][NStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], XTemp, YTemp,
+							strawPointTemp_[i][nStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], xTemp, yTemp,
 									(strawCluster_[i][0][a].trailing + strawCluster_[i][1][b].trailing + strawCluster_[i][3][c].trailing)
-											/ 3, ViewDistance, 3, 0);
+											/ 3, viewDistance, 3, 0);
 
 							strawCluster_[i][0][a].used = 2;
 							strawCluster_[i][1][b].used = 2;
 							strawCluster_[i][3][c].used = 2;
 
-							NStrawPointsTemp[i]++;
+							nStrawPointsTemp[i]++;
 						}
 					}
 				}
@@ -892,93 +892,93 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 		//gettimeofday(&time[20], 0);
 		//clusterizzazione nelle camere con sole 2 viste
 		//gettimeofday(&time[21], 0);
-		for (int a = 0; a < NStrawClusters[i][0]; a++) { //v
+		for (int a = 0; a < nStrawClusters[i][0]; a++) { //v
 
-			for (int b = 0; b < NStrawClusters[i][1]; b++) { //u (v,u)
+			for (int b = 0; b < nStrawClusters[i][1]; b++) { //u (v,u)
 
 				if (strawCluster_[i][1][b].used == 0 && strawCluster_[i][0][a].used == 0) {
-					Coordinate[0] = (strawCluster_[i][0][a].coordinate + strawCluster_[i][1][b].coordinate) / Sq2_;
-					Coordinate[1] = (strawCluster_[i][1][b].coordinate - strawCluster_[i][0][a].coordinate) / Sq2_;
+					coordinate[0] = (strawCluster_[i][0][a].coordinate + strawCluster_[i][1][b].coordinate) / Sq2_;
+					coordinate[1] = (strawCluster_[i][1][b].coordinate - strawCluster_[i][0][a].coordinate) / Sq2_;
 
-					if (strawAcceptance(i, Coordinate, 12) == 1) {
-						strawPointTemp_[i][NStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], Coordinate[0], Coordinate[1],
+					if (strawAcceptance(i, coordinate, 12) == 1) {
+						strawPointTemp_[i][nStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], coordinate[0], coordinate[1],
 								(strawCluster_[i][0][a].trailing + strawCluster_[i][1][b].trailing) / 2, 0, 2, 0);
-						NStrawPointsTemp[i]++;
+						nStrawPointsTemp[i]++;
 					}
 				}
 			}
-			for (int b = 0; b < NStrawClusters[i][2]; b++) { //x (v,x)
+			for (int b = 0; b < nStrawClusters[i][2]; b++) { //x (v,x)
 
 				if (strawCluster_[i][2][b].used == 0 && strawCluster_[i][0][a].used == 0) {
-					Coordinate[0] = strawCluster_[i][2][b].coordinate;
-					Coordinate[1] = strawCluster_[i][2][b].coordinate - (Sq2_ * strawCluster_[i][0][a].coordinate);
+					coordinate[0] = strawCluster_[i][2][b].coordinate;
+					coordinate[1] = strawCluster_[i][2][b].coordinate - (Sq2_ * strawCluster_[i][0][a].coordinate);
 
-					if (strawAcceptance(i, Coordinate, 12) == 1) {
-						strawPointTemp_[i][NStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], Coordinate[0], Coordinate[1],
+					if (strawAcceptance(i, coordinate, 12) == 1) {
+						strawPointTemp_[i][nStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], coordinate[0], coordinate[1],
 								(strawCluster_[i][0][a].trailing + strawCluster_[i][2][b].trailing) / 2, 0, 2, 0);
-						NStrawPointsTemp[i]++;
+						nStrawPointsTemp[i]++;
 					}
 				}
 			}
-			for (int b = 0; b < NStrawClusters[i][3]; b++) { //y (v,y)
+			for (int b = 0; b < nStrawClusters[i][3]; b++) { //y (v,y)
 
 				if (strawCluster_[i][3][b].used == 0 && strawCluster_[i][0][a].used == 0) {
-					Coordinate[0] = (Sq2_ * strawCluster_[i][0][a].coordinate) + strawCluster_[i][3][b].coordinate;
-					Coordinate[1] = strawCluster_[i][3][b].coordinate;
+					coordinate[0] = (Sq2_ * strawCluster_[i][0][a].coordinate) + strawCluster_[i][3][b].coordinate;
+					coordinate[1] = strawCluster_[i][3][b].coordinate;
 
-					if (strawAcceptance(i, Coordinate, 12) == 1) {
-						strawPointTemp_[i][NStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], Coordinate[0], Coordinate[1],
+					if (strawAcceptance(i, coordinate, 12) == 1) {
+						strawPointTemp_[i][nStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], coordinate[0], coordinate[1],
 								(strawCluster_[i][0][a].trailing + strawCluster_[i][3][b].trailing) / 2, 0, 2, 0);
-						NStrawPointsTemp[i]++;
+						nStrawPointsTemp[i]++;
 					}
 				}
 			}
 		}
 		//gettimeofday(&time[22], 0);
 		//gettimeofday(&time[23], 0);
-		for (int a = 0; a < NStrawClusters[i][1]; a++) { //u
+		for (int a = 0; a < nStrawClusters[i][1]; a++) { //u
 
-			for (int b = 0; b < NStrawClusters[i][2]; b++) { //x (u,x)
+			for (int b = 0; b < nStrawClusters[i][2]; b++) { //x (u,x)
 
 				if (strawCluster_[i][2][b].used == 0 && strawCluster_[i][1][a].used == 0) {
-					Coordinate[0] = strawCluster_[i][2][b].coordinate;
-					Coordinate[1] = (Sq2_ * strawCluster_[i][1][a].coordinate) - strawCluster_[i][2][b].coordinate;
+					coordinate[0] = strawCluster_[i][2][b].coordinate;
+					coordinate[1] = (Sq2_ * strawCluster_[i][1][a].coordinate) - strawCluster_[i][2][b].coordinate;
 
-					if (strawAcceptance(i, Coordinate, 12) == 1) {
-						strawPointTemp_[i][NStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], Coordinate[0], Coordinate[1],
+					if (strawAcceptance(i, coordinate, 12) == 1) {
+						strawPointTemp_[i][nStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], coordinate[0], coordinate[1],
 								(strawCluster_[i][1][a].trailing + strawCluster_[i][2][b].trailing) / 2, 0, 2, 0);
-						NStrawPointsTemp[i]++;
+						nStrawPointsTemp[i]++;
 					}
 				}
 			}
-			for (int b = 0; b < NStrawClusters[i][3]; b++) { //y (u,y)
+			for (int b = 0; b < nStrawClusters[i][3]; b++) { //y (u,y)
 
 				if (strawCluster_[i][3][b].used == 0 && strawCluster_[i][1][a].used == 0) {
-					Coordinate[0] = (Sq2_ * strawCluster_[i][1][a].coordinate) - strawCluster_[i][3][b].coordinate;
-					Coordinate[1] = strawCluster_[i][3][b].coordinate;
+					coordinate[0] = (Sq2_ * strawCluster_[i][1][a].coordinate) - strawCluster_[i][3][b].coordinate;
+					coordinate[1] = strawCluster_[i][3][b].coordinate;
 
-					if (strawAcceptance(i, Coordinate, 12) == 1) {
-						strawPointTemp_[i][NStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], Coordinate[0], Coordinate[1],
+					if (strawAcceptance(i, coordinate, 12) == 1) {
+						strawPointTemp_[i][nStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], coordinate[0], coordinate[1],
 								(strawCluster_[i][1][a].trailing + strawCluster_[i][3][b].trailing) / 2, 0, 2, 0);
-						NStrawPointsTemp[i]++;
+						nStrawPointsTemp[i]++;
 					}
 				}
 			}
 		}
 		//gettimeofday(&time[24], 0);
 		//gettimeofday(&time[25], 0);
-		for (int a = 0; a < NStrawClusters[i][2]; a++) { //x
+		for (int a = 0; a < nStrawClusters[i][2]; a++) { //x
 
-			for (int b = 0; b < NStrawClusters[i][3]; b++) { //y (x,y)
+			for (int b = 0; b < nStrawClusters[i][3]; b++) { //y (x,y)
 
 				if (strawCluster_[i][3][b].used == 0 && strawCluster_[i][2][a].used == 0) {
-					Coordinate[0] = strawCluster_[i][2][a].coordinate;
-					Coordinate[1] = strawCluster_[i][3][b].coordinate;
+					coordinate[0] = strawCluster_[i][2][a].coordinate;
+					coordinate[1] = strawCluster_[i][3][b].coordinate;
 
-					if (strawAcceptance(i, Coordinate, 12) == 1) {
-						strawPointTemp_[i][NStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], Coordinate[0], Coordinate[1],
+					if (strawAcceptance(i, coordinate, 12) == 1) {
+						strawPointTemp_[i][nStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], coordinate[0], coordinate[1],
 								(strawCluster_[i][2][a].trailing + strawCluster_[i][3][b].trailing) / 2, 0, 2, 0);
-						NStrawPointsTemp[i]++;
+						nStrawPointsTemp[i]++;
 					}
 				}
 			}
@@ -996,369 +996,369 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 	float point_dx = 0.0;
 	float point_dy = 0.0;
 	Point pointTemp;
-	float viewdistance_delta = 0.0;
+	float viewDistanceDelta = 0.0;
 
 	for (int i = 0; i < 4; i++) {
-		if (NStrawPointsTemp[i] < 7) {
+		if (nStrawPointsTemp[i] < 7) {
 			//			LOG_INFO( "!!!!!!!!!!!!!! Sto entrando qui !!!!!! " );
-			NStrawPointsFinal[i] = NStrawPointsTemp[i];
-			for (int j = 0; j < NStrawPointsFinal[i]; j++) { //loop over point
+			nStrawPointsFinal[i] = nStrawPointsTemp[i];
+			for (int j = 0; j < nStrawPointsFinal[i]; j++) { //loop over point
 				strawPointFinal_[i][j] = strawPointTemp_[i][j];
 			}
 			continue;
 		}
-		for (int j = 0; j < NStrawPointsTemp[i]; j++) { //loop over point
+		for (int j = 0; j < nStrawPointsTemp[i]; j++) { //loop over point
 
 			if (strawPointTemp_[i][j].nViews == 4 && !strawPointTemp_[i][j].used) {
 				pointTemp.clonePoint(strawPointTemp_[i][j]);
 				strawPointTemp_[i][j].used = 1;
-				for (int k = j + 1; k < NStrawPointsTemp[i]; k++) { //loop over point
+				for (int k = j + 1; k < nStrawPointsTemp[i]; k++) { //loop over point
 
 					if (strawPointTemp_[i][k].nViews == 4 && !strawPointTemp_[i][k].used) {
 						//						point_dx = fabs(strawPointTemp_[i][j].x-strawPointTemp_[i][k].x);
 						point_dy = fabs(strawPointTemp_[i][j].y - strawPointTemp_[i][k].y);
 						if (point_dy < 4.0) {
-							viewdistance_delta = pointTemp.viewDistance - strawPointTemp_[i][k].viewDistance;
-							if (viewdistance_delta > 1.0 && pointTemp.viewDistance > 3.0) {
+							viewDistanceDelta = pointTemp.viewDistance - strawPointTemp_[i][k].viewDistance;
+							if (viewDistanceDelta > 1.0 && pointTemp.viewDistance > 3.0) {
 								pointTemp.clonePoint(strawPointTemp_[i][k]);
 								strawPointTemp_[i][k].used = 1;
 							}
-							if (viewdistance_delta < -1.0 && strawPointTemp_[i][k].viewDistance > 3.0) {
+							if (viewDistanceDelta < -1.0 && strawPointTemp_[i][k].viewDistance > 3.0) {
 								strawPointTemp_[i][k].used = 1;
 							}
 						}
 					}
 				}
-				strawPointTempbis_[i][NStrawPointsTempBis[i]].clonePoint(pointTemp);
-				NStrawPointsTempBis[i]++;
+				strawPointTempbis_[i][nStrawPointsTempBis[i]].clonePoint(pointTemp);
+				nStrawPointsTempBis[i]++;
 			}
 			if (strawPointTemp_[i][j].nViews == 3 && !strawPointTemp_[i][j].used) {
 				pointTemp.clonePoint(strawPointTemp_[i][j]);
 				strawPointTemp_[i][j].used = 1;
-				for (int k = j + 1; k < NStrawPointsTemp[i]; k++) //loop over point
+				for (int k = j + 1; k < nStrawPointsTemp[i]; k++) //loop over point
 						{
 					if (strawPointTemp_[i][k].nViews == 3 && !strawPointTemp_[i][k].used) {
 						//						point_dx = fabs(strawPointTemp_[i][j].x-strawPointTemp_[i][k].x);
 						point_dy = fabs(strawPointTemp_[i][j].y - strawPointTemp_[i][k].y);
 						if (point_dy < 4.0) {
-							viewdistance_delta = pointTemp.viewDistance - strawPointTemp_[i][k].viewDistance;
-							if (viewdistance_delta > 1.0 && pointTemp.viewDistance > 3.0) {
+							viewDistanceDelta = pointTemp.viewDistance - strawPointTemp_[i][k].viewDistance;
+							if (viewDistanceDelta > 1.0 && pointTemp.viewDistance > 3.0) {
 								pointTemp.clonePoint(strawPointTemp_[i][k]);
 								strawPointTemp_[i][k].used = 1;
 							}
-							if (viewdistance_delta < -1.0 && strawPointTemp_[i][k].viewDistance > 3.0) {
+							if (viewDistanceDelta < -1.0 && strawPointTemp_[i][k].viewDistance > 3.0) {
 								strawPointTemp_[i][k].used = 1;
 							}
 						}
 					}
 				}
-				strawPointTempbis_[i][NStrawPointsTempBis[i]].clonePoint(pointTemp);
-				NStrawPointsTempBis[i]++;
+				strawPointTempbis_[i][nStrawPointsTempBis[i]].clonePoint(pointTemp);
+				nStrawPointsTempBis[i]++;
 			}
 			if (strawPointTemp_[i][j].nViews == 2) {
-				strawPointTempbis_[i][NStrawPointsTempBis[i]].clonePoint(strawPointTemp_[i][j]);
-				NStrawPointsTempBis[i]++;
+				strawPointTempbis_[i][nStrawPointsTempBis[i]].clonePoint(strawPointTemp_[i][j]);
+				nStrawPointsTempBis[i]++;
 			}
 		}
 
 		////////second SELECTION
 
-		for (int j = 0; j < NStrawPointsTempBis[i]; j++) { //loop over point
+		for (int j = 0; j < nStrawPointsTempBis[i]; j++) { //loop over point
 
 			if (strawPointTempbis_[i][j].nViews == 4 && !strawPointTempbis_[i][j].used) {
 				pointTemp.clonePoint(strawPointTempbis_[i][j]);
 				strawPointTempbis_[i][j].used = 1;
-				for (int k = j + 1; k < NStrawPointsTempBis[i]; k++) { //loop over point
+				for (int k = j + 1; k < nStrawPointsTempBis[i]; k++) { //loop over point
 
 					if (strawPointTempbis_[i][k].nViews == 4 && !strawPointTempbis_[i][k].used) {
 						point_dx = fabs(strawPointTempbis_[i][j].x - strawPointTempbis_[i][k].x);
 						//						point_dy = fabs(strawPointTempbis_[i][j].y-strawPointTempbis_[i][k].y);
 						if (point_dx < 4.0) {
-							viewdistance_delta = pointTemp.viewDistance - strawPointTempbis_[i][k].viewDistance;
-							if (viewdistance_delta > 1.0 && pointTemp.viewDistance > 3.0) {
+							viewDistanceDelta = pointTemp.viewDistance - strawPointTempbis_[i][k].viewDistance;
+							if (viewDistanceDelta > 1.0 && pointTemp.viewDistance > 3.0) {
 								//								pointTemp.setPoint(strawPointTempbis_[i][k].z,strawPointTempbis_[i][k].x,strawPointTempbis_[i][k].y,strawPointTempbis_[i][k].trailing,strawPointTempbis_[i][k].viewDistance,strawPointTempbis_[i][k].nViews,strawPointTempbis_[i][k].used);
 								pointTemp.clonePoint(strawPointTempbis_[i][k]);
 								strawPointTempbis_[i][k].used = 1;
 							}
-							if (viewdistance_delta < -1.0 && strawPointTemp_[i][k].viewDistance > 3.0) {
+							if (viewDistanceDelta < -1.0 && strawPointTemp_[i][k].viewDistance > 3.0) {
 								strawPointTempbis_[i][k].used = 1;
 							}
 						}
 					}
 				}
-				strawPointFinal_[i][NStrawPointsFinal[i]].clonePoint(pointTemp);
-				NStrawPointsFinal[i]++;
+				strawPointFinal_[i][nStrawPointsFinal[i]].clonePoint(pointTemp);
+				nStrawPointsFinal[i]++;
 			}
 			if (strawPointTempbis_[i][j].nViews == 3 && !strawPointTempbis_[i][j].used) {
 				//				pointTemp.setPoint(strawPointTempbis_[i][j].z,strawPointTempbis_[i][j].x,strawPointTempbis_[i][j].y,strawPointTempbis_[i][j].trailing,strawPointTempbis_[i][j].viewDistance,strawPointTempbis_[i][j].nViews,strawPointTempbis_[i][j].used);
 				pointTemp.clonePoint(strawPointTempbis_[i][j]);
 				strawPointTempbis_[i][j].used = 1;
-				for (int k = j + 1; k < NStrawPointsTempBis[i]; k++) { //loop over point
+				for (int k = j + 1; k < nStrawPointsTempBis[i]; k++) { //loop over point
 					if (strawPointTempbis_[i][k].nViews == 3 && !strawPointTempbis_[i][k].used) {
 						point_dx = fabs(strawPointTempbis_[i][j].x - strawPointTempbis_[i][k].x);
 						//						point_dy = fabs(strawPointTempbis_[i][j].y-strawPointTempbis_[i][k].y);
 						if (point_dx < 4.0) {
-							viewdistance_delta = pointTemp.viewDistance - strawPointTempbis_[i][k].viewDistance;
-							if (viewdistance_delta > 1.0 && pointTemp.viewDistance > 3.0) {
+							viewDistanceDelta = pointTemp.viewDistance - strawPointTempbis_[i][k].viewDistance;
+							if (viewDistanceDelta > 1.0 && pointTemp.viewDistance > 3.0) {
 								//								pointTemp.setPoint(strawPointTempbis_[i][k].z,strawPointTempbis_[i][k].x,strawPointTempbis_[i][k].y,strawPointTempbis_[i][k].trailing,strawPointTempbis_[i][k].viewDistance,strawPointTempbis_[i][k].nViews,strawPointTempbis_[i][k].used);
 								pointTemp.clonePoint(strawPointTempbis_[i][k]);
 								strawPointTempbis_[i][k].used = 1;
 							}
-							if (viewdistance_delta < -1.0 && strawPointTemp_[i][k].viewDistance > 3.0) {
+							if (viewDistanceDelta < -1.0 && strawPointTemp_[i][k].viewDistance > 3.0) {
 								strawPointTempbis_[i][k].used = 1;
 							}
 						}
 					}
 				}
-				strawPointFinal_[i][NStrawPointsFinal[i]].clonePoint(pointTemp);
-				NStrawPointsFinal[i]++;
+				strawPointFinal_[i][nStrawPointsFinal[i]].clonePoint(pointTemp);
+				nStrawPointsFinal[i]++;
 			}
 			if (strawPointTempbis_[i][j].nViews == 2) {
-				strawPointFinal_[i][NStrawPointsFinal[i]].clonePoint(strawPointTempbis_[i][j]);
-				NStrawPointsFinal[i]++;
+				strawPointFinal_[i][nStrawPointsFinal[i]].clonePoint(strawPointTempbis_[i][j]);
+				nStrawPointsFinal[i]++;
 			}
 		}
 	}
 
 	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < NStrawPointsFinal[i]; j++) {
-			if (NStrawPointsFinal[i] > 0)
-				NChambersHit++;
+		for (int j = 0; j < nStrawPointsFinal[i]; j++) {
+			if (nStrawPointsFinal[i] > 0)
+				nChambersHit++;
 		}
 	}
 
 	////////////////////// TRACK RECONSTRUCTION ////////////////////////////////////
 //	LOG_INFO("Track Reconstruction - Hought ");
 
-	float CDA = 0.;
+	float cda = 0.;
 
-	float MTemp;
+	float mTemp;
 
-	int NCam = 0;
-	int QyHist = 0;
-	int ChkCamera = 0;
-	int ChkCam = 0;
-	int NChkCam = 0;
-	int AddCam1 = 0;
-	int AddCam2 = 0;
+	int nCam = 0;
+	int qyHist = 0;
+	int chkCamera = 0;
+	int chkCam = 0;
+	int nChkCam = 0;
+	int addCam1 = 0;
+	int addCam2 = 0;
 
-	//verificare
-	int NFirstTrack = 0;
-	int NFirstTrackCentrali = 0;
-	int TempNHitC = 0;
-	int TempNHitL = 0;
-	int Temp2NHitC = 0;
+	// Check
+	int nFirstTrack = 0;
+	int nFirstTrackCentrali = 0;
+	int tempNHitC = 0;
+	int tempNHitL = 0;
+	int temp2NHitC = 0;
 
-	int NAddHit1 = 0;
-	int NAddHit2 = 0;
-	int TempHit = 0;
-	int TempCamera = 0;
-	int ChkHit = 0; //chk per verificare se un hit o una camera trovata in una casella laterale è gia stata usata nella casella centrale
+	int nAddHit1 = 0;
+	int nAddHit2 = 0;
+	int tempHit = 0;
+	int tempCamera = 0;
+	int chkHit = 0; //chk per verificare se un hit o una camera trovata in una casella laterale è gia stata usata nella casella centrale
 
-	float PointMY = 0.0;
-	float PointQY = 0.0;
+	float pointMY = 0.0;
+	float pointQY = 0.0;
 
-	int NTrack = 0;
+	int nTrack = 0;
 
 	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < NStrawPointsFinal[i]; j++) //loop over point
+		for (int j = 0; j < nStrawPointsFinal[i]; j++) //loop over point
 				{
-			NCam = i;
+			nCam = i;
 			for (int a = 0; a < RANGEM; a++) {
-				MTemp = ((float) a - ((float) RANGEM + 0.1) / 2) * passo;
-				QY = strawPointFinal_[i][j].y - MTemp * (strawPointFinal_[i][j].z - ZMAGNET); //con 0.03 mrad di angolo max qy va da -1424 a 1637, quindi metto 1500 come limite (posso tagliare un poco prima di 0.03 per l'ultima camera)
+				mTemp = ((float) a - ((float) RANGEM + 0.1) / 2) * PASSO;
+				qy = strawPointFinal_[i][j].y - mTemp * (strawPointFinal_[i][j].z - ZMAGNET); //con 0.03 mrad di angolo max qy va da -1424 a 1637, quindi metto 1500 come limite (posso tagliare un poco prima di 0.03 per l'ultima camera)
 				//qx = point[i][j].x - mtemp * point[i][j].z; //se si volesse fare un hough con x ma e' complicato con il magnete
 
-				QyHist = QY * RANGEQ / LMAGNET + RANGEQ / 2; //provo a mettere 3000
+				qyHist = qy * RANGEQ / LMAGNET + RANGEQ / 2; //provo a mettere 3000
 
-				if (QyHist > 0 && QyHist < RANGEQ && (Hought[a][QyHist] >> 60) < 6) {
-					Hought[a][QyHist] |= ((long long) (0x3 & NCam) << ((Hought[a][QyHist] >> 60) * 2 + 48)); //12 bits from 48 to 59 with the point chamber number (2 bit for chamber)
-					Hought[a][QyHist] |= ((((long long) (0xFF & (j))) << ((Hought[a][QyHist] >> 60) * 8)) & 0XFFFFFFFFFFFF); //the first 48 bits with up to 6 point of 8 bits ( 255 )
-					Hought[a][QyHist] += ((long long) 1 << 60); //the 4 most significant bits with the number of points
+				if (qyHist > 0 && qyHist < RANGEQ && (hought[a][qyHist] >> 60) < 6) {
+					hought[a][qyHist] |= ((long long) (0x3 & nCam) << ((hought[a][qyHist] >> 60) * 2 + 48)); //12 bits from 48 to 59 with the point chamber number (2 bit for chamber)
+					hought[a][qyHist] |= ((((long long) (0xFF & (j))) << ((hought[a][qyHist] >> 60) * 8)) & 0XFFFFFFFFFFFF); //the first 48 bits with up to 6 point of 8 bits ( 255 )
+					hought[a][qyHist] += ((long long) 1 << 60); //the 4 most significant bits with the number of points
 				}
 			}
 		}
 	}
 
-	NFirstTrack = 0;
+	nFirstTrack = 0;
 
 	for (int a = 0; a < RANGEM; a++) {
 		for (int b = 0; b < RANGEQ; b++) {
-			if ((Hought[a][b] >> 60) > 1) //looking for bin with at least 2 points
+			if ((hought[a][b] >> 60) > 1) //looking for bin with at least 2 points
 					{
-				ChkCam = 0;
-				NChkCam = 4;
-				AddCam1 = -1;
-				AddCam2 = -1;
-				ChkCamera = 0;
+				chkCam = 0;
+				nChkCam = 4;
+				addCam1 = -1;
+				addCam2 = -1;
+				chkCamera = 0;
 
 				//verificare
-				NFirstTrack = 0;
-				NFirstTrackCentrali = 0;
-				TempNHitC = 0;
-				TempNHitL = 0;
-				NAddHit1 = 0;
+				nFirstTrack = 0;
+				nFirstTrackCentrali = 0;
+				tempNHitC = 0;
+				tempNHitL = 0;
+				nAddHit1 = 0;
 
-				NAddHit1 = 0;
-				NAddHit2 = 0;
-				TempHit = 0;
-				TempCamera = 0;
-				ChkHit = 0; //chk per verificare se un hit o una camera trovata in una casella laterale è gia stata usata nella casella centrale
+				nAddHit1 = 0;
+				nAddHit2 = 0;
+				tempHit = 0;
+				tempCamera = 0;
+				chkHit = 0; //chk per verificare se un hit o una camera trovata in una casella laterale è gia stata usata nella casella centrale
 
-				PointMY = 0.0;
-				PointQY = 0.0;
+				pointMY = 0.0;
+				pointQY = 0.0;
 
-				for (int c = 0; c < (int) (Hought[a][b] >> 60); c++) // check if there are at least 2 hits belonging to different chambers
-					ChkCam |= 1 << (0X3 & (Hought[a][b] >> (48 + 2 * c)));
+				for (int c = 0; c < (int) (hought[a][b] >> 60); c++) // check if there are at least 2 hits belonging to different chambers
+					chkCam |= 1 << (0X3 & (hought[a][b] >> (48 + 2 * c)));
 
 				for (int d = 0; d < 4; d++)
-					if ((0X1 & (ChkCam >> d)) == 0) {
-						NChkCam--;
+					if ((0X1 & (chkCam >> d)) == 0) {
+						nChkCam--;
 
-						if (AddCam1 == -1)
-							AddCam1 = d;
+						if (addCam1 == -1)
+							addCam1 = d;
 						else
-							AddCam2 = d;
+							addCam2 = d;
 					}
 
-				if (NChkCam > 1) {
-					for (int d = 0; d < (int) (Hought[a][b] >> 60); d++) {
+				if (nChkCam > 1) {
+					for (int d = 0; d < (int) (hought[a][b] >> 60); d++) {
 						// si creano più tracklet con tutte le combinazioni di hit con camere diverse
 
-						if (((int) pow(2, (int) (0X3 & (Hought[a][b] >> (48 + 2 * d)))) & ChkCamera) == 0) {
+						if (((int) pow(2, (int) (0X3 & (hought[a][b] >> (48 + 2 * d)))) & chkCamera) == 0) {
 							// verifica se la camera è gia stata usata per questo tracklet: se non è stata
 							// usata la aggiungo ad in tracklet esistenti (all'inizio ce ne e' uno vuoto)
 
-							for (int j = 0; j < NFirstTrack + 1; j++) {
-								strawFirstTempTrk_[j].hitc[TempNHitC] = (int) (0XFF & (Hought[a][b] >> (8 * d)));
-								strawFirstTempTrk_[j].camerec[TempNHitC] = (int) (0X3 & (Hought[a][b] >> (48 + 2 * d)));
+							for (int j = 0; j < nFirstTrack + 1; j++) {
+								strawFirstTempTrk_[j].hitc[tempNHitC] = (int) (0XFF & (hought[a][b] >> (8 * d)));
+								strawFirstTempTrk_[j].camerec[tempNHitC] = (int) (0X3 & (hought[a][b] >> (48 + 2 * d)));
 
-								ChkCamera |= (int) pow(2, strawFirstTempTrk_[NFirstTrack].camerec[TempNHitC]);
+								chkCamera |= (int) pow(2, strawFirstTempTrk_[nFirstTrack].camerec[tempNHitC]);
 
-								strawFirstTempTrk_[j].ncentrali = TempNHitC + 1;
+								strawFirstTempTrk_[j].ncentrali = tempNHitC + 1;
 								strawFirstTempTrk_[j].nlaterali = 0;
 							}
-							TempNHitC++;
+							tempNHitC++;
 						}
 						else //se è gia stata usata si crea un nuovo tracklet con la nuova camera al posto di quell'altra (se soddisfa dei requisiti)
 						{
-							Temp2NHitC = 0;
-							NFirstTrack++;
-							for (int j = 0; j < TempNHitC; j++) {
+							temp2NHitC = 0;
+							nFirstTrack++;
+							for (int j = 0; j < tempNHitC; j++) {
 
-								if (strawFirstTempTrk_[NFirstTrack - 1].camerec[j] != (int) (0X3 & (Hought[a][b] >> (48 + 2 * d)))) {
-									strawFirstTempTrk_[NFirstTrack].hitc[Temp2NHitC] = strawFirstTempTrk_[NFirstTrack - 1].hitc[j];
-									strawFirstTempTrk_[NFirstTrack].camerec[Temp2NHitC] = strawFirstTempTrk_[NFirstTrack - 1].camerec[j];
+								if (strawFirstTempTrk_[nFirstTrack - 1].camerec[j] != (int) (0X3 & (hought[a][b] >> (48 + 2 * d)))) {
+									strawFirstTempTrk_[nFirstTrack].hitc[temp2NHitC] = strawFirstTempTrk_[nFirstTrack - 1].hitc[j];
+									strawFirstTempTrk_[nFirstTrack].camerec[temp2NHitC] = strawFirstTempTrk_[nFirstTrack - 1].camerec[j];
 								}
 								else {
-									if (strawPointFinal_[(int) (0X3 & (Hought[a][b] >> (48 + 2 * d)))][(int) (0XFF
-											& (Hought[a][b] >> (8 * d)))].nViews
-											> strawPointFinal_[strawFirstTempTrk_[NFirstTrack - 1].camerec[Temp2NHitC]][strawFirstTempTrk_[NFirstTrack
-													- 1].hitc[Temp2NHitC]].nViews) {
-										NFirstTrack--;
-										strawFirstTempTrk_[NFirstTrack].hitc[Temp2NHitC] = (int) (0XFF & (Hought[a][b] >> (8 * d)));
-										strawFirstTempTrk_[NFirstTrack].camerec[Temp2NHitC] = (int) (0X3 & (Hought[a][b] >> (48 + 2 * d)));
+									if (strawPointFinal_[(int) (0X3 & (hought[a][b] >> (48 + 2 * d)))][(int) (0XFF
+											& (hought[a][b] >> (8 * d)))].nViews
+											> strawPointFinal_[strawFirstTempTrk_[nFirstTrack - 1].camerec[temp2NHitC]][strawFirstTempTrk_[nFirstTrack
+													- 1].hitc[temp2NHitC]].nViews) {
+										nFirstTrack--;
+										strawFirstTempTrk_[nFirstTrack].hitc[temp2NHitC] = (int) (0XFF & (hought[a][b] >> (8 * d)));
+										strawFirstTempTrk_[nFirstTrack].camerec[temp2NHitC] = (int) (0X3 & (hought[a][b] >> (48 + 2 * d)));
 									}
-									else if (strawPointFinal_[(int) (0X3 & (Hought[a][b] >> (48 + 2 * d)))][(int) (0XFF
-											& (Hought[a][b] >> (8 * d)))].nViews
-											== strawPointFinal_[strawFirstTempTrk_[NFirstTrack - 1].camerec[Temp2NHitC]][strawFirstTempTrk_[NFirstTrack
-													- 1].hitc[Temp2NHitC]].nViews) {
-										strawFirstTempTrk_[NFirstTrack].hitc[Temp2NHitC] = (int) (0XFF & (Hought[a][b] >> (8 * d)));
-										strawFirstTempTrk_[NFirstTrack].camerec[Temp2NHitC] = (int) (0X3 & (Hought[a][b] >> (48 + 2 * d)));
+									else if (strawPointFinal_[(int) (0X3 & (hought[a][b] >> (48 + 2 * d)))][(int) (0XFF
+											& (hought[a][b] >> (8 * d)))].nViews
+											== strawPointFinal_[strawFirstTempTrk_[nFirstTrack - 1].camerec[temp2NHitC]][strawFirstTempTrk_[nFirstTrack
+													- 1].hitc[temp2NHitC]].nViews) {
+										strawFirstTempTrk_[nFirstTrack].hitc[temp2NHitC] = (int) (0XFF & (hought[a][b] >> (8 * d)));
+										strawFirstTempTrk_[nFirstTrack].camerec[temp2NHitC] = (int) (0X3 & (hought[a][b] >> (48 + 2 * d)));
 									}
 									else {
-										NFirstTrack--;
+										nFirstTrack--;
 									}
 								}
 
-								Temp2NHitC++;
+								temp2NHitC++;
 							}
-							strawFirstTempTrk_[NFirstTrack].ncentrali = Temp2NHitC;
-							strawFirstTempTrk_[NFirstTrack].nlaterali = 0;
+							strawFirstTempTrk_[nFirstTrack].ncentrali = temp2NHitC;
+							strawFirstTempTrk_[nFirstTrack].nlaterali = 0;
 						}
 					}
-					NFirstTrackCentrali = NFirstTrack;
+					nFirstTrackCentrali = nFirstTrack;
 
-					if (TempNHitC > 1 && TempNHitC < 4) //se ci sono meno di 4 hit nella casella centrale, si cercano gli hit mancanti in quelle intorno
+					if (tempNHitC > 1 && tempNHitC < 4) //se ci sono meno di 4 hit nella casella centrale, si cercano gli hit mancanti in quelle intorno
 							{
-						NAddHit1 = 0;
-						NAddHit2 = 0;
+						nAddHit1 = 0;
+						nAddHit2 = 0;
 						int *addhit1 = new int[50];
 						int *addhit2 = new int[50];
 
 						for (int h = -1; h < 2; h++) {
 							for (int k = -1; k < 2; k++) {
 								if (a + h > -1 && a + h < RANGEM && b + k > -1 && b + k < 200) {
-									for (int l = 0; l < (Hought[a + h][b + k] >> 60); l++) {
-										TempHit = (int) (0XFF & (Hought[a + h][b + k] >> (8 * l)));
-										TempCamera = (int) (0X3 & (Hought[a + h][b + k] >> (48 + 2 * l)));
-										ChkHit = 0;
+									for (int l = 0; l < (hought[a + h][b + k] >> 60); l++) {
+										tempHit = (int) (0XFF & (hought[a + h][b + k] >> (8 * l)));
+										tempCamera = (int) (0X3 & (hought[a + h][b + k] >> (48 + 2 * l)));
+										chkHit = 0;
 
 										//terza e nuova soluzione
 
-										if (TempCamera == AddCam1) {
+										if (tempCamera == addCam1) {
 											//look if there already are the hit in addhit1[]
 
-											for (int d = 0; d < NAddHit1; d++) {
-												if (addhit1[d] == TempHit) {
-													ChkHit = 1;
+											for (int d = 0; d < nAddHit1; d++) {
+												if (addhit1[d] == tempHit) {
+													chkHit = 1;
 												}
 											}
 
-											if (ChkHit == 0) {
-												addhit1[NAddHit1] = TempHit;
-												NAddHit1++;
+											if (chkHit == 0) {
+												addhit1[nAddHit1] = tempHit;
+												nAddHit1++;
 											}
 										}
-										if (TempCamera == AddCam2) {
-											for (int d = 0; d < NAddHit2; d++) {
-												if (addhit2[d] == TempHit) {
-													ChkHit = 1;
+										if (tempCamera == addCam2) {
+											for (int d = 0; d < nAddHit2; d++) {
+												if (addhit2[d] == tempHit) {
+													chkHit = 1;
 												}
 											}
 
-											if (ChkHit == 0) {
-												addhit2[NAddHit2] = TempHit;
-												NAddHit2++;
+											if (chkHit == 0) {
+												addhit2[nAddHit2] = tempHit;
+												nAddHit2++;
 											}
 										}
 									}
 								}
 							}
 						}
-						if (NAddHit1 > 0) {
-							for (int j = 0; j < NFirstTrackCentrali + 1; j++) {
-								strawFirstTempTrk_[j].hitl[TempNHitL] = addhit1[0];
-								strawFirstTempTrk_[j].camerel[TempNHitL] = AddCam1;
-								strawFirstTempTrk_[j].nlaterali = TempNHitL + 1;
+						if (nAddHit1 > 0) {
+							for (int j = 0; j < nFirstTrackCentrali + 1; j++) {
+								strawFirstTempTrk_[j].hitl[tempNHitL] = addhit1[0];
+								strawFirstTempTrk_[j].camerel[tempNHitL] = addCam1;
+								strawFirstTempTrk_[j].nlaterali = tempNHitL + 1;
 							}
 
-							for (int d = 1; d < NAddHit1; d++) {
-								for (int j = 0; j < NFirstTrackCentrali + 1; j++) {
-									NFirstTrack++;
-									strawFirstTempTrk_[NFirstTrack].copyTrack(strawFirstTempTrk_[j]);
-									strawFirstTempTrk_[NFirstTrack].hitl[TempNHitL] = addhit1[d];
+							for (int d = 1; d < nAddHit1; d++) {
+								for (int j = 0; j < nFirstTrackCentrali + 1; j++) {
+									nFirstTrack++;
+									strawFirstTempTrk_[nFirstTrack].copyTrack(strawFirstTempTrk_[j]);
+									strawFirstTempTrk_[nFirstTrack].hitl[tempNHitL] = addhit1[d];
 								}
 							}
-							TempNHitL++;
+							tempNHitL++;
 						}
-						NFirstTrackCentrali = NFirstTrack; //sono aumentati in seguito all'addhit1
+						nFirstTrackCentrali = nFirstTrack; //sono aumentati in seguito all'addhit1
 
-						if (NAddHit2 > 0) {
-							for (int j = 0; j < NFirstTrackCentrali + 1; j++) {
-								strawFirstTempTrk_[j].hitl[TempNHitL] = addhit2[0];
-								strawFirstTempTrk_[j].camerel[TempNHitL] = AddCam2;
-								strawFirstTempTrk_[j].nlaterali = TempNHitL + 1;
+						if (nAddHit2 > 0) {
+							for (int j = 0; j < nFirstTrackCentrali + 1; j++) {
+								strawFirstTempTrk_[j].hitl[tempNHitL] = addhit2[0];
+								strawFirstTempTrk_[j].camerel[tempNHitL] = addCam2;
+								strawFirstTempTrk_[j].nlaterali = tempNHitL + 1;
 							}
 
-							for (int d = 1; d < NAddHit2; d++) {
-								for (int j = 0; j < NFirstTrackCentrali + 1; j++) {
-									NFirstTrack++;
-									strawFirstTempTrk_[NFirstTrack].copyTrack(strawFirstTempTrk_[j]);
-									strawFirstTempTrk_[NFirstTrack].hitl[TempNHitL] = addhit2[d];
+							for (int d = 1; d < nAddHit2; d++) {
+								for (int j = 0; j < nFirstTrackCentrali + 1; j++) {
+									nFirstTrack++;
+									strawFirstTempTrk_[nFirstTrack].copyTrack(strawFirstTempTrk_[j]);
+									strawFirstTempTrk_[nFirstTrack].hitl[tempNHitL] = addhit2[d];
 								}
 							}
-							TempNHitL++;
+							tempNHitL++;
 						}
 
 						delete[] addhit1;
@@ -1367,12 +1367,12 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 
 					//now I have all the tracklet find in the bin, I have to select only the real one
 
-					PointMY = ((float) a - ((float) RANGEM + 0.1) / 2) * passo;
-					PointQY = b * LMAGNET / RANGEQ - LMAGNET / 2;
+					pointMY = ((float) a - ((float) RANGEM + 0.1) / 2) * PASSO;
+					pointQY = b * LMAGNET / RANGEQ - LMAGNET / 2;
 
 					//	zvertex = 197645 - (PointQY / PointMY); //oppure shiftati perchè zvertex = 197645-((PointQY+4.762)/(PointMY+0.0001989));
 
-					for (int j = 0; j < NFirstTrack + 1; j++) { //parte X
+					for (int j = 0; j < nFirstTrack + 1; j++) { //parte X
 
 						float x0 = 0.0;
 						float x1 = 0.0;
@@ -1389,11 +1389,11 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 						float q01 = 0.0;
 						float q23 = 0.0;
 						float dqx = 1000000.0;
-						double trailingtemp = 0.0;
+						double trailingTemp = 0.0;
 
 						if (strawFirstTempTrk_[j].ncentrali + strawFirstTempTrk_[j].nlaterali > 2) {
-							for (int z = 0; z < TempNHitC; z++) {
-								trailingtemp += strawPointFinal_[strawFirstTempTrk_[j].camerec[z]][strawFirstTempTrk_[j].hitc[z]].trailing;
+							for (int z = 0; z < tempNHitC; z++) {
+								trailingTemp += strawPointFinal_[strawFirstTempTrk_[j].camerec[z]][strawFirstTempTrk_[j].hitc[z]].trailing;
 
 								if (strawFirstTempTrk_[j].camerec[z] == 0) {
 									x0 = strawPointFinal_[strawFirstTempTrk_[j].camerec[z]][strawFirstTempTrk_[j].hitc[z]].x;
@@ -1416,8 +1416,8 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 									z3 = strawPointFinal_[strawFirstTempTrk_[j].camerec[z]][strawFirstTempTrk_[j].hitc[z]].z - ZMAGNET;
 								}
 							}
-							for (int z = 0; z < TempNHitL; z++) {
-								trailingtemp += strawPointFinal_[strawFirstTempTrk_[j].camerel[z]][strawFirstTempTrk_[j].hitl[z]].trailing;
+							for (int z = 0; z < tempNHitL; z++) {
+								trailingTemp += strawPointFinal_[strawFirstTempTrk_[j].camerel[z]][strawFirstTempTrk_[j].hitl[z]].trailing;
 
 								if (strawFirstTempTrk_[j].camerel[z] == 0) {
 									x0 = strawPointFinal_[strawFirstTempTrk_[j].camerel[z]][strawFirstTempTrk_[j].hitl[z]].x;
@@ -1479,23 +1479,23 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 							strawFirstTempTrk_[j].q2x = q23;
 							strawFirstTempTrk_[j].pz = 270.0 / (fabs(strawFirstTempTrk_[j].m2x - strawFirstTempTrk_[j].m1x));
 
-							strawFirstTempTrk_[j].my = PointMY;
-							strawFirstTempTrk_[j].qy = PointQY;
-							strawFirstTempTrk_[j].trailing = trailingtemp / (TempNHitC + TempNHitL);
+							strawFirstTempTrk_[j].my = pointMY;
+							strawFirstTempTrk_[j].qy = pointQY;
+							strawFirstTempTrk_[j].trailing = trailingTemp / (tempNHitC + tempNHitL);
 
-							QTrack.setPoint(0.0, strawFirstTempTrk_[j].q1x, strawFirstTempTrk_[j].qy, 0.0, 0.0, 0, 0);
-							MTrack.setPoint(1.0, strawFirstTempTrk_[j].m1x, strawFirstTempTrk_[j].my, 0.0, 0.0, 0, 0);
+							qTrack.setPoint(0.0, strawFirstTempTrk_[j].q1x, strawFirstTempTrk_[j].qy, 0.0, 0.0, 0, 0);
+							mTrack.setPoint(1.0, strawFirstTempTrk_[j].m1x, strawFirstTempTrk_[j].my, 0.0, 0.0, 0, 0);
 
-							cdaVertex(QBeam_, QTrack, MBeam_, MTrack, CDA, Vertex);
+							cdaVertex(QBeam_, qTrack, MBeam_, mTrack, cda, vertex);
 
-							strawFirstTempTrk_[j].zvertex = Vertex.z;
-							strawFirstTempTrk_[j].cda = CDA;
+							strawFirstTempTrk_[j].zvertex = vertex.z;
+							strawFirstTempTrk_[j].cda = cda;
 
 							//pz>3 Gev <100Gev, my e mx1 < 0.020
 							if (strawFirstTempTrk_[j].pz > 3000 && strawFirstTempTrk_[j].pz < 100000 && strawFirstTempTrk_[j].my < 0.020
 									&& strawFirstTempTrk_[j].m1x < 0.020) {
-								strawTempTrk_[NTrack].copyTrack(strawFirstTempTrk_[j]);
-								NTrack++;
+								strawTempTrk_[nTrack].copyTrack(strawFirstTempTrk_[j]);
+								nTrack++;
 							}
 						}
 					}
@@ -1506,330 +1506,330 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 		}
 	}
 
-	NTracletCondivisi = 0;
-	NTrackIntermedie = 0;
+	nTracletCondivisi = 0;
+	nTrackIntermedie = 0;
 
 	//prima uso le tracce con 4 hit
-	for (int e = 0; e < NTrack; e++) {
-		TrackIntermedieTemp_my = 0.0;
-		TrackIntermedieTemp_qy = 0.0;
-		TrackIntermedieTemp_m1x = 0.0;
-		TrackIntermedieTemp_q1x = 0.0;
-		TrackIntermedieTemp_m2x = 0.0;
-		TrackIntermedieTemp_q2x = 0.0;
+	for (int e = 0; e < nTrack; e++) {
+		trackIntermedieTemp_my = 0.0;
+		trackIntermedieTemp_qy = 0.0;
+		trackIntermedieTemp_m1x = 0.0;
+		trackIntermedieTemp_q1x = 0.0;
+		trackIntermedieTemp_m2x = 0.0;
+		trackIntermedieTemp_q2x = 0.0;
 
 		//select the best temporary track between the similar track with 4 point
 		if (strawTempTrk_[e].usato == 0 && strawTempTrk_[e].ncentrali + strawTempTrk_[e].nlaterali == 4) {
-			TrackIntermedieTemp.copyTrack(strawTempTrk_[e]);
+			trackIntermedieTemp.copyTrack(strawTempTrk_[e]);
 			if ((strawTempTrk_[e].q2x - strawTempTrk_[e].q1x) < -13 || (strawTempTrk_[e].q2x - strawTempTrk_[e].q1x) > 0)
-				for (int f = e; f < NTrack; f++) {
-					TempCondivise = 0;
+				for (int f = e; f < nTrack; f++) {
+					tempCondivise = 0;
 					if (strawTempTrk_[f].ncentrali + strawTempTrk_[f].nlaterali == 4) {
-						for (int g = 0; g < TrackIntermedieTemp.ncentrali && strawTempTrk_[f].usato == 0; g++) {
+						for (int g = 0; g < trackIntermedieTemp.ncentrali && strawTempTrk_[f].usato == 0; g++) {
 							for (int h = 0; h < strawTempTrk_[f].ncentrali; h++) {
 
-								if (TrackIntermedieTemp.hitc[g] == strawTempTrk_[f].hitc[h]
-										&& TrackIntermedieTemp.camerec[g] == strawTempTrk_[f].camerec[h]) {
-									TempCondivise++;
+								if (trackIntermedieTemp.hitc[g] == strawTempTrk_[f].hitc[h]
+										&& trackIntermedieTemp.camerec[g] == strawTempTrk_[f].camerec[h]) {
+									tempCondivise++;
 								}
 							}
 							for (int h = 0; h < strawTempTrk_[f].nlaterali; h++) {
-								if (TrackIntermedieTemp.hitc[g] == strawTempTrk_[f].hitl[h]
-										&& TrackIntermedieTemp.camerec[g] == strawTempTrk_[f].camerel[h]) {
-									TempCondivise++;
+								if (trackIntermedieTemp.hitc[g] == strawTempTrk_[f].hitl[h]
+										&& trackIntermedieTemp.camerec[g] == strawTempTrk_[f].camerel[h]) {
+									tempCondivise++;
 								}
 							}
 						}
 
-						for (int g = 0; g < TrackIntermedieTemp.nlaterali && strawTempTrk_[f].usato == 0; g++) {
+						for (int g = 0; g < trackIntermedieTemp.nlaterali && strawTempTrk_[f].usato == 0; g++) {
 							for (int h = 0; h < strawTempTrk_[f].ncentrali; h++) {
 
-								if (TrackIntermedieTemp.hitl[g] == strawTempTrk_[f].hitc[h]
-										&& TrackIntermedieTemp.camerel[g] == strawTempTrk_[f].camerec[h]) {
-									TempCondivise++;
+								if (trackIntermedieTemp.hitl[g] == strawTempTrk_[f].hitc[h]
+										&& trackIntermedieTemp.camerel[g] == strawTempTrk_[f].camerec[h]) {
+									tempCondivise++;
 								}
 							}
 							for (int h = 0; h < strawTempTrk_[f].nlaterali; h++) {
 
-								if (TrackIntermedieTemp.hitl[g] == strawTempTrk_[f].hitl[h]
-										&& TrackIntermedieTemp.camerel[g] == strawTempTrk_[f].camerel[h]) {
-									TempCondivise++;
+								if (trackIntermedieTemp.hitl[g] == strawTempTrk_[f].hitl[h]
+										&& trackIntermedieTemp.camerel[g] == strawTempTrk_[f].camerel[h]) {
+									tempCondivise++;
 								}
 							}
 						}
 
-						if (TempCondivise > 1
+						if (tempCondivise > 1
 								&& (((strawTempTrk_[f].q2x - strawTempTrk_[f].q1x) > -13
 										&& (strawTempTrk_[f].q2x - strawTempTrk_[f].q1x) < 0)
-										|| strawTempTrk_[f].ncentrali > TrackIntermedieTemp.ncentrali
-										|| (strawTempTrk_[f].ncentrali == TrackIntermedieTemp.ncentrali
+										|| strawTempTrk_[f].ncentrali > trackIntermedieTemp.ncentrali
+										|| (strawTempTrk_[f].ncentrali == trackIntermedieTemp.ncentrali
 												&& fabs(strawTempTrk_[f].q2x - strawTempTrk_[f].q1x + 3)
-														< fabs(TrackIntermedieTemp.q2x - TrackIntermedieTemp.q1x + 3)))) {
+														< fabs(trackIntermedieTemp.q2x - trackIntermedieTemp.q1x + 3)))) {
 							//  End of conditional logic
 
-							TrackIntermedieTemp.copyTrack(strawTempTrk_[f]);
+							trackIntermedieTemp.copyTrack(strawTempTrk_[f]);
 						}
 					}
 				}
 
-			NTracletCondivisi = 0;
+			nTracletCondivisi = 0;
 
-			for (int f = 0; f < NTrack; f++) { //the tracks with the same point will be combined
+			for (int f = 0; f < nTrack; f++) { //the tracks with the same point will be combined
 
-				TempCondivise = 0;
-				for (int g = 0; g < TrackIntermedieTemp.ncentrali && strawTempTrk_[f].usato == 0; g++) {
+				tempCondivise = 0;
+				for (int g = 0; g < trackIntermedieTemp.ncentrali && strawTempTrk_[f].usato == 0; g++) {
 					for (int h = 0; h < strawTempTrk_[f].ncentrali; h++) {
-						if (TrackIntermedieTemp.hitc[g] == strawTempTrk_[f].hitc[h]
-								&& TrackIntermedieTemp.camerec[g] == strawTempTrk_[f].camerec[h]) {
-							TempCondivise++;
+						if (trackIntermedieTemp.hitc[g] == strawTempTrk_[f].hitc[h]
+								&& trackIntermedieTemp.camerec[g] == strawTempTrk_[f].camerec[h]) {
+							tempCondivise++;
 						}
 					}
 					for (int h = 0; h < strawTempTrk_[f].nlaterali; h++) {
-						if (TrackIntermedieTemp.hitc[g] == strawTempTrk_[f].hitl[h]
-								&& TrackIntermedieTemp.camerec[g] == strawTempTrk_[f].camerel[h]) {
-							TempCondivise++;
+						if (trackIntermedieTemp.hitc[g] == strawTempTrk_[f].hitl[h]
+								&& trackIntermedieTemp.camerec[g] == strawTempTrk_[f].camerel[h]) {
+							tempCondivise++;
 						}
 					}
 				}
 
-				for (int g = 0; g < TrackIntermedieTemp.nlaterali && strawTempTrk_[f].usato == 0; g++) {
+				for (int g = 0; g < trackIntermedieTemp.nlaterali && strawTempTrk_[f].usato == 0; g++) {
 					for (int h = 0; h < strawTempTrk_[f].ncentrali; h++) {
-						if (TrackIntermedieTemp.hitl[g] == strawTempTrk_[f].hitc[h]
-								&& TrackIntermedieTemp.camerel[g] == strawTempTrk_[f].camerec[h]) {
-							TempCondivise++;
+						if (trackIntermedieTemp.hitl[g] == strawTempTrk_[f].hitc[h]
+								&& trackIntermedieTemp.camerel[g] == strawTempTrk_[f].camerec[h]) {
+							tempCondivise++;
 						}
 					}
 					for (int h = 0; h < strawTempTrk_[f].nlaterali; h++) {
-						if (TrackIntermedieTemp.hitl[g] == strawTempTrk_[f].hitl[h]
-								&& TrackIntermedieTemp.camerel[g] == strawTempTrk_[f].camerel[h]) {
-							TempCondivise++;
+						if (trackIntermedieTemp.hitl[g] == strawTempTrk_[f].hitl[h]
+								&& trackIntermedieTemp.camerel[g] == strawTempTrk_[f].camerel[h]) {
+							tempCondivise++;
 						}
 					}
 				}
 
-				if (TempCondivise == (strawTempTrk_[f].ncentrali + strawTempTrk_[f].nlaterali)) {
-					NTracletCondivisi++;
-					TrackIntermedieTemp_my += strawTempTrk_[f].my;
-					TrackIntermedieTemp_qy += strawTempTrk_[f].qy;
-					TrackIntermedieTemp_m1x += strawTempTrk_[f].m1x;
-					TrackIntermedieTemp_q1x += strawTempTrk_[f].q1x;
-					TrackIntermedieTemp_m2x += strawTempTrk_[f].m2x;
-					TrackIntermedieTemp_q2x += strawTempTrk_[f].q2x;
+				if (tempCondivise == (strawTempTrk_[f].ncentrali + strawTempTrk_[f].nlaterali)) {
+					nTracletCondivisi++;
+					trackIntermedieTemp_my += strawTempTrk_[f].my;
+					trackIntermedieTemp_qy += strawTempTrk_[f].qy;
+					trackIntermedieTemp_m1x += strawTempTrk_[f].m1x;
+					trackIntermedieTemp_q1x += strawTempTrk_[f].q1x;
+					trackIntermedieTemp_m2x += strawTempTrk_[f].m2x;
+					trackIntermedieTemp_q2x += strawTempTrk_[f].q2x;
 
 					strawTempTrk_[f].usato = 1;
 				}
 				else {
-					if (strawTempTrk_[f].ncentrali + strawTempTrk_[f].nlaterali == 4 && TempCondivise > 1) {
+					if (strawTempTrk_[f].ncentrali + strawTempTrk_[f].nlaterali == 4 && tempCondivise > 1) {
 						strawTempTrk_[f].usato = 1;
 					}
-					else if (strawTempTrk_[f].ncentrali + strawTempTrk_[f].nlaterali == 3 && TempCondivise > 0) {
+					else if (strawTempTrk_[f].ncentrali + strawTempTrk_[f].nlaterali == 3 && tempCondivise > 0) {
 						strawTempTrk_[f].usato = 1;
 					}
 				}
 			}
 
-			TrackIntermedieTemp.my = TrackIntermedieTemp_my / NTracletCondivisi;
-			TrackIntermedieTemp.qy = TrackIntermedieTemp_qy / NTracletCondivisi;
-			TrackIntermedieTemp.m1x = TrackIntermedieTemp_m1x / NTracletCondivisi;
-			TrackIntermedieTemp.q1x = TrackIntermedieTemp_q1x / NTracletCondivisi;
-			TrackIntermedieTemp.m2x = TrackIntermedieTemp_m2x / NTracletCondivisi;
-			TrackIntermedieTemp.q2x = TrackIntermedieTemp_q2x / NTracletCondivisi;
+			trackIntermedieTemp.my = trackIntermedieTemp_my / nTracletCondivisi;
+			trackIntermedieTemp.qy = trackIntermedieTemp_qy / nTracletCondivisi;
+			trackIntermedieTemp.m1x = trackIntermedieTemp_m1x / nTracletCondivisi;
+			trackIntermedieTemp.q1x = trackIntermedieTemp_q1x / nTracletCondivisi;
+			trackIntermedieTemp.m2x = trackIntermedieTemp_m2x / nTracletCondivisi;
+			trackIntermedieTemp.q2x = trackIntermedieTemp_q2x / nTracletCondivisi;
 
-			strawTrkIntermedie_[NTrackIntermedie].copyTrack(TrackIntermedieTemp);
-			strawTrkIntermedie_[NTrackIntermedie].pz = 270 / (fabs(TrackIntermedieTemp.m2x - TrackIntermedieTemp.m1x));
+			strawTrkIntermedie_[nTrackIntermedie].copyTrack(trackIntermedieTemp);
+			strawTrkIntermedie_[nTrackIntermedie].pz = 270 / (fabs(trackIntermedieTemp.m2x - trackIntermedieTemp.m1x));
 
-			QTrack.setPoint(0.0, TrackIntermedieTemp.q1x, TrackIntermedieTemp.qy, 0.0, 0.0, 0, 0);
-			MTrack.setPoint(1.0, TrackIntermedieTemp.m1x, TrackIntermedieTemp.my, 0.0, 0.0, 0, 0);
+			qTrack.setPoint(0.0, trackIntermedieTemp.q1x, trackIntermedieTemp.qy, 0.0, 0.0, 0, 0);
+			mTrack.setPoint(1.0, trackIntermedieTemp.m1x, trackIntermedieTemp.my, 0.0, 0.0, 0, 0);
 
-			cdaVertex(QBeam_, QTrack, MBeam_, MTrack, CDA, Vertex);
+			cdaVertex(QBeam_, qTrack, MBeam_, mTrack, cda, vertex);
 
-			strawTrkIntermedie_[NTrackIntermedie].zvertex = Vertex.z;
-			strawTrkIntermedie_[NTrackIntermedie].cda = CDA;
-			strawTrkIntermedie_[NTrackIntermedie].ncondivisi = 0;
-			strawTrkIntermedie_[NTrackIntermedie].ncamcondivise = 0;
-			strawTrkIntermedie_[NTrackIntermedie].usato = 0;
+			strawTrkIntermedie_[nTrackIntermedie].zvertex = vertex.z;
+			strawTrkIntermedie_[nTrackIntermedie].cda = cda;
+			strawTrkIntermedie_[nTrackIntermedie].ncondivisi = 0;
+			strawTrkIntermedie_[nTrackIntermedie].ncamcondivise = 0;
+			strawTrkIntermedie_[nTrackIntermedie].usato = 0;
 
-			NTrackIntermedie++;
+			nTrackIntermedie++;
 
 		}
 	}
 
 	//the same with tracks with only 3 points
-	for (int e = 0; e < NTrack; e++) {
+	for (int e = 0; e < nTrack; e++) {
 
-		TrackIntermedieTemp_my = 0.0;
-		TrackIntermedieTemp_qy = 0.0;
-		TrackIntermedieTemp_m1x = 0.0;
-		TrackIntermedieTemp_q1x = 0.0;
-		TrackIntermedieTemp_m2x = 0.0;
-		TrackIntermedieTemp_q2x = 0.0;
+		trackIntermedieTemp_my = 0.0;
+		trackIntermedieTemp_qy = 0.0;
+		trackIntermedieTemp_m1x = 0.0;
+		trackIntermedieTemp_q1x = 0.0;
+		trackIntermedieTemp_m2x = 0.0;
+		trackIntermedieTemp_q2x = 0.0;
 
 		if (strawTempTrk_[e].usato == 0 && strawTempTrk_[e].ncentrali + strawTempTrk_[e].nlaterali == 3) {
-			TrackIntermedieTemp.copyTrack(strawTempTrk_[e]);
+			trackIntermedieTemp.copyTrack(strawTempTrk_[e]);
 
-			for (int f = 0; f < NTrack; f++) {
-				TempCondivise = 0;
-				for (int g = 0; g < TrackIntermedieTemp.ncentrali && strawTempTrk_[f].usato == 0; g++) {
+			for (int f = 0; f < nTrack; f++) {
+				tempCondivise = 0;
+				for (int g = 0; g < trackIntermedieTemp.ncentrali && strawTempTrk_[f].usato == 0; g++) {
 					for (int h = 0; h < strawTempTrk_[f].ncentrali; h++) {
-						if (TrackIntermedieTemp.hitc[g] == strawTempTrk_[f].hitc[h]
-								&& TrackIntermedieTemp.camerec[g] == strawTempTrk_[f].camerec[h]) {
-							TempCondivise++;
+						if (trackIntermedieTemp.hitc[g] == strawTempTrk_[f].hitc[h]
+								&& trackIntermedieTemp.camerec[g] == strawTempTrk_[f].camerec[h]) {
+							tempCondivise++;
 						}
 					}
 					for (int h = 0; h < strawTempTrk_[f].nlaterali; h++) {
-						if (TrackIntermedieTemp.hitc[g] == strawTempTrk_[f].hitl[h]
-								&& TrackIntermedieTemp.camerec[g] == strawTempTrk_[f].camerel[h]) {
-							TempCondivise++;
+						if (trackIntermedieTemp.hitc[g] == strawTempTrk_[f].hitl[h]
+								&& trackIntermedieTemp.camerec[g] == strawTempTrk_[f].camerel[h]) {
+							tempCondivise++;
 						}
 					}
 				}
 
-				for (int g = 0; g < TrackIntermedieTemp.nlaterali && strawTempTrk_[f].usato == 0; g++) {
+				for (int g = 0; g < trackIntermedieTemp.nlaterali && strawTempTrk_[f].usato == 0; g++) {
 					for (int h = 0; h < strawTempTrk_[f].ncentrali; h++) {
-						if (TrackIntermedieTemp.hitl[g] == strawTempTrk_[f].hitc[h]
-								&& TrackIntermedieTemp.camerel[g] == strawTempTrk_[f].camerec[h]) {
-							TempCondivise++;
+						if (trackIntermedieTemp.hitl[g] == strawTempTrk_[f].hitc[h]
+								&& trackIntermedieTemp.camerel[g] == strawTempTrk_[f].camerec[h]) {
+							tempCondivise++;
 						}
 					}
 					for (int h = 0; h < strawTempTrk_[f].nlaterali; h++) {
-						if (TrackIntermedieTemp.hitl[g] == strawTempTrk_[f].hitl[h]
-								&& TrackIntermedieTemp.camerel[g] == strawTempTrk_[f].camerel[h]) {
-							TempCondivise++;
+						if (trackIntermedieTemp.hitl[g] == strawTempTrk_[f].hitl[h]
+								&& trackIntermedieTemp.camerel[g] == strawTempTrk_[f].camerel[h]) {
+							tempCondivise++;
 						}
 					}
 				}
 
-				if (TempCondivise > 1
-						&& (strawTempTrk_[f].ncentrali > TrackIntermedieTemp.ncentrali
-								|| (strawTempTrk_[f].cda < TrackIntermedieTemp.cda
-										&& strawTempTrk_[f].ncentrali == TrackIntermedieTemp.ncentrali))) {
+				if (tempCondivise > 1
+						&& (strawTempTrk_[f].ncentrali > trackIntermedieTemp.ncentrali
+								|| (strawTempTrk_[f].cda < trackIntermedieTemp.cda
+										&& strawTempTrk_[f].ncentrali == trackIntermedieTemp.ncentrali))) {
 					// End of conditional logic
-					TrackIntermedieTemp.copyTrack(strawTempTrk_[f]);
+					trackIntermedieTemp.copyTrack(strawTempTrk_[f]);
 				}
 			}
 
-			NTracletCondivisi = 0;
+			nTracletCondivisi = 0;
 
-			for (int f = 0; f < NTrack; f++) {
-				TempCondivise = 0;
-				for (int g = 0; g < TrackIntermedieTemp.ncentrali && strawTempTrk_[f].usato == 0; g++) {
+			for (int f = 0; f < nTrack; f++) {
+				tempCondivise = 0;
+				for (int g = 0; g < trackIntermedieTemp.ncentrali && strawTempTrk_[f].usato == 0; g++) {
 					for (int h = 0; h < strawTempTrk_[f].ncentrali; h++) {
-						if (TrackIntermedieTemp.hitc[g] == strawTempTrk_[f].hitc[h]
-								&& TrackIntermedieTemp.camerec[g] == strawTempTrk_[f].camerec[h]) {
-							TempCondivise++;
+						if (trackIntermedieTemp.hitc[g] == strawTempTrk_[f].hitc[h]
+								&& trackIntermedieTemp.camerec[g] == strawTempTrk_[f].camerec[h]) {
+							tempCondivise++;
 						}
 					}
 					for (int h = 0; h < strawTempTrk_[f].nlaterali; h++) {
-						if (TrackIntermedieTemp.hitc[g] == strawTempTrk_[f].hitl[h]
-								&& TrackIntermedieTemp.camerec[g] == strawTempTrk_[f].camerel[h]) {
-							TempCondivise++;
+						if (trackIntermedieTemp.hitc[g] == strawTempTrk_[f].hitl[h]
+								&& trackIntermedieTemp.camerec[g] == strawTempTrk_[f].camerel[h]) {
+							tempCondivise++;
 						}
 					}
 				}
 
-				for (int g = 0; g < TrackIntermedieTemp.nlaterali && strawTempTrk_[f].usato == 0; g++) {
+				for (int g = 0; g < trackIntermedieTemp.nlaterali && strawTempTrk_[f].usato == 0; g++) {
 					for (int h = 0; h < strawTempTrk_[f].ncentrali; h++) {
-						if (TrackIntermedieTemp.hitl[g] == strawTempTrk_[f].hitc[h]
-								&& TrackIntermedieTemp.camerel[g] == strawTempTrk_[f].camerec[h]) {
-							TempCondivise++;
+						if (trackIntermedieTemp.hitl[g] == strawTempTrk_[f].hitc[h]
+								&& trackIntermedieTemp.camerel[g] == strawTempTrk_[f].camerec[h]) {
+							tempCondivise++;
 						}
 					}
 					for (int h = 0; h < strawTempTrk_[f].nlaterali; h++) {
-						if (TrackIntermedieTemp.hitl[g] == strawTempTrk_[f].hitl[h]
-								&& TrackIntermedieTemp.camerel[g] == strawTempTrk_[f].camerel[h]) {
-							TempCondivise++;
+						if (trackIntermedieTemp.hitl[g] == strawTempTrk_[f].hitl[h]
+								&& trackIntermedieTemp.camerel[g] == strawTempTrk_[f].camerel[h]) {
+							tempCondivise++;
 						}
 					}
 				}
 
-				if (TempCondivise == (TrackIntermedieTemp.ncentrali + TrackIntermedieTemp.nlaterali)) {
-					NTracletCondivisi++;
-					TrackIntermedieTemp_my += strawTempTrk_[f].my;
-					TrackIntermedieTemp_qy += strawTempTrk_[f].qy;
-					TrackIntermedieTemp_m1x += strawTempTrk_[f].m1x;
-					TrackIntermedieTemp_q1x += strawTempTrk_[f].q1x;
-					TrackIntermedieTemp_m2x += strawTempTrk_[f].m2x;
-					TrackIntermedieTemp_q2x += strawTempTrk_[f].q2x;
+				if (tempCondivise == (trackIntermedieTemp.ncentrali + trackIntermedieTemp.nlaterali)) {
+					nTracletCondivisi++;
+					trackIntermedieTemp_my += strawTempTrk_[f].my;
+					trackIntermedieTemp_qy += strawTempTrk_[f].qy;
+					trackIntermedieTemp_m1x += strawTempTrk_[f].m1x;
+					trackIntermedieTemp_q1x += strawTempTrk_[f].q1x;
+					trackIntermedieTemp_m2x += strawTempTrk_[f].m2x;
+					trackIntermedieTemp_q2x += strawTempTrk_[f].q2x;
 
 					strawTempTrk_[f].usato = 1;
 				}
 				else {
-					if (TrackIntermedieTemp.ncentrali == 3 && strawTempTrk_[f].ncentrali == 2 && TempCondivise > 0) {
+					if (trackIntermedieTemp.ncentrali == 3 && strawTempTrk_[f].ncentrali == 2 && tempCondivise > 0) {
 						strawTempTrk_[f].usato = 1;
 					}
-					else if (TempCondivise > 1) {
+					else if (tempCondivise > 1) {
 						strawTempTrk_[f].usato = 1;
 					}
 				}
 			}
 
-			TrackIntermedieTemp.my = TrackIntermedieTemp_my / NTracletCondivisi;
-			TrackIntermedieTemp.qy = TrackIntermedieTemp_qy / NTracletCondivisi;
-			TrackIntermedieTemp.m1x = TrackIntermedieTemp_m1x / NTracletCondivisi;
-			TrackIntermedieTemp.q1x = TrackIntermedieTemp_q1x / NTracletCondivisi;
-			TrackIntermedieTemp.m2x = TrackIntermedieTemp_m2x / NTracletCondivisi;
-			TrackIntermedieTemp.q2x = TrackIntermedieTemp_q2x / NTracletCondivisi;
+			trackIntermedieTemp.my = trackIntermedieTemp_my / nTracletCondivisi;
+			trackIntermedieTemp.qy = trackIntermedieTemp_qy / nTracletCondivisi;
+			trackIntermedieTemp.m1x = trackIntermedieTemp_m1x / nTracletCondivisi;
+			trackIntermedieTemp.q1x = trackIntermedieTemp_q1x / nTracletCondivisi;
+			trackIntermedieTemp.m2x = trackIntermedieTemp_m2x / nTracletCondivisi;
+			trackIntermedieTemp.q2x = trackIntermedieTemp_q2x / nTracletCondivisi;
 
-			strawTrkIntermedie_[NTrackIntermedie].copyTrack(TrackIntermedieTemp);
-			strawTrkIntermedie_[NTrackIntermedie].pz = 270 / (fabs(TrackIntermedieTemp.m2x - TrackIntermedieTemp.m1x));
+			strawTrkIntermedie_[nTrackIntermedie].copyTrack(trackIntermedieTemp);
+			strawTrkIntermedie_[nTrackIntermedie].pz = 270 / (fabs(trackIntermedieTemp.m2x - trackIntermedieTemp.m1x));
 
-			QTrack.setPoint(0.0, TrackIntermedieTemp.q1x, TrackIntermedieTemp.qy, 0.0, 0.0, 0, 0);
-			MTrack.setPoint(1.0, TrackIntermedieTemp.m1x, TrackIntermedieTemp.my, 0.0, 0.0, 0, 0);
+			qTrack.setPoint(0.0, trackIntermedieTemp.q1x, trackIntermedieTemp.qy, 0.0, 0.0, 0, 0);
+			mTrack.setPoint(1.0, trackIntermedieTemp.m1x, trackIntermedieTemp.my, 0.0, 0.0, 0, 0);
 
-			cdaVertex(QBeam_, QTrack, MBeam_, MTrack, CDA, Vertex);
+			cdaVertex(QBeam_, qTrack, MBeam_, mTrack, cda, vertex);
 
-			strawTrkIntermedie_[NTrackIntermedie].zvertex = Vertex.z;
-			strawTrkIntermedie_[NTrackIntermedie].cda = CDA;
-			strawTrkIntermedie_[NTrackIntermedie].ncondivisi = 0;
-			strawTrkIntermedie_[NTrackIntermedie].ncamcondivise = 0;
-			strawTrkIntermedie_[NTrackIntermedie].usato = 0;
+			strawTrkIntermedie_[nTrackIntermedie].zvertex = vertex.z;
+			strawTrkIntermedie_[nTrackIntermedie].cda = cda;
+			strawTrkIntermedie_[nTrackIntermedie].ncondivisi = 0;
+			strawTrkIntermedie_[nTrackIntermedie].ncamcondivise = 0;
+			strawTrkIntermedie_[nTrackIntermedie].usato = 0;
 
-			NTrackIntermedie++;
+			nTrackIntermedie++;
 
 		}
 	}
 
 	//casi a 3 tracce
-	Point MTrack1;
-	Point QTrack1;
-	Point MTrack2;
-	Point QTrack2;
+	Point mTrack1;
+	Point qTrack1;
+	Point mTrack2;
+	Point qTrack2;
 
-	for (int e = 0; e < NTrackIntermedie; e++) {
+	for (int e = 0; e < nTrackIntermedie; e++) {
 		// We zero FlagL1Limit as needed rather than zeroing the entire array
-		FlagL1Limit[e] = 0;
+		flagL1Limit[e] = 0;
 
 		if (e < 5) {
-			L1Info->setL1StrawTrack_P(e, strawTrkIntermedie_[e].pz);
-			L1Info->setL1StrawTrack_Vz(e, strawTrkIntermedie_[e].zvertex);
+			l1Info->setL1StrawTrack_P(e, strawTrkIntermedie_[e].pz);
+			l1Info->setL1StrawTrack_Vz(e, strawTrkIntermedie_[e].zvertex);
 		}
 		if (strawTrkIntermedie_[e].zvertex > -100000 && strawTrkIntermedie_[e].zvertex < 180000 && strawTrkIntermedie_[e].cda < 200
 				&& strawTrkIntermedie_[e].pz < 50000) {
-			FlagL1Limit[e]++;
+			flagL1Limit[e]++;
 		}
 
-		QTrack1.setPoint(0.0, strawTrkIntermedie_[e].q1x, strawTrkIntermedie_[e].qy, 0.0, 0.0, 0, 0);
-		MTrack1.setPoint(1.0, strawTrkIntermedie_[e].m1x, strawTrkIntermedie_[e].my, 0.0, 0.0, 0, 0);
+		qTrack1.setPoint(0.0, strawTrkIntermedie_[e].q1x, strawTrkIntermedie_[e].qy, 0.0, 0.0, 0, 0);
+		mTrack1.setPoint(1.0, strawTrkIntermedie_[e].m1x, strawTrkIntermedie_[e].my, 0.0, 0.0, 0, 0);
 
-		for (int f = e + 1; f < NTrackIntermedie; f++) {
-			QTrack2.setPoint(0.0, strawTrkIntermedie_[f].q1x, strawTrkIntermedie_[f].qy, 0.0, 0.0, 0, 0);
-			MTrack2.setPoint(1.0, strawTrkIntermedie_[f].m1x, strawTrkIntermedie_[f].my, 0.0, 0.0, 0, 0);
+		for (int f = e + 1; f < nTrackIntermedie; f++) {
+			qTrack2.setPoint(0.0, strawTrkIntermedie_[f].q1x, strawTrkIntermedie_[f].qy, 0.0, 0.0, 0, 0);
+			mTrack2.setPoint(1.0, strawTrkIntermedie_[f].m1x, strawTrkIntermedie_[f].my, 0.0, 0.0, 0, 0);
 
-			cdaVertex(QTrack1, QTrack2, MTrack1, MTrack2, CDA, Vertex);
-			if (CDA < 30) {
-				FlagL1Three[e]++;
-				FlagL1Three[f]++;
+			cdaVertex(qTrack1, qTrack2, mTrack1, mTrack2, cda, vertex);
+			if (cda < 30) {
+				flagL1Three[e]++;
+				flagL1Three[f]++;
 			}
 		}
 
 		if (strawTrkIntermedie_[e].m1x - strawTrkIntermedie_[e].m2x < 0) {
-			FlagL1Exotic = 1;
+			flagL1Exotic = 1;
 		}
-		if (FlagL1Limit[e] > 0 && FlagL1Three[e] == 0) {
-			FlagL1Pnn = 1;
+		if (flagL1Limit[e] > 0 && flagL1Three[e] == 0) {
+			flagL1Pnn = 1;
 		}
-		if (FlagL1Limit[e] > 0 && FlagL1Three[e] > 0) {
-			FlagL1TreTracks = 1;
+		if (flagL1Limit[e] > 0 && flagL1Three[e] > 0) {
+			flagL1TreTracks = 1;
 		}
 	}
 
@@ -1843,10 +1843,10 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint L0MaskID, DecoderHandler& Decod
 //	if (flag_l1_tretracks == 1)
 //		LOG_INFO("                Evento a tre traccie \n");
 
-	L1Info->setL1StrawNTracks(NTrackIntermedie);
-	L1Info->setL1StrawProcessed();
-	FlagL1 = ((FlagL1Exotic & 0x1) << 1) | (FlagL1Pnn & 0x1);
-	return FlagL1;
+	l1Info->setL1StrawNTracks(nTrackIntermedie);
+	l1Info->setL1StrawProcessed();
+	flagL1 = ((flagL1Exotic & 0x1) << 1) | (flagL1Pnn & 0x1);
+	return flagL1;
 }
 
 float StrawAlgo::posTubNew(int chamber, int view, int plane, int jstraw) {
@@ -1854,38 +1854,38 @@ float StrawAlgo::posTubNew(int chamber, int view, int plane, int jstraw) {
 	return 17.6 * jstraw + XOffset_[view][plane] + XOffCh_[chamber][view];
 }
 
-int StrawAlgo::strawAcceptance(int N, double* Coordinate, int Zone) {
+int StrawAlgo::strawAcceptance(int n, double* coordinate, int zone) {
 
-	float ViewSize = 2100.0;
-	float StrawSpacing = 17.6;
-	float StrawInnerRadius = 4.875;
-	float CopperThickness = 0.00005;
-	float MylarThickness = 0.036;
-	float GoldThickness = 0.00002;
-	double StrawRadius = StrawInnerRadius + 2 * CopperThickness + MylarThickness + GoldThickness;
-	double StrawDiameter = 2 * StrawRadius;
+	float viewSize = 2100.0;
+	float strawSpacing = 17.6;
+	float strawInnerRadius = 4.875;
+	float copperThickness = 0.00005;
+	float mylarThickness = 0.036;
+	float goldThickness = 0.00002;
+	double strawRadius = strawInnerRadius + 2 * copperThickness + mylarThickness + goldThickness;
+	double strawDiameter = 2 * strawRadius;
 
-	double ViewPlaneTransverseSize = (120 - 1) * StrawSpacing + StrawDiameter;
+	double viewPlaneTransverseSize = (120 - 1) * strawSpacing + strawDiameter;
 
 	// View definition
-	double A[4] = { InvSq2_, InvSq2_, 1, 0 };
-	double B[4] = { InvSq2_, -InvSq2_, 0, 1 };
-	double C[4] = { InvSq2_, InvSq2_, 0, 1 };
-	double D[4] = { -InvSq2_, InvSq2_, 1, 0 };
-	int Viewflag[4] = { 0, 0, 0, 0 };
+	double a[4] = { InvSq2_, InvSq2_, 1, 0 };
+	double b[4] = { InvSq2_, -InvSq2_, 0, 1 };
+	double c[4] = { InvSq2_, InvSq2_, 0, 1 };
+	double d[4] = { -InvSq2_, InvSq2_, 1, 0 };
+	int viewFlag[4] = { 0, 0, 0, 0 };
 	for (int jView = 0; jView < 4; jView++) {
-		double PosView = A[jView] * Coordinate[0] + B[jView] * Coordinate[1];
-		double PosAlongStraw = C[jView] * Coordinate[0] + D[jView] * Coordinate[1];
-		if (((PosView > HoleChamberMax_[N][jView] && PosView < 0.5 * ViewPlaneTransverseSize)
-				|| (PosView < HoleChamberMin_[N][jView] && PosView > -0.5 * ViewPlaneTransverseSize))
-				&& fabs(PosAlongStraw) < 0.5 * ViewSize) {
-			Viewflag[jView] = 1;
+		double posView = a[jView] * coordinate[0] + b[jView] * coordinate[1];
+		double posAlongStraw = c[jView] * coordinate[0] + d[jView] * coordinate[1];
+		if (((posView > HoleChamberMax_[n][jView] && posView < 0.5 * viewPlaneTransverseSize)
+				|| (posView < HoleChamberMin_[n][jView] && posView > -0.5 * viewPlaneTransverseSize))
+				&& fabs(posAlongStraw) < 0.5 * viewSize) {
+			viewFlag[jView] = 1;
 		}
 	}
-	int Vu = Viewflag[0];
-	int Vv = Viewflag[1];
-	int Vx = Viewflag[2];
-	int Vy = Viewflag[3];
+	int vu = viewFlag[0];
+	int vv = viewFlag[1];
+	int vx = viewFlag[2];
+	int vy = viewFlag[3];
 
 // Zones
 //  This code has been deactivated since we always require
@@ -1923,60 +1923,60 @@ int StrawAlgo::strawAcceptance(int N, double* Coordinate, int Zone) {
 //	default:
 //		return 0;
 //	}
-	if (Vx + Vy + Vu + Vv == 2)
+	if (vx + vy + vu + vv == 2)
 		return 1;
 	return 0;
 }
 
-void StrawAlgo::cdaVertex(const Point& QBeam, Point& QTrack, const Point& MBeam, Point& MTrack, float& CDA, Point& Vertex) {
+void StrawAlgo::cdaVertex(const Point& qBeam, Point& qTrack, const Point& mBeam, Point& mTrack, float& cda, Point& vertex) {
 
-	Point R12;
-	float T1, T2, AA, BB, CC, DD, EE, Det;
-	Point Q1, Q2;
+	Point r12;
+	float t1, t2, aa, bb, cc, dd, ee, det;
+	Point q1, q2;
 
-	R12.z = QBeam.z - QTrack.z;
-	R12.x = QBeam.x - QTrack.x;
-	R12.y = QBeam.y - QTrack.y;
+	r12.z = qBeam.z - qTrack.z;
+	r12.x = qBeam.x - qTrack.x;
+	r12.y = qBeam.y - qTrack.y;
 
-	AA = MBeam.x * MBeam.x + MBeam.y * MBeam.y + MBeam.z * MBeam.z;
-	BB = MTrack.x * MTrack.x + MTrack.y * MTrack.y + MTrack.z * MTrack.z;
-	CC = MBeam.x * MTrack.x + MBeam.y * MTrack.y + MBeam.z * MTrack.z;
-	DD = R12.x * MBeam.x + R12.y * MBeam.y + R12.z * MBeam.z;
-	EE = R12.x * MTrack.x + R12.y * MTrack.y + R12.z * MTrack.z;
-	Det = CC * CC - AA * BB;
+	aa = mBeam.x * mBeam.x + mBeam.y * mBeam.y + mBeam.z * mBeam.z;
+	bb = mTrack.x * mTrack.x + mTrack.y * mTrack.y + mTrack.z * mTrack.z;
+	cc = mBeam.x * mTrack.x + mBeam.y * mTrack.y + mBeam.z * mTrack.z;
+	dd = r12.x * mBeam.x + r12.y * mBeam.y + r12.z * mBeam.z;
+	ee = r12.x * mTrack.x + r12.y * mTrack.y + r12.z * mTrack.z;
+	det = cc * cc - aa * bb;
 
-	T1 = (BB * DD - CC * EE) / Det;
-	T2 = (CC * DD - AA * EE) / Det;
+	t1 = (bb * dd - cc * ee) / det;
+	t2 = (cc * dd - aa * ee) / det;
 
-	Q1.z = QBeam.z + T1 * MBeam.z;
-	Q1.x = QBeam.x + T1 * MBeam.x;
-	Q1.y = QBeam.y + T1 * MBeam.y;
-	Q2.z = QTrack.z + T2 * MTrack.z;
-	Q2.x = QTrack.x + T2 * MTrack.x;
-	Q2.y = QTrack.y + T2 * MTrack.y;
+	q1.z = qBeam.z + t1 * mBeam.z;
+	q1.x = qBeam.x + t1 * mBeam.x;
+	q1.y = qBeam.y + t1 * mBeam.y;
+	q2.z = qTrack.z + t2 * mTrack.z;
+	q2.x = qTrack.x + t2 * mTrack.x;
+	q2.y = qTrack.y + t2 * mTrack.y;
 
-	Vertex.setPoint(ZMAGNET + (Q1.z + Q2.z) / 2, (Q1.x + Q2.x) / 2, (Q1.y + Q2.y) / 2, 0.0, 0.0, 0, 0);
-	R12.setPoint(Q1.z - Q2.z, Q1.x - Q2.x, Q1.y - Q2.y, 0.0, 0.0, 0, 0);
+	vertex.setPoint(ZMAGNET + (q1.z + q2.z) / 2, (q1.x + q2.x) / 2, (q1.y + q2.y) / 2, 0.0, 0.0, 0, 0);
+	r12.setPoint(q1.z - q2.z, q1.x - q2.x, q1.y - q2.y, 0.0, 0.0, 0, 0);
 
-	CDA = sqrt(R12.x * R12.x + R12.y * R12.y + R12.z * R12.z);
+	cda = sqrt(r12.x * r12.x + r12.y * r12.y + r12.z * r12.z);
 
 }
 
-void StrawAlgo::writeData(L1StrawAlgo* AlgoPacket, uint L0MaskID, L1InfoToStorage* L1Info) {
+void StrawAlgo::writeData(L1StrawAlgo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info) {
 
-	if (AlgoID_ != AlgoPacket->algoID)
+	if (AlgoID_ != algoPacket->algoID)
 		LOG_ERROR("Algo ID does not match with Algo ID written within the packet!");
-	AlgoPacket->algoID = AlgoID_;
-	AlgoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[L0MaskID];
-	AlgoPacket->qualityFlags = (L1Info->isL1StrawProcessed() << 6) | (L1Info->isL1StrawEmptyPacket() << 4)
-			| (L1Info->isL1StrawBadData() << 2) | ((uint) L1Info->getL1StrawTrgWrd());
+	algoPacket->algoID = AlgoID_;
+	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
+	algoPacket->qualityFlags = (l1Info->isL1StrawProcessed() << 6) | (l1Info->isL1StrawEmptyPacket() << 4)
+			| (l1Info->isL1StrawBadData() << 2) | ((uint) l1Info->getL1StrawTrgWrd());
 	for (uint iTrk = 0; iTrk != 5; iTrk++) {
 //		LOG_INFO("track index " << iTrk << " momentum " << l1Info->getL1StrawTrack_P(iTrk));
 //		LOG_INFO("track index " << iTrk << " vertex " << l1Info->getL1StrawTrack_Vz(iTrk));
-		AlgoPacket->l1Data[iTrk] = ((uint) L1Info->getL1StrawTrack_P(iTrk) << 16) | (uint) L1Info->getL1StrawTrack_Vz(iTrk);
+		algoPacket->l1Data[iTrk] = ((uint) l1Info->getL1StrawTrack_P(iTrk) << 16) | (uint) l1Info->getL1StrawTrack_Vz(iTrk);
 	}
-	AlgoPacket->l1Data[5] = L1Info->getL1StrawNTracks();
-	AlgoPacket->numberOfWords = (sizeof(L1StrawAlgo) / 4.);
+	algoPacket->l1Data[5] = l1Info->getL1StrawNTracks();
+	algoPacket->numberOfWords = (sizeof(L1StrawAlgo) / 4.);
 //	LOG_INFO("l0MaskID " << l0MaskID);
 //	LOG_INFO("algoID " << (uint)algoPacket->algoID);
 //	LOG_INFO("quality Flags " << (uint)algoPacket->qualityFlags);
