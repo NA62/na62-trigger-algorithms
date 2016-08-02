@@ -89,7 +89,7 @@ private:
 	static const Point QBeam_;
 	static const Point MBeam_;
 	Point strawPointTemp_[4][5000];
-	Point strawPointTempbis_[4][2000];
+	Point strawPointTempBis_[4][2000];
 	Point strawPointFinal_[4][2000];
 	Cluster strawCluster_[4][4][500];
 	Straw strawPrecluster_[4][4][2][500];

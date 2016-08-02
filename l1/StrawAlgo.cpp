@@ -721,7 +721,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 	for (int i = 0; i < 4; i++) {
 		////////////ciclo dei punti a 4 viste//////////////////
 		//gettimeofday(&time[15], 0);
-		nTotalViewCluster += nStrawClusters[i][3] + nStrawClusters[i][2] + nStrawClusters[i][1] + nStrawClusters[i][0];
+		nTotalViewCluster += nStrawClusters[i][0] + nStrawClusters[i][1] + nStrawClusters[i][2] + nStrawClusters[i][3];
 		for (int a = 0; a < nStrawClusters[i][3]; a++) { //clusters [a] is inside y
 
 			for (int b = 0; b < nStrawClusters[i][2]; b++) { //we loop on x view
@@ -739,18 +739,13 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 								xTemp = strawCluster_[i][2][b].coordinate;
 								yTemp = strawCluster_[i][3][a].coordinate;
 
-								if (viewDistance < viewDistance4) {
-									strawPointTemp_[i][nStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], xTemp, yTemp,
-											(strawCluster_[i][3][a].trailing + strawCluster_[i][2][b].trailing
-													+ strawCluster_[i][1][c].trailing + strawCluster_[i][0][d].trailing) / 4, viewDistance,
-											4, 0);
-								}
-								else {
-									strawPointTemp_[i][nStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], xTemp, yTemp,
-											(strawCluster_[i][3][a].trailing + strawCluster_[i][2][b].trailing
-													+ strawCluster_[i][1][c].trailing + strawCluster_[i][0][d].trailing) / 4, viewDistance4,
-											4, 0);
-								}
+								// Decide which of the two we want to actually save
+								viewDistance = viewDistance < viewDistance4 ? viewDistance : viewDistance4;
+
+								strawPointTemp_[i][nStrawPointsTemp[i]].setPoint(ChamberZPosition_[i], xTemp, yTemp,
+										(strawCluster_[i][3][a].trailing + strawCluster_[i][2][b].trailing + strawCluster_[i][1][c].trailing
+												+ strawCluster_[i][0][d].trailing) / 4, viewDistance, 4, 0);
+
 								strawCluster_[i][0][d].used = 1;
 								strawCluster_[i][1][c].used = 1;
 								strawCluster_[i][2][b].used = 1;
@@ -759,14 +754,16 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 								nStrawPointsTemp[i]++;
 
 							}
-						}
-					}
-				}
-			}
-		}
+						} // End of d/v loop
+					} // End of cluster cut conditional
+				} // End of c/u loop
+			} // End of b/x loop
+		} // End of a loop
+
 		//gettimeofday(&time[16], 0);
 		//////////////////////////// primo ciclo dei punti a 3 viste prima yx cercando in v o u, poi uv cercando in x o y
 		//gettimeofday(&time[17], 0);
+
 		for (int a = 0; a < nStrawClusters[i][3]; a++) { //clusters [a] is inside y
 			for (int b = 0; b < nStrawClusters[i][2]; b++) { //we loop on x view
 				for (int c = 0; c < nStrawClusters[i][1]; c++) { //we loop on u  views
@@ -793,7 +790,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 							nStrawPointsTemp[i]++;
 						}
 					}
-				}
+				} // End of c/u loop
 				for (int c = 0; c < nStrawClusters[i][0]; c++) { //we loop on v views
 					if ((strawCluster_[i][0][c].used != 1 && strawCluster_[i][2][b].used != 1)
 							|| (strawCluster_[i][0][c].used != 1 && strawCluster_[i][3][a].used != 1)
@@ -818,9 +815,10 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 							nStrawPointsTemp[i]++;
 						}
 					}
-				}
-			}
-		}
+				} // End of c/v loop
+			} // End of b/x loop
+		} // End of a loop
+
 		//gettimeofday(&time[18], 0);
 		/////////////////////////3 viste seconda clusterizzazione partendo da u e v
 
@@ -1009,6 +1007,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 		}
 		for (int j = 0; j < nStrawPointsTemp[i]; j++) { //loop over point
 
+			// First loop over points with 4 views since they are more useful
 			if (strawPointTemp_[i][j].nViews == 4 && !strawPointTemp_[i][j].used) {
 				pointTemp.clonePoint(strawPointTemp_[i][j]);
 				strawPointTemp_[i][j].used = 1;
@@ -1029,14 +1028,15 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 						}
 					}
 				}
-				strawPointTempbis_[i][nStrawPointsTempBis[i]].clonePoint(pointTemp);
+				strawPointTempBis_[i][nStrawPointsTempBis[i]].clonePoint(pointTemp);
 				nStrawPointsTempBis[i]++;
 			}
+
+			// Next loop over points with 3 views
 			if (strawPointTemp_[i][j].nViews == 3 && !strawPointTemp_[i][j].used) {
 				pointTemp.clonePoint(strawPointTemp_[i][j]);
 				strawPointTemp_[i][j].used = 1;
-				for (int k = j + 1; k < nStrawPointsTemp[i]; k++) //loop over point
-						{
+				for (int k = j + 1; k < nStrawPointsTemp[i]; k++) { //loop over point
 					if (strawPointTemp_[i][k].nViews == 3 && !strawPointTemp_[i][k].used) {
 						//						point_dx = fabs(strawPointTemp_[i][j].x-strawPointTemp_[i][k].x);
 						point_dy = fabs(strawPointTemp_[i][j].y - strawPointTemp_[i][k].y);
@@ -1052,11 +1052,11 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 						}
 					}
 				}
-				strawPointTempbis_[i][nStrawPointsTempBis[i]].clonePoint(pointTemp);
+				strawPointTempBis_[i][nStrawPointsTempBis[i]].clonePoint(pointTemp);
 				nStrawPointsTempBis[i]++;
 			}
 			if (strawPointTemp_[i][j].nViews == 2) {
-				strawPointTempbis_[i][nStrawPointsTempBis[i]].clonePoint(strawPointTemp_[i][j]);
+				strawPointTempBis_[i][nStrawPointsTempBis[i]].clonePoint(strawPointTemp_[i][j]);
 				nStrawPointsTempBis[i]++;
 			}
 		}
@@ -1065,23 +1065,23 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 
 		for (int j = 0; j < nStrawPointsTempBis[i]; j++) { //loop over point
 
-			if (strawPointTempbis_[i][j].nViews == 4 && !strawPointTempbis_[i][j].used) {
-				pointTemp.clonePoint(strawPointTempbis_[i][j]);
-				strawPointTempbis_[i][j].used = 1;
+			if (strawPointTempBis_[i][j].nViews == 4 && !strawPointTempBis_[i][j].used) {
+				pointTemp.clonePoint(strawPointTempBis_[i][j]);
+				strawPointTempBis_[i][j].used = 1;
 				for (int k = j + 1; k < nStrawPointsTempBis[i]; k++) { //loop over point
 
-					if (strawPointTempbis_[i][k].nViews == 4 && !strawPointTempbis_[i][k].used) {
-						point_dx = fabs(strawPointTempbis_[i][j].x - strawPointTempbis_[i][k].x);
+					if (strawPointTempBis_[i][k].nViews == 4 && !strawPointTempBis_[i][k].used) {
+						point_dx = fabs(strawPointTempBis_[i][j].x - strawPointTempBis_[i][k].x);
 						//						point_dy = fabs(strawPointTempbis_[i][j].y-strawPointTempbis_[i][k].y);
 						if (point_dx < 4.0) {
-							viewDistanceDelta = pointTemp.viewDistance - strawPointTempbis_[i][k].viewDistance;
+							viewDistanceDelta = pointTemp.viewDistance - strawPointTempBis_[i][k].viewDistance;
 							if (viewDistanceDelta > 1.0 && pointTemp.viewDistance > 3.0) {
 								//								pointTemp.setPoint(strawPointTempbis_[i][k].z,strawPointTempbis_[i][k].x,strawPointTempbis_[i][k].y,strawPointTempbis_[i][k].trailing,strawPointTempbis_[i][k].viewDistance,strawPointTempbis_[i][k].nViews,strawPointTempbis_[i][k].used);
-								pointTemp.clonePoint(strawPointTempbis_[i][k]);
-								strawPointTempbis_[i][k].used = 1;
+								pointTemp.clonePoint(strawPointTempBis_[i][k]);
+								strawPointTempBis_[i][k].used = 1;
 							}
 							if (viewDistanceDelta < -1.0 && strawPointTemp_[i][k].viewDistance > 3.0) {
-								strawPointTempbis_[i][k].used = 1;
+								strawPointTempBis_[i][k].used = 1;
 							}
 						}
 					}
@@ -1089,23 +1089,23 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 				strawPointFinal_[i][nStrawPointsFinal[i]].clonePoint(pointTemp);
 				nStrawPointsFinal[i]++;
 			}
-			if (strawPointTempbis_[i][j].nViews == 3 && !strawPointTempbis_[i][j].used) {
+			if (strawPointTempBis_[i][j].nViews == 3 && !strawPointTempBis_[i][j].used) {
 				//				pointTemp.setPoint(strawPointTempbis_[i][j].z,strawPointTempbis_[i][j].x,strawPointTempbis_[i][j].y,strawPointTempbis_[i][j].trailing,strawPointTempbis_[i][j].viewDistance,strawPointTempbis_[i][j].nViews,strawPointTempbis_[i][j].used);
-				pointTemp.clonePoint(strawPointTempbis_[i][j]);
-				strawPointTempbis_[i][j].used = 1;
+				pointTemp.clonePoint(strawPointTempBis_[i][j]);
+				strawPointTempBis_[i][j].used = 1;
 				for (int k = j + 1; k < nStrawPointsTempBis[i]; k++) { //loop over point
-					if (strawPointTempbis_[i][k].nViews == 3 && !strawPointTempbis_[i][k].used) {
-						point_dx = fabs(strawPointTempbis_[i][j].x - strawPointTempbis_[i][k].x);
+					if (strawPointTempBis_[i][k].nViews == 3 && !strawPointTempBis_[i][k].used) {
+						point_dx = fabs(strawPointTempBis_[i][j].x - strawPointTempBis_[i][k].x);
 						//						point_dy = fabs(strawPointTempbis_[i][j].y-strawPointTempbis_[i][k].y);
 						if (point_dx < 4.0) {
-							viewDistanceDelta = pointTemp.viewDistance - strawPointTempbis_[i][k].viewDistance;
+							viewDistanceDelta = pointTemp.viewDistance - strawPointTempBis_[i][k].viewDistance;
 							if (viewDistanceDelta > 1.0 && pointTemp.viewDistance > 3.0) {
 								//								pointTemp.setPoint(strawPointTempbis_[i][k].z,strawPointTempbis_[i][k].x,strawPointTempbis_[i][k].y,strawPointTempbis_[i][k].trailing,strawPointTempbis_[i][k].viewDistance,strawPointTempbis_[i][k].nViews,strawPointTempbis_[i][k].used);
-								pointTemp.clonePoint(strawPointTempbis_[i][k]);
-								strawPointTempbis_[i][k].used = 1;
+								pointTemp.clonePoint(strawPointTempBis_[i][k]);
+								strawPointTempBis_[i][k].used = 1;
 							}
 							if (viewDistanceDelta < -1.0 && strawPointTemp_[i][k].viewDistance > 3.0) {
-								strawPointTempbis_[i][k].used = 1;
+								strawPointTempBis_[i][k].used = 1;
 							}
 						}
 					}
@@ -1113,8 +1113,8 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 				strawPointFinal_[i][nStrawPointsFinal[i]].clonePoint(pointTemp);
 				nStrawPointsFinal[i]++;
 			}
-			if (strawPointTempbis_[i][j].nViews == 2) {
-				strawPointFinal_[i][nStrawPointsFinal[i]].clonePoint(strawPointTempbis_[i][j]);
+			if (strawPointTempBis_[i][j].nViews == 2) {
+				strawPointFinal_[i][nStrawPointsFinal[i]].clonePoint(strawPointTempBis_[i][j]);
 				nStrawPointsFinal[i]++;
 			}
 		}
@@ -1208,10 +1208,10 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 				pointMY = 0.0;
 				pointQY = 0.0;
 
-				for (int c = 0; c < (int) (hought[a][b] >> 60); c++) // check if there are at least 2 hits belonging to different chambers
+				for (int c = 0; c < (int) (hought[a][b] >> 60); c++) { // check if there are at least 2 hits belonging to different chambers
 					chkCam |= 1 << (0X3 & (hought[a][b] >> (48 + 2 * c)));
-
-				for (int d = 0; d < 4; d++)
+				}
+				for (int d = 0; d < 4; d++) {
 					if ((0X1 & (chkCam >> d)) == 0) {
 						nChkCam--;
 
@@ -1220,7 +1220,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 						else
 							addCam2 = d;
 					}
-
+				}
 				if (nChkCam > 1) {
 					for (int d = 0; d < (int) (hought[a][b] >> 60); d++) {
 						// si creano più tracklet con tutte le combinazioni di hit con camere diverse
