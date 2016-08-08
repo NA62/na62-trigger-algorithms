@@ -273,6 +273,13 @@ public:
 		l1StrawBadData_ = false;
 	}
 
+	void setL1StrawOverflow() {
+		l1StrawOverflow_ = true;
+	}
+	bool isL1StrawOverflow() {
+		return l1StrawOverflow_;
+	}
+
 private:
 
 	double chodTime;
@@ -309,6 +316,8 @@ private:
 	bool l1IRCSACBadData_;
 	bool l1MUV3BadData_;
 	bool l1NewCHODBadData_;
+
+	bool l1StrawOverflow_;
 
 	uint nKTAGSectors_l0tp;
 	uint nKTAGSectors_chod;

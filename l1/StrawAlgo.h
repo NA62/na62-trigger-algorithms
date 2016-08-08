@@ -24,8 +24,18 @@
 #include "straw_algorithm/Cluster.h"
 #include "straw_algorithm/Straw.h"
 
-#define MAXNHITS 1000
-#define MAXNROCHS 512
+#define MAX_N_HITS 1500
+#define MAX_N_ROCHS 512
+#define MAX_N_TRACKS 4000
+#define MAX_N_POINT_TEMP 5000
+#define MAX_N_POINT_TEMP_BIS 2000
+#define MAX_N_POINT_FINAL 2000
+#define MAX_N_CLUSTER 500
+#define MAX_N_PRECLUSTER MAX_N_CLUSTER // These happen to be the same but one could change it
+#define MAX_N_FIRST_TEMP_TRACK 3000
+#define MAX_N_TEMP_TRACK 4000
+#define MAX_N_TRACK_INTERMEDIE 1000
+
 
 #define RANGEM 160
 #define RANGEQ 200
@@ -46,6 +56,7 @@ public:
 	StrawAlgo();
 	static void initialize(uint i, l1Straw& l1StrawStruct);
 	uint_fast8_t processStrawTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
+	static uint_fast8_t abortProcessing(L1InfoToStorage* l1Info);
 	static void writeData(L1StrawAlgo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 
 	static float posTubNew(int chamber, int view, int plane, int jStraw);
@@ -88,14 +99,14 @@ private:
 
 	static const Point QBeam_;
 	static const Point MBeam_;
-	Point strawPointTemp_[4][5000];
-	Point strawPointTempbis_[4][2000];
-	Point strawPointFinal_[4][2000];
-	Cluster strawCluster_[4][4][500];
-	Straw strawPrecluster_[4][4][2][500];
-	Track strawFirstTempTrk_[3000];
-	Track strawTempTrk_[4000];
-	Track strawTrkIntermedie_[1000];
+	Point strawPointTemp_[4][MAX_N_POINT_TEMP];
+	Point strawPointTempBis_[4][MAX_N_POINT_TEMP_BIS];
+	Point strawPointFinal_[4][MAX_N_POINT_FINAL];
+	Cluster strawCluster_[4][4][MAX_N_CLUSTER];
+	Straw strawPrecluster_[4][4][2][MAX_N_PRECLUSTER];
+	Track strawFirstTempTrk_[MAX_N_FIRST_TEMP_TRACK];
+	Track strawTempTrk_[MAX_N_TEMP_TRACK];
+	Track strawTrkIntermedie_[MAX_N_TRACK_INTERMEDIE];
 
 	static const double Sq2_;
 	static const double InvSq2_;
