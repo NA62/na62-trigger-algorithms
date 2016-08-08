@@ -1949,7 +1949,9 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 
 uint_fast8_t StrawAlgo::abortProcessing(L1InfoToStorage* l1Info) {
 	l1Info->setL1StrawOverflow();
-	return 1;
+	l1Info->setL1StrawProcessed();
+	// 3 for event fulfilled both L1 straw triggers for Kpnn and exotics data streams
+	return 3;
 }
 
 float StrawAlgo::posTubNew(int chamber, int view, int plane, int jstraw) {
