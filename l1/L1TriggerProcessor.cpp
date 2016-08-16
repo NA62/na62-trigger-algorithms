@@ -27,6 +27,7 @@
 #include "StrawAlgo.h"
 #include "NewCHODAlgo.h"
 
+
 namespace na62 {
 
 std::atomic<uint64_t>* L1TriggerProcessor::L1Triggers_ = new std::atomic<uint64_t>[0xFF + 1];
@@ -95,6 +96,15 @@ uint L1TriggerProcessor::NumToAlgoID_[16][10];
 uint_fast8_t L1TriggerProcessor::NumberOfEnabledL0Masks_ = 0;
 std::vector<int> L1TriggerProcessor::L0MaskIDs_;
 uint_fast32_t L1TriggerProcessor::L1DataPacketSize_ = 0;
+
+
+/////////////////////
+//Intended for the shared memory farm version do not use them and the related get methods
+std::array<uint_fast8_t, 16> L1TriggerProcessor::l1TriggerWords_;
+L1InfoToStorage L1TriggerProcessor::l1Info_;
+bool L1TriggerProcessor::isL1WhileTimeout_;
+///////////////////////
+
 
 bool L1TriggerProcessor::isRequestZeroSuppressedCreamData(uint_fast8_t l1TriggerTypeWord) {
 	// add here any special L1 trigger word requiring NZS LKr data
@@ -340,7 +350,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 	uint_fast8_t muvTrigger = 0;
 	uint_fast8_t newchodTrigger = 0;
 
-	uint_fast8_t l1TriggerWords[16] = { };
+	//uint_fast8_t l1TriggerWords[16] = { };
+	std:array<uint_fast8_t, 16> l1TriggerWords = { };
 	L1InfoToStorage l1Info;
 
 	DecoderHandler decoder(event);
@@ -791,6 +802,14 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 		 */
 		event->setRrequestZeroSuppressedCreamData(true);
 		event->setProcessingID(0); // 0 indicates raw data as collected from the detector
+
+
+		/////////////////////
+		//Intended for the shared memory farm version do not use them and the related get methods
+		l1TriggerWords_ = l1TriggerWords;
+		l1Info_ = l1Info;
+		isL1WhileTimeout_ = isL1WhileTimeout;
+		///////////////////////
 		L1TriggerProcessor::writeL1Data(event, l1TriggerWords, &l1Info, isL1WhileTimeout);
 //		L1TriggerProcessor::readL1Data(event);
 
@@ -816,7 +835,9 @@ void L1TriggerProcessor::readL1Data(Event* const event) {
 		LOG_INFO("L1 Data " << data);
 	}
 }
-void L1TriggerProcessor::writeL1Data(Event* const event, const uint_fast8_t* l1TriggerWords, L1InfoToStorage* l1Info,
+
+//void L1TriggerProcessor::writeL1Data(Event* const event, const uint_fast8_t* l1TriggerWords, L1InfoToStorage* l1Info,
+void L1TriggerProcessor::writeL1Data(Event* const event, const std::array<uint_fast8_t, 16> l1TriggerWords, L1InfoToStorage* l1Info,
 		bool isL1WhileTimeout) {
 
 	uint nBlockHeaderWords = 0;

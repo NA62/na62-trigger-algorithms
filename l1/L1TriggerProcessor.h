@@ -15,7 +15,7 @@
 #include <atomic>
 
 #include <eventBuilding/Event.h>
-#include "L1InfoToStorage.h"
+#include "l1/L1InfoToStorage.h"
 #include "../options/TriggerOptions.h"
 #include "../struct/HLTConfParams.h"
 #include "L1Downscaling.h"
@@ -51,7 +51,10 @@ public:
 	/**
 	 * Fill in trigger decisions into event structure
 	 */
-	static void writeL1Data(Event* const event, const uint_fast8_t* l1TriggerWords, L1InfoToStorage* l1Info, bool isL1WhileTimeout = false);
+	//static void writeL1Data(Event* const event, const uint_fast8_t* l1TriggerWords, L1InfoToStorage* l1Info, bool isL1WhileTimeout = false);
+	static void writeL1Data(Event* const event, std::array<uint_fast8_t, 16> l1TriggerWords, L1InfoToStorage* l1Info, bool isL1WhileTimeout = false);
+
+
 	static void readL1Data(Event* const event);
 	static bool writeAlgoPacket(int algoID, L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 	static bool writeStrawAlgoPacket(int algoID, L1StrawAlgo* strawAlgoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
@@ -116,6 +119,19 @@ public:
 	static inline uint64_t GetEventCountersByL0MaskByAlgoID(uint iMaskID, uint iAlgoID) {
 		return EventCountersByL0MaskByAlgoID_[iMaskID][iAlgoID];
 	}
+
+	////////////
+	//Intended for the shared memory farm version do not use them and the related get methods
+	static std::array<uint_fast8_t, 16> inline getL1TriggerWords() {
+		return l1TriggerWords_;
+	}
+	static L1InfoToStorage inline getL1Info() {
+		return l1Info_;
+	}
+	static inline bool getIsL1WhileTimeout() {
+		return isL1WhileTimeout_;
+	}
+	///////////
 
 	static void initialize(l1Struct &l1Struct);
 
@@ -192,6 +208,14 @@ private:
 	static std::vector<int> L0MaskIDs_;
 
 	static uint_fast32_t L1DataPacketSize_;
+
+	/////////////////////
+	//Intended for the shared memory farm version do not use them and the related get methods
+	//static uint_fast8_t l1TriggerWords_[16];
+	static std::array<uint_fast8_t, 16> l1TriggerWords_;
+	static L1InfoToStorage l1Info_;
+	static bool isL1WhileTimeout_;
+	///////////////////////
 
 }
 ;
