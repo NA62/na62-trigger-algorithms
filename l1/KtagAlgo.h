@@ -31,15 +31,13 @@ public:
 	 *
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
-	static uint_fast8_t processKtagTrigger(uint l0MaskID,
-			DecoderHandler& decoder, L1InfoToStorage* l1Info);
+	static uint_fast8_t processKtagTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
 	/**
 	 * Calculates the sectorID based on the Tel62 and FPGA IDs. Possible results are between 0 and 7
 	 */
 	static uint calculateSector(uint tel62ID, uint fpgaID) {
 		return ((tel62ID << 2) | fpgaID) / 3;
 	}
-
 	static void initialize(uint i, l1KTAG &l1KtagStruct);
 	static void writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 
