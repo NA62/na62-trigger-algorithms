@@ -15,7 +15,7 @@
 #include <atomic>
 
 #include <eventBuilding/Event.h>
-#include "L1InfoToStorage.h"
+#include "l1/L1InfoToStorage.h"
 #include "../options/TriggerOptions.h"
 #include "../struct/HLTConfParams.h"
 #include "L1Downscaling.h"
