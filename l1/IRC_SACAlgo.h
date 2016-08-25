@@ -18,7 +18,6 @@
 #include "../struct/HLTConfParams.h"
 #include "L1Fragment.h"
 
-#define maxNhits 500
 #define maxNROchs 512
 
 namespace na62 {

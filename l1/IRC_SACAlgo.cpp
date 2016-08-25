@@ -41,87 +41,78 @@ void IRC_SACAlgo::initialize(uint i, l1IRCSAC &l1IRCSACStruct) {
 uint_fast8_t IRC_SACAlgo::processIRCSACTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
 	using namespace l0;
+
 //	LOG_INFO("Initial Time " << time[0].tv_sec << " " << time[0].tv_usec);
-//	LOG_INFO("IRC_SACAlgo: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
+//	LOG_INFO("IRCSAC: event timestamp " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
+//	LOG_INFO("IRCSAC: event reference fine time from L0TP " << std::hex << (uint)decoder.getDecodedEvent()->getFinetime() << std::dec);
 
 	/*
 	 * TODO: The same logic needs to be developed for RICHRefTime
 	 */
+	double refTimeL0TP = 0.;
 	double averageCHODHitTime = 0.;
 	bool isCHODRefTime = false;
-	if (AlgoRefTimeSourceID_[l0MaskID] == 1) {
+	if (!AlgoRefTimeSourceID_[l0MaskID]) {
+		refTimeL0TP = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
+//		LOG_INFO("L1 reference finetime from L0TP (ns) " << refTimeL0TP);
+	} else if (AlgoRefTimeSourceID_[l0MaskID] == 1) {
 		if (l1Info->isL1CHODProcessed()) {
 			isCHODRefTime = 1;
 			averageCHODHitTime = l1Info->getCHODAverageTime();
 		} else
-			LOG_ERROR("IRC_SACAlgo.cpp: Not able to use averageCHODHitTime as Reference Time even if it is requested!");
-	}
-//	LOG_INFO("IRC_SACAlgo: chodtime " << averageCHODHitTime);
+			LOG_ERROR("IRC_SACAlgo.cpp: Not able to use averageCHODHitTime as Reference Time even if requested!");
+	} else
+		LOG_ERROR("L1 Reference Time Source ID not recognised !!");
 
 	uint nHits = 0;
-
-	//TODO: chkmax need to be USED
-	DecoderRange<TrbFragmentDecoder> x = decoder.getIRCDecoderRange();
-	if (x.begin() == x.end()) {
-		LOG_ERROR("IRC_SAC: Empty decoder range!");
-		l1Info->setL1IRCSACBadData();
-//		badData = 1;
-		return 0;
-	}
-
 	int hit[maxNROchs] = { 0 };
 
 	TrbFragmentDecoder& ircsacPacket = (TrbFragmentDecoder&) decoder.getDecodedIRCFragment(0);
 //	LOG_INFO("First time check (inside iterator) " << time[1].tv_sec << " " << time[1].tv_usec);
 
 	if (!ircsacPacket.isReady() || ircsacPacket.isBadFragment()) {
-		LOG_ERROR("IRC_SACAlgo: This looks like a Bad Packet!!!! ");
+		LOG_ERROR("IRC_SAC: This looks like a Bad Packet!!!! ");
 		l1Info->setL1IRCSACBadData();
-//		badData = 1;
 		return 0;
 	}
 
 	/**
 	 * Get Arrays with hit Info
 	 */
-	const uint64_t* const edge_times = ircsacPacket.getTimes();
-	const uint_fast8_t* const edge_chIDs = ircsacPacket.getChIDs();
-	const bool* const edge_IDs = ircsacPacket.getIsLeadings();
-	const uint_fast8_t* const edge_tdcIDs = ircsacPacket.getTdcIDs();
-	double finetime, edgetime, dt_l0tp, dt_chod;
+	const uint64_t* const edgeTime = ircsacPacket.getTimes();
+	const uint_fast8_t* const edgeChID = ircsacPacket.getChIDs();
+	const bool* const edgeIsLeading = ircsacPacket.getIsLeadings();
+	const uint_fast8_t* const edgeTdcID = ircsacPacket.getTdcIDs();
+	double time, dtL0TP, dtCHOD;
 
 	uint numberOfEdgesOfCurrentBoard = ircsacPacket.getNumberOfEdgesStored();
 
-//	LOG_INFO("IRC_SAC: Tel62 ID " << ircsacPacket.getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard);
-//	LOG_INFO("Reference detector fine time " << (uint) decoder.getDecodedEvent()->getFinetime());
+	if (!numberOfEdgesOfCurrentBoard)
+		l1Info->setL1IRCSACEmptyPacket();
 
 	for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
-//		LOG_INFO("Edge " << iEdge << " ID " << edge_IDs[iEdge]);
-//		LOG_INFO("Edge " << iEdge << " chID " << (uint) edge_chIDs[iEdge]);
-//		LOG_INFO("Edge " << iEdge << " tdcID " << (uint) edge_tdcIDs[iEdge]);
-//		LOG_INFO("Edge " << iEdge << " time " << std::hex << edge_times[iEdge] << std::dec);
+//		LOG_INFO("Edge " << iEdge << " ID " << edgeIsLeading[iEdge]);
+//		LOG_INFO("Edge " << iEdge << " chID " << (uint) edgeChID[iEdge]);
+//		LOG_INFO("Edge " << iEdge << " tdcID " << (uint) edgeTdcID[iEdge]);
+//		LOG_INFO("Edge " << iEdge << " time " << std::hex << edgeTime[iEdge] << std::dec);
 
-		const int roChID = (edge_tdcIDs[iEdge] * 32) + edge_chIDs[iEdge];
+		const int roChID = (edgeTdcID[iEdge] * 32) + edgeChID[iEdge];
 //		LOG_INFO("IRCSAC Algo: Found R0chID " << roChID);
 
 		if ((roChID < 128) && ((roChID & 1) == 0)) {
-			if (edge_IDs[iEdge]) {
-				edgetime = (edge_times[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
+			if (edgeIsLeading[iEdge]) {
+				time = (edgeTime[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
+//				LOG_INFO("Edge time (ns) " << time);
 
 				if (!isCHODRefTime) {
-					finetime = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
-					dt_l0tp = fabs(edgetime - finetime);
-					dt_chod = -1.0e+28;
+					dtL0TP = fabs(time - refTimeL0TP);
+					dtCHOD = -1.0e+28;
 				} else
-					dt_chod = fabs(edgetime - averageCHODHitTime);
+					dtCHOD = fabs(time - averageCHODHitTime);
+//				LOG_INFO("Is Low Threshold:  " << ((roChID & 1) == 0) << "dtL0TP " << dtL0TP << " dtCHOD " << dtCHOD);
 
-//				LOG_INFO("edgetime (in ns) " << edgetime);
-//				LOG_INFO("finetime (in ns) " << finetime);
-//				LOG_INFO("isLeading? " << edge_IDs[iEdge]);
-//				LOG_INFO("Is Low Threshold:  " << ((roChID & 1) == 0) << " dt_l0tp " << dt_l0tp << " dt_chod " << dt_chod);
-
-				if ((!isCHODRefTime && dt_l0tp < AlgoOnlineTimeWindow_[l0MaskID])
-						|| (isCHODRefTime && dt_chod < AlgoOnlineTimeWindow_[l0MaskID])) {
+				if ((!isCHODRefTime && dtL0TP < AlgoOnlineTimeWindow_[l0MaskID])
+						|| (isCHODRefTime && dtCHOD < AlgoOnlineTimeWindow_[l0MaskID])) {
 					hit[roChID]++;
 //					LOG_INFO("Increment hit[" << roChID << "] to " << hit[roChID]);
 				}
@@ -132,6 +123,7 @@ uint_fast8_t IRC_SACAlgo::processIRCSACTrigger(uint l0MaskID, DecoderHandler& de
 				if (nHits) {
 					l1Info->setL1IRCSACNHits(nHits);
 					l1Info->setL1IRCSACProcessed();
+//					LOG_INFO("IRCSACAlgo: Returning nHits != 0 !!!!");
 					return 1;
 				}
 			}
@@ -140,11 +132,8 @@ uint_fast8_t IRC_SACAlgo::processIRCSACTrigger(uint l0MaskID, DecoderHandler& de
 		}
 	}
 //	LOG_INFO("time check " << time[2].tv_sec << " " << time[2].tv_usec);
-
-	if (!numberOfEdgesOfCurrentBoard)
-		l1Info->setL1IRCSACEmptyPacket();
-//	LOG_INFO("IRC_SACAlgo.cpp: Analysed Event " << decoder.getDecodedEvent()->getEventNumber());
-//	LOG_INFO("nEdges_tot " << numberOfEdgesOfCurrentBoard << " - nHits " << nHits);
+//	LOG_INFO("IRC_SACAlgo.cpp: Analysing Event " << decoder.getDecodedEvent()->getEventNumber());
+//	LOG_INFO("Timestamp " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
 //	LOG_INFO("time check (final)" << time[3].tv_sec << " " << time[3].tv_usec);
 
 //	for (int i = 0; i < 3; i++) {
@@ -152,32 +141,38 @@ uint_fast8_t IRC_SACAlgo::processIRCSACTrigger(uint l0MaskID, DecoderHandler& de
 //		}
 //	LOG_INFO(((time[3].tv_sec - time[0].tv_sec)*1e6 + time[3].tv_usec) - time[0].tv_usec);
 
+//	LOG_INFO("nEdges_tot " << numberOfEdgesOfCurrentBoard << " - nHits " << nHits);
+
 	l1Info->setL1IRCSACNHits(nHits);
 	l1Info->setL1IRCSACProcessed();
-	return (nHits);
+	return (nHits > 0);
 }
 
 void IRC_SACAlgo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info) {
 
 	if (AlgoID_ != algoPacket->algoID)
-		LOG_ERROR("Algo ID does not match with Algo ID written within the packet!");
+		LOG_ERROR("Algo ID does not match with Algo ID already written within the packet!");
+
 	algoPacket->algoID = AlgoID_;
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
 //	algoPacket->qualityFlags = (l1Info->isL1IRCSACProcessed() << 6) | (l1Info->isL1IRCSACEmptyPacket() << 4) | (l1Info->isL1IRCSACBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
 	algoPacket->qualityFlags = (l1Info->isL1IRCSACProcessed() << 6) | (l1Info->isL1IRCSACEmptyPacket() << 4)
 			| (l1Info->isL1IRCSACBadData() << 2) | ((uint) l1Info->getL1IRCSACTrgWrd());
+
 	algoPacket->l1Data[0] = l1Info->getL1IRCSACNHits();
-	if (AlgoRefTimeSourceID_[l0MaskID] == 1)
-		algoPacket->l1Data[1] = l1Info->getCHODAverageTime();
-	else
-		algoPacket->l1Data[1] = 0;
+	if (!AlgoRefTimeSourceID_[l0MaskID]) {
+		algoPacket->l1Data[1] = l1Info->getL1RefTimeL0TP();
+	} else if (AlgoRefTimeSourceID_[l0MaskID] == 1) {
+		algoPacket->l1Data[1] = l1Info->getCHODAverageTime(); //this is a double!!!
+	} else
+		LOG_ERROR("L1 Reference Time Source ID not recognised !!");
+
 	algoPacket->numberOfWords = (sizeof(L1Algo) / 4.);
 //	LOG_INFO("l0MaskID " << l0MaskID);
 //	LOG_INFO("algoID " << (uint)algoPacket->algoID);
 //	LOG_INFO("quality Flags " << (uint)algoPacket->qualityFlags);
 //	LOG_INFO("online TW " << (uint)algoPacket->onlineTimeWindow);
 //	LOG_INFO("Data Words " << algoPacket->l1Data[0] << " " << algoPacket->l1Data[1]);
-
 }
 
 }

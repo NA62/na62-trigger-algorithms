@@ -9,7 +9,6 @@
 #ifndef NEWCHODALGO_H_
 #define NEWCHODALGO_H_
 
-
 #include <sys/types.h>
 #include <cstdint>
 
@@ -32,7 +31,7 @@ public:
 	 */
 
 	static uint_fast8_t processNewCHODTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
-	static void initialize(uint i,l1NewCHOD &l1NewChodStruct);
+	static void initialize(uint i, l1NewCHOD &l1NewChodStruct);
 	static void writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 
 private:
@@ -47,7 +46,5 @@ private:
 };
 
 } /* namespace na62 */
-
-
 
 #endif /* NEWCHODALGO_H_ */

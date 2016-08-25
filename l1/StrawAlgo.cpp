@@ -1898,8 +1898,8 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 		flagL1Limit[e] = 0;
 
 		if (e < 5) {
-			l1Info->setL1StrawTrack_P(e, strawTrkIntermedie_[e].pz);
-			l1Info->setL1StrawTrack_Vz(e, strawTrkIntermedie_[e].zvertex);
+			l1Info->setL1StrawTrackP(e, strawTrkIntermedie_[e].pz);
+			l1Info->setL1StrawTrackVz(e, strawTrkIntermedie_[e].zvertex);
 		}
 		if (strawTrkIntermedie_[e].zvertex > -100000 && strawTrkIntermedie_[e].zvertex < 180000 && strawTrkIntermedie_[e].cda < 200
 				&& strawTrkIntermedie_[e].pz < 50000) {
@@ -2071,16 +2071,19 @@ void StrawAlgo::writeData(L1StrawAlgo* algoPacket, uint l0MaskID, L1InfoToStorag
 
 	if (AlgoID_ != algoPacket->algoID)
 		LOG_ERROR("Algo ID does not match with Algo ID written within the packet!");
+
 	algoPacket->algoID = AlgoID_;
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
 	algoPacket->qualityFlags = (l1Info->isL1StrawProcessed() << 6) | (l1Info->isL1StrawEmptyPacket() << 4)
 			| (l1Info->isL1StrawBadData() << 2) | (l1Info->isL1StrawOverflow() << 1) | ((uint) l1Info->getL1StrawTrgWrd());
+
 	for (uint iTrk = 0; iTrk != 5; iTrk++) {
 //		LOG_INFO("track index " << iTrk << " momentum " << l1Info->getL1StrawTrack_P(iTrk));
 //		LOG_INFO("track index " << iTrk << " vertex " << l1Info->getL1StrawTrack_Vz(iTrk));
-		algoPacket->l1Data[iTrk] = ((uint) l1Info->getL1StrawTrack_P(iTrk) << 16) | (uint) l1Info->getL1StrawTrack_Vz(iTrk);
+		algoPacket->l1Data[iTrk] = ((uint) l1Info->getL1StrawTrackP(iTrk) << 16) | (uint) l1Info->getL1StrawTrackVz(iTrk);
 	}
 	algoPacket->l1Data[5] = l1Info->getL1StrawNTracks();
+
 	algoPacket->numberOfWords = (sizeof(L1StrawAlgo) / 4.);
 //	LOG_INFO("l0MaskID " << l0MaskID);
 //	LOG_INFO("algoID " << (uint)algoPacket->algoID);

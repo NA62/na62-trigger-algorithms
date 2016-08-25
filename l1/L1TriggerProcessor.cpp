@@ -327,7 +327,6 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 
 uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalgo) {
 
-//using namespace l0;
 	uint_fast8_t l1Trigger = 0;
 	uint_fast8_t l1GlobalFlagTrigger = 0;
 	uint_fast8_t l1MaskFlagTrigger = 0;
@@ -355,10 +354,6 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 	L1InfoToStorage l1Info;
 
 	DecoderHandler decoder(event);
-//event->readTriggerTypeWordAndFineTime();
-//uint_fast8_t evtRefFineTime = event->getFinetime();
-
-//L1TriggerProcessor::clear();
 
 	L1InputEvents_.fetch_add(1, std::memory_order_relaxed);
 //	LOG_INFO("L1Event number after adding 1 " << L1InputEvents_);
@@ -366,16 +361,21 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 //	LOG_INFO("L1Event number per Burst after adding 1 " << L1InputEventsPerBurst_);
 
 //	LOG_INFO("Global FlagMode " << flagMode << " " << L1InputEvents_ << " " << autoFlagFactor);
-
 	if (FlagMode_) {
 		l1GlobalFlagTrigger = 1;
 	} else if (AutoFlagFactor_ && (L1InputEvents_ % AutoFlagFactor_ == 0)) {
 		l1GlobalFlagTrigger = 1;
 	}
 //	LOG_INFO("l1GlobalFlagTrigger " << (uint)l1GlobalFlagTrigger);
+
 	/*
 	 * Check if the event should bypass the processing
 	 */
+	uint_fast8_t l0DataType = event->getTriggerDataType();
+//	LOG_INFO("l0TriggerDataType " << std::hex << (uint) l0DataType << std::dec);
+	uint_fast8_t l0TrigWord = event->getL0TriggerTypeWord();
+//	LOG_INFO("l0TriggerWord " << std::hex << (uint) l0TrigWord << std::dec);
+
 	if (event->isSpecialTriggerEvent()) {
 		isL1Bypassed = 1;
 		event->setRrequestZeroSuppressedCreamData(false);
@@ -387,7 +387,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 //		L1TriggerProcessor::readL1Data(event);
 		return l1Trigger;
 	}
-	if (event->isPulserGTKTriggerEvent() || bypassEvent()) {
+//	if (event->isPulserGTKTriggerEvent() || bypassEvent()) {
+	if ((event->isPeriodicTriggerEvent() && (l0TrigWord == 0x8)) || bypassEvent()) { //PulserGTK to be addressed with 0x2c trword
 		isL1Bypassed = 1;
 		event->setRrequestZeroSuppressedCreamData(true);
 		l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | ((l1MaskFlagTrigger != 0) << 6) | (isL1Bypassed << 5) | (isAllL1AlgoDisable << 4)
@@ -396,6 +397,17 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 //		printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %8x\n",l1Trigger);
 		L1TriggerProcessor::writeL1Data(event, l1TriggerWords, &l1Info);
 //		L1TriggerProcessor::readL1Data(event);
+		return l1Trigger;
+	}
+	if (event->isPeriodicTriggerEvent() && (l0TrigWord == 0x10)) { //In burst periodics to be addressed within na62-farm-lib
+		isL1Bypassed = 1;
+		event->setRrequestZeroSuppressedCreamData(true); //Temporarily ZS LKr data
+		l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | ((l1MaskFlagTrigger != 0) << 6) | (isL1Bypassed << 5) | (isAllL1AlgoDisable << 4)
+				| (numberOfTriggeredL1Masks != 0);
+		L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed);
+		//		printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %8x\n",l1Trigger);
+		L1TriggerProcessor::writeL1Data(event, l1TriggerWords, &l1Info);
+		//		L1TriggerProcessor::readL1Data(event);
 		return l1Trigger;
 	}
 
@@ -415,15 +427,18 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 	 * The event is ready to be processed
 	 *
 	 */
-//  l0TrigWord = event->getL0TriggerTypeWord();
-//	LOG_INFO("l0TriggerWord " << std::hex << (uint) l0TrigWord << std::dec);
-	//l0DataType = event->getTriggerDataType();
-//	LOG_INFO("l0TriggerDataType " << std::hex << (uint) l0DataType << std::dec);
+	uint_fast16_t l0TrigFlags = event->getTriggerFlags();
+//	LOG_INFO("l0TrigFlags " << std::hex << (uint) l0TrigFlags << std::dec);
+	uint_fast8_t refFineTime = event->getFinetime();
+//	LOG_INFO("Event Reference Fine Time " << std::hex << (uint) refFineTime << std::dec);
+	l1Info.setL1RefTimeL0TP(refFineTime);
+
 	/*
 	 * Store the global event timestamp taken from the reverence detector
 	 */
 	l0::MEPFragment* tsFragment = event->getL0SubeventBySourceIDNum(SourceIDManager::TS_SOURCEID_NUM)->getFragment(0);
 	event->setTimestamp(tsFragment->getTimestamp());
+//	LOG_INFO("Event Timestamp " << std::hex << (uint) event->getTimestamp() << std::dec);
 
 	uint_fast8_t l1TriggerTmp;
 	uint_fast8_t l1FlagTrigger;
@@ -440,7 +455,6 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 		isL0ControlTrigger = 1;
 		isL1Bypassed = 1;
 	}
-	uint_fast16_t l0TrigFlags = event->getTriggerFlags();
 	if (isL0PhysicsTrigger) {
 		for (int i = 0; i != 16; i++) {
 			l1TriggerWords[i] = 0;
@@ -753,7 +767,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 		}
 
 //		printf("Summary of Triggered Masks: %d\n", numberOfTriggeredL1Masks);
-//		for (int i = 0; i != 16; i++) printf("Summary of Trigger Words: l1Trigger %x\n",l1TriggerWords[i]);
+//		for (int i = 0; i != 16; i++)
+//			printf("Summary of Trigger Words: l1Trigger %x\n",l1TriggerWords[i]);
 	}
 
 	/*
@@ -836,7 +851,6 @@ void L1TriggerProcessor::readL1Data(Event* const event) {
 	}
 }
 
-//void L1TriggerProcessor::writeL1Data(Event* const event, const uint_fast8_t* l1TriggerWords, L1InfoToStorage* l1Info,
 void L1TriggerProcessor::writeL1Data(Event* const event, const std::array<uint_fast8_t, 16> l1TriggerWords, L1InfoToStorage* l1Info,
 		bool isL1WhileTimeout) {
 
@@ -928,7 +942,7 @@ void L1TriggerProcessor::writeL1Data(Event* const event, const std::array<uint_f
 
 				L1StrawAlgo* strawAlgoPacket = (L1StrawAlgo*) (payload + nBlockHeaderWords + nMaskWords);
 
-				if (((uint)event->getTriggerFlags()) & (1 << numToMaskID)) {
+				if (((uint) event->getTriggerFlags()) & (1 << numToMaskID)) {
 
 //					LOG_INFO("NumToAlgoID " << numToAlgoID);
 					strawAlgoPacket->processID = AlgoProcessID_[numToMaskID][numToAlgoID];
@@ -959,7 +973,7 @@ void L1TriggerProcessor::writeL1Data(Event* const event, const std::array<uint_f
 			} else {
 				L1Algo* algoPacket = (L1Algo*) (payload + nBlockHeaderWords + nMaskWords);
 
-				if (((uint)event->getTriggerFlags()) & (1 << numToMaskID)) {
+				if (((uint) event->getTriggerFlags()) & (1 << numToMaskID)) {
 
 //					LOG_INFO("NumToAlgoID " << numToAlgoID);
 					algoPacket->processID = AlgoProcessID_[numToMaskID][numToAlgoID];
