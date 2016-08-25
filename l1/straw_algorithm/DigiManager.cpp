@@ -9,14 +9,6 @@
 
 namespace na62 {
 
-DigiManager::DigiManager() {
-	// TODO Auto-generated constructor stub
-}
-
-DigiManager::~DigiManager() {
-	// TODO Auto-generated destructor stub
-}
-
 // RT dependence for full digitization
 double DigiManager::rTDependence(double time) {
 	double time2 = time * time;

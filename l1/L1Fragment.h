@@ -38,6 +38,19 @@ struct L1Algo {
 	uint32_t l1Data[2];
 };
 
+struct L1StrawAlgo {
+	uint8_t numberOfWords; //number of 32bit words in Algo packet, 2 header words are included
+	uint8_t processID;
+	uint8_t algoID;
+	uint8_t qualityFlags; //isEmptyPacket, isBadData, isProcessed
+	uint16_t downscaleFactor;
+	uint8_t onlineTimeWindow; //half width of online matching time window
+//	uint8_t l1AlgoProcessed :2;
+	uint8_t algoFlags; //enable, logic, flagging, downscale
+//	uint8_t more_reserved;
+	uint32_t l1Data[6];
+};
+
 struct L1Data {
 	uint32_t dataWords;
 };

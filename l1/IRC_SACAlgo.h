@@ -14,11 +14,10 @@
 
 #include "../common/decoding/DecoderHandler.h"
 #include "ircsac_algorithm/ParsConfFile.h"
-#include "L1InfoToStorage.h"
+#include "l1/L1InfoToStorage.h"
 #include "../struct/HLTConfParams.h"
 #include "L1Fragment.h"
 
-#define maxNhits 500
 #define maxNROchs 512
 
 namespace na62 {

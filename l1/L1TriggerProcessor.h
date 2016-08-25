@@ -15,12 +15,13 @@
 #include <atomic>
 
 #include <eventBuilding/Event.h>
-#include "L1InfoToStorage.h"
+#include "l1/L1InfoToStorage.h"
 #include "../options/TriggerOptions.h"
 #include "../struct/HLTConfParams.h"
 #include "L1Downscaling.h"
 #include "L1Reduction.h"
 #include "L1Fragment.h"
+#include "StrawAlgo.h"
 
 namespace na62 {
 
@@ -34,7 +35,7 @@ public:
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 
-	static uint_fast8_t compute(Event* const event);
+	static uint_fast8_t compute(Event* const event, StrawAlgo& strawalgo);
 
 	/**
 	 * Returns true if the current event should be bypassed instead of being processed
@@ -53,6 +54,7 @@ public:
 	static void writeL1Data(Event* const event, const uint_fast8_t* l1TriggerWords, L1InfoToStorage* l1Info, bool isL1WhileTimeout = false);
 	static void readL1Data(Event* const event);
 	static bool writeAlgoPacket(int algoID, L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
+	static bool writeStrawAlgoPacket(int algoID, L1StrawAlgo* strawAlgoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 	static std::string algoIdToTriggerName(uint algoID);
 
 	/**
@@ -153,6 +155,7 @@ private:
 	static uint_fast16_t RichEnableMask_;
 	static uint_fast16_t CedarEnableMask_;
 	static uint_fast16_t LavEnableMask_;
+	static uint_fast16_t StrawEnableMask_;
 	static uint_fast16_t IrcSacEnableMask_;
 	static uint_fast16_t MuvEnableMask_;
 	static uint_fast16_t NewChodEnableMask_;
@@ -161,6 +164,7 @@ private:
 	static uint_fast16_t RichFlagMask_;
 	static uint_fast16_t CedarFlagMask_;
 	static uint_fast16_t LavFlagMask_;
+	static uint_fast16_t StrawFlagMask_;
 	static uint_fast16_t IrcSacFlagMask_;
 	static uint_fast16_t MuvFlagMask_;
 	static uint_fast16_t NewChodFlagMask_;
@@ -170,9 +174,13 @@ private:
 	static uint RichAlgorithmId_;
 	static uint CedarAlgorithmId_;
 	static uint LavAlgorithmId_;
+	static uint StrawAlgorithmId_;
 	static uint IrcSacAlgorithmId_;
 	static uint MuvAlgorithmId_;
 	static uint NewChodAlgorithmId_;
+
+	static int StrawAlgoType_[16];
+	static int MUVAlgoType_[16];
 
 	// Converters
 	static uint MaskIDToNum_[16];

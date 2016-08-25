@@ -13,7 +13,7 @@
 
 #include "../common/decoding/DecoderHandler.h"
 #include "muv_algorithm/ParsConfFile.h"
-#include "L1InfoToStorage.h"
+#include "l1/L1InfoToStorage.h"
 #include "../struct/HLTConfParams.h"
 #include "L1Fragment.h"
 
@@ -29,13 +29,10 @@ public:
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 
-	static uint_fast8_t processMUV3Trigger0(uint l0MaskID, DecoderHandler& decoder,
-			L1InfoToStorage* l1Info);
-	static uint_fast8_t processMUV3Trigger1(uint l0MaskID, DecoderHandler& decoder,
-			L1InfoToStorage* l1Info);
-	static uint_fast8_t processMUV3Trigger2(uint l0MaskID, DecoderHandler& decoder,
-			L1InfoToStorage* l1Info);
-	static void initialize(uint i,l1MUV &l1MUV3Struct);
+	static uint_fast8_t processMUV3Trigger0(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
+	static uint_fast8_t processMUV3Trigger1(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
+	static uint_fast8_t processMUV3Trigger2(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
+	static void initialize(uint i, l1MUV &l1MUV3Struct);
 	static void writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 
 private:

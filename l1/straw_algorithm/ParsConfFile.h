@@ -22,18 +22,28 @@ public:
 	~STRAWParsConfFile();
 
 	static STRAWParsConfFile* GetInstance();
-	static int* getGeoMap();
-	static int getNROChannels();
-	static void readT0();
-	static double* getT0();
+
+	int* getGeoMap();
+	int getNROChannels();
+
+	void readT0();
+	double* getT0();
+
+	void readStationT0();
+	double getStationT0();
 
 private:
 
 	static STRAWParsConfFile* theInstance;  // singleton instance
-	static int nROChannels;
-	static int geoMap[8192];
-	static string fileT0;
-	static double fROMezzaninesT0[512]; //from offline - to be removed
+
+	int nROChannels;
+	int geoMap[8192];
+
+	string fileT0;
+	double fROMezzaninesT0[512]; //from offline - to be removed
+
+	string fileStationT0;
+	double fStationT0;
 
 };
 
