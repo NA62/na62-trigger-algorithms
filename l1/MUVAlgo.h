@@ -32,6 +32,7 @@ public:
 	static uint_fast8_t processMUV3Trigger0(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
 	static uint_fast8_t processMUV3Trigger1(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
 	static uint_fast8_t processMUV3Trigger2(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
+	static uint_fast8_t processMUV3Trigger3(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
 	static void initialize(uint i, l1MUV &l1MUV3Struct);
 	static void writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 
