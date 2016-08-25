@@ -238,7 +238,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger1(uint l0MaskID, DecoderHandler& decode
 						if (((pmtID1 % 12) <= 5 && (pmtID2 % 12) >= 6) || ((pmtID2 % 12) <= 5 && (pmtID1 % 12) >= 6)) {
 							edgetime1 = (edge_times[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
 							edgetime2 = (edge_times[jEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
-							if (fabs(edgetime1 - edgetime2) < 100) {
+							if (fabs(edgetime1 - edgetime2) < 10) {
 								if (!isCHODRefTime) {
 									//LOG_INFO("finetime (in ns) " << finetime);
 									dt_l0tp1 = fabs(edgetime1 - finetime);
@@ -254,7 +254,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger1(uint l0MaskID, DecoderHandler& decode
 										|| (isCHODRefTime && dt_chod1 < AlgoOnlineTimeWindow_[l0MaskID]
 												&& dt_chod2 < AlgoOnlineTimeWindow_[l0MaskID])) {
 									l1Info->setL1MUV3Processed();
-									LOG_INFO("pmt1: "<<pmtID1<<" pmt2: "<<pmtID2<<" dt_l0tp1: "<<dt_l0tp1<<" dt_l0tp2: "<<dt_l0tp2);
+//									LOG_INFO("pmt1: "<<pmtID1<<" pmt2: "<<pmtID2<<" dt_l0tp1: "<<dt_l0tp1<<" dt_l0tp2: "<<dt_l0tp2);
 									return 1;
 								}
 							}
@@ -333,7 +333,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger2(uint l0MaskID, DecoderHandler& decode
 //							LOG_INFO("neighbours! pmt1= " << pmtID1 << " pmt2= " << pmtID2);
 							edgetime1 = (edge_times[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
 							edgetime2 = (edge_times[jEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
-							if (fabs(edgetime1 - edgetime2) < 10) {
+							if (fabs(edgetime1 - edgetime2) < 5) {
 								if (!isCHODRefTime) {
 									finetime = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
 									//					LOG_INFO("finetime (in ns) " << finetime);
@@ -347,10 +347,10 @@ uint_fast8_t MUV3Algo::processMUV3Trigger2(uint l0MaskID, DecoderHandler& decode
 									//				LOG_INFO("Online Time Window " << algoOnlineTimeWindow << " dt_l0tp1 " << dt_l0tp1 << " dt_chod1 " << dt_chod1);
 									//				LOG_INFO("Online Time Window " << algoOnlineTimeWindow << " dt_l0tp2 " << dt_l0tp2 << " dt_chod2 " << dt_chod2);
 								}
-								if ((!isCHODRefTime && dt_l0tp1 < AlgoOnlineTimeWindow_[l0MaskID]
-										&& dt_l0tp2 < AlgoOnlineTimeWindow_[l0MaskID])
-										|| (isCHODRefTime && dt_chod1 < AlgoOnlineTimeWindow_[l0MaskID]
-												&& dt_chod2 < AlgoOnlineTimeWindow_[l0MaskID])) {
+								if ((!isCHODRefTime && (dt_l0tp1 < AlgoOnlineTimeWindow_[l0MaskID]
+										|| dt_l0tp2 < AlgoOnlineTimeWindow_[l0MaskID]))
+										|| (isCHODRefTime && (dt_chod1 < AlgoOnlineTimeWindow_[l0MaskID]
+												|| dt_chod2 < AlgoOnlineTimeWindow_[l0MaskID]))) {
 									l1Info->setL1MUV3Processed();
 									return 1;
 								}
@@ -439,7 +439,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger3(uint l0MaskID, DecoderHandler& decode
 //									LOG_INFO("pmt1: "<<pmtID1<<" pmt2: "<<pmtID2);
 								edgetime1 = (edge_times[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
 								edgetime2 = (edge_times[jEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
-								if (fabs(edgetime1 - edgetime2) < 10) {
+								if (fabs(edgetime1 - edgetime2) < 5) {
 									edgetime = max(edgetime1, edgetime2);
 									if (!isCHODRefTime) {
 										finetime = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
@@ -451,10 +451,8 @@ uint_fast8_t MUV3Algo::processMUV3Trigger3(uint l0MaskID, DecoderHandler& decode
 //									LOG_INFO("dt_l0tp: "<<dt_l0tp<<" dt_chod: "<<dt_chod);
 									if ((!isCHODRefTime && dt_l0tp < AlgoOnlineTimeWindow_[l0MaskID])
 											|| (isCHODRefTime && dt_chod < AlgoOnlineTimeWindow_[l0MaskID])) {
-										if (dt_l0tp <= 5 || dt_chod <= 5) {
-											l1Info->setL1MUV3Processed();
-											return 1;
-										}
+										l1Info->setL1MUV3Processed();
+										return 1;
 									}
 								}
 							}
