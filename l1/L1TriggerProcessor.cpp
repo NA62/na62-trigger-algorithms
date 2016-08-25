@@ -360,7 +360,12 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 	/*
 	 * Check if the event should bypass the processing
 	 */
-	if (event->isSpecialTriggerEvent() || (event->isPeriodicTriggerEvent() && !event->isPulserGTKTriggerEvent())) {
+	uint_fast8_t l0DataType = event->getTriggerDataType();
+//	LOG_INFO("l0TriggerDataType " << std::hex << (uint) l0DataType << std::dec);
+	uint_fast8_t l0TrigWord = event->getL0TriggerTypeWord();
+//	LOG_INFO("l0TriggerWord " << std::hex << (uint) l0TrigWord << std::dec);
+
+	if (event->isSpecialTriggerEvent()) {
 		isL1Bypassed = 1;
 		event->setRrequestZeroSuppressedCreamData(false);
 		l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | ((l1MaskFlagTrigger != 0) << 6) | (isL1Bypassed << 5) | (isAllL1AlgoDisable << 4)
@@ -371,7 +376,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 //		L1TriggerProcessor::readL1Data(event);
 		return l1Trigger;
 	}
-	if (event->isPulserGTKTriggerEvent() || bypassEvent()) {
+//	if (event->isPulserGTKTriggerEvent() || bypassEvent()) {
+	if ((event->isPeriodicTriggerEvent() && (l0TrigWord == 0x8)) || bypassEvent()) { //PulserGTK to be addressed with 0x2c trword
 		isL1Bypassed = 1;
 		event->setRrequestZeroSuppressedCreamData(true);
 		l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | ((l1MaskFlagTrigger != 0) << 6) | (isL1Bypassed << 5) | (isAllL1AlgoDisable << 4)
@@ -380,6 +386,17 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 //		printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %8x\n",l1Trigger);
 		L1TriggerProcessor::writeL1Data(event, l1TriggerWords, &l1Info);
 //		L1TriggerProcessor::readL1Data(event);
+		return l1Trigger;
+	}
+	if (event->isPeriodicTriggerEvent() && (l0TrigWord == 0x10)) { //In burst periodics to be addressed within na62-farm-lib
+		isL1Bypassed = 1;
+		event->setRrequestZeroSuppressedCreamData(true); //Temporarily ZS LKr data
+		l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | ((l1MaskFlagTrigger != 0) << 6) | (isL1Bypassed << 5) | (isAllL1AlgoDisable << 4)
+				| (numberOfTriggeredL1Masks != 0);
+		L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed);
+		//		printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %8x\n",l1Trigger);
+		L1TriggerProcessor::writeL1Data(event, l1TriggerWords, &l1Info);
+		//		L1TriggerProcessor::readL1Data(event);
 		return l1Trigger;
 	}
 
@@ -399,10 +416,6 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 	 * The event is ready to be processed
 	 *
 	 */
-//	uint_fast8_t l0DataType = event->getTriggerDataType();
-//	LOG_INFO("l0TriggerDataType " << std::hex << (uint) l0DataType << std::dec);
-//	uint_fast8_t l0TrigWord = event->getL0TriggerTypeWord();
-//	LOG_INFO("l0TriggerWord " << std::hex << (uint) l0TrigWord << std::dec);
 	uint_fast16_t l0TrigFlags = event->getTriggerFlags();
 //	LOG_INFO("l0TrigFlags " << std::hex << (uint) l0TrigFlags << std::dec);
 	uint_fast8_t refFineTime = event->getFinetime();
@@ -819,7 +832,7 @@ void L1TriggerProcessor::readL1Data(Event* const event) {
 	}
 }
 void L1TriggerProcessor::writeL1Data(Event* const event, const uint_fast8_t* l1TriggerWords, L1InfoToStorage* l1Info,
-		bool isL1WhileTimeout) {
+bool isL1WhileTimeout) {
 
 	uint nBlockHeaderWords = 0;
 	uint_fast8_t refTimeSourceID = 0;
