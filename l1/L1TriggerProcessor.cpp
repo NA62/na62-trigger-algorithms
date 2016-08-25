@@ -643,12 +643,25 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 
 					if ((MuvEnableMask_ & (1 << i)) && AlgoProcessID_[i][MuvAlgorithmId_] == l1ProcessID
 							&& SourceIDManager::isMUV3Active()) {
-						if (!l1Info.isL1MUV3Processed()) {
+						/*
+						 * AlgoType=0, Multiplicity trigger to be used in veto, corresponding to Trigger3
+						 * AlgoType=1, Left-Right trigger to be used in positive, corresponding to Trigger1
+						 * AlgoType=2, Neighbours trigger (from Chris) to be used in positive, corresponding to Trigger0
+						 */
+						if (!MUVAlgoType_[i] && !l1Info.isL1MUV3TriggerMultiProcessed()) {
+							muvTrigger = MUV3Algo::processMUV3Trigger3(i, decoder, &l1Info);
+						} else if ((MUVAlgoType_[i] == 1) && !l1Info.isL1MUV3TriggerLeftRightProcessed()) {
+							muvTrigger = MUV3Algo::processMUV3Trigger1(i, decoder, &l1Info);
+						} else if ((MUVAlgoType_[i] == 2) && !l1Info.isL1MUV3TriggerNeighboursProcessed()) {
 							muvTrigger = MUV3Algo::processMUV3Trigger0(i, decoder, &l1Info);
+						}
+
+//						if (!l1Info.isL1MUV3Processed()) {
+//							muvTrigger = MUV3Algo::processMUV3Trigger3(i, decoder, &l1Info);
 //							if (muvTrigger != 0) {
 //								L1Downscaling::processAlgorithm(muvAlgorithmId);
 //							}
-						}
+//						}
 						l1ProcessID++;
 //						printf("L1TriggerProcessor.cpp: muvTrigger %d\n", muvTrigger);
 
