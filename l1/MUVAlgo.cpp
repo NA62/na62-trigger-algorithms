@@ -42,89 +42,88 @@ void MUV3Algo::initialize(uint i, l1MUV &l1MUV3Struct) {
 uint_fast8_t MUV3Algo::processMUV3Trigger0(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
 	using namespace l0;
-//	LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
-//	LOG_INFO("Timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
+
+//	LOG_INFO("MUV3: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
+//	LOG_INFO("MUV3: event reference fine time from L0TP " << std::hex << (uint)decoder.getDecodedEvent()->getFinetime() << std::dec);
 
 	/*
 	 * TODO: The same logic needs to be developed for RICHRefTime
 	 */
+	double refTimeL0TP = 0.;
 	double averageCHODHitTime = 0.;
 	bool isCHODRefTime = false;
-	if (AlgoRefTimeSourceID_[l0MaskID] == 1) {
+	if (!AlgoRefTimeSourceID_[l0MaskID]) {
+		refTimeL0TP = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
+//		LOG_INFO("L1 reference finetime from L0TP (ns) " << refTimeL0TP);
+	} else if (AlgoRefTimeSourceID_[l0MaskID] == 1) {
 		if (l1Info->isL1CHODProcessed()) {
 			isCHODRefTime = 1;
 			averageCHODHitTime = l1Info->getCHODAverageTime();
 		} else
-			LOG_ERROR("MUV3Algo.cpp: Not able to use averageCHODHitTime as Reference Time even if it is requested!");
-	}
+			LOG_ERROR("MUV3Algo.cpp: Not able to use averageCHODHitTime as Reference Time even if requested!");
+	} else
+		LOG_ERROR("L1 Reference Time Source ID not recognised !!");
 
 	TrbFragmentDecoder& muv3Packet = (TrbFragmentDecoder&) decoder.getDecodedMUV3Fragment(0);
-	if (!muv3Packet.isReady() || muv3Packet.isBadFragment()) {
 
-		LOG_ERROR("MUV3Algo: This looks like a Bad Packet!!!! ");
+	if (!muv3Packet.isReady() || muv3Packet.isBadFragment()) {
+		LOG_ERROR("MUV3: This looks like a Bad Packet!!!! ");
 		l1Info->setL1MUV3BadData();
-//		badData = 1;
 		return 0;
 	}
 
 	uint nTiles = 0;
-	uint pmtID[2] = { 0 };
+	int pmtID[2] = { 0 };
 	bool tileID[152] = { false };
-
-//	for (uint i = 0; i != 152; ++i) {
-//		if (i < 2)
-//			pmtID[i] = 0;
-//		tileID[i] = 0;
-//	}
 
 	/**
 	 * Get Arrays with hit Info
 	 */
 
-	const uint64_t* const edge_times = muv3Packet.getTimes();
-	const uint_fast8_t* const edge_chIDs = muv3Packet.getChIDs();
-	const bool* const edge_IDs = muv3Packet.getIsLeadings();
-	const uint_fast8_t* const edge_tdcIDs = muv3Packet.getTdcIDs();
-	double finetime, edgetime, dt_l0tp, dt_chod;
-	uint pmtID1, pmtID2;
+	const uint64_t* const edgeTime = muv3Packet.getTimes();
+	const uint_fast8_t* const edgeChID = muv3Packet.getChIDs();
+	const bool* const edgeIsLeading = muv3Packet.getIsLeadings();
+	const uint_fast8_t* const edgeTdcID = muv3Packet.getTdcIDs();
+	double time, dtL0TP, dtCHOD;
+	int pmtID1, pmtID2;
 
 	uint numberOfEdgesOfCurrentBoard = muv3Packet.getNumberOfEdgesStored();
+
 	if (!numberOfEdgesOfCurrentBoard)
 		l1Info->setL1MUV3EmptyPacket();
-//		emptyPacket = 1;
+
 //	LOG_INFO("MUV3: Tel62 ID " << muv3Packet.getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard);
 
 	for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
+//		LOG_INFO("Edge " << iEdge << " ID " << edgeIsLeading[iEdge]);
+//		LOG_INFO("Edge " << iEdge << " chID " << (uint) edgeChID[iEdge]);
+//		LOG_INFO("Edge " << iEdge << " tdcID " << (uint) edgeTdcID[iEdge]);
+//		LOG_INFO("Edge " << iEdge << " time " << std::hex << edgeTime[iEdge] << std::dec);
 
-//		LOG_INFO<< "finetime (decoder) " << (uint)decoder.getDecodedEvent()->getFinetime() << ENDL;
-//		LOG_INFO<< "edge_time " << std::hex << edge_times[iEdge] << std::dec << ENDL;
-//		LOG_INFO<< "Without offset " << fabs(edgetime - finetime) << ENDL;
 		/**
 		 * Process leading edges only
 		 *
 		 */
-		if (edge_IDs[iEdge]) { //in time with trigger
-			const int roChID = (edge_tdcIDs[iEdge] * 32) + edge_chIDs[iEdge];
+		if (edgeIsLeading[iEdge]) { //in time with trigger
+			const int roChID = (edgeTdcID[iEdge] * 32) + edgeChID[iEdge];
 			if (PmtGeo_[roChID] > 151)
 				pmtID1 = PmtGeo_[roChID] - 200;
 			else
 				pmtID1 = PmtGeo_[roChID];
 
 			if (pmtID1 < 144) {
-				edgetime = (edge_times[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
-//				LOG_INFO("edgetime (in ns) " << edgetime);
+				time = (edgeTime[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
+//				LOG_INFO("Edge time (ns) " << time);
 
 				if (!isCHODRefTime) {
-					finetime = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
-//					LOG_INFO("finetime (in ns) " << finetime);
-					dt_l0tp = fabs(edgetime - finetime);
-					dt_chod = -1.0e+28;
+					dtL0TP = fabs(time - refTimeL0TP);
+					dtCHOD = -1.0e+28;
 				} else
-					dt_chod = fabs(edgetime - averageCHODHitTime);
+					dtCHOD = fabs(time - averageCHODHitTime);
+//				LOG_INFO("dtL0TP " << dtL0TP << " dtCHOD " << dtCHOD);
 
-//				LOG_INFO("Online Time Window " << algoOnlineTimeWindow << " dt_l0tp " << dt_l0tp << " dt_chod " << dt_chod);
-				if ((!isCHODRefTime && dt_l0tp < AlgoOnlineTimeWindow_[l0MaskID])
-						|| (isCHODRefTime && dt_chod < AlgoOnlineTimeWindow_[l0MaskID])) {
+				if ((!isCHODRefTime && dtL0TP < AlgoOnlineTimeWindow_[l0MaskID])
+						|| (isCHODRefTime && dtCHOD < AlgoOnlineTimeWindow_[l0MaskID])) {
 					tileID[pmtID1] = 1;
 				}
 			}
@@ -136,59 +135,65 @@ uint_fast8_t MUV3Algo::processMUV3Trigger0(uint l0MaskID, DecoderHandler& decode
 			nTiles++;
 			if (nTiles > 2) {
 				l1Info->setL1MUV3NTiles(nTiles);
-				l1Info->setL1MUV3Processed();
-//				algoProcessed = 1;
+				l1Info->setL1MUV3TriggerNeighboursProcessed();
+//				LOG_INFO("MUVAlgo: Returning nTiles > 2 !!!!");
 				return 1;
 			}
 			pmtID[nTiles - 1] = i;
 		}
 	}
 
+//	LOG_INFO("MUV: Analysing Event " << decoder.getDecodedEvent()->getEventNumber());
+//	LOG_INFO("Timestamp " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
+//	LOG_INFO("Number of Tiles " << nTiles);
+
 	if (!nTiles || (nTiles == 1)) {
 		l1Info->setL1MUV3NTiles(nTiles);
-		l1Info->setL1MUV3Processed();
-//		algoProcessed = 1;
+		l1Info->setL1MUV3TriggerNeighboursProcessed();
 		return 0;
 	} else if ((fabs(pmtID[0] - pmtID[1]) == 1 && ((pmtID[0] + pmtID[1]) % 24) != 23) || fabs(pmtID[0] - pmtID[1]) == 12) {
 		l1Info->setL1MUV3NTiles(nTiles);
-		l1Info->setL1MUV3Processed();
-//		algoProcessed = 1;
+		l1Info->setL1MUV3TriggerNeighboursProcessed();
 		return 0;
 	} else {
 		l1Info->setL1MUV3NTiles(nTiles);
-		l1Info->setL1MUV3Processed();
-//		algoProcessed = 1;
+		l1Info->setL1MUV3TriggerNeighboursProcessed();
 		return 1;
 	}
 
-	LOG_ERROR("Attention: no case is provided for this !!!!");
+	LOG_ERROR("MUV3Algo.cpp -> Attention: no case is provided for this !!!!");
 }
 
 uint_fast8_t MUV3Algo::processMUV3Trigger1(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
 	using namespace l0;
-	//LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
-	//LOG_INFO("Timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
+
+//	LOG_INFO("MUV3: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
+//	LOG_INFO("MUV3: event reference fine time from L0TP " << std::hex << (uint)decoder.getDecodedEvent()->getFinetime() << std::dec);
 
 	/*
 	 * TODO: The same logic needs to be developed for RICHRefTime
 	 */
+	double refTimeL0TP = 0.;
 	double averageCHODHitTime = 0.;
 	bool isCHODRefTime = false;
-	if (AlgoRefTimeSourceID_[l0MaskID] == 1) {
+	if (!AlgoRefTimeSourceID_[l0MaskID]) {
+		refTimeL0TP = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
+//		LOG_INFO("L1 reference finetime from L0TP (ns) " << refTimeL0TP);
+	} else if (AlgoRefTimeSourceID_[l0MaskID] == 1) {
 		if (l1Info->isL1CHODProcessed()) {
 			isCHODRefTime = 1;
 			averageCHODHitTime = l1Info->getCHODAverageTime();
 		} else
-			LOG_ERROR("MUV3Algo.cpp: Not able to use averageCHODHitTime as Reference Time even if it is requested!");
-	}
+			LOG_ERROR("MUV3Algo.cpp: Not able to use averageCHODHitTime as Reference Time even if requested!");
+	} else
+		LOG_ERROR("L1 Reference Time Source ID not recognised !!");
 
 	TrbFragmentDecoder& muv3Packet = (TrbFragmentDecoder&) decoder.getDecodedMUV3Fragment(0);
-	if (!muv3Packet.isReady() || muv3Packet.isBadFragment()) {
 
-		LOG_ERROR("MUV3Algo: This looks like a Bad Packet!!!! ");
+	if (!muv3Packet.isReady() || muv3Packet.isBadFragment()) {
+		LOG_ERROR("MUV3: This looks like a Bad Packet!!!! ");
 		l1Info->setL1MUV3BadData();
-//		badData = 1;
 		return 0;
 	}
 
@@ -196,39 +201,39 @@ uint_fast8_t MUV3Algo::processMUV3Trigger1(uint l0MaskID, DecoderHandler& decode
 	 * Get Arrays with hit Info
 	 */
 
-	const uint64_t* const edge_times = muv3Packet.getTimes();
-	const uint_fast8_t* const edge_chIDs = muv3Packet.getChIDs();
-	const bool* const edge_IDs = muv3Packet.getIsLeadings();
-	const uint_fast8_t* const edge_tdcIDs = muv3Packet.getTdcIDs();
+	const uint64_t* const edgeTime = muv3Packet.getTimes();
+	const uint_fast8_t* const edgeChID = muv3Packet.getChIDs();
+	const bool* const edgeIsLeading = muv3Packet.getIsLeadings();
+	const uint_fast8_t* const edgeTdcID = muv3Packet.getTdcIDs();
 	double finetime, edgetime1, edgetime2, dt_l0tp1, dt_l0tp2, dt_chod1, dt_chod2;
-	uint pmtID1, pmtID2;
+	int pmtID1, pmtID2;
 
 	uint numberOfEdgesOfCurrentBoard = muv3Packet.getNumberOfEdgesStored();
+
 	if (!numberOfEdgesOfCurrentBoard)
 		l1Info->setL1MUV3EmptyPacket();
-//		emptyPacket = 1;
+
 //	LOG_INFO("MUV3: Tel62 ID " << muv3Packet.getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard);
 
 	for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
+//		LOG_INFO("Edge " << iEdge << " ID " << edgeIsLeading[iEdge]);
+//		LOG_INFO("Edge " << iEdge << " chID " << (uint) edgeChID[iEdge]);
+//		LOG_INFO("Edge " << iEdge << " tdcID " << (uint) edgeTdcID[iEdge]);
+//		LOG_INFO("Edge " << iEdge << " time " << std::hex << edgeTime[iEdge] << std::dec);
 
-//		LOG_INFO<< "finetime (decoder) " << (uint)decoder.getDecodedEvent()->getFinetime() << ENDL;
-//		LOG_INFO<< "edge_time " << std::hex << edge_times[iEdge] << std::dec << ENDL;
-//		LOG_INFO<< "finetime (in ns) " << finetime << ENDL;
-//		LOG_INFO<< "edgetime (in ns) " << edgetime << ENDL;
-//		LOG_INFO<< "Without offset " << fabs(edgetime - finetime) << ENDL;
 		/**
 		 * Process leading edges only
 		 *
 		 */
-		if (edge_IDs[iEdge]) {
-			const int roChID1 = (edge_tdcIDs[iEdge] * 32) + edge_chIDs[iEdge];
+		if (edgeIsLeading[iEdge]) {
+			const int roChID1 = (edgeTdcID[iEdge] * 32) + edgeChID[iEdge];
 			if (PmtGeo_[roChID1] > 151)
 				pmtID1 = PmtGeo_[roChID1] - 200;
 			else
 				pmtID1 = PmtGeo_[roChID1];
 			for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard; jEdge++) {
-				if (edge_IDs[jEdge] && jEdge != iEdge) {
-					const int roChID2 = (edge_tdcIDs[jEdge] * 32) + edge_chIDs[jEdge];
+				if (edgeIsLeading[jEdge] && jEdge != iEdge) {
+					const int roChID2 = (edgeTdcID[jEdge] * 32) + edgeChID[jEdge];
 					if (PmtGeo_[roChID2] > 151)
 						pmtID2 = PmtGeo_[roChID2] - 200;
 					else
@@ -236,13 +241,13 @@ uint_fast8_t MUV3Algo::processMUV3Trigger1(uint l0MaskID, DecoderHandler& decode
 
 					if (pmtID1 < 144 && pmtID2 < 144) {
 						if (((pmtID1 % 12) <= 5 && (pmtID2 % 12) >= 6) || ((pmtID2 % 12) <= 5 && (pmtID1 % 12) >= 6)) {
-							edgetime1 = (edge_times[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
-							edgetime2 = (edge_times[jEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
-							if (fabs(edgetime1 - edgetime2) < 10) {
+							edgetime1 = (edgeTime[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
+							edgetime2 = (edgeTime[jEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
+							if (fabs(edgetime1 - edgetime2) < 10.) {
 								if (!isCHODRefTime) {
 									//LOG_INFO("finetime (in ns) " << finetime);
-									dt_l0tp1 = fabs(edgetime1 - finetime);
-									dt_l0tp2 = fabs(edgetime2 - finetime);
+									dt_l0tp1 = fabs(edgetime1 - refTimeL0TP);
+									dt_l0tp2 = fabs(edgetime2 - refTimeL0TP);
 									dt_chod1 = -1.0e+28;
 									dt_chod2 = -1.0e+28;
 								} else {
@@ -253,8 +258,9 @@ uint_fast8_t MUV3Algo::processMUV3Trigger1(uint l0MaskID, DecoderHandler& decode
 										&& dt_l0tp2 < AlgoOnlineTimeWindow_[l0MaskID])
 										|| (isCHODRefTime && dt_chod1 < AlgoOnlineTimeWindow_[l0MaskID]
 												&& dt_chod2 < AlgoOnlineTimeWindow_[l0MaskID])) {
-									l1Info->setL1MUV3Processed();
-//									LOG_INFO("pmt1: "<<pmtID1<<" pmt2: "<<pmtID2<<" dt_l0tp1: "<<dt_l0tp1<<" dt_l0tp2: "<<dt_l0tp2);
+									l1Info->setL1MUV3TriggerLeftRightProcessed();
+//									LOG_INFO("left and right! pmt1= " << pmtID1 << " pmt2= " << pmtID2);
+//									LOG_INFO("MUVAlgo: Returning with left-right hits !!!!");
 									return 1;
 								}
 							}
@@ -265,64 +271,79 @@ uint_fast8_t MUV3Algo::processMUV3Trigger1(uint l0MaskID, DecoderHandler& decode
 		}
 	}
 
-	l1Info->setL1MUV3Processed();
+//	LOG_INFO("MUV: Analysing Event " << decoder.getDecodedEvent()->getEventNumber());
+//	LOG_INFO("Timestamp " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
+//	LOG_INFO("No left-right hits have been found ");
+
+	l1Info->setL1MUV3TriggerLeftRightProcessed();
 	return 0;
 }
 
 uint_fast8_t MUV3Algo::processMUV3Trigger2(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
 	using namespace l0;
-	//LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
-	//LOG_INFO("Timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
+
+//	LOG_INFO("MUV3: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
+//	LOG_INFO("MUV3: event reference fine time from L0TP " << std::hex << (uint)decoder.getDecodedEvent()->getFinetime() << std::dec);
 
 	/*
 	 * TODO: The same logic needs to be developed for RICHRefTime
 	 */
+	double refTimeL0TP = 0.;
 	double averageCHODHitTime = 0.;
 	bool isCHODRefTime = false;
-	if (AlgoRefTimeSourceID_[l0MaskID] == 1) {
+	if (!AlgoRefTimeSourceID_[l0MaskID]) {
+		refTimeL0TP = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
+//		LOG_INFO("L1 reference finetime from L0TP (ns) " << refTimeL0TP);
+	} else if (AlgoRefTimeSourceID_[l0MaskID] == 1) {
 		if (l1Info->isL1CHODProcessed()) {
 			isCHODRefTime = 1;
 			averageCHODHitTime = l1Info->getCHODAverageTime();
 		} else
-			LOG_ERROR("MUV3Algo.cpp: Not able to use averageCHODHitTime as Reference Time even if it is requested!");
-	}
+			LOG_ERROR("MUV3Algo.cpp: Not able to use averageCHODHitTime as Reference Time even if requested!");
+	} else
+		LOG_ERROR("L1 Reference Time Source ID not recognised !!");
 
 	TrbFragmentDecoder& muv3Packet = (TrbFragmentDecoder&) decoder.getDecodedMUV3Fragment(0);
-	if (!muv3Packet.isReady() || muv3Packet.isBadFragment()) {
 
-		LOG_ERROR("MUV3Algo: This looks like a Bad Packet!!!! ");
+	if (!muv3Packet.isReady() || muv3Packet.isBadFragment()) {
+		LOG_ERROR("MUV3: This looks like a Bad Packet!!!! ");
 		l1Info->setL1MUV3BadData();
-//		badData = 1;
 		return 0;
 	}
 
 	/**
 	 * Get Arrays with hit Info
 	 */
-	const uint64_t* const edge_times = muv3Packet.getTimes();
-	const uint_fast8_t* const edge_chIDs = muv3Packet.getChIDs();
-	const bool* const edge_IDs = muv3Packet.getIsLeadings();
-	const uint_fast8_t* const edge_tdcIDs = muv3Packet.getTdcIDs();
+
+	const uint64_t* const edgeTime = muv3Packet.getTimes();
+	const uint_fast8_t* const edgeChID = muv3Packet.getChIDs();
+	const bool* const edgeIsLeading = muv3Packet.getIsLeadings();
+	const uint_fast8_t* const edgeTdcID = muv3Packet.getTdcIDs();
 	double finetime, edgetime1, edgetime2, dt_l0tp1, dt_l0tp2, dt_chod1, dt_chod2;
-	uint pmtID1, pmtID2;
+	int pmtID1, pmtID2;
 
 	uint numberOfEdgesOfCurrentBoard = muv3Packet.getNumberOfEdgesStored();
+
 	if (!numberOfEdgesOfCurrentBoard)
 		l1Info->setL1MUV3EmptyPacket();
-//		emptyPacket = 1;
-	//LOG_INFO<< "MUV3: Tel62 ID " << muv3Packet.getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard << ENDL;
+//	LOG_INFO("MUV3: Tel62 ID " << muv3Packet.getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard);
 
 	for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
-		if (edge_IDs[iEdge]) {
-			const int roChID1 = (edge_tdcIDs[iEdge] * 32) + edge_chIDs[iEdge];
+//		LOG_INFO("Edge " << iEdge << " ID " << edgeIsLeading[iEdge]);
+//		LOG_INFO("Edge " << iEdge << " chID " << (uint) edgeChID[iEdge]);
+//		LOG_INFO("Edge " << iEdge << " tdcID " << (uint) edgeTdcID[iEdge]);
+//		LOG_INFO("Edge " << iEdge << " time " << std::hex << edgeTime[iEdge] << std::dec);
+
+		if (edgeIsLeading[iEdge]) {
+			const int roChID1 = (edgeTdcID[iEdge] * 32) + edgeChID[iEdge];
 			if (PmtGeo_[roChID1] > 151)
 				pmtID1 = PmtGeo_[roChID1] - 200;
 			else
 				pmtID1 = PmtGeo_[roChID1];
 			for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard; jEdge++) {
-				if (edge_IDs[jEdge] && jEdge != iEdge) {
-					const int roChID2 = (edge_tdcIDs[jEdge] * 32) + edge_chIDs[jEdge];
+				if (edgeIsLeading[jEdge] && jEdge != iEdge) {
+					const int roChID2 = (edgeTdcID[jEdge] * 32) + edgeChID[jEdge];
 					if (PmtGeo_[roChID2] > 151)
 						pmtID2 = PmtGeo_[roChID2] - 200;
 					else
@@ -331,14 +352,13 @@ uint_fast8_t MUV3Algo::processMUV3Trigger2(uint l0MaskID, DecoderHandler& decode
 					if (pmtID1 < 144 && pmtID2 < 144) {
 						if ((fabs(pmtID1 - pmtID2) == 1 && ((pmtID1 + pmtID2) % 24) != 23) || fabs(pmtID1 - pmtID2) == 12) {
 //							LOG_INFO("neighbours! pmt1= " << pmtID1 << " pmt2= " << pmtID2);
-							edgetime1 = (edge_times[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
-							edgetime2 = (edge_times[jEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
-							if (fabs(edgetime1 - edgetime2) < 5) {
+							edgetime1 = (edgeTime[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
+							edgetime2 = (edgeTime[jEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
+							if (fabs(edgetime1 - edgetime2) < 5.) {
 								if (!isCHODRefTime) {
-									finetime = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
 									//					LOG_INFO("finetime (in ns) " << finetime);
-									dt_l0tp1 = fabs(edgetime1 - finetime);
-									dt_l0tp2 = fabs(edgetime2 - finetime);
+									dt_l0tp1 = fabs(edgetime1 - refTimeL0TP);
+									dt_l0tp2 = fabs(edgetime2 - refTimeL0TP);
 									dt_chod1 = -1.0e+28;
 									dt_chod2 = -1.0e+28;
 								} else {
@@ -351,7 +371,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger2(uint l0MaskID, DecoderHandler& decode
 										|| dt_l0tp2 < AlgoOnlineTimeWindow_[l0MaskID]))
 										|| (isCHODRefTime && (dt_chod1 < AlgoOnlineTimeWindow_[l0MaskID]
 												|| dt_chod2 < AlgoOnlineTimeWindow_[l0MaskID]))) {
-									l1Info->setL1MUV3Processed();
+									l1Info->setL1MUV3TriggerNeighboursProcessed();
 									return 1;
 								}
 							}
@@ -362,35 +382,40 @@ uint_fast8_t MUV3Algo::processMUV3Trigger2(uint l0MaskID, DecoderHandler& decode
 		}
 	}
 
-	l1Info->setL1MUV3Processed();
+	l1Info->setL1MUV3TriggerNeighboursProcessed();
 	return 0;
 }
 
 uint_fast8_t MUV3Algo::processMUV3Trigger3(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
 	using namespace l0;
-	LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
-	//LOG_INFO("Timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
+
+//	LOG_INFO("MUV3: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
+//	LOG_INFO("MUV3: event reference fine time from L0TP " << std::hex << (uint)decoder.getDecodedEvent()->getFinetime() << std::dec);
 
 	/*
 	 * TODO: The same logic needs to be developed for RICHRefTime
 	 */
+	double refTimeL0TP = 0.;
 	double averageCHODHitTime = 0.;
 	bool isCHODRefTime = false;
-	if (AlgoRefTimeSourceID_[l0MaskID] == 1) {
+	if (!AlgoRefTimeSourceID_[l0MaskID]) {
+		refTimeL0TP = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
+//		LOG_INFO("L1 reference finetime from L0TP (ns) " << refTimeL0TP);
+	} else if (AlgoRefTimeSourceID_[l0MaskID] == 1) {
 		if (l1Info->isL1CHODProcessed()) {
 			isCHODRefTime = 1;
 			averageCHODHitTime = l1Info->getCHODAverageTime();
 		} else
-			LOG_ERROR("MUV3Algo.cpp: Not able to use averageCHODHitTime as Reference Time even if it is requested!");
-	}
+			LOG_ERROR("MUV3Algo.cpp: Not able to use averageCHODHitTime as Reference Time even if requested!");
+	} else
+		LOG_ERROR("L1 Reference Time Source ID not recognised !!");
 
 	TrbFragmentDecoder& muv3Packet = (TrbFragmentDecoder&) decoder.getDecodedMUV3Fragment(0);
-	if (!muv3Packet.isReady() || muv3Packet.isBadFragment()) {
 
+	if (!muv3Packet.isReady() || muv3Packet.isBadFragment()) {
 		LOG_ERROR("MUV3Algo: This looks like a Bad Packet!!!! ");
 		l1Info->setL1MUV3BadData();
-//		badData = 1;
 		return 0;
 	}
 
@@ -398,89 +423,110 @@ uint_fast8_t MUV3Algo::processMUV3Trigger3(uint l0MaskID, DecoderHandler& decode
 	 * Get Arrays with hit Info
 	 */
 
-	const uint64_t* const edge_times = muv3Packet.getTimes();
-	const uint_fast8_t* const edge_chIDs = muv3Packet.getChIDs();
-	const bool* const edge_IDs = muv3Packet.getIsLeadings();
-	const uint_fast8_t* const edge_tdcIDs = muv3Packet.getTdcIDs();
-	double finetime, edgetime1, edgetime2, edgetime, dt_l0tp, dt_chod;
-	uint pmtID1, pmtID2;
+	const uint64_t* const edgeTime = muv3Packet.getTimes();
+	const uint_fast8_t* const edgeChID = muv3Packet.getChIDs();
+	const bool* const edgeIsLeading = muv3Packet.getIsLeadings();
+	const uint_fast8_t* const edgeTdcID = muv3Packet.getTdcIDs();
+	double time1, time2, time, dtL0TP, dtCHOD;
+	int pmtID1, pmtID2;
 
 	uint numberOfEdgesOfCurrentBoard = muv3Packet.getNumberOfEdgesStored();
+
 	if (!numberOfEdgesOfCurrentBoard)
 		l1Info->setL1MUV3EmptyPacket();
-
 //	LOG_INFO("MUV3: Tel62 ID " << muv3Packet.getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard);
 
 	for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
+//		LOG_INFO("Edge " << iEdge << " ID " << edgeIsLeading[iEdge]);
+//		LOG_INFO("Edge " << iEdge << " chID " << (uint) edgeChID[iEdge]);
+//		LOG_INFO("Edge " << iEdge << " tdcID " << (uint) edgeTdcID[iEdge]);
+//		LOG_INFO("Edge " << iEdge << " time " << std::hex << edgeTime[iEdge] << std::dec);
 
-		/*edgetime = (edge_times[iEdge]
-		 - decoder.getDecodedEvent()->getTimestamp() * 256.)
-		 * 0.097464731802;*/
-
-//		LOG_INFO<< "finetime (decoder) " << (uint)decoder.getDecodedEvent()->getFinetime() << ENDL;
-//		LOG_INFO<< "edge_time " << std::hex << edge_times[iEdge] << std::dec << ENDL;
-//		LOG_INFO<< "finetime (in ns) " << finetime << ENDL;
-//		LOG_INFO<< "edgetime (in ns) " << edgetime << ENDL;
-//		LOG_INFO<< "Without offset " << fabs(edgetime - finetime) << ENDL;
 		/**
 		 * Process leading edges only
 		 *
 		 */
-		if (edge_IDs[iEdge]) {
-			const int roChID1 = (edge_tdcIDs[iEdge] * 32) + edge_chIDs[iEdge];
-			if (PmtGeo_[roChID1] < 200 && PmtGeo_[roChID1] > -1) {
-				pmtID1 = PmtGeo_[roChID1];
-				for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard; jEdge++) {
-					if (edge_IDs[jEdge]) {
-						const int roChID2 = (edge_tdcIDs[jEdge] * 32) + edge_chIDs[jEdge];
-						if (PmtGeo_[roChID2] >= 200) {
-							pmtID2 = PmtGeo_[roChID2];
-							if (fabs(pmtID1 - pmtID2) == 200) {
-//									LOG_INFO("pmt1: "<<pmtID1<<" pmt2: "<<pmtID2);
-								edgetime1 = (edge_times[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
-								edgetime2 = (edge_times[jEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
-								if (fabs(edgetime1 - edgetime2) < 5) {
-									edgetime = max(edgetime1, edgetime2);
-									if (!isCHODRefTime) {
-										finetime = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
-										//					LOG_INFO("finetime (in ns) " << finetime);
-										dt_l0tp = fabs(edgetime - finetime);
-										dt_chod = -1.0e+28;
-									} else
-										dt_chod = fabs(edgetime - averageCHODHitTime);
-//									LOG_INFO("dt_l0tp: "<<dt_l0tp<<" dt_chod: "<<dt_chod);
-									if ((!isCHODRefTime && dt_l0tp < AlgoOnlineTimeWindow_[l0MaskID])
-											|| (isCHODRefTime && dt_chod < AlgoOnlineTimeWindow_[l0MaskID])) {
-										l1Info->setL1MUV3Processed();
-										return 1;
-									}
-								}
-							}
-						}
-					}
-				}
+		if (edgeIsLeading[iEdge]) {
+			const int roChID1 = (edgeTdcID[iEdge] * 32) + edgeChID[iEdge];
+//			if (PmtGeo_[roChID1] < 200 && PmtGeo_[roChID1] > -1) {
+			pmtID1 = PmtGeo_[roChID1];
+			///////////////////////////// modified part for loose hits //////////////////////////////
+			time1 = (edgeTime[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
+			if (!isCHODRefTime) {
+				dtL0TP = fabs(time1 - refTimeL0TP);
+				dtCHOD = -1.0e+28;
+			} else
+				dtCHOD = fabs(time1 - averageCHODHitTime);
+//			LOG_INFO("dtL0TP: "<< dtL0TP <<" dtCHOD: "<<dtCHOD);
+			if ((!isCHODRefTime && dtL0TP < AlgoOnlineTimeWindow_[l0MaskID])
+					|| (isCHODRefTime && dtCHOD < AlgoOnlineTimeWindow_[l0MaskID])) {
+				l1Info->setL1MUV3TriggerMultiProcessed();
+//				LOG_INFO("MUVAlgo: Returning because a muon was found !!!!");
+				return 1;
 			}
+			///////////////////////////////////////////////////////////////////////////////
+			/*
+			 for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard; jEdge++) {
+			 if (edgeIsLeading[jEdge]) {
+			 const int roChID2 = (edgeTdcID[jEdge] * 32) + edgeChID[jEdge];
+			 if (PmtGeo_[roChID2] >= 200) {
+			 pmtID2 = PmtGeo_[roChID2];
+			 if (fabs(pmtID1 - pmtID2) == 200) {
+			 //								LOG_INFO("pmt1: "<< pmtID1 <<" pmt2: "<< pmtID2);
+			 time1 = (edgeTime[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
+			 time2 = (edgeTime[jEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
+			 if (fabs(time1 - time2) < 10) {
+			 time = (time1 + time2) / 2.;
+			 if (!isCHODRefTime) {
+			 dtL0TP = fabs(time - refTimeL0TP);
+			 dtCHOD = -1.0e+28;
+			 } else
+			 dtCHOD = fabs(time - averageCHODHitTime);
+			 //									LOG_INFO("dtL0TP: "<< dtL0TP <<" dtCHOD: "<<dtCHOD);
+			 if ((!isCHODRefTime && dtL0TP < AlgoOnlineTimeWindow_[l0MaskID])
+			 || (isCHODRefTime && dtCHOD < AlgoOnlineTimeWindow_[l0MaskID])) {
+			 l1Info->setL1MUV3TriggerMultiProcessed();
+			 LOG_INFO("MUVAlgo: Returning because a muon was found !!!!");
+			 return 1;
+			 }
+			 }
+			 }
+			 }
+			 }
+			 }
+			 }
+			 */
 		}
 	}
 
-	l1Info->setL1MUV3Processed();
+//	LOG_INFO("MUV: Analysing Event " << decoder.getDecodedEvent()->getEventNumber());
+//	LOG_INFO("Timestamp " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
+//	LOG_INFO("No muons have been found ");
+
+	l1Info->setL1MUV3TriggerMultiProcessed();
 	return 0;
 }
 
 void MUV3Algo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info) {
 
 	if (AlgoID_ != algoPacket->algoID)
-		LOG_ERROR("Algo ID does not match with Algo ID written within the packet!");
+		LOG_ERROR("Algo ID does not match with Algo ID already written within the packet!");
+
 	algoPacket->algoID = AlgoID_;
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
 //	algoPacket->qualityFlags = (l1Info->isL1MUV3Processed() << 6) | (l1Info->isL1MUV3EmptyPacket() << 4) | (l1Info->isL1MUV3BadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
-	algoPacket->qualityFlags = (l1Info->isL1MUV3Processed() << 6) | (l1Info->isL1MUV3EmptyPacket() << 4) | (l1Info->isL1MUV3BadData() << 2)
-			| ((uint) l1Info->getL1MUV3TrgWrd());
+	algoPacket->qualityFlags = (((uint) (l1Info->isL1MUV3TriggerMultiProcessed() || l1Info->isL1MUV3TriggerLeftRightProcessed()
+			|| l1Info->isL1MUV3TriggerNeighboursProcessed())) << 6) | (l1Info->isL1MUV3EmptyPacket() << 4)
+			| (l1Info->isL1MUV3BadData() << 2) | ((uint) l1Info->getL1MUV3TrgWrd());
+
 	algoPacket->l1Data[0] = l1Info->getL1MUV3NTiles();
-	if (AlgoRefTimeSourceID_[l0MaskID] == 1)
-		algoPacket->l1Data[1] = l1Info->getCHODAverageTime();
-	else
-		algoPacket->l1Data[1] = 0;
+	if (!AlgoRefTimeSourceID_[l0MaskID]) {
+		algoPacket->l1Data[1] = l1Info->getL1RefTimeL0TP();
+	} else if (AlgoRefTimeSourceID_[l0MaskID] == 1) {
+		algoPacket->l1Data[1] = l1Info->getCHODAverageTime(); //this is a double!!!
+	} else
+		LOG_ERROR("L1 Reference Time Source ID not recognised !!");
+
 	algoPacket->numberOfWords = (sizeof(L1Algo) / 4.);
 //	LOG_INFO("l0MaskID " << l0MaskID);
 //	LOG_INFO("algoID " << (uint)algoPacket->algoID);

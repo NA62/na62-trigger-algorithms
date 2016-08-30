@@ -22,11 +22,11 @@
 namespace na62 {
 
 SrbFragmentDecoder::SrbFragmentDecoder() :
-		edgeTimes(nullptr), edgeStrawIDs(nullptr), edgeSrbIDs(nullptr), edgeErrorFlags(
-				nullptr), edgeIsLeading(nullptr), subevent_(nullptr), fragmentNumber_(
+		edgeTimes(nullptr), edgeStrawIDs(nullptr), edgeSrbIDs(nullptr), edgeErrorFlags(nullptr), edgeIsLeading(nullptr), subevent_(nullptr), fragmentNumber_(
 		UINT_FAST16_MAX) {
 	firstTSCoarseTime = 0;
 	nEdges_tot = 0;
+	isBadFrag_ = false;
 }
 
 SrbFragmentDecoder::~SrbFragmentDecoder() {
@@ -45,8 +45,13 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 		return;
 	}
 
-	const l0::MEPFragment* const srbDataFragment = subevent_->getFragment(
-			fragmentNumber_);
+	const l0::MEPFragment* const srbDataFragment = subevent_->getFragment(fragmentNumber_);
+
+	//	LOG_INFO("srbData " << srbDataFragment->getPayloadLength());
+	if (!srbDataFragment->getPayloadLength()) {
+		isBadFrag_ = true;
+		return;
+	}
 	/*
 	 * Each data word is 2 bytes. Each header word is 4 bytes.
 	 * there is a 2 word board header
@@ -56,6 +61,14 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	 * -> use this to estimate the maximum number of edges
 	 */
 	const uint maxNwords = (srbDataFragment->getPayloadLength() / 4);
+
+	if (maxNwords <= 0) {
+		LOG_ERROR("The packet payload is not as expected !!!");
+		//throw NA62Error("The packet payload is not as expected !!!");
+		isBadFrag_ = true;
+		return;
+	}
+
 	const uint maxNEdges = maxNwords * 2;
 
 	//LOG_INFO("srbData " << srbDataFragment->getPayloadLength());
@@ -77,8 +90,7 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 
 	const char* const payload = srbDataFragment->getPayload();
 
-	const SrbDataHeader* const boardHeader =
-			reinterpret_cast<const SrbDataHeader*>(payload);
+	const SrbDataHeader* const boardHeader = reinterpret_cast<const SrbDataHeader*>(payload);
 
 	firstTSCoarseTime = (int64_t) boardHeader->firstTSCoarseTime;
 	uint_fast8_t SrbID = boardHeader->srbID;
@@ -114,8 +126,7 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	int64_t slotTime = 0;
 	nEdges_tot = 0;
 	for (uint iSlot = 0; iSlot < NSlots; iSlot++) {
-		SrbTimeSlot* srbTimeSlot = (SrbTimeSlot*) payload + (2 + nWords) * 4
-				+ iSlot;
+		SrbTimeSlot* srbTimeSlot = (SrbTimeSlot*) payload + (2 + nWords) * 4 + iSlot;
 		NEdgesInSlot = (uint) srbTimeSlot->SlotCounter;
 		for (int iEdgeInSlot = 0; iEdgeInSlot < NEdgesInSlot; iEdgeInSlot++) {
 			slotTime = firstTSCoarseTime + iSlot;

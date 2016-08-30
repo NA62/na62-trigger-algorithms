@@ -15,11 +15,9 @@
 
 #include "../common/decoding/DecoderHandler.h"
 #include "chod_algorithm/ParsConfFile.h"
-#include "L1InfoToStorage.h"
+#include "l1/L1InfoToStorage.h"
 #include "../struct/HLTConfParams.h"
 #include "L1Fragment.h"
-
-#define maxNhits 500
 
 namespace na62 {
 
@@ -33,8 +31,7 @@ public:
 	 * @return uint_fast8_t <0> if the event is rejected, the L1 trigger type word in other cases.
 	 */
 
-	static uint_fast8_t processCHODTrigger(uint l0MaskID,
-			DecoderHandler& decoder, L1InfoToStorage* l1Info);
+	static uint_fast8_t processCHODTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
 	static void initialize(uint i, l1CHOD &l1ChodStruct);
 	static void writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 

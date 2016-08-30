@@ -42,80 +42,81 @@ void NewCHODAlgo::initialize(uint i, l1NewCHOD &l1NewChodStruct) {
 
 uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
-//	LOG_INFO("Initial Time " << time[0].tv_sec << " " << time[0].tv_usec);
-
 	using namespace l0;
+
+//	LOG_INFO("NewCHOD: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
+//	LOG_INFO("NewCHOD: event reference fine time from L0TP " << std::hex << (uint)decoder.getDecodedEvent()->getFinetime() << std::dec);
 
 	uint nMaxPMTs = 4;
 	uint nHits = 0;
 	double averageHitTime = 0.;
-
-//	LOG_INFO("Event number = " << decoder.getDecodedEvent()->getEventNumber());
-//	LOG_INFO("NewCHODAlgo: event timestamp = " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
 //	LOG_INFO("Average Hit Time (initial value) " << averageHitTime);
 
+	double refTimeL0TP = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
+//	LOG_INFO("L1 reference finetime from L0TP (ns) " << refTimeL0TP);
+
 	TrbFragmentDecoder& newchodPacket = (TrbFragmentDecoder&) decoder.getDecodedIRCFragment(0);
+
 	if (!newchodPacket.isReady() || newchodPacket.isBadFragment()) {
-//
 		LOG_ERROR("NewCHODAlgo: This looks like a Bad Packet!!!! ");
 		l1Info->setL1NewCHODBadData();
-//		badData = 1;
 		return 0;
 	}
-//	LOG_INFO("First time check (inside iterator) " << time[1].tv_sec << " " << time[1].tv_usec);
 
 	/**
 	 * Get Arrays with hit Info
 	 */
-	const uint64_t* const edge_times = newchodPacket.getTimes();
-	const uint_fast8_t* const edge_chIDs = newchodPacket.getChIDs();
-	const bool* const edge_IDs = newchodPacket.getIsLeadings();
-	const uint_fast8_t* const edge_tdcIDs = newchodPacket.getTdcIDs();
-	double finetime, edgetime1, edgetime2, dt1_l0tp, dt2_l0tp;
+	const uint64_t* const edgeTime = newchodPacket.getTimes();
+	const uint_fast8_t* const edgeChID = newchodPacket.getChIDs();
+	const bool* const edgeIsLeading = newchodPacket.getIsLeadings();
+	const uint_fast8_t* const edgeTdcID = newchodPacket.getTdcIDs();
+	double time1, time2, dt1L0TP, dt2L0TP;
 	int PMTID1, PMTID2;
 
 	uint numberOfEdgesOfCurrentBoard = newchodPacket.getNumberOfEdgesStored();
+
 	if (!numberOfEdgesOfCurrentBoard)
 		l1Info->setL1NewCHODEmptyPacket();
-//		emptyPacket = 1;
 
 	for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
+//		LOG_INFO("Edge " << iEdge << " ID " << edgeIsLeading[iEdge]);
+//		LOG_INFO("Edge " << iEdge << " chID " << (uint) edgeChID[iEdge]);
+//		LOG_INFO("Edge " << iEdge << " tdcID " << (uint) edgeTdcID[iEdge]);
+//		LOG_INFO("Edge " << iEdge << " time " << std::hex << edgeTime[iEdge] << std::dec);
+
 		/**
 		 * Process leading edges only
 		 *
 		 */
-		if (edge_IDs[iEdge]) {
-			const int roChID1 = (edge_tdcIDs[iEdge] * 32) + edge_chIDs[iEdge];
+		if (edgeIsLeading[iEdge]) {
+			const int roChID1 = (edgeTdcID[iEdge] * 32) + edgeChID[iEdge];
 			PMTID1 = PmtGeo_[roChID1];
-//			LOG_INFO("iEdge " << iEdge);
 //			LOG_INFO("Readout Channel ID1 " << roChID1);
 //			LOG_INFO("Geom PMT ID1 " << PMTID1);
 
 			if ((PMTID1 / 10) % 10 >= 1 && (PMTID1 / 10) % 10 <= 3) {
 				for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard; jEdge++) {
-					if (edge_IDs[jEdge] && jEdge != iEdge) {
-						const int roChID2 = (edge_tdcIDs[jEdge] * 32) + edge_chIDs[jEdge];
+					if (edgeIsLeading[jEdge] && jEdge != iEdge) {
+						const int roChID2 = (edgeTdcID[jEdge] * 32) + edgeChID[jEdge];
 						PMTID2 = PmtGeo_[roChID2];
-//						LOG_INFO("jEdge " << jEdge);
 //						LOG_INFO("Readout Channel ID2 " << roChID2);
 //						LOG_INFO("Geom PMT ID2 " << PMTID2);
 
 						if (fabs(PMTID1 - PMTID2) == 50 && (PMTID1 / 100) % 10 == (PMTID2 / 100) % 10) {
-							finetime = decoder.getDecodedEvent()->getFinetime() * 0.097464731802;
-							edgetime1 = (edge_times[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
-							edgetime2 = (edge_times[jEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
-//							LOG_INFO("finetime (in ns) " << finetime << " edgetime1 (in ns) " << edgetime1 << " edgetime2 " << edgetime2);
+							time1 = (edgeTime[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
+							time2 = (edgeTime[jEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
+//							LOG_INFO("edgetime1 (in ns) " << time1 << " edgetime2 " << time2);
 
-							dt1_l0tp = fabs(edgetime1 - finetime);
-							dt2_l0tp = fabs(edgetime2 - finetime);
+							dt1L0TP = fabs(time1 - refTimeL0TP);
+							dt2L0TP = fabs(time2 - refTimeL0TP);
+//							LOG_INFO("dt1L0TP "<< dt1L0TP << " dt2L0TP " << dt2L0TP);
 
-//							LOG_INFO("dt1_l0tp "<< dt1_l0tp << " dt2_l0tp " << dt2_l0tp);
-//							LOG_INFO("edge1-edge2 "<<fabs(edgetime1-edgetime2));
-							if ((dt1_l0tp < AlgoOnlineTimeWindow_[l0MaskID]) && (dt2_l0tp < AlgoOnlineTimeWindow_[l0MaskID])
-									&& (fabs(edgetime1 - edgetime2) < 5.)) {
+							if ((dt1L0TP < AlgoOnlineTimeWindow_[l0MaskID]) && (dt2L0TP < AlgoOnlineTimeWindow_[l0MaskID])
+									&& (fabs(time1 - time2) < 5.)) {
 
 								if (AlgoRefTimeSourceID_[l0MaskID] == 1)
-									averageHitTime += edgetime1;
+									averageHitTime += time1;
+
 								nHits++;
 							}
 						}
@@ -124,6 +125,9 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID, DecoderHandler& d
 			}
 		}
 	}
+
+//	LOG_INFO("NewCHOD: Analysing Event " << decoder.getDecodedEvent()->getEventNumber());
+//	LOG_INFO("Timestamp " << std::hex << decoder.getDecodedEvent()->getTimestamp() << std::dec);
 
 	if ((AlgoRefTimeSourceID_[l0MaskID] == 1) && nHits) {
 		averageHitTime = averageHitTime / (nHits);
@@ -136,27 +140,30 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID, DecoderHandler& d
 
 //	LOG_INFO("NewCHODAlgo=============== number of Hits " << nHits);
 //	LOG_INFO("NewCHODAlgo=============== average HitTime " << averageHitTime);
-//	LOG_INFO("NewCHODAlgo=============== L1NewCHODProcessed Flag " << (uint)l1Info->isL1NewCHODProcessed());
-//	if (AlgoLogic_[l0MaskID])
+
 	return ((nHits > 0) && (nHits < nMaxPMTs));
-//	else return (nHits >= nMaxPMTs);
 
 }
 
 void NewCHODAlgo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info) {
 
 	if (AlgoID_ != algoPacket->algoID)
-		LOG_ERROR("Algo ID does not match with Algo ID written within the packet!");
+		LOG_ERROR("Algo ID does not match with Algo ID already written within the packet!");
+
 	algoPacket->algoID = AlgoID_;
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
 //	algoPacket->qualityFlags = (l1Info->isL1NewCHODProcessed() << 6) | (l1Info->isL1NewCHODEmptyPacket() << 4) | (l1Info->isL1NewCHODBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
 	algoPacket->qualityFlags = (l1Info->isL1NewCHODProcessed() << 6) | (l1Info->isL1NewCHODEmptyPacket() << 4)
 			| (l1Info->isL1NewCHODBadData() << 2) | ((uint) l1Info->getL1NewCHODTrgWrd());
+
 	algoPacket->l1Data[0] = (uint) l1Info->getL1NewCHODNHits();
-	if (AlgoRefTimeSourceID_[l0MaskID] == 1)
-		algoPacket->l1Data[1] = l1Info->getNewCHODAverageTime();
-	else
-		algoPacket->l1Data[1] = 0;
+	if (!AlgoRefTimeSourceID_[l0MaskID]) {
+		algoPacket->l1Data[1] = l1Info->getL1RefTimeL0TP();
+	} else if (AlgoRefTimeSourceID_[l0MaskID] == 1) {
+		algoPacket->l1Data[1] = l1Info->getNewCHODAverageTime(); //this is a double!!!
+	} else
+		LOG_ERROR("L1 Reference Time Source ID not recognised !!");
+
 	algoPacket->numberOfWords = (sizeof(L1Algo) / 4.);
 	//	LOG_INFO("l0MaskID " << l0MaskID);
 	//	LOG_INFO("algoID " << (uint)algoPacket->algoID);
