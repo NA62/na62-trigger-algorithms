@@ -90,34 +90,38 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID, DecoderHandler& d
 		 */
 		if (edgeIsLeading[iEdge]) {
 			const int roChID1 = (edgeTdcID[iEdge] * 32) + edgeChID[iEdge];
-			PMTID1 = PmtGeo_[roChID1];
+			if (roChID1 >= 192) {
+				PMTID1 = PmtGeo_[roChID1];
 //			LOG_INFO("Readout Channel ID1 " << roChID1);
 //			LOG_INFO("Geom PMT ID1 " << PMTID1);
 
-			if ((PMTID1 / 10) % 10 >= 1 && (PMTID1 / 10) % 10 <= 3) {
-				for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard; jEdge++) {
-					if (edgeIsLeading[jEdge] && jEdge != iEdge) {
-						const int roChID2 = (edgeTdcID[jEdge] * 32) + edgeChID[jEdge];
-						PMTID2 = PmtGeo_[roChID2];
+				if ((PMTID1 / 10) % 10 >= 1 && (PMTID1 / 10) % 10 <= 3) {
+					for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard; jEdge++) {
+						if (edgeIsLeading[jEdge] && jEdge != iEdge) {
+							const int roChID2 = (edgeTdcID[jEdge] * 32) + edgeChID[jEdge];
+							if (roChID2 >= 192) {
+								PMTID2 = PmtGeo_[roChID2];
 //						LOG_INFO("Readout Channel ID2 " << roChID2);
 //						LOG_INFO("Geom PMT ID2 " << PMTID2);
 
-						if (fabs(PMTID1 - PMTID2) == 50 && (PMTID1 / 100) % 10 == (PMTID2 / 100) % 10) {
-							time1 = (edgeTime[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
-							time2 = (edgeTime[jEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
+								if (fabs(PMTID1 - PMTID2) == 50 && (PMTID1 / 100) % 10 == (PMTID2 / 100) % 10) {
+									time1 = (edgeTime[iEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
+									time2 = (edgeTime[jEdge] - decoder.getDecodedEvent()->getTimestamp() * 256.) * 0.097464731802;
 //							LOG_INFO("edgetime1 (in ns) " << time1 << " edgetime2 " << time2);
 
-							dt1L0TP = fabs(time1 - refTimeL0TP);
-							dt2L0TP = fabs(time2 - refTimeL0TP);
+									dt1L0TP = fabs(time1 - refTimeL0TP);
+									dt2L0TP = fabs(time2 - refTimeL0TP);
 //							LOG_INFO("dt1L0TP "<< dt1L0TP << " dt2L0TP " << dt2L0TP);
 
-							if ((dt1L0TP < AlgoOnlineTimeWindow_[l0MaskID]) && (dt2L0TP < AlgoOnlineTimeWindow_[l0MaskID])
-									&& (fabs(time1 - time2) < 5.)) {
+									if ((dt1L0TP < AlgoOnlineTimeWindow_[l0MaskID]) && (dt2L0TP < AlgoOnlineTimeWindow_[l0MaskID])
+											&& (fabs(time1 - time2) < 5.)) {
 
-								if (AlgoRefTimeSourceID_[l0MaskID] == 1)
-									averageHitTime += time1;
+										if (AlgoRefTimeSourceID_[l0MaskID] == 1)
+											averageHitTime += time1;
 
-								nHits++;
+										nHits++;
+									}
+								}
 							}
 						}
 					}

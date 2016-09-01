@@ -158,7 +158,7 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 						+ ((frameTS & 0xfffff800) * 0x100);
 
 				edgeChIDs[iEdge + nEdges_tot] = (uint) tdcData->chID;
-				edgeTdcIDs[iEdge + nEdges_tot] = (uint) tdcData->tdcID;
+				edgeTdcIDs[iEdge + nEdges_tot] = (uint) tdcData->tdcID + fpgaHeader->FPGAID*4;
 				edgeIsLeading[iEdge + nEdges_tot] = tdcData->ID == 0x4;
 
 //				LOG_INFO("edgeChIDs[" << iEdge + nEdges_tot << "] " << (uint) edgeChIDs[iEdge + nEdges_tot]);

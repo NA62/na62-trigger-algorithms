@@ -69,7 +69,8 @@ struct TrbData {
 //  uint32_t tdcWord :32;
 	uint time :19; //hit time measurement (100ps LSB)
 	uint chID :5;      //TDC channel ID
-	uint tdcID :4;     //TDC chip ID
+	uint tdcID :2;     //TDC chip ID
+	uint CRC :2;		// CRC bit check (not used yet)
 	uint ID :4;        //0x4 (leading time), 0x5 (trailing time)
 }__attribute__ ((__packed__));
 
