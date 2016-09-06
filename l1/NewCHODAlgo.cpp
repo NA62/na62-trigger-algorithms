@@ -95,7 +95,7 @@ uint_fast8_t NewCHODAlgo::processNewCHODTrigger(uint l0MaskID, DecoderHandler& d
 //			LOG_INFO("Readout Channel ID1 " << roChID1);
 //			LOG_INFO("Geom PMT ID1 " << PMTID1);
 
-				if ((PMTID1 / 10) % 10 >= 1 && (PMTID1 / 10) % 10 <= 3) {
+				if ((PMTID1 / 10) % 10 >= 0 && (PMTID1 / 10) % 10 <= 3) {
 					for (uint jEdge = 0; jEdge != numberOfEdgesOfCurrentBoard; jEdge++) {
 						if (edgeIsLeading[jEdge] && jEdge != iEdge) {
 							const int roChID2 = (edgeTdcID[jEdge] * 32) + edgeChID[jEdge];
