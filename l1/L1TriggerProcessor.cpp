@@ -27,7 +27,6 @@
 #include "StrawAlgo.h"
 #include "NewCHODAlgo.h"
 
-
 namespace na62 {
 
 std::atomic<uint64_t>* L1TriggerProcessor::L1Triggers_ = new std::atomic<uint64_t>[0xFF + 1];
@@ -36,6 +35,8 @@ std::atomic<uint64_t>* L1TriggerProcessor::L1InputReducedEventsPerL0Mask_ = new 
 std::atomic<uint64_t>** L1TriggerProcessor::EventCountersByL0MaskByAlgoID_;
 std::atomic<uint64_t> L1TriggerProcessor::L1InputEvents_(0);
 std::atomic<uint64_t> L1TriggerProcessor::L1InputReducedEvents_(0);
+std::atomic<uint64_t> L1TriggerProcessor::L1PhysicsEvents_(0);
+std::atomic<uint64_t> L1TriggerProcessor::L1PhysicsEventsByMultipleMasks_(0);
 std::atomic<uint64_t> L1TriggerProcessor::L1InputEventsPerBurst_(0);
 std::atomic<uint64_t> L1TriggerProcessor::L1AcceptedEvents_(0);
 
@@ -97,14 +98,12 @@ uint_fast8_t L1TriggerProcessor::NumberOfEnabledL0Masks_ = 0;
 std::vector<int> L1TriggerProcessor::L0MaskIDs_;
 uint_fast32_t L1TriggerProcessor::L1DataPacketSize_ = 0;
 
-
 /////////////////////
 //Intended for the shared memory farm version do not use them and the related get methods
 std::array<uint_fast8_t, 16> L1TriggerProcessor::l1TriggerWords_;
 L1InfoToStorage L1TriggerProcessor::l1Info_;
 bool L1TriggerProcessor::isL1WhileTimeout_;
 ///////////////////////
-
 
 bool L1TriggerProcessor::isRequestZeroSuppressedCreamData(uint_fast8_t l1TriggerTypeWord) {
 	// add here any special L1 trigger word requiring NZS LKr data
@@ -350,7 +349,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 	uint_fast8_t newchodTrigger = 0;
 
 	//uint_fast8_t l1TriggerWords[16] = { };
-	std:array<uint_fast8_t, 16> l1TriggerWords = { };
+	std: array<uint_fast8_t, 16> l1TriggerWords = { };
 	L1InfoToStorage l1Info;
 
 	DecoderHandler decoder(event);
@@ -382,7 +381,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 		l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | ((l1MaskFlagTrigger != 0) << 6) | (isL1Bypassed << 5) | (isAllL1AlgoDisable << 4)
 				| (numberOfTriggeredL1Masks != 0);
 		L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed);
-//		printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %8x\n",l1Trigger);
+//		printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %8x\n", l1Trigger);
 		L1TriggerProcessor::writeL1Data(event, l1TriggerWords, &l1Info);
 //		L1TriggerProcessor::readL1Data(event);
 		return l1Trigger;
@@ -394,7 +393,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 		l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | ((l1MaskFlagTrigger != 0) << 6) | (isL1Bypassed << 5) | (isAllL1AlgoDisable << 4)
 				| (numberOfTriggeredL1Masks != 0);
 		L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed);
-//		printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %8x\n",l1Trigger);
+//		printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %8x\n", l1Trigger);
 		L1TriggerProcessor::writeL1Data(event, l1TriggerWords, &l1Info);
 //		L1TriggerProcessor::readL1Data(event);
 		return l1Trigger;
@@ -405,9 +404,9 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 		l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | ((l1MaskFlagTrigger != 0) << 6) | (isL1Bypassed << 5) | (isAllL1AlgoDisable << 4)
 				| (numberOfTriggeredL1Masks != 0);
 		L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed);
-		//		printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %8x\n",l1Trigger);
+//		printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %8x\n", l1Trigger);
 		L1TriggerProcessor::writeL1Data(event, l1TriggerWords, &l1Info);
-		//		L1TriggerProcessor::readL1Data(event);
+//		L1TriggerProcessor::readL1Data(event);
 		return l1Trigger;
 	}
 
@@ -456,6 +455,9 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 		isL1Bypassed = 1;
 	}
 	if (isL0PhysicsTrigger) {
+		L1PhysicsEvents_.fetch_add(1, std::memory_order_relaxed);
+		if (__builtin_popcount((uint) l0TrigFlags) > 1)
+			L1PhysicsEventsByMultipleMasks_.fetch_add(1, std::memory_order_relaxed);
 		for (int i = 0; i != 16; i++) {
 			l1TriggerWords[i] = 0;
 			if (l0TrigFlags & (1 << i)) {
@@ -781,7 +783,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 
 //		printf("Summary of Triggered Masks: %d\n", numberOfTriggeredL1Masks);
 //		for (int i = 0; i != 16; i++)
-//			printf("Summary of Trigger Words: l1Trigger %x\n",l1TriggerWords[i]);
+//			printf("Summary of Trigger Words: l1Trigger %x\n", l1TriggerWords[i]);
 	}
 
 	/*
@@ -830,7 +832,6 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 		 */
 		event->setRrequestZeroSuppressedCreamData(true);
 		event->setProcessingID(0); // 0 indicates raw data as collected from the detector
-
 
 		/////////////////////
 		//Intended for the shared memory farm version do not use them and the related get methods

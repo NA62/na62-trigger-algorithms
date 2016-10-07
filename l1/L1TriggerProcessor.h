@@ -74,6 +74,12 @@ public:
 	static inline uint64_t GetL1InputReducedStats() {
 		return L1InputReducedEvents_;
 	}
+	static inline uint64_t GetL1PhysicsStats() {
+		return L1PhysicsEvents_;
+	}
+	static inline uint64_t GetL1PhysicsByMultipleMasksStats() {
+		return L1PhysicsEventsByMultipleMasks_;
+	}
 	static inline uint64_t GetL1InputEventsPerBurst() {
 		return L1InputEventsPerBurst_;
 	}
@@ -116,6 +122,9 @@ public:
 	static inline uint64_t GetL1AcceptedEventsPerL0Mask(uint iMaskID) {
 		return L1AcceptedEventsPerL0Mask_[iMaskID];
 	}
+	static inline uint64_t GetL1InputReducedEventsPerL0Mask(uint iMaskID) {
+		return L1InputReducedEventsPerL0Mask_[iMaskID];
+	}
 	static inline uint64_t GetEventCountersByL0MaskByAlgoID(uint iMaskID, uint iAlgoID) {
 		return EventCountersByL0MaskByAlgoID_[iMaskID][iAlgoID];
 	}
@@ -142,6 +151,8 @@ private:
 	static std::atomic<uint64_t>** EventCountersByL0MaskByAlgoID_;
 	static std::atomic<uint64_t> L1InputEvents_;
 	static std::atomic<uint64_t> L1InputReducedEvents_;
+	static std::atomic<uint64_t> L1PhysicsEvents_;
+	static std::atomic<uint64_t> L1PhysicsEventsByMultipleMasks_;
 	static std::atomic<uint64_t> L1InputEventsPerBurst_;
 	static std::atomic<uint64_t> L1AcceptedEvents_;
 
