@@ -1,6 +1,6 @@
 #include "HLTConfParamsProxy.h"
-#include "XMLConfWriter.h"
-#include "XMLConfParser.h"
+#include <xmlconf/XMLConfWriter.h>
+#include <xmlconf/XMLConfParser.h>
 #include <iostream>
 
 static XMLConfParser gParser;
