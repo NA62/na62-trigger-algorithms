@@ -352,25 +352,18 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 	DecoderHandler decoder(event);
 
 	L1InputEvents_.fetch_add(1, std::memory_order_relaxed);
-//	LOG_INFO("L1Event number after adding 1 " << L1InputEvents_);
 	L1InputEventsPerBurst_.fetch_add(1, std::memory_order_relaxed);
-//	LOG_INFO("L1Event number per Burst after adding 1 " << L1InputEventsPerBurst_);
 
-//	LOG_INFO("Global FlagMode " << flagMode << " " << L1InputEvents_ << " " << autoFlagFactor);
 	if (FlagMode_) {
 		l1GlobalFlagTrigger = 1;
 	} else if (AutoFlagFactor_ && (L1InputEvents_ % AutoFlagFactor_ == 0)) {
 		l1GlobalFlagTrigger = 1;
 	}
-//	LOG_INFO("l1GlobalFlagTrigger " << (uint)l1GlobalFlagTrigger);
 
 	/*
 	 * Check if the event should bypass the processing
 	 */
-	uint_fast8_t l0DataType = event->getTriggerDataType();
-//	LOG_INFO("l0TriggerDataType " << std::hex << (uint) l0DataType << std::dec);
 	uint_fast8_t l0TrigWord = event->getL0TriggerTypeWord();
-//	LOG_INFO("l0TriggerWord " << std::hex << (uint) l0TrigWord << std::dec);
 
 	if (event->isSpecialTriggerEvent()) {
 		isL1Bypassed = 1;
@@ -378,7 +371,6 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 		l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | ((l1MaskFlagTrigger != 0) << 6) | (isL1Bypassed << 5) | (isAllL1AlgoDisable << 4)
 				| (numberOfTriggeredL1Masks != 0);
 		L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed);
-//		printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %8x\n", l1Trigger);
 		L1TriggerProcessor::writeL1Data(event, &l1Info);
 //		L1TriggerProcessor::readL1Data(event);
 		return l1Trigger;
@@ -390,7 +382,6 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 		l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | ((l1MaskFlagTrigger != 0) << 6) | (isL1Bypassed << 5) | (isAllL1AlgoDisable << 4)
 				| (numberOfTriggeredL1Masks != 0);
 		L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed);
-//		printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %8x\n", l1Trigger);
 		L1TriggerProcessor::writeL1Data(event, &l1Info);
 //		L1TriggerProcessor::readL1Data(event);
 		return l1Trigger;
@@ -401,7 +392,6 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 		l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | ((l1MaskFlagTrigger != 0) << 6) | (isL1Bypassed << 5) | (isAllL1AlgoDisable << 4)
 				| (numberOfTriggeredL1Masks != 0);
 		L1Triggers_[l1Trigger].fetch_add(1, std::memory_order_relaxed);
-//		printf("L1TriggerProcessor.cpp: !!!!!!!! Final l1Trigger %8x\n", l1Trigger);
 		L1TriggerProcessor::writeL1Data(event, &l1Info);
 //		L1TriggerProcessor::readL1Data(event);
 		return l1Trigger;
@@ -411,22 +401,17 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 	 * Check if the event fulfills the reduction option
 	 *
 	 */
-//	LOG_INFO("L1Reduction Factor " << reductionFactor);
-//	LOG_INFO("Modulo " << L1InputEvents_ % reductionFactor);
 	if (ReductionFactor_ && (L1InputEvents_ % ReductionFactor_ != 0))
 		return 0;
 
 	L1InputReducedEvents_.fetch_add(1, std::memory_order_relaxed);
-//	LOG_INFO("L1ReducedEvent number after adding 1 " << L1InputReducedEvents_);
 
 	/*
 	 * The event is ready to be processed
 	 *
 	 */
 	uint_fast16_t l0TrigFlags = event->getTriggerFlags();
-//	LOG_INFO("l0TrigFlags " << std::hex << (uint) l0TrigFlags << std::dec);
 	uint_fast8_t refFineTime = event->getFinetime();
-//	LOG_INFO("Event Reference Fine Time " << std::hex << (uint) refFineTime << std::dec);
 	l1Info.setL1RefTimeL0TP(refFineTime);
 
 	/*
@@ -465,17 +450,13 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 				l1TriggerResult = 0;
 				l1FlagTrigger = 0;
 
-//				LOG_INFO("NumberOfEnabledAndFlaggedAlgos_[" << i << "] " << NumberOfEnabledAndFlaggedAlgos_[i]);
 				if (NumberOfEnabledAndFlaggedAlgos_[i])
 					l1FlagTrigger = 1;
-//				LOG_INFO("Reduction factor " << maskReductionFactor[i] << " Modulo (maskReductionFactor) " << L1InputReducedEventsPerL0Mask_[i] % maskReductionFactor[i]);
 				if (MaskReductionFactor_[i] && (L1InputReducedEventsPerL0Mask_[i] % MaskReductionFactor_[i] != 0))
 					isReducedEvent = 1;
 				else
 					isReducedEvent = 0;
 
-//				LOG_INFO("isReducedEvent " << isReducedEvent);
-//				LOG_INFO("i " << i << " processID " << l1ProcessID << " nEnAlgos " << NumberOfEnabledAlgos_[i] << " l1TriggerTemp " << (uint) l1TriggerTmp << " nEnableFlagAlgos " << NumberOfEnabledAndFlaggedAlgos_[i] << " l1FlagTrig " << (uint) l1FlagTrigger);
 				if (!NumberOfEnabledAlgos_[i])
 					isAllL1AlgoDisable = 1;
 
@@ -777,7 +758,6 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 			}
 			if (__builtin_popcount((uint) l1TriggerResult))
 				numberOfTriggeredL1Masks++;
-
 
 			event->setL1TriggerWord(i, l1TriggerResult);
 		}

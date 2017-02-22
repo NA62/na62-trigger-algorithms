@@ -13,11 +13,9 @@
 #include <iostream>
 #include "L2Fragment.h"
 
-
 namespace na62 {
 
-std::atomic<uint64_t>* L2TriggerProcessor::L2Triggers_ = new std::atomic<
-		uint64_t>[0xFF + 1];
+std::atomic<uint64_t>* L2TriggerProcessor::L2Triggers_ = new std::atomic<uint64_t>[0xFF + 1];
 std::atomic<uint64_t> L2TriggerProcessor::L2InputEvents_(0);
 std::atomic<uint64_t> L2TriggerProcessor::L2InputReducedEvents_(0);
 std::atomic<uint64_t> L2TriggerProcessor::L2InputEventsPerBurst_(0);
@@ -86,20 +84,12 @@ void L2TriggerProcessor::initialize(l2Struct &l2Struct) {
 
 uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 
-	//event->readTriggerTypeWordAndFineTime();
-
-
 	bool isL0PhysicsTrigger = false;
 	bool isL0PeriodicTrigger = false;
 	bool isL0ControlTrigger = false;
 	bool isL2Bypassed = false;
 	uint numberOfTriggeredL2Masks = 0;
 	bool isAllL2AlgoDisable = false;
-
-	uint_fast8_t l0TrigWord = event->getL0TriggerTypeWord();;
-	uint_fast8_t l0DataType = event->getTriggerDataType(); //0x1 for physics, 0x2 for periodics, 0x4 for calibrations
-	uint_fast16_t l0TrigFlags = event->getTriggerFlags();
-	uint_fast8_t l2TriggerWords[16];
 
 	uint_fast8_t l2Trigger = 0;
 	uint_fast8_t l2GlobalFlagTrigger = 0;
@@ -119,19 +109,16 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 	 */
 	if (event->isSpecialTriggerEvent()) {
 		isL2Bypassed = true;
-		l2Trigger = ((uint) l2GlobalFlagTrigger << 7)
-				| ((l2MaskFlagTrigger != 0) << 6) | (isL2Bypassed << 5)
-				| (isAllL2AlgoDisable << 4) | (numberOfTriggeredL2Masks != 0);
+		l2Trigger = ((uint) l2GlobalFlagTrigger << 7) | ((l2MaskFlagTrigger != 0) << 6) | (isL2Bypassed << 5) | (isAllL2AlgoDisable << 4)
+				| (numberOfTriggeredL2Masks != 0);
 		L2Triggers_[l2Trigger].fetch_add(1, std::memory_order_relaxed);
 		writeData(event, l2Trigger);
 		return l2Trigger;
 	}
-	if (event->isPulserGTKTriggerEvent() || event->isL2Bypassed()
-			|| bypassEvent()) {
+	if (event->isPulserGTKTriggerEvent() || event->isPeriodicTriggerEvent() || event->isL2Bypassed() || bypassEvent()) {
 		isL2Bypassed = true;
-		l2Trigger = ((uint) l2GlobalFlagTrigger << 7)
-				| ((l2MaskFlagTrigger != 0) << 6) | (isL2Bypassed << 5)
-				| (isAllL2AlgoDisable << 4) | (numberOfTriggeredL2Masks != 0);
+		l2Trigger = ((uint) l2GlobalFlagTrigger << 7) | ((l2MaskFlagTrigger != 0) << 6) | (isL2Bypassed << 5) | (isAllL2AlgoDisable << 4)
+				| (numberOfTriggeredL2Masks != 0);
 		L2Triggers_[l2Trigger].fetch_add(1, std::memory_order_relaxed);
 		writeData(event, l2Trigger);
 		return l2Trigger;
@@ -150,6 +137,9 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 	 * The event is ready to be processed
 	 *
 	 */
+	uint_fast16_t l0TrigFlags = event->getTriggerFlags();
+	uint_fast8_t l2TriggerResult;
+	uint_fast8_t l2TriggerTmp;
 
 	if (event->isPhysicsTriggerEvent()) {
 		isL0PhysicsTrigger = 1;
@@ -165,19 +155,23 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 
 	if (isL0PhysicsTrigger) {
 		for (int i = 0; i != 16; i++) {
-			l2TriggerWords[i] = 0;
 			if (l0TrigFlags & (1 << i)) {
+				l2TriggerResult = 0;
+				l2TriggerTmp = 0;
 				if (!NumberOfEnabledAlgos_[i])
 					isAllL2AlgoDisable = 1;
+
+				l2TriggerResult = ((l2TriggerTmp & AlgoEnableMask_[i]) == AlgoEnableMask_[i]);
 			}
-			if (__builtin_popcount((uint) l2TriggerWords[i]))
+			if (__builtin_popcount((uint) l2TriggerResult))
 				numberOfTriggeredL2Masks++;
+
+			event->setL2TriggerWord(i, l2TriggerResult);
 		}
 	}
 
-	l2Trigger = ((uint) l2GlobalFlagTrigger << 7)
-			| ((l2MaskFlagTrigger != 0) << 6) | (isL2Bypassed << 5)
-			| (isAllL2AlgoDisable << 4) | (numberOfTriggeredL2Masks != 0);
+	l2Trigger = ((uint) l2GlobalFlagTrigger << 7) | ((l2MaskFlagTrigger != 0) << 6) | (isL2Bypassed << 5) | (isAllL2AlgoDisable << 4)
+			| (numberOfTriggeredL2Masks != 0);
 
 	if (l2Trigger != 0) {
 		L2AcceptedEvents_.fetch_add(1, std::memory_order_relaxed);
@@ -193,13 +187,11 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 }
 
 uint_fast8_t L2TriggerProcessor::onNonZSuppressedLKrDataReceived(Event* event) {
-	LOG_INFO(
-			"onNonZSuppressedLKrDataReceived - Trigger method not yet implemented!!!!!!!!!!!!");
+	LOG_INFO("onNonZSuppressedLKrDataReceived - Trigger method not yet implemented!!!!!!!!!!!!");
 	return 1;
 }
 
-void L2TriggerProcessor::async_requestNonZSuppressedLKrData(
-		const std::vector<uint_fast16_t> crateCREAMIDs, Event* event) {
+void L2TriggerProcessor::async_requestNonZSuppressedLKrData(const std::vector<uint_fast16_t> crateCREAMIDs, Event* event) {
 //	event->setNonZSuppressedDataRequestedNum((uint_fast16_t) crateCREAMIDs.size());
 //	cream::L1DistributionHandler::Async_RequestLKRDataUnicast(event,
 //	true, crateCREAMIDs);
@@ -207,52 +199,50 @@ void L2TriggerProcessor::async_requestNonZSuppressedLKrData(
 
 void L2TriggerProcessor::writeData(Event* event, const uint32_t& l2TriggerWord) {
 
-	const l0::MEPFragment* const L2TPEvent =
-			event->getL2ResultSubevent()->getFragment(0);
+	const l0::MEPFragment* const L2TPEvent = event->getL2ResultSubevent()->getFragment(0);
 
-	if(L2TPEvent->getPayloadLength() != L2DataPacketSize_) {
-		LOG_ERROR("L2 result fragment has wrong size " << (int) L2TPEvent->getPayloadLength()<< " instead of " <<  L2DataPacketSize_
-				<< ". Result will not be filled.");
+	if (L2TPEvent->getPayloadLength() != L2DataPacketSize_) {
+		LOG_ERROR(
+				"L2 result fragment has wrong size " << (int) L2TPEvent->getPayloadLength()<< " instead of " << L2DataPacketSize_ << ". Result will not be filled.");
 		return;
 	}
 
-	char* payload = const_cast<char*> (L2TPEvent->getPayload());
+	char* payload = const_cast<char*>(L2TPEvent->getPayload());
 	// This will eventually become a more complex result...
 	L2_BLOCK* globalResult = reinterpret_cast<L2_BLOCK*>(payload);
 	globalResult->triggerword = l2TriggerWord;
 
 	/* No L2 Algorithms implemented yet - result is very simple
-	(l2Block.l2Global).l2BypassProbability = BypassProbability_;
-	(l2Block.l2Global).l2FlagMode = FlagMode_;
-	(l2Block.l2Global).refTimeSourceID = ReferenceTimeSourceID_;
-	(l2Block.l2Global).l2AutoFlagFactor = AutoFlagFactor_;
-	(l2Block.l2Global).l2ReductionFactor = ReductionFactor_;
-	(l2Block.l2Global).l2DownscaleFactor = DownscaleFactor_;
+	 (l2Block.l2Global).l2BypassProbability = BypassProbability_;
+	 (l2Block.l2Global).l2FlagMode = FlagMode_;
+	 (l2Block.l2Global).refTimeSourceID = ReferenceTimeSourceID_;
+	 (l2Block.l2Global).l2AutoFlagFactor = AutoFlagFactor_;
+	 (l2Block.l2Global).l2ReductionFactor = ReductionFactor_;
+	 (l2Block.l2Global).l2DownscaleFactor = DownscaleFactor_;
 
-	int numToMaskID;
-	for (int iNum = 0; iNum < NumberOfEnabledL0Masks_; iNum++) {
-		if (NumToMaskID_[iNum] == -1)
-			LOG_ERROR("ERROR! Wrong association of mask ID!");
-		else
-			numToMaskID = NumToMaskID_[iNum];
-		(l2Block.l2Mask[iNum]).maskID = numToMaskID;
-		(l2Block.l2Mask[iNum]).triggerWord = l2TriggerWords[numToMaskID];
-		(l2Block.l2Mask[iNum]).numberOfEnabledAlgos =
-				NumberOfEnabledAlgos_[numToMaskID];
-		(l2Block.l2Mask[iNum]).numberOfFlaggedAlgos =
-				NumberOfFlaggedAlgos_[numToMaskID];
+	 int numToMaskID;
+	 for (int iNum = 0; iNum < NumberOfEnabledL0Masks_; iNum++) {
+	 if (NumToMaskID_[iNum] == -1)
+	 LOG_ERROR("ERROR! Wrong association of mask ID!");
+	 else
+	 numToMaskID = NumToMaskID_[iNum];
+	 (l2Block.l2Mask[iNum]).maskID = numToMaskID;
+	 (l2Block.l2Mask[iNum]).triggerWord = l2TriggerWords[numToMaskID];
+	 (l2Block.l2Mask[iNum]).numberOfEnabledAlgos =
+	 NumberOfEnabledAlgos_[numToMaskID];
+	 (l2Block.l2Mask[iNum]).numberOfFlaggedAlgos =
+	 NumberOfFlaggedAlgos_[numToMaskID];
 
 
-		(l2Block.l2Mask[iNum]).reductionFactor =
-				MaskReductionFactor_[numToMaskID];
-		(l2Block.l2Mask[iNum]).algoEnableMask = AlgoEnableMask_[numToMaskID];
-		(l2Block.l2Mask[iNum]).algoFlagMask = AlgoFlagMask_[numToMaskID];
-		(l2Block.l2Mask[iNum]).algoLogicMask = AlgoLogicMask_[numToMaskID];
-		(l2Block.l2Mask[iNum]).algoDwScMask = AlgoDwScMask_[numToMaskID];
+	 (l2Block.l2Mask[iNum]).reductionFactor =
+	 MaskReductionFactor_[numToMaskID];
+	 (l2Block.l2Mask[iNum]).algoEnableMask = AlgoEnableMask_[numToMaskID];
+	 (l2Block.l2Mask[iNum]).algoFlagMask = AlgoFlagMask_[numToMaskID];
+	 (l2Block.l2Mask[iNum]).algoLogicMask = AlgoLogicMask_[numToMaskID];
+	 (l2Block.l2Mask[iNum]).algoDwScMask = AlgoDwScMask_[numToMaskID];
 
-	}
-	*/
+	 }
+	 */
 }
-
 
 } /* namespace na62 */
