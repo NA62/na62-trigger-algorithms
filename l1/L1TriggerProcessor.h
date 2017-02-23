@@ -65,21 +65,6 @@ public:
 	 */
 	static bool isRequestZeroSuppressedCreamData(uint_fast8_t l1TriggerTypeWord);
 
-	static inline std::atomic<uint64_t>* GetL1TriggerStats() {
-		return L1Triggers_;
-	}
-	static inline uint64_t GetL1InputStats() {
-		return L1InputEvents_;
-	}
-	static inline uint64_t GetL1InputReducedStats() {
-		return L1InputReducedEvents_;
-	}
-	static inline uint64_t GetL1PhysicsStats() {
-		return L1PhysicsEvents_;
-	}
-	static inline uint64_t GetL1PhysicsByMultipleMasksStats() {
-		return L1PhysicsEventsByMultipleMasks_;
-	}
 	static inline uint64_t GetL1InputEventsPerBurst() {
 		return L1InputEventsPerBurst_;
 	}
@@ -147,6 +132,7 @@ private:
 	static std::atomic<uint64_t>* L1InputReducedEventsPerL0Mask_;
 	static std::atomic<uint64_t>** EventCountersByL0MaskByAlgoID_;
 	static std::atomic<uint64_t> L1InputEvents_;
+	static std::atomic<uint64_t> L1OutputEvents_;
 	static std::atomic<uint64_t> L1InputReducedEvents_;
 	static std::atomic<uint64_t> L1PhysicsEvents_;
 	static std::atomic<uint64_t> L1PhysicsEventsByMultipleMasks_;
