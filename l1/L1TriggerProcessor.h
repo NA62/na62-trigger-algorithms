@@ -52,7 +52,7 @@ public:
 	 * Fill in trigger decisions into event structure
 	 */
 	//static void writeL1Data(Event* const event, const uint_fast8_t* l1TriggerWords, L1InfoToStorage* l1Info, bool isL1WhileTimeout = false);
-	static void writeL1Data(Event* const event, std::array<uint_fast8_t, 16> l1TriggerWords, L1InfoToStorage* l1Info, bool isL1WhileTimeout = false);
+	static void writeL1Data(Event* const event, L1InfoToStorage* l1Info, bool isL1WhileTimeout = false);
 
 
 	static void readL1Data(Event* const event);
@@ -65,21 +65,6 @@ public:
 	 */
 	static bool isRequestZeroSuppressedCreamData(uint_fast8_t l1TriggerTypeWord);
 
-	static inline std::atomic<uint64_t>* GetL1TriggerStats() {
-		return L1Triggers_;
-	}
-	static inline uint64_t GetL1InputStats() {
-		return L1InputEvents_;
-	}
-	static inline uint64_t GetL1InputReducedStats() {
-		return L1InputReducedEvents_;
-	}
-	static inline uint64_t GetL1PhysicsStats() {
-		return L1PhysicsEvents_;
-	}
-	static inline uint64_t GetL1PhysicsByMultipleMasksStats() {
-		return L1PhysicsEventsByMultipleMasks_;
-	}
 	static inline uint64_t GetL1InputEventsPerBurst() {
 		return L1InputEventsPerBurst_;
 	}
@@ -131,9 +116,6 @@ public:
 
 	////////////
 	//Intended for the shared memory farm version do not use them and the related get methods
-	static std::array<uint_fast8_t, 16> inline getL1TriggerWords() {
-		return l1TriggerWords_;
-	}
 	static L1InfoToStorage inline getL1Info() {
 		return l1Info_;
 	}
@@ -150,6 +132,7 @@ private:
 	static std::atomic<uint64_t>* L1InputReducedEventsPerL0Mask_;
 	static std::atomic<uint64_t>** EventCountersByL0MaskByAlgoID_;
 	static std::atomic<uint64_t> L1InputEvents_;
+	static std::atomic<uint64_t> L1OutputEvents_;
 	static std::atomic<uint64_t> L1InputReducedEvents_;
 	static std::atomic<uint64_t> L1PhysicsEvents_;
 	static std::atomic<uint64_t> L1PhysicsEventsByMultipleMasks_;
@@ -222,8 +205,6 @@ private:
 
 	/////////////////////
 	//Intended for the shared memory farm version do not use them and the related get methods
-	//static uint_fast8_t l1TriggerWords_[16];
-	static std::array<uint_fast8_t, 16> l1TriggerWords_;
 	static L1InfoToStorage l1Info_;
 	static bool isL1WhileTimeout_;
 	///////////////////////

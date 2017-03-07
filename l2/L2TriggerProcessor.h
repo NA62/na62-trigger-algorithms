@@ -57,15 +57,6 @@ public:
 	}
 	static void initialize(l2Struct &l2Struct);
 
-	static inline std::atomic<uint64_t>* GetL2TriggerStats() {
-		return L2Triggers_;
-	}
-	static inline uint64_t GetL2InputStats() {
-		return L2InputEvents_;
-	}
-	static inline uint64_t GetL2InputReducedStats() {
-		return L2InputReducedEvents_;
-	}
 	static inline uint64_t GetL2InputEventsPerBurst() {
 		return L2InputEventsPerBurst_;
 	}
@@ -95,6 +86,7 @@ public:
 private:
 	static std::atomic<uint64_t>* L2Triggers_;
 	static std::atomic<uint64_t> L2InputEvents_;
+	static std::atomic<uint64_t> L2OutputEvents_;
 	static std::atomic<uint64_t> L2InputReducedEvents_;
 	static std::atomic<uint64_t> L2InputEventsPerBurst_;
 	static std::atomic<uint64_t> L2AcceptedEvents_;
