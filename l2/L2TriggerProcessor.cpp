@@ -87,8 +87,8 @@ void L2TriggerProcessor::initialize(l2Struct &l2Struct) {
 uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 
 	bool isL0PhysicsTrigger = false;
-	bool isL0PeriodicTrigger = false;
-	bool isL0ControlTrigger = false;
+	//bool isL0PeriodicTrigger = false;
+	//bool isL0ControlTrigger = false;
 	bool isL2Bypassed = false;
 	uint numberOfTriggeredL2Masks = 0;
 	bool isAllL2AlgoDisable = false;
@@ -151,11 +151,11 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 		isL0PhysicsTrigger = 1;
 	}
 	if (event->isPeriodicTriggerEvent()) {
-		isL0PeriodicTrigger = 1;
+		//isL0PeriodicTrigger = 1;
 		isL2Bypassed = 1;
 	}
 	if (event->isControlTriggerEvent()) {
-		isL0ControlTrigger = 1;
+		//isL0ControlTrigger = 1;
 		isL2Bypassed = 1;
 	}
 

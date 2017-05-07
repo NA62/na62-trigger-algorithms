@@ -58,8 +58,7 @@ float RICHAlgo::radiusRing;
 
 uint_fast8_t RICHAlgo::processRICHTrigger(DecoderHandler& decoder) {
 
-	struct timeval time[10];
-
+	//struct timeval time[10];
 	//gettimeofday(&time[0], 0);
 
 	using namespace l0;

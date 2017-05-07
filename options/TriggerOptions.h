@@ -44,7 +44,7 @@ public:
 
 		(OPTION_TRIGGER_XML_FILE,
 				po::value<std::string>()->default_value(
-						"/lkrpn0/RunControl/PCFarm/Trigger/config_START_RUN.cfg"),
+						"/na62server/RunControl/PCFarm/Trigger/config_START_RUN.cfg"),
 				"XML Trigger file for trigger configuration")
 
 		(OPTION_ACTIVE_L0_MASKS, po::value<std::string>()->required(),

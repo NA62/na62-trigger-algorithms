@@ -85,7 +85,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger0(uint l0MaskID, DecoderHandler& decode
 	const bool* const edgeIsLeading = muv3Packet.getIsLeadings();
 	const uint_fast8_t* const edgeTdcID = muv3Packet.getTdcIDs();
 	double time, dtL0TP, dtCHOD;
-	int pmtID1, pmtID2;
+	int pmtID1;
 
 	uint numberOfEdgesOfCurrentBoard = muv3Packet.getNumberOfEdgesStored();
 
@@ -205,7 +205,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger1(uint l0MaskID, DecoderHandler& decode
 	const uint_fast8_t* const edgeChID = muv3Packet.getChIDs();
 	const bool* const edgeIsLeading = muv3Packet.getIsLeadings();
 	const uint_fast8_t* const edgeTdcID = muv3Packet.getTdcIDs();
-	double finetime, edgetime1, edgetime2, dt_l0tp1, dt_l0tp2, dt_chod1, dt_chod2;
+	double edgetime1, edgetime2, dt_l0tp1, dt_l0tp2, dt_chod1, dt_chod2;
 	int pmtID1, pmtID2;
 
 	uint numberOfEdgesOfCurrentBoard = muv3Packet.getNumberOfEdgesStored();
@@ -320,7 +320,7 @@ uint_fast8_t MUV3Algo::processMUV3Trigger2(uint l0MaskID, DecoderHandler& decode
 	const uint_fast8_t* const edgeChID = muv3Packet.getChIDs();
 	const bool* const edgeIsLeading = muv3Packet.getIsLeadings();
 	const uint_fast8_t* const edgeTdcID = muv3Packet.getTdcIDs();
-	double finetime, edgetime1, edgetime2, dt_l0tp1, dt_l0tp2, dt_chod1, dt_chod2;
+	double edgetime1, edgetime2, dt_l0tp1, dt_l0tp2, dt_chod1, dt_chod2;
 	int pmtID1, pmtID2;
 
 	uint numberOfEdgesOfCurrentBoard = muv3Packet.getNumberOfEdgesStored();
@@ -427,8 +427,8 @@ uint_fast8_t MUV3Algo::processMUV3Trigger3(uint l0MaskID, DecoderHandler& decode
 	const uint_fast8_t* const edgeChID = muv3Packet.getChIDs();
 	const bool* const edgeIsLeading = muv3Packet.getIsLeadings();
 	const uint_fast8_t* const edgeTdcID = muv3Packet.getTdcIDs();
-	double time1, time2, time, dtL0TP, dtCHOD;
-	int pmtID1, pmtID2;
+	double time1, dtL0TP, dtCHOD;
+	int pmtID1;
 
 	uint numberOfEdgesOfCurrentBoard = muv3Packet.getNumberOfEdgesStored();
 

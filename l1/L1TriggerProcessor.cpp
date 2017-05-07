@@ -225,7 +225,7 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 //		LOG_INFO(" number of Enabled algo " << NumberOfEnabledAlgos_[i] << " EnabledAndCut " << __builtin_popcount((uint) AlgoEnableCutMask_[i]));
 
 		if (NumberOfFlaggedAlgos_[i] != NumberOfEnabledAndFlaggedAlgos_[i]) {
-			LOG_ERROR("Mismatch between NumberOfFlaggedAlgos and algoEnable&FlagMask !!!");
+			//LOG_ERROR("Mismatch between NumberOfFlaggedAlgos and algoEnable&FlagMask !!!");
 			NumberOfFlaggedAlgos_[i] = NumberOfEnabledAndFlaggedAlgos_[i];
 		}
 

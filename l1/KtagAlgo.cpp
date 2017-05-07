@@ -90,7 +90,7 @@ uint_fast8_t KtagAlgo::processKtagTrigger(uint l0MaskID, DecoderHandler& decoder
 		 * Get Arrays with hit Info
 		 */
 		const uint64_t* const edgeTime = cedarPacket->getTimes();
-		const uint_fast8_t* const edgeChID = cedarPacket->getChIDs();
+		//const uint_fast8_t* const edgeChID = cedarPacket->getChIDs();
 		const bool* const edgeIsLeading = cedarPacket->getIsLeadings();
 		const uint_fast8_t* const edgeTdcID = cedarPacket->getTdcIDs();
 		double time, dtL0TP, dtCHOD;
