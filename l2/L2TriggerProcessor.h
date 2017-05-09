@@ -57,12 +57,6 @@ public:
 	}
 	static void initialize(l2Struct &l2Struct);
 
-	static inline uint64_t GetL2InputEventsPerBurst() {
-		return L2InputEventsPerBurst_;
-	}
-	static void ResetL2InputEventsPerBurst() {
-		L2InputEventsPerBurst_ = 0;
-	}
 	static inline uint GetL2ReductionFactor() {
 		return ReductionFactor_;
 	}
@@ -84,11 +78,8 @@ public:
 		return L2DataPacketSize_;
 	}
 private:
-	static std::atomic<uint64_t>* L2Triggers_;
 	static std::atomic<uint64_t> L2InputEvents_;
-	static std::atomic<uint64_t> L2OutputEvents_;
 	static std::atomic<uint64_t> L2InputReducedEvents_;
-	static std::atomic<uint64_t> L2InputEventsPerBurst_;
 	static std::atomic<uint64_t> L2AcceptedEvents_;
 
 	static uint NumberOfEnabledAlgos_[16];

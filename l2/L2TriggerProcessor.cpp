@@ -15,12 +15,8 @@
 #include "L2Fragment.h"
 
 namespace na62 {
-
-std::atomic<uint64_t>* L2TriggerProcessor::L2Triggers_ = new std::atomic<uint64_t>[0xFF + 1];
 std::atomic<uint64_t> L2TriggerProcessor::L2InputEvents_(0);
-std::atomic<uint64_t> L2TriggerProcessor::L2OutputEvents_(0);
 std::atomic<uint64_t> L2TriggerProcessor::L2InputReducedEvents_(0);
-std::atomic<uint64_t> L2TriggerProcessor::L2InputEventsPerBurst_(0);
 std::atomic<uint64_t> L2TriggerProcessor::L2AcceptedEvents_(0);
 
 double L2TriggerProcessor::BypassProbability_;
@@ -51,10 +47,6 @@ void L2TriggerProcessor::initialize(l2Struct &l2Struct) {
 
 	L0MaskIDs_ = TriggerOptions::GetIntList(OPTION_ACTIVE_L0_MASKS);
 	NumberOfEnabledL0Masks_ = L0MaskIDs_.size();
-
-	for (int i = 0; i != 0xFF + 1; i++) {
-		L2Triggers_[i] = 0;
-	}
 
 	/*
 	 * Initialisation of individual Algo masks
@@ -98,8 +90,6 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 	uint_fast8_t l2MaskFlagTrigger = 0;
 
 	L2InputEvents_.fetch_add(1, std::memory_order_relaxed);
-	L2InputEventsPerBurst_.fetch_add(1, std::memory_order_relaxed);
-
 	/*
 	 * Check if the event is autopass
 	 */
@@ -117,7 +107,6 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 		isL2Bypassed = true;
 		l2Trigger = ((uint) l2GlobalFlagTrigger << 7) | ((l2MaskFlagTrigger != 0) << 6) | (isL2Bypassed << 5) | (isAllL2AlgoDisable << 4)
 				| (numberOfTriggeredL2Masks != 0);
-		L2Triggers_[l2Trigger].fetch_add(1, std::memory_order_relaxed);
 		writeData(event, l2Trigger);
 		return l2Trigger;
 	}
@@ -125,7 +114,6 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 		isL2Bypassed = true;
 		l2Trigger = ((uint) l2GlobalFlagTrigger << 7) | ((l2MaskFlagTrigger != 0) << 6) | (isL2Bypassed << 5) | (isAllL2AlgoDisable << 4)
 				| (numberOfTriggeredL2Masks != 0);
-		L2Triggers_[l2Trigger].fetch_add(1, std::memory_order_relaxed);
 		writeData(event, l2Trigger);
 		return l2Trigger;
 	}
@@ -179,9 +167,6 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 			| (numberOfTriggeredL2Masks != 0);
 
 	if (l2Trigger != 0) {
-
-		L2OutputEvents_.fetch_add(1, std::memory_order_relaxed);
-
 		if (l2Trigger & TRIGGER_L2_PHYSICS) {
 			L2AcceptedEvents_.fetch_add(1, std::memory_order_relaxed);
 		}
@@ -195,7 +180,6 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 		writeData(event, l2Trigger);
 	}
 
-	L2Triggers_[l2Trigger].fetch_add(1, std::memory_order_relaxed);
 	return l2Trigger;
 }
 
