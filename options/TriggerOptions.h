@@ -47,7 +47,7 @@ public:
 						"/na62server/RunControl/PCFarm/Trigger/config_START_RUN.cfg"),
 				"XML Trigger file for trigger configuration")
 
-		(OPTION_ACTIVE_L0_MASKS, po::value<std::string>()->required(),
+		(OPTION_ACTIVE_L0_MASKS, po::value<std::string>()->default_value("99"),
 				"List of Active L0 Masks to be used")
 
 				/*

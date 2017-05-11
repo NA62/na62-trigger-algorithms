@@ -110,6 +110,13 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 
 	L0MaskIDs_ = TriggerOptions::GetIntList(OPTION_ACTIVE_L0_MASKS);
 	NumberOfEnabledL0Masks_ = L0MaskIDs_.size();
+
+
+	if (NumberOfEnabledL0Masks_ == 1 && L0MaskIDs_[0] == 99) { //Default value
+		NumberOfEnabledL0Masks_ = 0;
+		LOG_INFO("No Mask provided from the run control");
+	}
+
 //	LOG_INFO("numberOfEnabledL0Masks " << (uint)numberOfEnabledL0Masks);
 
 	EventCountersByL0MaskByAlgoID_ = new std::atomic<uint64_t>*[16];
