@@ -2080,9 +2080,10 @@ void StrawAlgo::writeData(L1StrawAlgo* algoPacket, uint l0MaskID, L1InfoToStorag
 	for (uint iTrk = 0; iTrk != 5; iTrk++) {
 //		LOG_INFO("track index " << iTrk << " momentum " << l1Info->getL1StrawTrack_P(iTrk));
 //		LOG_INFO("track index " << iTrk << " vertex " << l1Info->getL1StrawTrack_Vz(iTrk));
-		algoPacket->l1Data[iTrk] = ((uint) l1Info->getL1StrawTrackP(iTrk) << 16) | (uint) l1Info->getL1StrawTrackVz(iTrk);
+		algoPacket->l1Data[iTrk] = (uint) l1Info->getL1StrawTrackVz(iTrk);
+		algoPacket->l1Data[iTrk+5] = (uint) l1Info->getL1StrawTrackP(iTrk);
 	}
-	algoPacket->l1Data[5] = l1Info->getL1StrawNTracks();
+	algoPacket->l1Data[10] = l1Info->getL1StrawNTracks();
 
 	algoPacket->numberOfWords = (sizeof(L1StrawAlgo) / 4.);
 //	LOG_INFO("l0MaskID " << l0MaskID);

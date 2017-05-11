@@ -48,7 +48,7 @@ struct L1StrawAlgo {
 //	uint8_t l1AlgoProcessed :2;
 	uint8_t algoFlags; //enable, logic, flagging, downscale
 //	uint8_t more_reserved;
-	uint32_t l1Data[6];
+	uint32_t l1Data[11];
 };
 
 struct L1Data {

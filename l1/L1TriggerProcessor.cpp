@@ -214,7 +214,6 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 //		LOG_INFO(" number of Enabled algo " << NumberOfEnabledAlgos_[i] << " EnabledAndCut " << __builtin_popcount((uint) AlgoEnableCutMask_[i]));
 
 		if (NumberOfFlaggedAlgos_[i] != NumberOfEnabledAndFlaggedAlgos_[i]) {
-			//LOG_ERROR("Mismatch between NumberOfFlaggedAlgos and algoEnable&FlagMask !!!");
 			NumberOfFlaggedAlgos_[i] = NumberOfEnabledAndFlaggedAlgos_[i];
 		}
 
@@ -594,7 +593,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 					if ((MuvEnableMask_ & (1 << i)) && AlgoProcessID_[i][MuvAlgorithmId_] == l1ProcessID
 							&& SourceIDManager::isMUV3Active()) {
 						/*
-						 * AlgoType=0, Multiplicity trigger to be used in veto, corresponding to Trigger3
+						 * AlgoType=0, DRY RUN 2017, Multiplicity trigger (TIGHT HIT) to be used in positive, corresponding to Trigger3
+						 * AlgoType=0, Multiplicity trigger (LOOSE HIT) to be used in veto, corresponding to Trigger3
 						 * AlgoType=1, Left-Right trigger to be used in positive, corresponding to Trigger1
 						 * AlgoType=2, Neighbours trigger (from Chris) to be used in positive, corresponding to Trigger0
 						 */
@@ -815,12 +815,15 @@ void L1TriggerProcessor::writeL1Data(Event* const event, L1InfoToStorage* l1Info
 		maskPacket->triggerWord = event->getL1TriggerWord(numToMaskID);
 		maskPacket->maskID = numToMaskID;
 		maskPacket->flags = 0;
-		if (NumberOfEnabledAndFlaggedAlgos_[numToMaskID])
+		if (NumberOfEnabledAndFlaggedAlgos_[numToMaskID]) {
 			maskPacket->flags |= (1 << 6);
-		if (!NumberOfEnabledAlgos_[numToMaskID])
+		}
+		if (!NumberOfEnabledAlgos_[numToMaskID]) {
 			maskPacket->flags |= (1 << 4);
-		if (isL1WhileTimeout)
+		}
+		if (isL1WhileTimeout) {
 			maskPacket->flags |= (1 << 2);
+		}
 		maskPacket->reductionFactor = MaskReductionFactor_[numToMaskID];
 		maskPacket->reserved = 0;
 
