@@ -80,6 +80,9 @@ public:
 	static inline uint_fast8_t GetNumberOfEnabledL0Masks() {
 		return NumberOfEnabledL0Masks_;
 	}
+	static inline std::vector<int> GetEnabledL0MaskIDs() {
+		return L0MaskIDs_;
+	}
 	static inline uint GetL0MaskNumToMaskID(uint iNum) {
 		return NumToMaskID_[iNum];
 	}
@@ -88,6 +91,9 @@ public:
 	}
 	static inline uint GetNumberOfEnabledAlgoPerMask(uint iMaskID) {
 		return NumberOfEnabledAlgos_[iMaskID];
+	}
+	static inline uint GetNumberOfEnabledAndFlaggedAlgoPerMask(uint iMaskID) {
+		return NumberOfEnabledAndFlaggedAlgos_[iMaskID];
 	}
 	static inline uint GetAlgoNumToAlgoID(uint iMaskID, uint iNum) {
 		return NumToAlgoID_[iMaskID][iNum];
