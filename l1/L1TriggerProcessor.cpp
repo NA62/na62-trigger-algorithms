@@ -375,6 +375,16 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 //		L1TriggerProcessor::readL1Data(event);
 		return l1Trigger;
 	}
+
+	/*
+	 * Check if the event (PERIODICS INCLUDED) fulfills the reduction option
+	 *
+	 */
+	if (ReductionFactor_ && (L1InputEvents_ % ReductionFactor_ != 0))
+		return 0;
+
+	L1InputReducedEvents_.fetch_add(1, std::memory_order_relaxed);
+
 //	if (event->isPulserGTKTriggerEvent() || bypassEvent()) {
 	if ((event->isPeriodicTriggerEvent() && (l0TrigWord == 0x8)) || bypassEvent()) { //PulserGTK to be addressed with 0x2c trword
 		isL1Bypassed = 1;
@@ -397,12 +407,13 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 
 	/*
 	 * Check if the event fulfills the reduction option
+	 * TODO::Add possibility to reduce periodics or not
 	 *
 	 */
-	if (ReductionFactor_ && (L1InputEvents_ % ReductionFactor_ != 0))
-		return 0;
-
-	L1InputReducedEvents_.fetch_add(1, std::memory_order_relaxed);
+//	if (ReductionFactor_ && (L1InputEvents_ % ReductionFactor_ != 0))
+//		return 0;
+//
+//	L1InputReducedEvents_.fetch_add(1, std::memory_order_relaxed);
 
 	/*
 	 * The event is ready to be processed
