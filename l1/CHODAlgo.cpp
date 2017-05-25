@@ -76,7 +76,8 @@ uint_fast8_t CHODAlgo::processCHODTrigger(uint l0MaskID, DecoderHandler& decoder
 	const bool* const edgeIsLeading = chodPacket.getIsLeadings();
 	const uint_fast8_t* const edgeTdcID = chodPacket.getTdcIDs();
 	double time, dtL0TP;
-	int slabID, quadrantID, planeID;
+//	int quadrantID;
+	int slabID, planeID;
 
 	uint numberOfEdgesOfCurrentBoard = chodPacket.getNumberOfEdgesStored();
 

@@ -141,7 +141,7 @@ void StrawAlgo::initialize(uint i, l1Straw& l1StrawStruct) {
 
 uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info) {
 
-	struct timeval time[30];
+	//struct timeval time[30];
 	//gettimeofday(&time[0], 0);
 	//LOG_INFO( "Initial Time - Start " << time[0].tv_sec << " " << time[0].tv_usec );
 

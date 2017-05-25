@@ -121,7 +121,7 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 
 	}
 
-	int NSlots = 16;
+	uint NSlots = 16;
 	int NEdgesInSlot = 0;
 	int64_t slotTime = 0;
 	nEdges_tot = 0;

@@ -22,10 +22,11 @@ IRCSACParsConfFile::IRCSACParsConfFile() {
 
 //	LOG_INFO("In IRCSAC ParseConfFile");
 
-	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/ircsac_algorithm/config/IRCSAC.conf");
+//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/ircsac_algorithm/config/IRCSAC.conf");
+	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/ircsac_algorithm/config/IRCSAC.2017.conf");
 
 	if (!fileName_.isValid())
-		LOG_INFO("IRC SAC Config file not found");
+		LOG_ERROR("IRC SAC Config file not found");
 
 	if (fileName_.isValid()) {
 

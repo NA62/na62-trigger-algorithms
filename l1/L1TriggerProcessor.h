@@ -168,23 +168,23 @@ private:
 	static uint_fast16_t NewChodFlagMask_;
 
 	// Downscaling variables GLM:???
-	static uint ChodAlgorithmId_;
-	static uint RichAlgorithmId_;
-	static uint CedarAlgorithmId_;
-	static uint LavAlgorithmId_;
-	static uint StrawAlgorithmId_;
-	static uint IrcSacAlgorithmId_;
-	static uint MuvAlgorithmId_;
-	static uint NewChodAlgorithmId_;
+	static int ChodAlgorithmId_;
+	static int RichAlgorithmId_;
+	static int CedarAlgorithmId_;
+	static int LavAlgorithmId_;
+	static int StrawAlgorithmId_;
+	static int IrcSacAlgorithmId_;
+	static int MuvAlgorithmId_;
+	static int NewChodAlgorithmId_;
 
 	static int StrawAlgoType_[16];
 	static int MUVAlgoType_[16];
 
 	// Converters
 	static uint MaskIDToNum_[16];
-	static uint NumToMaskID_[16];
+	static int NumToMaskID_[16];
 	static uint AlgoIDToNum_[16][10]; //change the second dimension with the number of implemented algos
-	static uint NumToAlgoID_[16][10];
+	static int NumToAlgoID_[16][10];
 
 	static uint_fast8_t NumberOfEnabledL0Masks_;
 	static std::vector<int> L0MaskIDs_;

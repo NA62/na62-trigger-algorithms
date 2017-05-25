@@ -72,22 +72,22 @@ uint_fast16_t L1TriggerProcessor::IrcSacFlagMask_ = 0;
 uint_fast16_t L1TriggerProcessor::MuvFlagMask_ = 0;
 uint_fast16_t L1TriggerProcessor::NewChodFlagMask_ = 0;
 
-uint L1TriggerProcessor::ChodAlgorithmId_;
-uint L1TriggerProcessor::RichAlgorithmId_;
-uint L1TriggerProcessor::CedarAlgorithmId_;
-uint L1TriggerProcessor::LavAlgorithmId_;
-uint L1TriggerProcessor::StrawAlgorithmId_;
-uint L1TriggerProcessor::IrcSacAlgorithmId_;
-uint L1TriggerProcessor::MuvAlgorithmId_;
-uint L1TriggerProcessor::NewChodAlgorithmId_;
+int L1TriggerProcessor::ChodAlgorithmId_;
+int L1TriggerProcessor::RichAlgorithmId_;
+int L1TriggerProcessor::CedarAlgorithmId_;
+int L1TriggerProcessor::LavAlgorithmId_;
+int L1TriggerProcessor::StrawAlgorithmId_;
+int L1TriggerProcessor::IrcSacAlgorithmId_;
+int L1TriggerProcessor::MuvAlgorithmId_;
+int L1TriggerProcessor::NewChodAlgorithmId_;
 
 int L1TriggerProcessor::StrawAlgoType_[16];
 int L1TriggerProcessor::MUVAlgoType_[16];
 
 uint L1TriggerProcessor::MaskIDToNum_[16];
-uint L1TriggerProcessor::NumToMaskID_[16];
+int L1TriggerProcessor::NumToMaskID_[16];
 uint L1TriggerProcessor::AlgoIDToNum_[16][10];
-uint L1TriggerProcessor::NumToAlgoID_[16][10];
+int L1TriggerProcessor::NumToAlgoID_[16][10];
 
 uint_fast8_t L1TriggerProcessor::NumberOfEnabledL0Masks_ = 0;
 std::vector<int> L1TriggerProcessor::L0MaskIDs_;
@@ -330,12 +330,12 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 	bool isL1WhileTimeout = 0;
 	uint_fast8_t numberOfTriggeredL1Masks = 0;
 	bool isL0PhysicsTrigger = 0;
-	bool isL0PeriodicTrigger = 0;
-	bool isL0ControlTrigger = 0;
+//	bool isL0PeriodicTrigger = 0;
+//	bool isL0ControlTrigger = 0;
 	bool isReducedEvent = 0;
-	bool isAlgoEnableForAllL0Masks = 0;
+//	bool isAlgoEnableForAllL0Masks = 0;
 	uint_fast8_t chodTrigger = 0;
-	uint_fast8_t richTrigger = 0;
+//	uint_fast8_t richTrigger = 0;
 	uint_fast8_t cedarTrigger = 0;
 	uint_fast8_t lavTrigger = 0;
 	uint_fast8_t ircsacTrigger = 0;
@@ -438,11 +438,11 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 		isL0PhysicsTrigger = 1;
 	}
 	if (event->isPeriodicTriggerEvent()) {
-		isL0PeriodicTrigger = 1;
+//		isL0PeriodicTrigger = 1;
 		isL1Bypassed = 1;
 	}
 	if (event->isControlTriggerEvent()) {
-		isL0ControlTrigger = 1;
+//		isL0ControlTrigger = 1;
 		isL1Bypassed = 1;
 	}
 	if (isL0PhysicsTrigger) {
@@ -450,7 +450,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 			l1TriggerResult = 0;
 			if (l0TrigFlags & (1 << i)) {
 				L1InputReducedEventsPerL0Mask_[i].fetch_add(1, std::memory_order_relaxed);
-				uint_fast32_t l1ProcessID = 0;
+				int_fast32_t l1ProcessID = 0;
 				watchingWhileLoops = 0;
 				l1TriggerTmp = 0;
 				l1FlagTrigger = 0;
@@ -487,8 +487,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 						}
 //						printf("L1TriggerProcessor.cpp: tmpTrigger %d\n", l1TriggerTmp);
 					}
-					if ((ChodEnableMask_ & l0TrigFlags) == l0TrigFlags)
-						isAlgoEnableForAllL0Masks = 1;
+//					if ((ChodEnableMask_ & l0TrigFlags) == l0TrigFlags) isAlgoEnableForAllL0Masks = 1;
 //					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID && !((ChodEnableMask_ & ChodFlagMask_) & (1 << i))) {
 					if (((AlgoEnableMask_[i] & (1 << ChodAlgorithmId_)) && !(l1TriggerTmp & (1 << ChodAlgorithmId_))) && l1ProcessID
 							&& !((ChodEnableMask_ & ChodFlagMask_) & (1 << i))) {
@@ -513,8 +512,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 						}
 //						printf("L1TriggerProcessor.cpp: tmpTrigger %d\n", l1TriggerTmp);
 					}
-					if ((CedarEnableMask_ & l0TrigFlags) == l0TrigFlags)
-						isAlgoEnableForAllL0Masks = 1;
+//					if ((CedarEnableMask_ & l0TrigFlags) == l0TrigFlags) isAlgoEnableForAllL0Masks = 1;
 //					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID && !((CedarEnableMask_ & CedarFlagMask_) & (1 << i))) {
 					if (((AlgoEnableMask_[i] & (1 << CedarAlgorithmId_)) && !(l1TriggerTmp & (1 << CedarAlgorithmId_))) && l1ProcessID
 							&& !((CedarEnableMask_ & CedarFlagMask_) & (1 << i))) {
@@ -539,8 +537,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 						}
 //						printf("L1TriggerProcessor.cpp: tmpTrigger %d\n", l1TriggerTmp);
 					}
-					if ((LavEnableMask_ & l0TrigFlags) == l0TrigFlags)
-						isAlgoEnableForAllL0Masks = 1;
+//					if ((LavEnableMask_ & l0TrigFlags) == l0TrigFlags) isAlgoEnableForAllL0Masks = 1;
 //					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID && !((LavEnableMask_ & LavFlagMask_) & (1 << i))) {
 					if (((AlgoEnableMask_[i] & (1 << LavAlgorithmId_)) && !(l1TriggerTmp & (1 << LavAlgorithmId_))) && l1ProcessID
 							&& !((LavEnableMask_ & LavFlagMask_) & (1 << i))) {
@@ -565,8 +562,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 						}
 //						printf("L1TriggerProcessor.cpp: tmpTrigger %d\n", l1TriggerTmp);
 					}
-					if ((IrcSacEnableMask_ & l0TrigFlags) == l0TrigFlags)
-						isAlgoEnableForAllL0Masks = 1;
+//					if ((IrcSacEnableMask_ & l0TrigFlags) == l0TrigFlags) isAlgoEnableForAllL0Masks = 1;
 //					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID && !((IrcSacEnableMask_ & IrcSacFlagMask_) & (1 << i))) {
 					if (((AlgoEnableMask_[i] & (1 << IrcSacAlgorithmId_)) && !(l1TriggerTmp & (1 << IrcSacAlgorithmId_))) && l1ProcessID
 							&& !((IrcSacEnableMask_ & IrcSacFlagMask_) & (1 << i))) {
@@ -599,8 +595,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 						}
 //						printf("L1TriggerProcessor.cpp: tmpTrigger %d\n", l1TriggerTmp);
 					}
-					if ((StrawEnableMask_ & l0TrigFlags) == l0TrigFlags)
-						isAlgoEnableForAllL0Masks = 1;
+//					if ((StrawEnableMask_ & l0TrigFlags) == l0TrigFlags) isAlgoEnableForAllL0Masks = 1;
 //					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID && !((StrawEnableMask_ & StrawFlagMask_) & (1 << i))) {
 					if (((AlgoEnableMask_[i] & (1 << StrawAlgorithmId_)) && !(l1TriggerTmp & (1 << StrawAlgorithmId_))) && l1ProcessID
 							&& !((StrawEnableMask_ & StrawFlagMask_) & (1 << i))) {
@@ -635,8 +630,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 						}
 //						printf("L1TriggerProcessor.cpp: tmpTrigger %d\n", l1TriggerTmp);
 					}
-					if ((MuvEnableMask_ & l0TrigFlags) == l0TrigFlags)
-						isAlgoEnableForAllL0Masks = 1;
+//					if ((MuvEnableMask_ & l0TrigFlags) == l0TrigFlags) isAlgoEnableForAllL0Masks = 1;
 //					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID && !((MuvEnableMask_ & MuvFlagMask_) & (1 << i))) {
 					if (((AlgoEnableMask_[i] & (1 << MuvAlgorithmId_)) && !(l1TriggerTmp & (1 << MuvAlgorithmId_))) && l1ProcessID
 							&& !((MuvEnableMask_ & MuvFlagMask_) & (1 << i))) {
@@ -661,8 +655,7 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 						}
 //						printf("L1TriggerProcessor.cpp: tmpTrigger %d\n", l1TriggerTmp);
 					}
-					if ((NewChodEnableMask_ & l0TrigFlags) == l0TrigFlags)
-						isAlgoEnableForAllL0Masks = 1;
+//					if ((NewChodEnableMask_ & l0TrigFlags) == l0TrigFlags) isAlgoEnableForAllL0Masks = 1;
 //					if (!(l1TriggerTmp & AlgoEnableMask_[i]) && l1ProcessID && !((NewChodEnableMask_ & NewChodFlagMask_) & (1 << i))) {
 					if (((AlgoEnableMask_[i] & (1 << NewChodAlgorithmId_)) && !(l1TriggerTmp & (1 << NewChodAlgorithmId_))) && l1ProcessID
 							&& !((NewChodEnableMask_ & NewChodFlagMask_) & (1 << i))) {
@@ -764,7 +757,6 @@ void L1TriggerProcessor::readL1Data(Event* const event) {
 	uint_fast16_t length = (uint_fast16_t) L1TPEvent->getPayloadLength();
 	if ((uint) length != (uint) L1DataPacketSize_)
 		LOG_ERROR("length (in bytes) " << (uint)length << " is different from l1DataPacketsSize " << (uint)L1DataPacketSize_);
-	uint32_t dataWord;
 	for (uint i = 0; i != (uint) L1DataPacketSize_ / 4; i++) {
 		L1Data* dataPacket = (L1Data*) pload + i;
 		std::bitset<32> data((uint) dataPacket->dataWords);
@@ -854,7 +846,7 @@ void L1TriggerProcessor::writeL1Data(Event* const event, L1InfoToStorage* l1Info
 //		std::bitset<8> maskFlag((uint) maskPacket->flags);
 //		LOG_INFO("Flags " << (uint)maskPacket->flags << " " << maskFlag);
 
-		for (int iAlgoNum = 0; iAlgoNum < NumberOfEnabledAlgos_[numToMaskID]; iAlgoNum++) {
+		for (uint iAlgoNum = 0; iAlgoNum < NumberOfEnabledAlgos_[numToMaskID]; iAlgoNum++) {
 			if (NumToAlgoID_[iNum][iAlgoNum] == -1)
 				LOG_ERROR("ERROR! Wrong association of algo ID!");
 			else

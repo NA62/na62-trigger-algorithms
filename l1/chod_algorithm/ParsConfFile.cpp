@@ -23,11 +23,11 @@ CHODParsConfFile::CHODParsConfFile() {
 
 //	LOG_INFO("In CHOD ParseConfFile");
 
-	ConfFileReader fileName_(
-			"/workspace/na62-trigger-algorithms/l1/chod_algorithm/config/CHOD.conf");
+//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/chod_algorithm/config/CHOD.conf");
+	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/chod_algorithm/config/CHOD.2017.conf");
 
 	if (!fileName_.isValid())
-		LOG_INFO("CHOD Config file not found");
+		LOG_ERROR("CHOD Config file not found");
 
 	if (fileName_.isValid()) {
 
@@ -46,7 +46,7 @@ CHODParsConfFile::CHODParsConfFile() {
 					!= string::npos) {
 				for (int iCh = 0; iCh < nroChannels / 16; ++iCh) {
 					char name[1000];
-					sprintf(name, "ChRemap_%d=", iCh);
+					sprintf(name, "ChRemap_%04d=", iCh);
 					string remap = (string) name;
 //					LOG_INFO(remap);
 //					LOG_INFO(fileName_.getField<string>(1));

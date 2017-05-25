@@ -21,11 +21,11 @@ LAVParsConfFile::LAVParsConfFile() {
 
 //	LOG_INFO("In LAV ParseConfFile");
 
-	ConfFileReader fileName_(
-			"/workspace/na62-trigger-algorithms/l1/lav_algorithm/config/LAV.conf");
+//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/lav_algorithm/config/LAV.conf");
+	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/lav_algorithm/config/LAV.2017.conf");
 
 	if (!fileName_.isValid())
-		LOG_INFO("LAV Config file not found");
+		LOG_ERROR("LAV Config file not found");
 
 	if (fileName_.isValid()) {
 
@@ -44,7 +44,7 @@ LAVParsConfFile::LAVParsConfFile() {
 					!= string::npos) {
 				for (int iCh = 0; iCh < nroChannels / 16; ++iCh) {
 					char name[1000];
-					sprintf(name, "ChRemap_%d=", iCh);
+					sprintf(name, "ChRemap_%04d=", iCh);
 					string remap = (string) name;
 //					LOG_INFO(remap);
 //					LOG_INFO(fileName_.getField<string>(1));

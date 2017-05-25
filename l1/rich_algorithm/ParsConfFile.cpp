@@ -28,11 +28,11 @@ RICHParsConfFile::RICHParsConfFile() {
 
 	fileT0 = " ";
 
-	ConfFileReader fileName_(
-			"/workspace/na62-trigger-algorithms/l1/rich_algorithm/config/RICH.conf");
+	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/rich_algorithm/config/RICH.conf");
+//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/rich_algorithm/config/RICH.2017.conf");
 
 	if (!fileName_.isValid())
-		LOG_INFO("RICH Config file not found");
+		LOG_ERROR("RICH Config file not found");
 
 	if (fileName_.isValid()) {
 
@@ -173,7 +173,7 @@ void RICHParsConfFile::readT0() {
 			"/workspace/na62-trigger-algorithms/l1/rich_algorithm/" + fileT0);
 
 	if (!fileT0_.isValid())
-		LOG_INFO("T0 file not found");
+		LOG_ERROR("T0 file not found");
 
 	if (fileT0_.isValid()) {
 

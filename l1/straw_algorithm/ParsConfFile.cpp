@@ -19,14 +19,15 @@ STRAWParsConfFile::STRAWParsConfFile() {
 
 //	LOG_INFO("In STRAW ParsConfFile");
 
-	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer_online.2015.conf");
+//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer_online.2015.conf");
+	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer_online.2017.conf");
 
 	int maxChannelID = 0;
 	int loopChannels = 0;
 	fileT0 = " ";
 
 	if (!fileName_.isValid())
-		LOG_INFO("STRAW Configuration file not found");
+		LOG_ERROR("STRAW Configuration file not found");
 
 	if (fileName_.isValid()) {
 		LOG_INFO("STRAW configuration file open");
@@ -41,7 +42,7 @@ STRAWParsConfFile::STRAWParsConfFile() {
 				if (nROChannels)
 					loopChannels = nROChannels / 16;
 				else
-					LOG_INFO("Number of STRAW Readout Channels is empty");
+					LOG_ERROR("Number of STRAW Readout Channels is empty");
 //				LOG_INFO("Number of (Straw) Readout Channels " << nROChannels);
 			}
 			if (fileName_.getField<string>(1).find("ChRemap_") != string::npos) {
@@ -101,7 +102,7 @@ void STRAWParsConfFile::readT0() {
 	ConfFileReader fileT0_("/workspace/na62-trigger-algorithms/l1/straw_algorithm/" + fileT0);
 
 	if (!fileT0_.isValid())
-		LOG_INFO("STRAW ROMezzanines T0 file not found");
+		LOG_ERROR("STRAW ROMezzanines T0 file not found");
 
 	int nROMezzanines = 512;
 	int nGroups = nROMezzanines / 16;
@@ -156,7 +157,7 @@ void STRAWParsConfFile::readStationT0() {
 	ConfFileReader fileStationT0_("/workspace/na62-trigger-algorithms/l1/straw_algorithm/" + fileStationT0);
 
 	if (!fileStationT0_.isValid())
-		LOG_INFO("STRAW Station T0 file not found");
+		LOG_ERROR("STRAW Station T0 file not found");
 
 	if (fileStationT0_.isValid()) {
 		LOG_INFO("STRAW Station T0 file " << fileStationT0 << " open");
