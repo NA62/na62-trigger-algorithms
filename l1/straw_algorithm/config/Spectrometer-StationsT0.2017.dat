@@ -3,13 +3,4 @@
 #
 # Generated on Tue May 23 04:03:54 2017
 #
-# run 3685
-#StationsT0= -6164.64
-# run 3759
-#StationsT0= -5994.73
-# run 3882
-#StationsT0= -6135.68
-# run 3957
-#StationsT0= -6046.53
-# run 4026
-StationsT0= -6405.50
+StationsT0= -6406.30
