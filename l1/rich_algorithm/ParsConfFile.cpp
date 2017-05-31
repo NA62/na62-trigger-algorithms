@@ -29,7 +29,7 @@ RICHParsConfFile::RICHParsConfFile() {
 
 	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/rich_algorithm/config/RICH.conf");
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/rich_algorithm/config/RICH.2017.conf");
-//	ConfFileReader fileName_("/Users/romano/Desktop/workspace/na62-trigger-algorithms/l1/rich_algorithm/config/RICH.2017.om.conf");
+//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/rich_algorithm/config/RICH.2017.om.conf");
 
 	if (!fileName_.isValid())
 		LOG_ERROR("RICH Config file not found");

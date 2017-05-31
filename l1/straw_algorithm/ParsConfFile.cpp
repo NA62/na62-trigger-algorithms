@@ -21,7 +21,7 @@ STRAWParsConfFile::STRAWParsConfFile() {
 
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer_online.2015.conf");
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer_online.2017.conf");
-	ConfFileReader fileName_("/Users/romano/Desktop/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer.2017.om.conf");
+	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer.2017.om.conf");
 
 	int maxChannelID = 0;
 	int loopChannels = 0;
