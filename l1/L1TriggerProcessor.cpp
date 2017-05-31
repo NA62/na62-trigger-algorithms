@@ -385,19 +385,9 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 
 	L1InputReducedEvents_.fetch_add(1, std::memory_order_relaxed);
 
-//	if (event->isPulserGTKTriggerEvent() || bypassEvent()) {
-	if ((event->isPeriodicTriggerEvent() && (l0TrigWord == 0x8)) || bypassEvent()) { //PulserGTK to be addressed with 0x2c trword
+	if ((event->isPeriodicTriggerEvent() && event->isPulserGTKTriggerEvent()) || bypassEvent()) {
 		isL1Bypassed = 1;
 		event->setRrequestZeroSuppressedCreamData(true);
-		l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | ((l1MaskFlagTrigger != 0) << 6) | (isL1Bypassed << 5) | (isAllL1AlgoDisable << 4)
-				| (numberOfTriggeredL1Masks != 0);
-		L1TriggerProcessor::writeL1Data(event, &l1Info);
-//		L1TriggerProcessor::readL1Data(event);
-		return l1Trigger;
-	}
-	if (event->isPeriodicTriggerEvent() && (l0TrigWord == 0x10)) { //In burst periodics to be addressed within na62-farm-lib
-		isL1Bypassed = 1;
-		event->setRrequestZeroSuppressedCreamData(true); //Temporarily ZS LKr data
 		l1Trigger = ((uint) l1GlobalFlagTrigger << 7) | ((l1MaskFlagTrigger != 0) << 6) | (isL1Bypassed << 5) | (isAllL1AlgoDisable << 4)
 				| (numberOfTriggeredL1Masks != 0);
 		L1TriggerProcessor::writeL1Data(event, &l1Info);
