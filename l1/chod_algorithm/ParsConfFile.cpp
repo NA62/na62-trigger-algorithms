@@ -24,7 +24,8 @@ CHODParsConfFile::CHODParsConfFile() {
 //	LOG_INFO("In CHOD ParseConfFile");
 
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/chod_algorithm/config/CHOD.conf");
-	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/chod_algorithm/config/CHOD.2017.conf");
+//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/chod_algorithm/config/CHOD.2017.conf");
+	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/chod_algorithm/config/CHOD.2017.om.conf");
 
 	if (!fileName_.isValid())
 		LOG_ERROR("CHOD Config file not found");
@@ -55,6 +56,7 @@ CHODParsConfFile::CHODParsConfFile() {
 						for (int jCh = 0; jCh < 16; jCh++) {
 							geoSlabMap[iCh * 16 + jCh] =
 									fileName_.getField<int>(jCh + 2);
+//							LOG_INFO("geoSlabMap " << geoSlabMap[iCh * 16 + jCh]);
 						}
 					}
 				}

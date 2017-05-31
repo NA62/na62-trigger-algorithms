@@ -24,7 +24,8 @@ MUV3ParsConfFile::MUV3ParsConfFile() {
 //	LOG_INFO("In MUV3 ParseConfFile");
 
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/muv_algorithm/config/MUV3.2016.conf");
-	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/muv_algorithm/config/MUV3.2017.conf");
+//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/muv_algorithm/config/MUV3.2017.conf");
+	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/muv_algorithm/config/MUV3.2017.om.conf");
 
 	if (!fileName_.isValid())
 		LOG_ERROR("MUV3 Config file not found");
@@ -40,7 +41,7 @@ MUV3ParsConfFile::MUV3ParsConfFile() {
 			}
 			if (fileName_.getField<string>(1) == "NROChannels=") {
 				nroChannels = fileName_.getField<int>(2);
-//				LOG_INFO << "nroChannels " << nroChannels << ENDL;
+//				LOG_INFO("nroChannels " << nroChannels);
 			}
 			if (fileName_.getField<string>(1).find("ChRemap_")
 					!= string::npos) {
@@ -55,7 +56,7 @@ MUV3ParsConfFile::MUV3ParsConfFile() {
 						for (int jCh = 0; jCh < 16; jCh++) {
 							geoPMTMap[iCh * 16 + jCh] =
 									fileName_.getField<int>(jCh + 2);
-							//LOG_INFO << "geoPMTMap= " << geoPMTMap[iCh * 16 + jCh]<<ENDL;
+//							LOG_INFO("geoPMTMap= " << geoPMTMap[iCh * 16 + jCh]);
 						}
 					}
 				}

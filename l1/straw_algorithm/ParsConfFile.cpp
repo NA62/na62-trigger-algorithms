@@ -20,7 +20,8 @@ STRAWParsConfFile::STRAWParsConfFile() {
 //	LOG_INFO("In STRAW ParsConfFile");
 
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer_online.2015.conf");
-	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer_online.2017.conf");
+//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer_online.2017.conf");
+	ConfFileReader fileName_("/Users/romano/Desktop/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer.2017.om.conf");
 
 	int maxChannelID = 0;
 	int loopChannels = 0;
@@ -58,18 +59,22 @@ STRAWParsConfFile::STRAWParsConfFile() {
 							geoMap[iCh * 16 + jCh] = fileName_.getField<int>(jCh + 2);
 							if (geoMap[16 * iCh + jCh] > maxChannelID)
 								maxChannelID = geoMap[16 * iCh + jCh];
-//							LOG_INFO("(Straw) geoMap " << geoStrawMap[16*iCh+jCh]);
+//							LOG_INFO("(Straw) geoMap " << geoMap[16*iCh+jCh]);
 						}
 					}
 				}
 			}
 			if (fileName_.getField<string>(1).find("ROMezzaninesT0FileInput=") != string::npos) {
-				LOG_INFO("Selecting R0MezzaninesT0File " << fileName_.getField<string>(2));
 				fileT0 = fileName_.getField<string>(2);
+//				LOG_INFO("(Straw) Selecting R0MezzaninesT0File " << fileT0);
 			}
-			if (fileName_.getField<string>(1).find("StationsT0FileInput=") != string::npos) {
-				LOG_INFO("Selecting StationsT0File " << fileName_.getField<string>(2));
-				fileStationT0 = fileName_.getField<string>(2);
+			if ((fileName_.getField<string>(1).find("StationsT0=") != string::npos) && (fileName_.getField<string>(1).size() == 11)) {
+				fStationT0 = fileName_.getField<double>(2);
+//				LOG_INFO("(Straw) fStationT0 " << fStationT0);
+			}
+			if ((fileName_.getField<string>(1).find("MagicT0=") != string::npos) && (fileName_.getField<string>(1).size() == 8)) {
+				fMagicT0 = fileName_.getField<double>(2);
+//				LOG_INFO("(Straw) fMagicT0 " << fMagicT0);
 			}
 		}
 	}
@@ -150,31 +155,10 @@ double* STRAWParsConfFile::getT0() {
 	return fROMezzaninesT0;
 }
 
-void STRAWParsConfFile::readStationT0() {
-
-	//	LOG_INFO("In STRAW ParsConfFile - Station T0 file " << fileStationT0);
-
-	ConfFileReader fileStationT0_("/workspace/na62-trigger-algorithms/l1/straw_algorithm/" + fileStationT0);
-
-	if (!fileStationT0_.isValid())
-		LOG_ERROR("STRAW Station T0 file not found");
-
-	if (fileStationT0_.isValid()) {
-		LOG_INFO("STRAW Station T0 file " << fileStationT0 << " open");
-
-		while (fileStationT0_.nextLine()) {
-
-			if (fileStationT0_.getField<string>(1) == "#") {
-				continue;
-			} else if (fileStationT0_.getField<string>(1).find("StationsT0=") != string::npos) {
-//				LOG_INFO("(Straw) fStationT0 " << fileStationT0_.getField<double>(2));
-				fStationT0 = fileStationT0_.getField<double>(2);
-			}
-		}
-	}
+double STRAWParsConfFile::getStationT0() {
+	return fStationT0;
 }
 
-double STRAWParsConfFile::getStationT0() {
-	readStationT0();
-	return fStationT0;
+double STRAWParsConfFile::getMagicT0() {
+	return fMagicT0;
 }

@@ -73,6 +73,7 @@ private:
 	static int* StrawGeo_;
 	static double* ROMezzaninesT0_;
 	static double StationT0_;
+	static double MagicT0_;
 
 	static const double CutLowLeading_;
 	static const double CutHighLeading_;

@@ -361,11 +361,8 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 	}
 
 	/*
-	 * Check if the event should bypass the processing (Special, Periodics)
-	 * TODO: Control events to be added here
+	 * Check if the event should bypass the processing (Special, Periodics and Control)
 	 */
-	uint_fast8_t l0TrigWord = event->getL0TriggerTypeWord();
-
 	if (event->isSpecialTriggerEvent()) {
 		isL1Bypassed = 1;
 		event->setRrequestZeroSuppressedCreamData(false);
@@ -402,7 +399,6 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 	 */
 //	if (ReductionFactor_ && (L1InputEvents_ % ReductionFactor_ != 0))
 //		return 0;
-//
 //	L1InputReducedEvents_.fetch_add(1, std::memory_order_relaxed);
 
 	/*

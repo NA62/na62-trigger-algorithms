@@ -31,6 +31,7 @@ public:
 
 	void readStationT0();
 	double getStationT0();
+	double getMagicT0();
 
 private:
 
@@ -42,8 +43,8 @@ private:
 	string fileT0;
 	double fROMezzaninesT0[512]; //from offline - to be removed
 
-	string fileStationT0;
 	double fStationT0;
+	double fMagicT0;
 
 };
 

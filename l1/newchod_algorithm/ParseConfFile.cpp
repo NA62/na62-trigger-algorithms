@@ -22,7 +22,8 @@ NewCHODParsConfFile::NewCHODParsConfFile() {
 //	LOG_INFO("In NewCHOD ParseConfFile");
 
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/newchod_algorithm/config/NewCHOD.conf");
-	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/newchod_algorithm/config/NewCHOD.2017.conf");
+//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/newchod_algorithm/config/NewCHOD.2017.conf");
+	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/newchod_algorithm/config/NewCHOD.2017.om.conf");
 
 	if (!fileName_.isValid())
 		LOG_ERROR("NewCHOD Config file not found");

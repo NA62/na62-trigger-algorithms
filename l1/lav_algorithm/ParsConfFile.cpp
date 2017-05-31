@@ -22,7 +22,8 @@ LAVParsConfFile::LAVParsConfFile() {
 //	LOG_INFO("In LAV ParseConfFile");
 
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/lav_algorithm/config/LAV.conf");
-	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/lav_algorithm/config/LAV.2017.conf");
+//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/lav_algorithm/config/LAV.2017.conf");
+	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/lav_algorithm/config/LAV.2017.om.conf");
 
 	if (!fileName_.isValid())
 		LOG_ERROR("LAV Config file not found");
@@ -53,6 +54,7 @@ LAVParsConfFile::LAVParsConfFile() {
 						for (int jCh = 0; jCh < 16; jCh++) {
 							geoLGMap[iCh * 16 + jCh] =
 									fileName_.getField<int>(jCh + 2);
+//							LOG_INFO("geoLGMap " << geoLGMap[iCh * 16 + jCh]);
 						}
 					}
 				}

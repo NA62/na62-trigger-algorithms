@@ -33,7 +33,7 @@
 #define MAX_N_HIT_L 6
 #define MAX_N_ADD_HIT 50
 
-#define INVISIBLE_SHIFT 25.2 //28.4 //27
+//#define INVISIBLE_SHIFT 25.2 //28.4 //27
 #define CLOCK_PERIOD 24.951059536
 //#define rangem 160//160
 #define PASSO 0.0004//0.0002
@@ -52,6 +52,7 @@ STRAWParsConfFile* StrawAlgo::InfoSTRAW_ = STRAWParsConfFile::GetInstance();
 int* StrawAlgo::StrawGeo_ = InfoSTRAW_->getGeoMap();
 double* StrawAlgo::ROMezzaninesT0_ = InfoSTRAW_->getT0();
 double StrawAlgo::StationT0_ = InfoSTRAW_->getStationT0();
+double StrawAlgo::MagicT0_ = InfoSTRAW_->getMagicT0();
 
 //Defualt Values - TO BE REMOVED
 //double StrawAlgo::t0_main_shift = 6056.19;
@@ -249,21 +250,16 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 			//LOG_INFO( "SrbAddr " << (uint)srbAddr[iEdge] << " StrawAddr "<< (uint)strawAddr[iEdge] << " CoverAddr " << coverAddr << " fR0Mezz Index " << srbAddr[iEdge] * 16 + coverAddr );
 
 			//LOG_INFO(chRO[nHits] << " " << strawGeo[chRO[nHits]]);
-			/* LOG_INFO("ChamberID " << chamberID
-			 << " ViewID " << viewID
-			 << " HalfViewID " << halfviewID
-			 << " PlaneID " << planeID
-			 << " StrawID " << strawID
-			 << " IsALeading " << edgeIsLeading[iEdge]);
-			 */
+			//LOG_INFO("ChamberID " << chamberID << " ViewID " << viewID << " HalfViewID " << halfViewID << " PlaneID " << planeID);
+			//LOG_INFO(" StrawID " << strawID << " IsALeading " << edgeIsLeading[iEdge]);
 
 			if (edgeIsLeading[iEdge]) {
 				leading = (double) edgeTime[iEdge] - (double) StationT0_ - (double) ROMezzaninesT0_[srbAddr[iEdge] * 16 + coverAddr]
-						+ (double) INVISIBLE_SHIFT - (((double) decoder.getDecodedEvent()->getFinetime() * CLOCK_PERIOD) / 256 + 0.5);
+						+ (double) MagicT0_ - (((double) decoder.getDecodedEvent()->getFinetime() * CLOCK_PERIOD) / 256 + 0.5);
 			}
 			if (!edgeIsLeading[iEdge]) {
 				trailing = (double) edgeTime[iEdge] - (double) StationT0_ - (double) ROMezzaninesT0_[srbAddr[iEdge] * 16 + coverAddr]
-						+ (double) INVISIBLE_SHIFT - (((double) decoder.getDecodedEvent()->getFinetime() * CLOCK_PERIOD) / 256 + 0.5);
+						+ (double) MagicT0_ - (((double) decoder.getDecodedEvent()->getFinetime() * CLOCK_PERIOD) / 256 + 0.5);
 			}
 			//gettimeofday(&time[6], 0);
 			//LOG_INFO( "Read Config File and Assign ChannelID - Stop " << time[6].tv_sec << " " << time[6].tv_usec );
@@ -297,8 +293,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 
 						strawPrecluster_[chamberID][viewID][halfViewID][j].leading = leading;
 						strawPrecluster_[chamberID][viewID][halfViewID][j].wiredistance = wireDistance;
-					}
-					else if ((!edgeIsLeading[iEdge])
+					} else if ((!edgeIsLeading[iEdge])
 							&& (strawPrecluster_[chamberID][viewID][halfViewID][j].trailing < -100
 									|| strawPrecluster_[chamberID][viewID][halfViewID][j].trailing < trailing)
 							&& (trailing > -100 && trailing < 300)) {
@@ -404,8 +399,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 								if (tempDistance > 0) {
 									positionH = strawPrecluster_[i][g][0][h].position + strawPrecluster_[i][g][0][h].wiredistance;
 									positionJ = strawPrecluster_[i][g][0][j].position - strawPrecluster_[i][g][0][j].wiredistance;
-								}
-								else {
+								} else {
 									positionH = strawPrecluster_[i][g][0][h].position - strawPrecluster_[i][g][0][h].wiredistance;
 									positionJ = strawPrecluster_[i][g][0][j].position + strawPrecluster_[i][g][0][j].wiredistance;
 								}
@@ -482,8 +476,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 								if (tempDistance > 0) {
 									positionH = strawPrecluster_[i][g][1][h].position + strawPrecluster_[i][g][1][h].wiredistance;
 									positionJ = strawPrecluster_[i][g][1][j].position - strawPrecluster_[i][g][1][j].wiredistance;
-								}
-								else {
+								} else {
 									positionH = strawPrecluster_[i][g][1][h].position - strawPrecluster_[i][g][1][h].wiredistance;
 									positionJ = strawPrecluster_[i][g][1][j].position + strawPrecluster_[i][g][1][j].wiredistance;
 								}
@@ -495,12 +488,10 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 
 								if (strawPrecluster_[i][g][1][h].trailing > -200 && strawPrecluster_[i][g][1][j].trailing > -200) {
 									trailingCluster = (strawPrecluster_[i][g][1][h].trailing + strawPrecluster_[i][g][1][j].trailing) / 2;
-								}
-								else {
+								} else {
 									if (strawPrecluster_[i][g][1][h].trailing <= -200) {
 										trailingCluster = strawPrecluster_[i][g][1][j].trailing;
-									}
-									else {
+									} else {
 										trailingCluster = strawPrecluster_[i][g][1][h].trailing;
 									}
 								}
@@ -551,8 +542,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 										if (!g || g == 2) {
 											positionH = strawPrecluster_[i][g][0][h].position + strawPrecluster_[i][g][0][h].wiredistance;
 											positionJ = strawPrecluster_[i][g][1][j].position - strawPrecluster_[i][g][1][j].wiredistance;
-										}
-										else {
+										} else {
 											positionH = strawPrecluster_[i][g][0][h].position - strawPrecluster_[i][g][0][h].wiredistance;
 											positionJ = strawPrecluster_[i][g][1][j].position + strawPrecluster_[i][g][1][j].wiredistance;
 										}
@@ -565,12 +555,10 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 										if (strawPrecluster_[i][g][0][h].trailing > -200 && strawPrecluster_[i][g][1][j].trailing > -200) {
 											trailingCluster =
 													(strawPrecluster_[i][g][0][h].trailing + strawPrecluster_[i][g][1][j].trailing) / 2;
-										}
-										else {
+										} else {
 											if (strawPrecluster_[i][g][0][h].trailing <= -200) {
 												trailingCluster = strawPrecluster_[i][g][1][j].trailing;
-											}
-											else {
+											} else {
 												trailingCluster = strawPrecluster_[i][g][0][h].trailing;
 											}
 										}
@@ -585,13 +573,11 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 											strawPrecluster_[i][g][0][h].used = 1;
 											strawPrecluster_[i][g][1][j].used = 1;
 										}
-									}
-									else {
+									} else {
 										if (!g || g == 2) {
 											positionH = strawPrecluster_[i][g][0][h].position - strawPrecluster_[i][g][0][h].wiredistance;
 											positionJ = strawPrecluster_[i][g][1][j].position + strawPrecluster_[i][g][1][j].wiredistance;
-										}
-										else {
+										} else {
 											positionH = strawPrecluster_[i][g][0][h].position + strawPrecluster_[i][g][0][h].wiredistance;
 											positionJ = strawPrecluster_[i][g][1][j].position - strawPrecluster_[i][g][1][j].wiredistance;
 										}
@@ -607,8 +593,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 										else {
 											if (strawPrecluster_[i][g][0][h].trailing <= -200) {
 												trailingCluster = strawPrecluster_[i][g][1][j].trailing;
-											}
-											else {
+											} else {
 												trailingCluster = strawPrecluster_[i][g][0][h].trailing;
 											}
 										}
@@ -631,8 +616,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 										if (!g || g == 2) {
 											positionH = strawPrecluster_[i][g][0][h].position - strawPrecluster_[i][g][0][h].wiredistance;
 											positionJ = strawPrecluster_[i][g][1][j].position + strawPrecluster_[i][g][1][j].wiredistance;
-										}
-										else {
+										} else {
 											positionH = strawPrecluster_[i][g][0][h].position + strawPrecluster_[i][g][0][h].wiredistance;
 											positionJ = strawPrecluster_[i][g][1][j].position - strawPrecluster_[i][g][1][j].wiredistance;
 										}
@@ -662,13 +646,11 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 											strawPrecluster_[i][g][0][h].used = 1;
 											strawPrecluster_[i][g][1][j].used = 1;
 										}
-									}
-									else {
+									} else {
 										if (!g || g == 2) {
 											positionH = strawPrecluster_[i][g][0][h].position + strawPrecluster_[i][g][0][h].wiredistance;
 											positionJ = strawPrecluster_[i][g][1][j].position - strawPrecluster_[i][g][1][j].wiredistance;
-										}
-										else {
+										} else {
 											positionH = strawPrecluster_[i][g][0][h].position - strawPrecluster_[i][g][0][h].wiredistance;
 											positionJ = strawPrecluster_[i][g][1][j].position + strawPrecluster_[i][g][1][j].wiredistance;
 										}
@@ -684,8 +666,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 										else {
 											if (strawPrecluster_[i][g][0][h].trailing <= -200) {
 												trailingCluster = strawPrecluster_[i][g][1][j].trailing;
-											}
-											else {
+											} else {
 												trailingCluster = strawPrecluster_[i][g][0][h].trailing;
 											}
 										}
@@ -1306,8 +1287,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 							if (tempNHitC >= MAX_N_HIT_C) {
 								return StrawAlgo::abortProcessing(l1Info);
 							}
-						}
-						else //se è gia stata usata si crea un nuovo tracklet con la nuova camera al posto di quell'altra (se soddisfa dei requisiti)
+						} else //se è gia stata usata si crea un nuovo tracklet con la nuova camera al posto di quell'altra (se soddisfa dei requisiti)
 						{
 							temp2NHitC = 0;
 							nFirstTrack++;
@@ -1319,8 +1299,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 								if (strawFirstTempTrk_[nFirstTrack - 1].camerec[j] != (int) (0X3 & (hought[a][b] >> (48 + 2 * d)))) {
 									strawFirstTempTrk_[nFirstTrack].hitc[temp2NHitC] = strawFirstTempTrk_[nFirstTrack - 1].hitc[j];
 									strawFirstTempTrk_[nFirstTrack].camerec[temp2NHitC] = strawFirstTempTrk_[nFirstTrack - 1].camerec[j];
-								}
-								else {
+								} else {
 									if (strawPointFinal_[(int) (0X3 & (hought[a][b] >> (48 + 2 * d)))][(int) (0XFF
 											& (hought[a][b] >> (8 * d)))].nViews
 											> strawPointFinal_[strawFirstTempTrk_[nFirstTrack - 1].camerec[temp2NHitC]][strawFirstTempTrk_[nFirstTrack
@@ -1328,15 +1307,13 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 										nFirstTrack--;
 										strawFirstTempTrk_[nFirstTrack].hitc[temp2NHitC] = (int) (0XFF & (hought[a][b] >> (8 * d)));
 										strawFirstTempTrk_[nFirstTrack].camerec[temp2NHitC] = (int) (0X3 & (hought[a][b] >> (48 + 2 * d)));
-									}
-									else if (strawPointFinal_[(int) (0X3 & (hought[a][b] >> (48 + 2 * d)))][(int) (0XFF
+									} else if (strawPointFinal_[(int) (0X3 & (hought[a][b] >> (48 + 2 * d)))][(int) (0XFF
 											& (hought[a][b] >> (8 * d)))].nViews
 											== strawPointFinal_[strawFirstTempTrk_[nFirstTrack - 1].camerec[temp2NHitC]][strawFirstTempTrk_[nFirstTrack
 													- 1].hitc[temp2NHitC]].nViews) {
 										strawFirstTempTrk_[nFirstTrack].hitc[temp2NHitC] = (int) (0XFF & (hought[a][b] >> (8 * d)));
 										strawFirstTempTrk_[nFirstTrack].camerec[temp2NHitC] = (int) (0X3 & (hought[a][b] >> (48 + 2 * d)));
-									}
-									else {
+									} else {
 										nFirstTrack--;
 									}
 								}
@@ -1540,24 +1517,20 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 								strawFirstTempTrk_[j].m2x = (x3 - x2) / (z3 - z2);
 								if (z0 == 0) {
 									strawFirstTempTrk_[j].m1x = (x1 - q01) / z1;
-								}
-								else {
+								} else {
 									strawFirstTempTrk_[j].m1x = (x0 - q01) / z0;
 								}
-							}
-							else if (z2 == 0 || z3 == 0) {
+							} else if (z2 == 0 || z3 == 0) {
 								q01 = x0 - z0 * (x1 - x0) / (z1 - z0);
 								q23 = q01;
 
 								strawFirstTempTrk_[j].m1x = (x1 - x0) / (z1 - z0);
 								if (z2 == 0) {
 									strawFirstTempTrk_[j].m2x = (x3 - q23) / z3;
-								}
-								else {
+								} else {
 									strawFirstTempTrk_[j].m2x = (x2 - q23) / z2;
 								}
-							}
-							else {
+							} else {
 								q01 = x0 - z0 * (x1 - x0) / (z1 - z0);
 								q23 = x2 - z2 * (x3 - x2) / (z3 - z2);
 								strawFirstTempTrk_[j].m1x = (x1 - x0) / (z1 - z0);
@@ -1711,12 +1684,10 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 					trackIntermedieTemp_q2x += strawTempTrk_[f].q2x;
 
 					strawTempTrk_[f].usato = 1;
-				}
-				else {
+				} else {
 					if (strawTempTrk_[f].ncentrali + strawTempTrk_[f].nlaterali == 4 && tempCondivise > 1) {
 						strawTempTrk_[f].usato = 1;
-					}
-					else if (strawTempTrk_[f].ncentrali + strawTempTrk_[f].nlaterali == 3 && tempCondivise > 0) {
+					} else if (strawTempTrk_[f].ncentrali + strawTempTrk_[f].nlaterali == 3 && tempCondivise > 0) {
 						strawTempTrk_[f].usato = 1;
 					}
 				}
@@ -1848,12 +1819,10 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 					trackIntermedieTemp_q2x += strawTempTrk_[f].q2x;
 
 					strawTempTrk_[f].usato = 1;
-				}
-				else {
+				} else {
 					if (trackIntermedieTemp.ncentrali == 3 && strawTempTrk_[f].ncentrali == 2 && tempCondivise > 0) {
 						strawTempTrk_[f].usato = 1;
-					}
-					else if (tempCondivise > 1) {
+					} else if (tempCondivise > 1) {
 						strawTempTrk_[f].usato = 1;
 					}
 				}
@@ -2081,7 +2050,7 @@ void StrawAlgo::writeData(L1StrawAlgo* algoPacket, uint l0MaskID, L1InfoToStorag
 //		LOG_INFO("track index " << iTrk << " momentum " << l1Info->getL1StrawTrack_P(iTrk));
 //		LOG_INFO("track index " << iTrk << " vertex " << l1Info->getL1StrawTrack_Vz(iTrk));
 		algoPacket->l1Data[iTrk] = (uint) l1Info->getL1StrawTrackVz(iTrk);
-		algoPacket->l1Data[iTrk+5] = (uint) l1Info->getL1StrawTrackP(iTrk);
+		algoPacket->l1Data[iTrk + 5] = (uint) l1Info->getL1StrawTrackP(iTrk);
 	}
 	algoPacket->l1Data[10] = l1Info->getL1StrawNTracks();
 

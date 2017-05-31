@@ -23,7 +23,8 @@ IRCSACParsConfFile::IRCSACParsConfFile() {
 //	LOG_INFO("In IRCSAC ParseConfFile");
 
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/ircsac_algorithm/config/IRCSAC.conf");
-	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/ircsac_algorithm/config/IRCSAC.2017.conf");
+//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/ircsac_algorithm/config/IRCSAC.2017.conf");
+	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/ircsac_algorithm/config/IRCSAC.2017.om.conf");
 
 	if (!fileName_.isValid())
 		LOG_ERROR("IRC SAC Config file not found");
@@ -52,7 +53,7 @@ IRCSACParsConfFile::IRCSACParsConfFile() {
 					if (fileName_.getField<string>(1) == remap) {
 						for (int jCh = 0; jCh < 16; jCh++) {
 							geoPMTMap[iCh * 16 + jCh] = fileName_.getField<int>(jCh + 2);
-							//LOG_INFO << "geoPMTMap= " << geoPMTMap[iCh * 16 + jCh]<<ENDL;
+//							LOG_INFO("geoPMTMap= " << geoPMTMap[iCh * 16 + jCh]);
 						}
 					}
 				}
