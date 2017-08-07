@@ -31,6 +31,7 @@ private:
 
        int nroChannels;
        int geoPMTMap[512];
+       std::string TriggerFile_;
 };
 
 #endif /* L1_IRCSAC_ALGORITHM_PARSCONFFILE_H_ */

@@ -16,6 +16,7 @@
 #include <string.h>
 
 #include <sys/time.h>
+#include "../../options/TriggerOptions.h"
 
 CHODParsConfFile* CHODParsConfFile::theInstance = nullptr;
 
@@ -25,7 +26,10 @@ CHODParsConfFile::CHODParsConfFile() {
 
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/chod_algorithm/config/CHOD.conf");
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/chod_algorithm/config/CHOD.2017.conf");
-	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/chod_algorithm/config/CHOD.2017.om.conf");
+	//ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/chod_algorithm/config/CHOD.2017.om.conf");
+	//TriggerFile_ = na62::TriggerOptions::GetString(OPTION_CHOD_CONFIG);
+	TriggerFile_ = "/etc/na62-trigger.d/l1/CHOD.2017.om.conf";
+	ConfFileReader fileName_(TriggerFile_);
 
 	if (!fileName_.isValid())
 		LOG_ERROR("CHOD Config file not found");

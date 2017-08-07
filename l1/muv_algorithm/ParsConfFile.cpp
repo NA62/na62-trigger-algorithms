@@ -17,6 +17,8 @@
 
 #include <sys/time.h>
 
+#include "../../options/TriggerOptions.h"
+
 MUV3ParsConfFile* MUV3ParsConfFile::theInstance = nullptr;
 
 MUV3ParsConfFile::MUV3ParsConfFile() {
@@ -25,7 +27,10 @@ MUV3ParsConfFile::MUV3ParsConfFile() {
 
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/muv_algorithm/config/MUV3.2016.conf");
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/muv_algorithm/config/MUV3.2017.conf");
-	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/muv_algorithm/config/MUV3.2017.om.conf");
+	//ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/muv_algorithm/config/MUV3.2017.om.conf");
+	//TriggerFile_ = na62::TriggerOptions::GetString(OPTION_MUV_CONFIG);
+	TriggerFile_ = "/etc/na62-trigger.d/l1/MUV3.2017.om.conf";
+	ConfFileReader fileName_(TriggerFile_);
 
 	if (!fileName_.isValid())
 		LOG_ERROR("MUV3 Config file not found");

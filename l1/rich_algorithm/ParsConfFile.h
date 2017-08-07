@@ -47,6 +47,7 @@ private:
 	string fileT0;
 	int minPMsForEvent;
 	int nCandClusteringIterations;
+	std::string TriggerFile_;
 
 };
 

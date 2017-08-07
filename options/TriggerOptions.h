@@ -22,6 +22,15 @@
 
 #define OPTION_ACTIVE_L0_MASKS (char*)"activeL0MaskIDs"
 
+//#define OPTION_CHOD_CONFIG (char*)"chodConfig"
+//#define OPTION_IRCSAC_CONFIG (char*)"ircsacConfig"
+//#define OPTION_LAV_CONFIG (char*)"lavConfig"
+//#define OPTION_MUV_CONFIG (char*)"muvConfig"
+//#define OPTION_NEWCHOD_CONFIG (char*)"newchodConfig"
+//#define OPTION_RICH_CONFIG (char*)"richConfig"
+//#define OPTION_STRAW_CONFIG (char*)"strawConfig"
+
+
 // Here you can add your Options like e.g.
 // #define OPTION_YOUR_OPTION_NAME (char*)"nameUsedAs--Flag"
 // Then add your option to the desc object in Load below
@@ -49,6 +58,24 @@ public:
 
 		(OPTION_ACTIVE_L0_MASKS, po::value<std::string>()->default_value("99"),
 				"List of Active L0 Masks to be used")
+
+//		(OPTION_CHOD_CONFIG, po::value<std::string>()->default_value("/workspace/na62-trigger-algorithms/l1/chod_algorithm/config/CHOD.2017.om.conf"),
+//				"Path of the configuration file")
+//		(OPTION_IRCSAC_CONFIG, po::value<std::string>()->default_value("/workspace/na62-trigger-algorithms/l1/ircsac_algorithm/config/IRCSAC.2017.om.conf"),
+//				"Path of the configuration file")
+////		(OPTION_LAV_CONFIG, po::value<std::string>()->default_value("/workspace/na62-trigger-algorithms/l1/lav_algorithm/config/LAV.2017.om.conf"),
+////				"LAV Path of the configuration file")
+//		(OPTION_LAV_CONFIG, po::value<std::string>()->required(),
+//				"LAV Path of the configuration file")
+//		(OPTION_MUV_CONFIG, po::value<std::string>()->default_value("/workspace/na62-trigger-algorithms/l1/muv_algorithm/config/MUV3.2017.om.conf"),
+//				"Path of the configuration file")
+//		(OPTION_NEWCHOD_CONFIG, po::value<std::string>()->default_value("/workspace/na62-trigger-algorithms/l1/newchod_algorithm/config/NewCHOD.2017.om.conf"),
+//				"Path of the configuration file")
+//		(OPTION_RICH_CONFIG, po::value<std::string>()->default_value("/workspace/na62-trigger-algorithms/l1/rich_algorithm/config/RICH.conf"),
+//				"Path of the configuration file")
+//		(OPTION_STRAW_CONFIG, po::value<std::string>()->default_value("/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer.2017.om.conf"),
+//				"Path of the configuration file")
+
 
 				/*
 				 * Add your Option here like following:

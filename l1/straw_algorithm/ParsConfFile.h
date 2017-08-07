@@ -45,6 +45,7 @@ private:
 
 	double fStationT0;
 	double fMagicT0;
+	std::string TriggerFile_;
 
 };
 

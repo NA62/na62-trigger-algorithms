@@ -31,6 +31,7 @@ private:
 
        int nroChannels;
        int geoLGMap[6144];
+       std::string TriggerFile_;
 
 };
 

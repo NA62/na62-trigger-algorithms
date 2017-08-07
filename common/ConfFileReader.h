@@ -32,12 +32,18 @@ public:
 	bool inputFailed() const;
 	bool isValid() const;
 
+	std::string getFilename(){
+		return filename_;
+	}
+
 private:
 	void skip_fields(std::istringstream& ist, const int n);
 
 	std::ifstream file;
 	std::string line;
 	bool failed;
+	std::string TriggerFile_;
+	std::string filename_;
 };
 
 // Definition of FileReader::get template

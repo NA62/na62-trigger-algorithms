@@ -15,6 +15,7 @@
 #include <string.h>
 
 #include <sys/time.h>
+#include "../../options/TriggerOptions.h"
 
 IRCSACParsConfFile* IRCSACParsConfFile::theInstance = nullptr;
 
@@ -24,7 +25,10 @@ IRCSACParsConfFile::IRCSACParsConfFile() {
 
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/ircsac_algorithm/config/IRCSAC.conf");
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/ircsac_algorithm/config/IRCSAC.2017.conf");
-	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/ircsac_algorithm/config/IRCSAC.2017.om.conf");
+	//ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/ircsac_algorithm/config/IRCSAC.2017.om.conf");
+	//TriggerFile_ = na62::TriggerOptions::GetString(OPTION_IRCSAC_CONFIG);
+	TriggerFile_ = "/etc/na62-trigger.d/l1/IRCSAC.2017.om.conf";
+	ConfFileReader fileName_(TriggerFile_);
 
 	if (!fileName_.isValid())
 		LOG_ERROR("IRC SAC Config file not found");

@@ -11,11 +11,11 @@
 #include "options/Logging.h"
 
 ConfFileReader::ConfFileReader(const char* filename) :
-		file(filename), line(), failed(false) {
+		file(filename), filename_(filename), line(), failed(false) {
 }
 
 ConfFileReader::ConfFileReader(const std::string& filename) :
-		file(filename.c_str()), line(), failed(false) {
+		file(filename.c_str()),filename_(filename) , line(), failed(false) {
 }
 
 ConfFileReader::~ConfFileReader() {

@@ -12,6 +12,7 @@
 #include <iostream>
 #include <vector>
 #include <string.h>
+#include "../../options/TriggerOptions.h"
 
 STRAWParsConfFile* STRAWParsConfFile::theInstance = nullptr;
 
@@ -21,7 +22,10 @@ STRAWParsConfFile::STRAWParsConfFile() {
 
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer_online.2015.conf");
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer_online.2017.conf");
-	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer.2017.om.conf");
+//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer.2017.om.conf");
+	//TriggerFile_ = na62::TriggerOptions::GetString(OPTION_STRAW_CONFIG);
+	TriggerFile_ = "/etc/na62-trigger.d/l1/Spectrometer.2017.om.conf";
+	ConfFileReader fileName_(TriggerFile_);
 
 	int maxChannelID = 0;
 	int loopChannels = 0;
@@ -104,10 +108,10 @@ void STRAWParsConfFile::readT0() {
 
 //	LOG_INFO("In STRAW ParsConfFile - T0 Mezzanines file " << fileT0);
 
-	ConfFileReader fileT0_("/workspace/na62-trigger-algorithms/l1/straw_algorithm/" + fileT0);
+	ConfFileReader fileT0_("/etc/na62-trigger.d/l1/" + fileT0);
 
 	if (!fileT0_.isValid())
-		LOG_ERROR("STRAW ROMezzanines T0 file not found");
+		LOG_ERROR("STRAW ROMezzanines T0 file: " << fileT0_.getFilename() << " not found");
 
 	int nROMezzanines = 512;
 	int nGroups = nROMezzanines / 16;

@@ -33,6 +33,7 @@ private:
 
        int nroChannels;
        int geoPMTMap[512];
+       std::string TriggerFile_;
 };
 
 #endif /* L1_MUV3_ALGORITHM_PARSCONFFILE_H_ */

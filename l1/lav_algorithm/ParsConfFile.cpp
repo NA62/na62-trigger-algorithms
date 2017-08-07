@@ -14,6 +14,7 @@
 #include <string.h>
 
 #include <sys/time.h>
+#include "../../options/TriggerOptions.h"
 
 LAVParsConfFile* LAVParsConfFile::theInstance = nullptr;
 
@@ -23,7 +24,10 @@ LAVParsConfFile::LAVParsConfFile() {
 
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/lav_algorithm/config/LAV.conf");
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/lav_algorithm/config/LAV.2017.conf");
-	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/lav_algorithm/config/LAV.2017.om.conf");
+	//ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/lav_algorithm/config/LAV.2017.om.conf");
+	//TriggerFile_ = na62::TriggerOptions::GetString(OPTION_LAV_CONFIG);
+	TriggerFile_ = "/etc/na62-trigger.d/l1/LAV.2017.om.conf";
+	ConfFileReader fileName_(TriggerFile_);
 
 	if (!fileName_.isValid())
 		LOG_ERROR("LAV Config file not found");

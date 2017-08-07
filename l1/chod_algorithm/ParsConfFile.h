@@ -35,6 +35,7 @@ private:
 
        int nroChannels;
        int geoSlabMap[512];
+       std::string TriggerFile_;
 //       double timeT0[512];
 //       string fileT0;
 

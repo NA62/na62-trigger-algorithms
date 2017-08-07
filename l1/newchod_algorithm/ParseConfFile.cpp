@@ -14,6 +14,7 @@
 #include <string.h>
 
 #include <sys/time.h>
+#include "../../options/TriggerOptions.h"
 
 NewCHODParsConfFile* NewCHODParsConfFile::theInstance = nullptr;
 
@@ -23,7 +24,10 @@ NewCHODParsConfFile::NewCHODParsConfFile() {
 
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/newchod_algorithm/config/NewCHOD.conf");
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/newchod_algorithm/config/NewCHOD.2017.conf");
-	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/newchod_algorithm/config/NewCHOD.2017.om.conf");
+//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/newchod_algorithm/config/NewCHOD.2017.om.conf");
+	//TriggerFile_ = na62::TriggerOptions::GetString(OPTION_NEWCHOD_CONFIG);
+	TriggerFile_ = "/etc/na62-trigger.d/l1/NewCHOD.2017.om.conf";
+	ConfFileReader fileName_(TriggerFile_);
 
 	if (!fileName_.isValid())
 		LOG_ERROR("NewCHOD Config file not found");
