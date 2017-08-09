@@ -116,12 +116,14 @@ void RICHMultiTrackAlgo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToSt
 
 	algoPacket->algoID = AlgoID_;
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
-//	algoPacket->qualityFlags = (l1Info->isL1LAVProcessed() << 6) | (l1Info->isL1LAVEmptyPacket() << 4) | (l1Info->isL1LAVBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
-	algoPacket->qualityFlags = (l1Info->isL1LAVProcessed() << 6) | (l1Info->isL1LAVEmptyPacket() << 4) | (l1Info->isL1LAVBadData() << 2)
-			| ((uint) l1Info->getL1LAVTrgWrd(l0MaskID));
-
+	/*
+	 * TODO: to be completed
+	 */
+	//algoPacket->qualityFlags = l1Info->followExampleFromOtherAlgo();
+	algoPacket->qualityFlags = 0;
 	//algoPacket->l1Data[0] = l1Info->getSomethingRICHRelated();
 	algoPacket->l1Data[0] = 0;
+
 	if (!AlgoRefTimeSourceID_[l0MaskID]) {
 		algoPacket->l1Data[1] = l1Info->getL1RefTimeL0TP();
 	} else if (AlgoRefTimeSourceID_[l0MaskID] == 1) {
