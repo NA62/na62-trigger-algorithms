@@ -157,7 +157,7 @@ void IRC_SACAlgo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* 
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
 //	algoPacket->qualityFlags = (l1Info->isL1IRCSACProcessed() << 6) | (l1Info->isL1IRCSACEmptyPacket() << 4) | (l1Info->isL1IRCSACBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
 	algoPacket->qualityFlags = (l1Info->isL1IRCSACProcessed() << 6) | (l1Info->isL1IRCSACEmptyPacket() << 4)
-			| (l1Info->isL1IRCSACBadData() << 2) | ((uint) l1Info->getL1IRCSACTrgWrd());
+			| (l1Info->isL1IRCSACBadData() << 2) | ((uint) l1Info->getL1IRCSACTrgWrd(l0MaskID));
 
 	algoPacket->l1Data[0] = l1Info->getL1IRCSACNHits();
 	if (!AlgoRefTimeSourceID_[l0MaskID]) {

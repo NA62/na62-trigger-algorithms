@@ -172,7 +172,7 @@ void CHODAlgo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1I
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
 //	algoPacket->qualityFlags = (l1Info->isL1CHODProcessed() << 6) | (l1Info->isL1CHODEmptyPacket() << 4) | (l1Info->isL1CHODBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
 	algoPacket->qualityFlags = (l1Info->isL1CHODProcessed() << 6) | (l1Info->isL1CHODEmptyPacket() << 4) | (l1Info->isL1CHODBadData() << 2)
-			| ((uint) l1Info->getL1CHODTrgWrd());
+			| ((uint) l1Info->getL1CHODTrgWrd(l0MaskID));
 
 	algoPacket->l1Data[0] = (uint) l1Info->getL1CHODNHits();
 	if (!AlgoRefTimeSourceID_[l0MaskID]) {

@@ -158,7 +158,7 @@ void NewCHODAlgo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* 
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
 //	algoPacket->qualityFlags = (l1Info->isL1NewCHODProcessed() << 6) | (l1Info->isL1NewCHODEmptyPacket() << 4) | (l1Info->isL1NewCHODBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
 	algoPacket->qualityFlags = (l1Info->isL1NewCHODProcessed() << 6) | (l1Info->isL1NewCHODEmptyPacket() << 4)
-			| (l1Info->isL1NewCHODBadData() << 2) | ((uint) l1Info->getL1NewCHODTrgWrd());
+			| (l1Info->isL1NewCHODBadData() << 2) | ((uint) l1Info->getL1NewCHODTrgWrd(l0MaskID));
 
 	algoPacket->l1Data[0] = (uint) l1Info->getL1NewCHODNHits();
 	if (!AlgoRefTimeSourceID_[l0MaskID]) {

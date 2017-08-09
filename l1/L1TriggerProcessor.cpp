@@ -111,7 +111,6 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 	L0MaskIDs_ = TriggerOptions::GetIntList(OPTION_ACTIVE_L0_MASKS);
 	NumberOfEnabledL0Masks_ = L0MaskIDs_.size();
 
-
 	if (NumberOfEnabledL0Masks_ == 1 && L0MaskIDs_[0] == 99) { //Default value
 		NumberOfEnabledL0Masks_ = 0;
 		LOG_INFO("No Mask provided from the run control");
@@ -308,7 +307,7 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 			if (AlgoEnableMask_[l0Mask] & (1 << i)) {
 				NumToAlgoID_[num][algoNum] = i;
 				AlgoIDToNum_[num][i] = algoNum;
-//				LOG_INFO("Initialization of Enabled Algos " << AlgoIDToNum[num][i] << " " << NumToAlgoID[num][algoNum]);
+//				LOG_INFO("Initialization of Enabled Algos " << AlgoIDToNum_[num][i] << " " << NumToAlgoID_[num][algoNum]);
 				algoNum++;
 			}
 		}
@@ -466,10 +465,10 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 
 						if (AlgoLogicMask_[i] & (1 << (uint) ChodAlgorithmId_)) {
 							l1TriggerTmp |= (chodTrigger << (uint) ChodAlgorithmId_);
-							l1Info.setL1CHODTrgWrd(chodTrigger);
+							l1Info.setL1CHODTrgWrd(i,chodTrigger);
 						} else {
 							l1TriggerTmp |= (not chodTrigger << (uint) ChodAlgorithmId_);
-							l1Info.setL1CHODTrgWrd(not chodTrigger);
+							l1Info.setL1CHODTrgWrd(i,not chodTrigger);
 						}
 //						printf("L1TriggerProcessor.cpp: tmpTrigger %d\n", l1TriggerTmp);
 					}
@@ -491,10 +490,10 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 
 						if (AlgoLogicMask_[i] & (1 << (uint) CedarAlgorithmId_)) {
 							l1TriggerTmp |= (cedarTrigger << (uint) CedarAlgorithmId_);
-							l1Info.setL1KTAGTrgWrd(cedarTrigger);
+							l1Info.setL1KTAGTrgWrd(i,cedarTrigger);
 						} else {
 							l1TriggerTmp |= (not cedarTrigger << (uint) CedarAlgorithmId_);
-							l1Info.setL1KTAGTrgWrd(not cedarTrigger);
+							l1Info.setL1KTAGTrgWrd(i,not cedarTrigger);
 						}
 //						printf("L1TriggerProcessor.cpp: tmpTrigger %d\n", l1TriggerTmp);
 					}
@@ -516,10 +515,10 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 
 						if (AlgoLogicMask_[i] & (1 << (uint) LavAlgorithmId_)) {
 							l1TriggerTmp |= (lavTrigger << (uint) LavAlgorithmId_);
-							l1Info.setL1LAVTrgWrd(lavTrigger);
+							l1Info.setL1LAVTrgWrd(i,lavTrigger);
 						} else {
 							l1TriggerTmp |= (not lavTrigger << (uint) LavAlgorithmId_);
-							l1Info.setL1LAVTrgWrd(not lavTrigger);
+							l1Info.setL1LAVTrgWrd(i,not lavTrigger);
 						}
 //						printf("L1TriggerProcessor.cpp: tmpTrigger %d\n", l1TriggerTmp);
 					}
@@ -541,10 +540,10 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 
 						if (AlgoLogicMask_[i] & (1 << (uint) IrcSacAlgorithmId_)) {
 							l1TriggerTmp |= (ircsacTrigger << (uint) IrcSacAlgorithmId_);
-							l1Info.setL1IRCSACTrgWrd(ircsacTrigger);
+							l1Info.setL1IRCSACTrgWrd(i,ircsacTrigger);
 						} else {
 							l1TriggerTmp |= (not ircsacTrigger << (uint) IrcSacAlgorithmId_);
-							l1Info.setL1IRCSACTrgWrd(not ircsacTrigger);
+							l1Info.setL1IRCSACTrgWrd(i,not ircsacTrigger);
 						}
 //						printf("L1TriggerProcessor.cpp: tmpTrigger %d\n", l1TriggerTmp);
 					}
@@ -574,10 +573,10 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 
 						if (AlgoLogicMask_[i] & (1 << (uint) StrawAlgorithmId_)) {
 							l1TriggerTmp |= (strawTrigger << (uint) StrawAlgorithmId_);
-							l1Info.setL1StrawTrgWrd(strawTrigger);
+							l1Info.setL1StrawTrgWrd(i,strawTrigger);
 						} else {
 							l1TriggerTmp |= (not strawTrigger << (uint) StrawAlgorithmId_);
-							l1Info.setL1StrawTrgWrd(not strawTrigger);
+							l1Info.setL1StrawTrgWrd(i,not strawTrigger);
 						}
 //						printf("L1TriggerProcessor.cpp: tmpTrigger %d\n", l1TriggerTmp);
 					}
@@ -609,10 +608,10 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 
 						if (AlgoLogicMask_[i] & (1 << (uint) MuvAlgorithmId_)) {
 							l1TriggerTmp |= (muvTrigger << (uint) MuvAlgorithmId_);
-							l1Info.setL1MUV3TrgWrd(muvTrigger);
+							l1Info.setL1MUV3TrgWrd(i,muvTrigger);
 						} else {
 							l1TriggerTmp |= (not muvTrigger << (uint) MuvAlgorithmId_);
-							l1Info.setL1MUV3TrgWrd(not muvTrigger);
+							l1Info.setL1MUV3TrgWrd(i,not muvTrigger);
 						}
 //						printf("L1TriggerProcessor.cpp: tmpTrigger %d\n", l1TriggerTmp);
 					}
@@ -634,10 +633,10 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 
 						if (AlgoLogicMask_[i] & (1 << (uint) NewChodAlgorithmId_)) {
 							l1TriggerTmp |= (newchodTrigger << (uint) NewChodAlgorithmId_);
-							l1Info.setL1NewCHODTrgWrd(newchodTrigger);
+							l1Info.setL1NewCHODTrgWrd(i,newchodTrigger);
 						} else {
 							l1TriggerTmp |= (not newchodTrigger << (uint) NewChodAlgorithmId_);
-							l1Info.setL1NewCHODTrgWrd(not newchodTrigger);
+							l1Info.setL1NewCHODTrgWrd(i,not newchodTrigger);
 						}
 //						printf("L1TriggerProcessor.cpp: tmpTrigger %d\n", l1TriggerTmp);
 					}

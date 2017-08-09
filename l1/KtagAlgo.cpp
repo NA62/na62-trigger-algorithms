@@ -179,7 +179,7 @@ void KtagAlgo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1I
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
 //	algoPacket->qualityFlags = (l1Info->isL1KTAGProcessed() << 6) | (l1Info->isL1KTAGEmptyPacket() << 4) | (l1Info->isL1KTAGBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
 	algoPacket->qualityFlags = (l1Info->isL1KTAGProcessed() << 6) | (l1Info->isL1KTAGEmptyPacket() << 4) | (l1Info->isL1KTAGBadData() << 2)
-			| ((uint) l1Info->getL1KTAGTrgWrd());
+			| ((uint) l1Info->getL1KTAGTrgWrd(l0MaskID));
 
 	if (!AlgoRefTimeSourceID_[l0MaskID]) {
 		algoPacket->l1Data[0] = l1Info->getL1KTAGNSectorsL0TP();

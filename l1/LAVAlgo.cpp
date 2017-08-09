@@ -179,7 +179,7 @@ void LAVAlgo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1In
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
 //	algoPacket->qualityFlags = (l1Info->isL1LAVProcessed() << 6) | (l1Info->isL1LAVEmptyPacket() << 4) | (l1Info->isL1LAVBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
 	algoPacket->qualityFlags = (l1Info->isL1LAVProcessed() << 6) | (l1Info->isL1LAVEmptyPacket() << 4) | (l1Info->isL1LAVBadData() << 2)
-			| ((uint) l1Info->getL1LAVTrgWrd());
+			| ((uint) l1Info->getL1LAVTrgWrd(l0MaskID));
 
 	algoPacket->l1Data[0] = l1Info->getL1LAVNHits();
 	if (!AlgoRefTimeSourceID_[l0MaskID]) {
