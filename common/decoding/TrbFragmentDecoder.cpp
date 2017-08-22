@@ -23,6 +23,7 @@ TrbFragmentDecoder::TrbFragmentDecoder() :
 	time = 0;
 	nEdges_tot = 0;
 	isBadFrag_ = false;
+	sourceSubId_ = UINT_FAST16_MAX;
 }
 
 TrbFragmentDecoder::~TrbFragmentDecoder() {
@@ -79,6 +80,8 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 //	LOG_INFO("L0 trigger type " << (uint) boardHeader->triggerType);
 //	LOG_INFO("Source (Tel62) sub-ID " << (uint) boardHeader->sourceSubID);
 //	LOG_INFO("Format " << (uint) boardHeader->format);
+
+	sourceSubId_ = (uint_fast16_t) boardHeader->sourceSubID;
 
 	const uint nFPGAs = boardHeader->getNumberOfFPGAs();
 //	LOG_INFO("Number of FPGAs (from boardHeader) " << nFPGAs);

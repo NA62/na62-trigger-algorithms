@@ -80,6 +80,8 @@ uint_fast8_t LAVAlgo::processLAVTrigger(uint l0MaskID, DecoderHandler& decoder, 
 	for (TrbFragmentDecoder* lavPacket : decoder.getLAVDecoderRange()) {
 //	LOG_INFO("First time check (inside iterator) " << time[1].tv_sec << " " << time[1].tv_usec);
 
+		if(lavPacket->getSourceSubId() == 0) continue;
+
 		if (!lavPacket->isReady() || lavPacket->isBadFragment()) {
 			LOG_ERROR("LAV: This looks like a Bad Packet!!!! ");
 			l1Info->setL1LAVBadData();
@@ -102,7 +104,7 @@ uint_fast8_t LAVAlgo::processLAVTrigger(uint l0MaskID, DecoderHandler& decoder, 
 
 		uint numberOfEdgesOfCurrentBoard = lavPacket->getNumberOfEdgesStored();
 
-//		LOG_INFO("LAV: Tel62 ID " << lavPacket->getFragmentNumber() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard);
+//		LOG_INFO("LAV: Fragment ID " << lavPacket->getFragmentNumber() << " Tel62 ID " << lavPacket->getSourceSubId() << " - Number of Edges found " << numberOfEdgesOfCurrentBoard);
 
 		for (uint iEdge = 0; iEdge != numberOfEdgesOfCurrentBoard; iEdge++) {
 //			LOG_INFO("Edge " << iEdge << " ID " << edgeIsLeading[iEdge]);

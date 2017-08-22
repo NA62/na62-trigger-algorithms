@@ -156,6 +156,13 @@ public:
 		return fragmentNumber_;
 	}
 
+	/**
+	 * Returns the readout board ID of the fragment decoded by this object
+	 */
+	inline const uint_fast16_t getSourceSubId() const {
+		return sourceSubId_;
+	}
+
 	void setDataSource(const l0::Subevent* subevent,
 			uint_fast16_t fragmentNumber) {
 		subevent_ = subevent;
@@ -181,6 +188,7 @@ private:
 
 	const l0::Subevent* subevent_;
 	uint_fast16_t fragmentNumber_;
+	uint_fast16_t sourceSubId_;
 };
 
 }
