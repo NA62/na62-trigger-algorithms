@@ -79,6 +79,9 @@ uint_fast8_t LAVAlgo::processLAVTrigger(uint l0MaskID, DecoderHandler& decoder, 
 
 	for (TrbFragmentDecoder* lavPacket : decoder.getLAVDecoderRange()) {
 //	LOG_INFO("First time check (inside iterator) " << time[1].tv_sec << " " << time[1].tv_usec);
+		if (lavPacket->getFragmentNumber() == 0) {
+			continue;
+		}
 
 		if (!lavPacket->isReady() || lavPacket->isBadFragment()) {
 			LOG_ERROR("LAV: This looks like a Bad Packet!!!! ");
