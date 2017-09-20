@@ -8,4 +8,4 @@
 /llvm3.5/
 *~
 /Debug_ERS/
-.settings/language.settings.xml
+.settings/*
