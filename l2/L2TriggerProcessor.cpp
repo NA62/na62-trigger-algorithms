@@ -110,6 +110,17 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 		writeData(event, l2Trigger);
 		return l2Trigger;
 	}
+
+	/*
+	 * Check if the event (PERIODICS INCLUDED) fulfills the reduction option
+	 *
+	 */
+	if (ReductionFactor_ && (L2InputEvents_ % ReductionFactor_ != 0)) {
+		return 0;
+	}
+	L2InputReducedEvents_.fetch_add(1, std::memory_order_relaxed);
+
+
 	if (event->isPulserGTKTriggerEvent() || event->isPeriodicTriggerEvent() || event->isL2Bypassed() || bypassEvent()) {
 		isL2Bypassed = true;
 		l2Trigger = ((uint) l2GlobalFlagTrigger << 7) | ((l2MaskFlagTrigger != 0) << 6) | (isL2Bypassed << 5) | (isAllL2AlgoDisable << 4)
@@ -122,10 +133,10 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 	 * Check if the event fulfills the reduction option
 	 *
 	 */
-	if (ReductionFactor_ && (L2InputEvents_ % ReductionFactor_ != 0))
-		return 0;
-
-	L2InputReducedEvents_.fetch_add(1, std::memory_order_relaxed);
+	//if (ReductionFactor_ && (L2InputEvents_ % ReductionFactor_ != 0)) {
+	//	return 0;
+	//}
+	//L2InputReducedEvents_.fetch_add(1, std::memory_order_relaxed);
 
 	/*
 	 * The event is ready to be processed
