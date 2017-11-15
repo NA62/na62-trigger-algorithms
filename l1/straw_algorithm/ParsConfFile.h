@@ -8,12 +8,6 @@
 #ifndef L1_STRAW_ALGORITHM_PARSCONFFILE_H_
 #define L1_STRAW_ALGORITHM_PARSCONFFILE_H_
 
-#include "../../common/ConfFileReader.h"
-
-#include <iostream>
-#include <vector>
-#include <string>
-
 using namespace std;
 
 class STRAWParsConfFile {

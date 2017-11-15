@@ -9,15 +9,12 @@
 #include "ParsConfFile.h"
 
 #include <options/Logging.h>
-#include <iostream>
-#include <vector>
-#include <string.h>
+#include <string>
 
 STRAWParsConfFile* STRAWParsConfFile::theInstance = nullptr;
 
 STRAWParsConfFile::STRAWParsConfFile() {
 
-//	LOG_INFO("In STRAW ParsConfFile");
 
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer_online.2015.conf");
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/straw_algorithm/config/Spectrometer_online.2017.conf");

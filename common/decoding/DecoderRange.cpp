@@ -1,6 +1,13 @@
 #include "DecoderRange.h"
 
+
+
+#ifndef ONLINEHLT
 #include "DecoderHandler.h"
+#else
+#include "OfflineDecoderHandler.h"
+#endif
+
 #include "TrbFragmentDecoder.h"
 #include "SrbFragmentDecoder.h"
 

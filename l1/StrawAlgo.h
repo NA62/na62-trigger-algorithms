@@ -14,11 +14,17 @@
 #include <cstdint>
 #include <mutex>
 
+#ifndef ONLINEHLT
 #include "../common/decoding/DecoderHandler.h"
+#else
+#include "../common/decoding/OfflineDecoderHandler.h"
+#endif
+
+#include <l1/L1InfoToStorage.h>
 #include "straw_algorithm/ParsConfFile.h"
-#include "l1/L1InfoToStorage.h"
 #include "../struct/HLTConfParams.h"
 #include "L1Fragment.h"
+
 #include "straw_algorithm/Track.h"
 #include "straw_algorithm/Point.h"
 #include "straw_algorithm/Cluster.h"

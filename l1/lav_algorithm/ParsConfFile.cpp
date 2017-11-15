@@ -5,21 +5,17 @@
  *      Author: romano
  */
 
-#include "../../common/ConfFileReader.h"
+
 #include "ParsConfFile.h"
 
-#include <iostream>
-#include <vector>
-#include <options/Logging.h>
-#include <string.h>
+#include <string>
 
-#include <sys/time.h>
+#include <options/Logging.h>
+#include "../../common/ConfFileReader.h"
 
 LAVParsConfFile* LAVParsConfFile::theInstance = nullptr;
 
 LAVParsConfFile::LAVParsConfFile() {
-
-//	LOG_INFO("In LAV ParseConfFile");
 
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/lav_algorithm/config/LAV.conf");
 //	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/lav_algorithm/config/LAV.2017.conf");

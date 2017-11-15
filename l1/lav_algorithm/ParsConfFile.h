@@ -8,12 +8,6 @@
 #ifndef L1_LAV_ALGORITHM_PARSCONFFILE_H_
 #define L1_LAV_ALGORITHM_PARSCONFFILE_H_
 
-#include "../../common/ConfFileReader.h"
-
-#include <iostream>
-#include <vector>
-#include <string>
-
 using namespace std;
 
 class LAVParsConfFile {
@@ -33,8 +27,5 @@ private:
        int geoLGMap[6144];
 
 };
-
-
-
 
 #endif /* L1_LAV_ALGORITHM_PARSCONFFILE_H_ */

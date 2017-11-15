@@ -11,8 +11,12 @@
 #include <stdlib.h>
 #include <cstdint>
 #include <options/Logging.h>
-#include <l0/MEPFragment.h>
+
+#ifndef ONLINEHLT
 #include <l0/Subevent.h>
+#else
+#include <l0/offline/Subevent.h>
+#endif
 
 namespace na62 {
 
