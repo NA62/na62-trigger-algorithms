@@ -56,7 +56,20 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	const l0::MEPFragment* const trbDataFragment = subevent_->getFragment(
 			fragmentNumber_);
 
-//	LOG_INFO("trbData " << trbDataFragment->getPayloadLength());
+	//LOG_INFO("trbDataleght " << trbDataFragment->getPayloadLength());
+	LOG_INFO("eventLength_   : " << trbDataFragment->getDataWithHeaderLength() );
+	//LOG_INFO("eventNumberLSB_: " << trbDataFragment->rawData->eventNumberLSB_ );
+	LOG_INFO("timestamp_     : " << trbDataFragment->getTimestamp());
+
+
+
+
+
+
+
+
+
+
 	if (!trbDataFragment->getPayloadLength()) {
 		isBadFrag_ = true;
 		return;
@@ -69,7 +82,7 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	const int maxNwords = (trbDataFragment->getPayloadLength() / 4) - 2;
 
 	if (maxNwords <= 0) {
-		LOG_ERROR("The packet payload is not as expected !!!");
+		LOG_ERROR("The packet payload is not as expected! maxNWords: " << maxNwords);
 		//throw NA62Error("The packet payload is not as expected !!!");
 		isBadFrag_ = true;
 		return;

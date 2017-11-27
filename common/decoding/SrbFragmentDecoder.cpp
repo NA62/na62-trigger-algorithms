@@ -69,7 +69,7 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	const uint maxNwords = (srbDataFragment->getPayloadLength() / 4);
 
 	if (maxNwords <= 0) {
-		LOG_ERROR("The packet payload is not as expected !!!");
+		LOG_ERROR("The packet payload is not as expected! maxNWords: " << maxNwords);
 		//throw NA62Error("The packet payload is not as expected !!!");
 		isBadFrag_ = true;
 		return;
