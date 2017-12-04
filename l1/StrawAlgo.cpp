@@ -19,10 +19,10 @@
 
 #include "L1TriggerProcessor.h"
 
-#include "../common/decoding/SrbFragmentDecoder.h"
-#include "straw_algorithm/ParsConfFile.h"
-#include "straw_algorithm/ChannelID.h"
-#include "straw_algorithm/DigiManager.h"
+#include <common/decoding/SrbFragmentDecoder.h>
+#include <l1/straw_algorithm/STRAWParsConfFile.h>
+#include <l1/straw_algorithm/ChannelID.h>
+#include <l1/straw_algorithm/DigiManager.h>
 
 #define MAX_N_HIT_C 6
 #define MAX_N_HIT_L 6

@@ -17,7 +17,7 @@
 #endif
 #include <options/Logging.h>
 
-#include "../common/decoding/TrbFragmentDecoder.h"
+#include <common/decoding/TrbFragmentDecoder.h>
 
 namespace na62 {
 

@@ -31,10 +31,13 @@ public:
 
 	bool inputFailed() const;
 	bool isValid() const;
+	std::string inline getFilename() {
+		return filename;
+	}
 
 private:
 	void skip_fields(std::istringstream& ist, const int n);
-
+	std::string filename;
 	std::ifstream file;
 	std::string line;
 	bool failed;
