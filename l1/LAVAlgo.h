@@ -13,15 +13,15 @@
 #include <cstdint>
 
 #ifndef ONLINEHLT
-#include "../common/decoding/DecoderHandler.h"
+#include <common/decoding/DecoderHandler.h>
 #else
-#include "../common/decoding/OfflineDecoderHandler.h"
+#include <common/decoding/OfflineDecoderHandler.h>
 #endif
 
 #include <l1/L1InfoToStorage.h>
-#include "L1Fragment.h"
-#include "lav_algorithm/ParsConfFile.h"
-#include "../struct/HLTConfParams.h"
+#include <l1/L1Fragment.h>
+#include <l1/lav_algorithm/LAVParsConfFile.h>
+#include <struct/HLTConfParams.h>
 
 #define maxNROchs 512
 
