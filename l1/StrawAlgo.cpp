@@ -2058,5 +2058,9 @@ void StrawAlgo::writeData(L1StrawAlgo* algoPacket, uint l0MaskID, L1InfoToStorag
 
 }
 
+Track& StrawAlgo::getTracks(int n) {
+	return strawTrkIntermedie_[n];
+}
+
 } /* namespace na62 */
 
