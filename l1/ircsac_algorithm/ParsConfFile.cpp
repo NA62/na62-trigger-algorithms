@@ -6,8 +6,10 @@
  *      Author: lorenzaiacobuzio
  */
 
-#include "../../common/ConfFileReader.h"
+#include <common/ConfFileReader.h>
 #include "ParsConfFile.h"
+#include <l1/ConfPath.h>
+
 
 #include <iostream>
 #include <vector>
@@ -21,10 +23,7 @@ IRCSACParsConfFile* IRCSACParsConfFile::theInstance = nullptr;
 IRCSACParsConfFile::IRCSACParsConfFile() {
 
 //	LOG_INFO("In IRCSAC ParseConfFile");
-
-//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/ircsac_algorithm/config/IRCSAC.conf");
-//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/ircsac_algorithm/config/IRCSAC.2017.conf");
-	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/ircsac_algorithm/config/IRCSAC.2017.om.conf");
+	ConfFileReader fileName_(IRCSAC_CONFIG_FILE);
 
 	if (!fileName_.isValid())
 		LOG_ERROR("IRC SAC Config file not found");

@@ -5,8 +5,9 @@
  *      Author: lorenza
  */
 
-#include "../../common/ConfFileReader.h"
+#include <common/ConfFileReader.h>
 #include "ParsConfFile.h"
+#include <l1/ConfPath.h>
 
 #include <iostream>
 #include <vector>
@@ -21,9 +22,7 @@ NewCHODParsConfFile::NewCHODParsConfFile() {
 
 //	LOG_INFO("In NewCHOD ParseConfFile");
 
-//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/newchod_algorithm/config/NewCHOD.conf");
-//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/newchod_algorithm/config/NewCHOD.2017.conf");
-	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/newchod_algorithm/config/NewCHOD.2017.om.conf");
+	ConfFileReader fileName_(NEWCHOD_CONFIG_FILE);
 
 	if (!fileName_.isValid())
 		LOG_ERROR("NewCHOD Config file not found");
