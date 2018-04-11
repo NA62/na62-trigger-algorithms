@@ -11,8 +11,14 @@
 #include <stdlib.h>
 #include <cstdint>
 #include <options/Logging.h>
-#include <l0/MEPFragment.h>
+
+#ifndef ONLINEHLT
 #include <l0/Subevent.h>
+#else
+#include <l0/offline/Subevent.h>
+#endif
+
+//// Check if this could still work for offline reprocessing
 #include <eventBuilding/SourceIDManager.h>
 
 namespace na62 {

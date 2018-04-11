@@ -5,16 +5,8 @@
  *      Author: romano
  */
 
-#ifndef L1_LAV_ALGORITHM_PARSCONFFILE_H_
-#define L1_LAV_ALGORITHM_PARSCONFFILE_H_
-
-#include "../../common/ConfFileReader.h"
-
-#include <iostream>
-#include <vector>
-#include <string>
-
-using namespace std;
+#ifndef L1_LAV_ALGORITHM_LAVPARSCONFFILE_H_
+#define L1_LAV_ALGORITHM_LAVPARSCONFFILE_H_
 
 class LAVParsConfFile {
 public:
@@ -34,7 +26,4 @@ private:
 
 };
 
-
-
-
-#endif /* L1_LAV_ALGORITHM_PARSCONFFILE_H_ */
+#endif /* L1_LAV_ALGORITHM_LAVPARSCONFFILE_H_ */

@@ -8,20 +8,18 @@
 
 #include "KtagAlgo.h"
 
-#include <eventBuilding/Event.h>
-#include <eventBuilding/SourceIDManager.h>
-#include <l0/MEPFragment.h>
-#include <l0/Subevent.h>
-#include <options/Logging.h>
 #include <string.h>
 #include <math.h>
-
 #include <sys/time.h>
 
-#include "../common/decoding/DecoderRange.h"
-#include "../common/decoding/DecoderHandler.h"
-#include "../common/decoding/TrbFragmentDecoder.h"
-#include "L1TriggerProcessor.h"
+#ifndef ONLINEHLT
+#include <l0/Subevent.h>
+#else
+#include <l0/offline/Subevent.h>
+#endif
+#include <options/Logging.h>
+#include <common/decoding/TrbFragmentDecoder.h>
+
 
 namespace na62 {
 

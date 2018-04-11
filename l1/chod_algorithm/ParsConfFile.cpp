@@ -7,8 +7,9 @@
  *      Author: romano
  */
 
-#include "../../common/ConfFileReader.h"
+#include <common/ConfFileReader.h>
 #include "ParsConfFile.h"
+#include <l1/ConfPath.h>
 
 #include <iostream>
 #include <vector>
@@ -23,9 +24,7 @@ CHODParsConfFile::CHODParsConfFile() {
 
 //	LOG_INFO("In CHOD ParseConfFile");
 
-//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/chod_algorithm/config/CHOD.conf");
-//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/chod_algorithm/config/CHOD.2017.conf");
-	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/chod_algorithm/config/CHOD.2017.om.conf");
+	ConfFileReader fileName_(CHOD_CONFIG_FILE);
 
 	if (!fileName_.isValid())
 		LOG_ERROR("CHOD Config file not found");

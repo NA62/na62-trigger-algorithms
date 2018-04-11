@@ -5,16 +5,10 @@
  *      Author: vfascian
  */
 
-#ifndef L1_STRAW_ALGORITHM_PARSCONFFILE_H_
-#define L1_STRAW_ALGORITHM_PARSCONFFILE_H_
+#ifndef L1_STRAW_ALGORITHM_STRAWPARSCONFFILE_H_
+#define L1_STRAW_ALGORITHM_STRAWPARSCONFFILE_H_
 
-#include "../../common/ConfFileReader.h"
-
-#include <iostream>
-#include <vector>
 #include <string>
-
-using namespace std;
 
 class STRAWParsConfFile {
 public:
@@ -40,7 +34,7 @@ private:
 	int nROChannels;
 	int geoMap[8192];
 
-	string fileT0;
+	std::string fileT0;
 	double fROMezzaninesT0[512]; //from offline - to be removed
 
 	double fStationT0;
@@ -48,4 +42,4 @@ private:
 
 };
 
-#endif /* L1_STRAW_ALGORITHM_PARSCONFFILE_H_ */
+#endif /* L1_STRAW_ALGORITHM_STRAWPARSCONFFILE_H_ */

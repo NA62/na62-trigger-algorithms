@@ -7,8 +7,11 @@
  *      Author: romano
  */
 
-#include "../../common/ConfFileReader.h"
+
 #include "ParsConfFile.h"
+
+#include <common/ConfFileReader.h>
+#include <l1/ConfPath.h>
 
 #include <iostream>
 #include <vector>
@@ -23,9 +26,7 @@ MUV3ParsConfFile::MUV3ParsConfFile() {
 
 //	LOG_INFO("In MUV3 ParseConfFile");
 
-//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/muv_algorithm/config/MUV3.2016.conf");
-//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/muv_algorithm/config/MUV3.2017.conf");
-	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/muv_algorithm/config/MUV3.2017.om.conf");
+	ConfFileReader fileName_(MUV3_CONFIG_FILE);
 
 	if (!fileName_.isValid())
 		LOG_ERROR("MUV3 Config file not found");

@@ -7,27 +7,22 @@
  */
 #include "StrawAlgo.h"
 
-#include <eventBuilding/Event.h>
-#include <eventBuilding/SourceIDManager.h>
-#include <l0/MEPFragment.h>
-#include <l0/Subevent.h>
-#include <options/Logging.h>
-#include <string.h>
-#include <math.h>
-
 #include <sys/time.h>
+
+#ifndef ONLINEHLT
+#include <l0/Subevent.h>
+#else
+#include <l0/offline/Subevent.h>
+#endif
+
+#include <options/Logging.h>
+
 #include "L1TriggerProcessor.h"
 
-#include "../common/decoding/DecoderRange.h"
-#include "../common/decoding/DecoderHandler.h"
-#include "../common/decoding/SrbFragmentDecoder.h"
-#include "straw_algorithm/ParsConfFile.h"
-#include "straw_algorithm/ChannelID.h"
-#include "straw_algorithm/DigiManager.h"
-#include "straw_algorithm/Straw.h"
-#include "straw_algorithm/Cluster.h"
-#include "straw_algorithm/Point.h"
-#include "straw_algorithm/Track.h"
+#include <common/decoding/SrbFragmentDecoder.h>
+#include <l1/straw_algorithm/STRAWParsConfFile.h>
+#include <l1/straw_algorithm/ChannelID.h>
+#include <l1/straw_algorithm/DigiManager.h>
 
 #define MAX_N_HIT_C 6
 #define MAX_N_HIT_L 6
@@ -2061,6 +2056,10 @@ void StrawAlgo::writeData(L1StrawAlgo* algoPacket, uint l0MaskID, L1InfoToStorag
 //	LOG_INFO("online TW " << (uint)algoPacket->onlineTimeWindow);
 //	LOG_INFO("Data Words " << algoPacket->l1Data[0] << " " << algoPacket->l1Data[1]);
 
+}
+
+Track& StrawAlgo::getTracks(int n) {
+	return strawTrkIntermedie_[n];
 }
 
 } /* namespace na62 */

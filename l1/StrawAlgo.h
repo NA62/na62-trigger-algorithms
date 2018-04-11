@@ -14,15 +14,21 @@
 #include <cstdint>
 #include <mutex>
 
-#include "../common/decoding/DecoderHandler.h"
-#include "straw_algorithm/ParsConfFile.h"
-#include "l1/L1InfoToStorage.h"
-#include "../struct/HLTConfParams.h"
+#ifndef ONLINEHLT
+#include <common/decoding/DecoderHandler.h>
+#else
+#include <common/decoding/OfflineDecoderHandler.h>
+#endif
+
+#include <l1/L1InfoToStorage.h>
+#include <l1/straw_algorithm/STRAWParsConfFile.h>
+#include <struct/HLTConfParams.h>
 #include "L1Fragment.h"
-#include "straw_algorithm/Track.h"
-#include "straw_algorithm/Point.h"
-#include "straw_algorithm/Cluster.h"
-#include "straw_algorithm/Straw.h"
+
+#include <l1/straw_algorithm/Track.h>
+#include <l1/straw_algorithm/Point.h>
+#include <l1/straw_algorithm/Cluster.h>
+#include <l1/straw_algorithm/Straw.h>
 
 #define MAX_N_HITS 1500
 #define MAX_N_ROCHS 512
@@ -62,6 +68,7 @@ public:
 	static float posTubNew(int chamber, int view, int plane, int jStraw);
 	static int strawAcceptance(int n, double* coordinate, int zone);
 	static void cdaVertex(const Point& qBeam, Point& qTrack, const Point& mBeam, Point& mTrack, float& cda, Point& vertex);
+	Track& getTracks(int n);
 
 private:
 	static STRAWParsConfFile* InfoSTRAW_;

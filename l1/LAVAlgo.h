@@ -12,11 +12,16 @@
 #include <sys/types.h>
 #include <cstdint>
 
-#include "../common/decoding/DecoderHandler.h"
-#include "lav_algorithm/ParsConfFile.h"
-#include "l1/L1InfoToStorage.h"
-#include "../struct/HLTConfParams.h"
-#include "L1Fragment.h"
+#ifndef ONLINEHLT
+#include <common/decoding/DecoderHandler.h>
+#else
+#include <common/decoding/OfflineDecoderHandler.h>
+#endif
+
+#include <l1/L1InfoToStorage.h>
+#include <l1/L1Fragment.h>
+#include <l1/lav_algorithm/LAVParsConfFile.h>
+#include <struct/HLTConfParams.h>
 
 #define maxNROchs 512
 

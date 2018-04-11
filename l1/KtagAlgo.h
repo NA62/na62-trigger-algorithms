@@ -13,10 +13,15 @@
 #include <sys/types.h>
 #include <cstdint>
 
-#include "../common/decoding/DecoderHandler.h"
-#include "l1/L1InfoToStorage.h"
-#include "../struct/HLTConfParams.h"
+#ifndef ONLINEHLT
+#include <common/decoding/DecoderHandler.h>
+#else
+#include <common/decoding/OfflineDecoderHandler.h>
+#endif
+
 #include "L1Fragment.h"
+#include <l1/L1InfoToStorage.h>
+#include <struct/HLTConfParams.h>
 
 namespace na62 {
 

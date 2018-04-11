@@ -5,52 +5,40 @@
  *      Author: romano
  */
 
-#include "../../common/ConfFileReader.h"
-#include "ParsConfFile.h"
 
-#include <iostream>
-#include <vector>
+#include <string>
+
 #include <options/Logging.h>
-#include <string.h>
-
-#include <sys/time.h>
+#include <common/ConfFileReader.h>
+#include <l1/ConfPath.h>
+#include "LAVParsConfFile.h"
 
 LAVParsConfFile* LAVParsConfFile::theInstance = nullptr;
 
 LAVParsConfFile::LAVParsConfFile() {
-
-//	LOG_INFO("In LAV ParseConfFile");
-
-//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/lav_algorithm/config/LAV.conf");
-//	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/lav_algorithm/config/LAV.2017.conf");
-	ConfFileReader fileName_("/workspace/na62-trigger-algorithms/l1/lav_algorithm/config/LAV.2017.om.conf");
-
-	if (!fileName_.isValid())
-		LOG_ERROR("LAV Config file not found");
+	ConfFileReader fileName_(LAV_CONFIG_FILE);
 
 	if (fileName_.isValid()) {
-
 		LOG_INFO("LAV configuration file open");
 
 		while (fileName_.nextLine()) {
-
-			if (fileName_.getField<string>(1) == "#") {
+			if (fileName_.getField<std::string>(1) == "#") {
 				continue;
 			}
-			if (fileName_.getField<string>(1) == "NROChannels=") {
+			if (fileName_.getField<std::string>(1) == "NROChannels=") {
 				nroChannels = fileName_.getField<int>(2);
 //				LOG_INFO("nroChannels " << nroChannels);
 			}
-			if (fileName_.getField<string>(1).find("ChRemap_")
-					!= string::npos) {
+			if (fileName_.getField<std::string>(1).find("ChRemap_")
+					!= std::string::npos) {
 				for (int iCh = 0; iCh < nroChannels / 16; ++iCh) {
 					char name[1000];
 					sprintf(name, "ChRemap_%04d=", iCh);
-					string remap = (string) name;
+					std::string remap = (std::string) name;
 //					LOG_INFO(remap);
 //					LOG_INFO(fileName_.getField<string>(1));
 
-					if (fileName_.getField<string>(1) == remap) {
+					if (fileName_.getField<std::string>(1) == remap) {
 						for (int jCh = 0; jCh < 16; jCh++) {
 							geoLGMap[iCh * 16 + jCh] =
 									fileName_.getField<int>(jCh + 2);
@@ -60,6 +48,8 @@ LAVParsConfFile::LAVParsConfFile() {
 				}
 			}
 		}
+	} else {
+		LOG_ERROR("LAV Config file not found");
 	}
 }
 
