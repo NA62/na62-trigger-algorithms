@@ -46,6 +46,7 @@ uint L1TriggerProcessor::NumberOfEnabledAlgos_[16];
 uint L1TriggerProcessor::NumberOfFlaggedAlgos_[16];
 uint L1TriggerProcessor::NumberOfEnabledAndFlaggedAlgos_[16];
 uint L1TriggerProcessor::MaskReductionFactor_[16];
+bool L1TriggerProcessor::MaskTimeoutFlag_[16];
 uint_fast16_t L1TriggerProcessor::AlgoEnableMask_[16];
 uint_fast16_t L1TriggerProcessor::AlgoEnableCutMask_[16];
 uint_fast16_t L1TriggerProcessor::AlgoFlagMask_[16];
@@ -127,6 +128,7 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 		NumberOfFlaggedAlgos_[i] = 0;
 		NumberOfEnabledAndFlaggedAlgos_[i] = 0;
 		MaskReductionFactor_[i] = 0;
+		MaskTimeoutFlag_[i] = 0;
 		AlgoEnableMask_[i] = 0;
 		AlgoEnableCutMask_[i] = 0;
 		AlgoFlagMask_[i] = 0;
@@ -220,6 +222,7 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 //		LOG_INFO(" number of Enabled algo " << NumberOfEnabledAlgos_[i] << " EnabledAndCut " << __builtin_popcount((uint) AlgoEnableCutMask_[i]));
 
 		if (NumberOfFlaggedAlgos_[i] != NumberOfEnabledAndFlaggedAlgos_[i]) {
+//			LOG_ERROR("This is a warning: Mismatch between NumberOfFlaggedAlgos and algoEnabledAndFlaggedMask");
 			NumberOfFlaggedAlgos_[i] = NumberOfEnabledAndFlaggedAlgos_[i];
 		}
 
@@ -294,25 +297,38 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 
 	int num = 0;
 	int algoNum = 0;
-	for (int l0Mask : L0MaskIDs_) {
-		NumToMaskID_[num] = l0Mask;
-		MaskIDToNum_[l0Mask] = num;
-//		LOG_INFO("Initialization of Enabled Masks " << MaskIDToNum_[l0Mask] << " " << NumToMaskID_[num]);
-//		LOG_INFO("is Straw enabled on mask " << l0Mask << " ? " << (uint)(StrawEnableMask_ & (1 << l0Mask)));
-		if (!(StrawEnableMask_ & (1 << l0Mask)))
-			L1DataPacketSize_ += (sizeof(L1Mask) + NumberOfEnabledAlgos_[l0Mask] * sizeof(L1Algo));
-		else
-			L1DataPacketSize_ += (sizeof(L1Mask) + (NumberOfEnabledAlgos_[l0Mask] - 1) * sizeof(L1Algo)) + sizeof(L1StrawAlgo);
-		for (int i = 0; i != 16; i++) {
-			if (AlgoEnableMask_[l0Mask] & (1 << i)) {
-				NumToAlgoID_[num][algoNum] = i;
-				AlgoIDToNum_[num][i] = algoNum;
-//				LOG_INFO("Initialization of Enabled Algos " << AlgoIDToNum_[num][i] << " " << NumToAlgoID_[num][algoNum]);
-				algoNum++;
+	int algoSumProcessIds = 0;
+	int algoTotSumProcessIds = 0;
+	if(NumberOfEnabledL0Masks_) { // fix for L1 data packet when physics triggers are disabled
+		for (int l0Mask : L0MaskIDs_) {
+			NumToMaskID_[num] = l0Mask;
+			MaskIDToNum_[l0Mask] = num;
+//			LOG_INFO("Initialization of Enabled Masks " << MaskIDToNum_[l0Mask] << " " << NumToMaskID_[num]);
+//			LOG_INFO("is Straw enabled on mask " << l0Mask << " ? " << (uint)(StrawEnableMask_ & (1 << l0Mask)));
+			if (!(StrawEnableMask_ & (1 << l0Mask)))
+				L1DataPacketSize_ += (sizeof(L1Mask) + NumberOfEnabledAlgos_[l0Mask] * sizeof(L1Algo));
+			else
+				L1DataPacketSize_ += (sizeof(L1Mask) + (NumberOfEnabledAlgos_[l0Mask] - 1) * sizeof(L1Algo)) + sizeof(L1StrawAlgo);
+			for (int i = 0; i != 16; i++) {
+				if (AlgoEnableMask_[l0Mask] & (1 << i)) {
+					NumToAlgoID_[num][algoNum] = i;
+					AlgoIDToNum_[num][i] = algoNum;
+//					LOG_INFO("Initialization of Enabled Algos " << AlgoIDToNum_[num][i] << " " << NumToAlgoID_[num][algoNum]);
+					algoSumProcessIds += AlgoProcessID_[l0Mask][NumToAlgoID_[num][algoNum]];
+					algoNum++;
+				}
 			}
+			algoTotSumProcessIds = NumberOfEnabledAlgos_[l0Mask]*(NumberOfEnabledAlgos_[l0Mask]-1)/2.;
+//			LOG_INFO("Algo Tot Sum " << algoTotSumProcessIds << " Algo Sum " << algoSumProcessIds);
+			if(algoSumProcessIds != algoTotSumProcessIds){
+				LOG_ERROR("Configuration error in trigger mask " << l0Mask << ": check algo process ordering in Run Control!!!");
+				MaskTimeoutFlag_[l0Mask] = true;
+			}
+			num++;
+			algoNum = 0;
+			algoSumProcessIds=0;
+			algoTotSumProcessIds=0;
 		}
-		num++;
-		algoNum = 0;
 	}
 //	LOG_INFO("L1 Global " << sizeof(L1Global) << " L1Mask " << sizeof(L1Mask));
 //	LOG_INFO("L1Algo " << sizeof(L1Algo) << " L1StrawAlgo " << sizeof(L1StrawAlgo));
@@ -442,6 +458,11 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 
 				if (NumberOfEnabledAndFlaggedAlgos_[i])
 					l1FlagTrigger = 1;
+
+//				if set here would flag all events triggered by the mask with the algo enabled in flagging mode
+//				while it should flag only events being processed by the specific algo enabled in flagging mode
+//				l1MaskFlagTrigger += l1FlagTrigger;
+
 				if (MaskReductionFactor_[i] && (L1InputReducedEventsPerL0Mask_[i] % MaskReductionFactor_[i] != 0))
 					isReducedEvent = 1;
 				else
@@ -449,6 +470,9 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 
 				if (!NumberOfEnabledAlgos_[i])
 					isAllL1AlgoDisable = 1;
+
+				if(MaskTimeoutFlag_[i])
+					isL1WhileTimeout = true;
 
 				while ((watchingWhileLoops != 10) && !isReducedEvent && l1ProcessID != NumberOfEnabledAlgos_[i]) {
 
@@ -824,12 +848,13 @@ void L1TriggerProcessor::writeL1Data(Event* const event, L1InfoToStorage* l1Info
 
 		nMaskWords += sizeof(L1Mask); //2 32-bit header words for each mask
 
-//		LOG_INFO("maskID " << (uint) maskPacket->maskID << " triggerWord " << (uint) maskPacket->triggerWord);
 //		LOG_INFO("numberOfEnabledAlgos " << (uint)maskPacket->numberOfEnabledAlgos);
-//		LOG_INFO("reductionFactor " << (uint)maskPacket->reductionFactor);
+//		LOG_INFO("triggerWord " << (uint) maskPacket->triggerWord);
+//		LOG_INFO("maskID " << (uint) maskPacket->maskID);
 
 //		std::bitset<8> maskFlag((uint) maskPacket->flags);
 //		LOG_INFO("Flags " << (uint)maskPacket->flags << " " << maskFlag);
+//		LOG_INFO("reductionFactor " << (uint)maskPacket->reductionFactor);
 
 		for (uint iAlgoNum = 0; iAlgoNum < NumberOfEnabledAlgos_[numToMaskID]; iAlgoNum++) {
 			if (NumToAlgoID_[iNum][iAlgoNum] == -1)
@@ -861,14 +886,27 @@ void L1TriggerProcessor::writeL1Data(Event* const event, L1InfoToStorage* l1Info
 
 					L1TriggerProcessor::writeStrawAlgoPacket(numToAlgoID, strawAlgoPacket, numToMaskID, l1Info);
 
-					refTimeSourceID_tmp = (strawAlgoPacket->qualityFlags & 0x3);
+					refTimeSourceID_tmp = (strawAlgoPacket->qualityFlags & 0x80); // due to change in data format
 					if (refTimeSourceID != refTimeSourceID_tmp)
 						refTimeSourceID = refTimeSourceID_tmp;
-				} else
+				} else {
 					std::memset(strawAlgoPacket, 0, sizeof(L1StrawAlgo));
+				}
 
 				strawAlgoPacket->numberOfWords = (sizeof(L1StrawAlgo) / 4.);
 				nMaskWords += sizeof(L1StrawAlgo);
+
+//				LOG_INFO("Number of Words " << (uint) strawAlgoPacket->numberOfWords);
+//				LOG_INFO("Algo ID " << (uint) strawAlgoPacket->algoID << " Algo ProcessID " << (uint)strawAlgoPacket->processID);
+//				LOG_INFO("Quality Flags " << (uint) strawAlgoPacket->qualityFlags << " Algo Flags " << (uint)strawAlgoPacket->algoFlags);
+
+//				std::bitset<8> algoFlag((uint) strawAlgoPacket->algoFlags);
+//				std::bitset<8> qualityFlag((uint) strawAlgoPacket->qualityFlags);
+//				LOG_INFO("Quality Flags " << qualityFlag << " Algo Flags " << algoFlag);
+
+//				LOG_INFO("DS Factor " << (uint)strawAlgoPacket->downscaleFactor);
+//				LOG_INFO("Online TW " << (uint)strawAlgoPacket->onlineTimeWindow);
+//				LOG_INFO("L1 Data[0] " << (uint) strawAlgoPacket->l1Data[0] << " L1 Data[1] " << (uint)strawAlgoPacket->l1Data[1]);
 
 			} else {
 				L1Algo* algoPacket = (L1Algo*) (payload + nBlockHeaderWords + nMaskWords);
@@ -892,26 +930,28 @@ void L1TriggerProcessor::writeL1Data(Event* const event, L1InfoToStorage* l1Info
 
 					L1TriggerProcessor::writeAlgoPacket(numToAlgoID, algoPacket, numToMaskID, l1Info);
 
-					refTimeSourceID_tmp = (algoPacket->qualityFlags & 0x3);
+					refTimeSourceID_tmp = (algoPacket->qualityFlags & 0x80); // due to change in data format
 					if (refTimeSourceID != refTimeSourceID_tmp)
 						refTimeSourceID = refTimeSourceID_tmp;
-				} else
+				} else {
 					std::memset(algoPacket, 0, sizeof(L1Algo));
+				}
 
 				algoPacket->numberOfWords = (sizeof(L1Algo) / 4.);
 				nMaskWords += sizeof(L1Algo);
+
+//				LOG_INFO("Number of Words " << (uint) algoPacket->numberOfWords);
+//				LOG_INFO("Algo ID " << (uint) algoPacket->algoID << " Algo ProcessID " << (uint)algoPacket->processID);
+//				LOG_INFO("Quality Flags " << (uint) algoPacket->qualityFlags << " Algo Flags " << (uint)algoPacket->algoFlags);
+
+//				std::bitset<8> algoFlag((uint) algoPacket->algoFlags);
+//				std::bitset<8> qualityFlag((uint) algoPacket->qualityFlags);
+//				LOG_INFO("Quality Flags " << qualityFlag << " Algo Flags " << algoFlag);
+
+//				LOG_INFO("DS Factor " << (uint)algoPacket->downscaleFactor);
+//				LOG_INFO("Online TW " << (uint)algoPacket->onlineTimeWindow);
+//				LOG_INFO("L1 Data[0] " << (uint) algoPacket->l1Data[0] << " L1 Data[1] " << (uint)algoPacket->l1Data[1]);
 			}
-
-//			LOG_INFO("Algo ID " << (uint) algoPacket->algoID << " Algo ProcessID " << (uint)algoPacket->processID);
-//			LOG_INFO("Quality Flags " << (uint) algoPacket->qualityFlags << " Algo Flags " << (uint)algoPacket->algoFlags);
-
-//			std::bitset<8> algoFlag((uint) algoPacket->algoFlags);
-//			std::bitset<8> qualityFlag((uint) algoPacket->qualityFlags);
-//			LOG_INFO("Quality Flags " << qualityFlag << " Algo Flags " << algoFlag);
-
-//			LOG_INFO("Number of Words " << (uint) algoPacket->numberOfWords << " DS Factor " << (uint)algoPacket->downscaleFactor);
-//			LOG_INFO("Online TW " << (uint)algoPacket->onlineTimeWindow);
-//			LOG_INFO("L1 Data[0] " << (uint) algoPacket->l1Data[0] << " L1 Data[1] " << (uint)algoPacket->l1Data[1]);
 		}
 
 		maskPacket->referenceTimeSourceID = refTimeSourceID;

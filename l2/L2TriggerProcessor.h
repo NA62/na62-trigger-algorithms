@@ -69,6 +69,9 @@ public:
 	static inline uint GetL2AutoFlagFactor() {
 		return AutoFlagFactor_;
 	}
+	static inline uint_fast8_t GetNumberOfEnabledL0Masks() {
+		return NumberOfEnabledL0Masks_;
+	}
 
 	/**
 	 * Fills output L2 structures for merger
@@ -84,7 +87,9 @@ private:
 
 	static uint NumberOfEnabledAlgos_[16];
 	static uint NumberOfFlaggedAlgos_[16];
+	static uint NumberOfEnabledAndFlaggedAlgos_[16];
 	static uint MaskReductionFactor_[16];
+	static bool MaskTimeoutFlag_[16];
 
 	static uint_fast16_t AlgoEnableMask_[16];
 	static uint_fast16_t AlgoFlagMask_[16];

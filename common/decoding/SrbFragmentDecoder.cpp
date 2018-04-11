@@ -47,8 +47,11 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 
 	const l0::MEPFragment* const srbDataFragment = subevent_->getFragment(fragmentNumber_);
 
-	//	LOG_INFO("srbData " << srbDataFragment->getPayloadLength());
+//	LOG_INFO("SourceID " << (uint) srbDataFragment->getSourceID() << " Detector Name " << SourceIDManager::sourceIdToDetectorName((uint) srbDataFragment->getSourceID()));
+//	LOG_INFO("SourceSubID " << (uint) srbDataFragment->getSourceSubID());
+//	LOG_INFO("srbData " << srbDataFragment->getPayloadLength());
 	if (!srbDataFragment->getPayloadLength()) {
+		LOG_ERROR("DetID " << SourceIDManager::sourceIdToDetectorName((uint) srbDataFragment->getSourceID()) << " SubID " << (uint) srbDataFragment->getSourceSubID() << " : The packet payload is empty");
 		isBadFrag_ = true;
 		return;
 	}
@@ -63,7 +66,7 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	const uint maxNwords = (srbDataFragment->getPayloadLength() / 4);
 
 	if (maxNwords <= 0) {
-		LOG_ERROR("The packet payload is not as expected !!!");
+		LOG_ERROR("DetID " << SourceIDManager::sourceIdToDetectorName((uint) srbDataFragment->getSourceID()) << " SubID " << (uint) srbDataFragment->getSourceSubID() << " : The packet payload is not as expected !!!");
 		//throw NA62Error("The packet payload is not as expected !!!");
 		isBadFrag_ = true;
 		return;

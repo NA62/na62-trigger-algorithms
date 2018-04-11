@@ -62,7 +62,7 @@ uint_fast8_t LAVAlgo::processLAVTrigger(uint l0MaskID, DecoderHandler& decoder, 
 		} else
 			LOG_ERROR("LAVAlgo.cpp: Not able to use averageCHODHitTime as Reference Time even if requested!");
 	} else
-		LOG_ERROR("L1 Reference Time Source ID not recognised !!");
+		LOG_ERROR("LAVAlgo.cpp: L1 Reference Time Source ID not recognised !!");
 
 	uint nHits = 0;
 	uint nEdgesTot = 0;
@@ -175,13 +175,13 @@ uint_fast8_t LAVAlgo::processLAVTrigger(uint l0MaskID, DecoderHandler& decoder, 
 void LAVAlgo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info) {
 
 	if (AlgoID_ != algoPacket->algoID)
-		LOG_ERROR("Algo ID does not match with Algo ID already written within the packet!");
+		LOG_ERROR("LAVAlgo.cpp: Algo ID does not match with Algo ID already written within the packet!");
 
 	algoPacket->algoID = AlgoID_;
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
 //	algoPacket->qualityFlags = (l1Info->isL1LAVProcessed() << 6) | (l1Info->isL1LAVEmptyPacket() << 4) | (l1Info->isL1LAVBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
-	algoPacket->qualityFlags = (l1Info->isL1LAVProcessed() << 6) | (l1Info->isL1LAVEmptyPacket() << 4) | (l1Info->isL1LAVBadData() << 2)
-			| ((uint) l1Info->getL1LAVTrgWrd(l0MaskID));
+	algoPacket->qualityFlags = (AlgoRefTimeSourceID_[l0MaskID] << 7) | (l1Info->isL1LAVProcessed() << 6) | (l1Info->isL1LAVEmptyPacket() << 4) | (l1Info->isL1LAVBadData() << 2)
+		| ((uint) l1Info->getL1LAVTrgWrd(l0MaskID));
 
 	algoPacket->l1Data[0] = l1Info->getL1LAVNHits();
 	if (!AlgoRefTimeSourceID_[l0MaskID]) {
@@ -189,7 +189,7 @@ void LAVAlgo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1In
 	} else if (AlgoRefTimeSourceID_[l0MaskID] == 1) {
 		algoPacket->l1Data[1] = l1Info->getCHODAverageTime(); //this is a double!!!
 	} else
-		LOG_ERROR("L1 Reference Time Source ID not recognised !!");
+		LOG_ERROR("LAVAlgo.cpp: L1 Reference Time Source ID not recognised !!");
 
 	algoPacket->numberOfWords = (sizeof(L1Algo) / 4.);
 //	LOG_INFO("l0MaskID " << l0MaskID);

@@ -205,7 +205,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 		//	LOG_INFO( "Access Packets - Start " << time[3].tv_sec << " " << time[3].tv_usec );
 
 		if (!strawPacket_->isReady() || strawPacket_->isBadFragment()) {
-			LOG_ERROR("STRAWAlgo: This looks like a Bad Packet!!!! ");
+			LOG_ERROR("STRAW: This looks like a Bad Packet!!!! ");
 			l1Info->setL1StrawBadData();
 			return 0;
 		}
@@ -2043,7 +2043,7 @@ void StrawAlgo::writeData(L1StrawAlgo* algoPacket, uint l0MaskID, L1InfoToStorag
 
 	algoPacket->algoID = AlgoID_;
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
-	algoPacket->qualityFlags = (l1Info->isL1StrawProcessed() << 6) | (l1Info->isL1StrawEmptyPacket() << 4)
+	algoPacket->qualityFlags = (AlgoRefTimeSourceID_[l0MaskID] << 7) | (l1Info->isL1StrawProcessed() << 6) | (l1Info->isL1StrawEmptyPacket() << 4)
 			| (l1Info->isL1StrawBadData() << 2) | (l1Info->isL1StrawOverflow() << 1) | ((uint) l1Info->getL1StrawTrgWrd(l0MaskID));
 
 	for (uint iTrk = 0; iTrk != 5; iTrk++) {

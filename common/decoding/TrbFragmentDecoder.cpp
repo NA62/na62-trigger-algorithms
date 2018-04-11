@@ -13,6 +13,7 @@
 #include <options/Logging.h>
 #include <l0/MEPFragment.h>
 #include <l0/Subevent.h>
+#include <eventBuilding/SourceIDManager.h>
 
 namespace na62 {
 
@@ -52,8 +53,11 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	const l0::MEPFragment* const trbDataFragment = subevent_->getFragment(
 			fragmentNumber_);
 
+//	LOG_INFO("SourceID " << (uint) trbDataFragment->getSourceID() << " Detector Name " << SourceIDManager::sourceIdToDetectorName((uint) trbDataFragment->getSourceID()));
+//	LOG_INFO("SourceSubID " << (uint) trbDataFragment->getSourceSubID());
 //	LOG_INFO("trbData " << trbDataFragment->getPayloadLength());
 	if (!trbDataFragment->getPayloadLength()) {
+		LOG_ERROR("DetID " << SourceIDManager::sourceIdToDetectorName((uint) trbDataFragment->getSourceID()) << " SubID " << (uint) trbDataFragment->getSourceSubID() << " : The packet payload is empty");
 		isBadFrag_ = true;
 		return;
 	}
@@ -65,7 +69,7 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	const int maxNwords = (trbDataFragment->getPayloadLength() / 4) - 2;
 
 	if (maxNwords <= 0) {
-		LOG_ERROR("The packet payload is not as expected !!!");
+		LOG_ERROR("DetID " << SourceIDManager::sourceIdToDetectorName((uint) trbDataFragment->getSourceID()) << " SubID " << (uint) trbDataFragment->getSourceSubID() << " : The packet payload is not as expected !!!");
 		//throw NA62Error("The packet payload is not as expected !!!");
 		isBadFrag_ = true;
 		return;
@@ -86,7 +90,7 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	const uint nFPGAs = boardHeader->getNumberOfFPGAs();
 //	LOG_INFO("Number of FPGAs (from boardHeader) " << nFPGAs);
 	if (!boardHeader->fpgaFlags || nFPGAs > 4) {
-		LOG_ERROR("FPGA Flags or Number of FPGAs is not as expected !");
+		LOG_ERROR("DetID " << SourceIDManager::sourceIdToDetectorName((uint) trbDataFragment->getSourceID()) << " SubID " << (uint) trbDataFragment->getSourceSubID() << " : FPGA Flags or Number of FPGAs is not as expected !");
 		isBadFrag_ = true;
 		return;
 	}
@@ -123,7 +127,7 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 			const uint_fast16_t nWordsOfCurrentFrame =
 					(uint) frameHeader->nWords;
 			if (!nWordsOfCurrentFrame) {
-				LOG_ERROR("Number of Words in Frame is Null !" << std::hex << (int) (trbDataFragment->getSourceID()) << ":"
+				LOG_ERROR("DetID " << SourceIDManager::sourceIdToDetectorName((uint) trbDataFragment->getSourceID()) << " SubID " << (uint) trbDataFragment->getSourceSubID() << " : Number of Words in Frame is Null !" << std::hex << (int) (trbDataFragment->getSourceID()) << ":"
 				<< (int)(trbDataFragment->getSourceSubID()));
 				isBadFrag_ = true;
 				return;
@@ -184,16 +188,16 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 					&& ((nWords_tot + nFPGAs + 1)
 							!= (trbDataFragment->getPayloadLength() / 4))) {
 
-//				LOG_INFO("Frame 0 err words " << (uint) errHeader->frame0ErrWords));
-//				LOG_INFO("Frame 1 err words " << (uint) errHeader->frame1ErrWords));
-//				LOG_INFO("Number of err words " << (uint) errHeader->nErrWords));
+//				LOG_INFO("Frame 0 err words " << (uint) errHeader->frame0ErrWords);
+//				LOG_INFO("Frame 1 err words " << (uint) errHeader->frame1ErrWords);
+//				LOG_INFO("Number of err words " << (uint) errHeader->nErrWords);
 
 				/*
 				 * In 2015 DATA FORMAT error words can be present at the end of each FPGA block
 				 */
 				const uint_fast16_t nErrWords = errHeader->nErrWords;
 				if (!nErrWords) {
-					LOG_ERROR("Number of ErrWords is Null but Err Flag says otherwise!" << std::hex << (int) (trbDataFragment->getSourceID()) << ":" << (int)(trbDataFragment->getSourceSubID()));
+					LOG_ERROR("DetID " << SourceIDManager::sourceIdToDetectorName((uint) trbDataFragment->getSourceID()) << " SubID " << (uint) trbDataFragment->getSourceSubID() << " : Number of ErrWords is Null but Err Flag says otherwise!" << std::hex << (int) (trbDataFragment->getSourceID()) << ":" << (int)(trbDataFragment->getSourceSubID()));
 					isBadFrag_ = true;
 					return;
 				}
@@ -215,7 +219,7 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 			}
 		}
 	}
-//	LOG_INFO("TrbDecoder.cpp: Analysed Tel62 ID " << fragmentNumber_ << " - Number of edges found " << nEdges_tot);
+//	LOG_INFO("TrbDecoder.cpp: DetID " << SourceIDManager::sourceIdToDetectorName((uint) trbDataFragment->getSourceID()) << " SubID " << (uint) trbDataFragment->getSourceSubID() << " : Analysed Tel62 ID " << fragmentNumber_ << " - Number of edges found " << nEdges_tot);
 }
 
 }

@@ -140,6 +140,7 @@ private:
 	static uint NumberOfFlaggedAlgos_[16];
 	static uint NumberOfEnabledAndFlaggedAlgos_[16];
 	static uint MaskReductionFactor_[16];
+	static bool MaskTimeoutFlag_[16]; //flag for configuration error in trigger mask
 
 	static uint_fast16_t AlgoEnableMask_[16];
 	static uint_fast16_t AlgoEnableCutMask_[16];

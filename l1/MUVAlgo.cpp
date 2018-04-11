@@ -524,7 +524,7 @@ void MUV3Algo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1I
 	algoPacket->algoID = AlgoID_;
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
 //	algoPacket->qualityFlags = (l1Info->isL1MUV3Processed() << 6) | (l1Info->isL1MUV3EmptyPacket() << 4) | (l1Info->isL1MUV3BadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
-	algoPacket->qualityFlags = (((uint) (l1Info->isL1MUV3TriggerMultiProcessed() || l1Info->isL1MUV3TriggerLeftRightProcessed()
+	algoPacket->qualityFlags = (AlgoRefTimeSourceID_[l0MaskID] << 7) | (((uint) (l1Info->isL1MUV3TriggerMultiProcessed() || l1Info->isL1MUV3TriggerLeftRightProcessed()
 			|| l1Info->isL1MUV3TriggerNeighboursProcessed())) << 6) | (l1Info->isL1MUV3EmptyPacket() << 4)
 			| (l1Info->isL1MUV3BadData() << 2) | ((uint) l1Info->getL1MUV3TrgWrd(l0MaskID));
 

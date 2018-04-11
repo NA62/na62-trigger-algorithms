@@ -63,7 +63,7 @@ uint_fast8_t KtagAlgo::processKtagTrigger(uint l0MaskID, DecoderHandler& decoder
 		} else
 			LOG_ERROR("KtagAlgo.cpp: Not able to use averageCHODHitTime as Reference Time even if requested!");
 	} else
-		LOG_ERROR("L1 Reference Time Source ID not recognised !!");
+		LOG_ERROR("KtagAlgo.cpp: L1 Reference Time Source ID not recognised !!");
 
 	uint sectorOccupancyCHOD[8] = { 0 };
 	uint sectorOccupancyL0TP[8] = { 0 };
@@ -72,7 +72,7 @@ uint_fast8_t KtagAlgo::processKtagTrigger(uint l0MaskID, DecoderHandler& decoder
 	//TODO: chkmax need to be USED
 	DecoderRange<TrbFragmentDecoder> x = decoder.getCEDARDecoderRange();
 	if (x.begin() == x.end()) {
-		LOG_ERROR("KTAG: Empty decoder range!");
+		LOG_ERROR("CEDAR: Empty decoder range!");
 		l1Info->setL1KTAGBadData();
 		return 0;
 	}
@@ -81,7 +81,7 @@ uint_fast8_t KtagAlgo::processKtagTrigger(uint l0MaskID, DecoderHandler& decoder
 //      LOG_INFO("First time check (inside iterator) " << time[1].tv_sec << " " << time[1].tv_usec);
 
 		if (!cedarPacket->isReady() || cedarPacket->isBadFragment()) {
-			LOG_ERROR("KTAG: This looks like a Bad Packet!!!! ");
+			LOG_ERROR("CEDAR: This looks like a Bad Packet!!!! ");
 			l1Info->setL1KTAGBadData();
 			return 0;
 		}
@@ -173,13 +173,13 @@ uint_fast8_t KtagAlgo::processKtagTrigger(uint l0MaskID, DecoderHandler& decoder
 void KtagAlgo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info) {
 
 	if (AlgoID_ != algoPacket->algoID)
-		LOG_ERROR("Algo ID does not match with Algo ID already written in the packet!");
+		LOG_ERROR("KtagAlgo.cpp: Algo ID does not match with Algo ID already written in the packet!");
 
 	algoPacket->algoID = AlgoID_;
 	algoPacket->onlineTimeWindow = (uint) AlgoOnlineTimeWindow_[l0MaskID];
 //	algoPacket->qualityFlags = (l1Info->isL1KTAGProcessed() << 6) | (l1Info->isL1KTAGEmptyPacket() << 4) | (l1Info->isL1KTAGBadData() << 2) | AlgoRefTimeSourceID_[l0MaskID];
-	algoPacket->qualityFlags = (l1Info->isL1KTAGProcessed() << 6) | (l1Info->isL1KTAGEmptyPacket() << 4) | (l1Info->isL1KTAGBadData() << 2)
-			| ((uint) l1Info->getL1KTAGTrgWrd(l0MaskID));
+	algoPacket->qualityFlags = (AlgoRefTimeSourceID_[l0MaskID] << 7) | (l1Info->isL1KTAGProcessed() << 6) | (l1Info->isL1KTAGEmptyPacket() << 4) | (l1Info->isL1KTAGBadData() << 2)
+		| ((uint) l1Info->getL1KTAGTrgWrd(l0MaskID));
 
 	if (!AlgoRefTimeSourceID_[l0MaskID]) {
 		algoPacket->l1Data[0] = l1Info->getL1KTAGNSectorsL0TP();
@@ -188,7 +188,7 @@ void KtagAlgo::writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1I
 		algoPacket->l1Data[0] = l1Info->getL1KTAGNSectorsCHOD();
 		algoPacket->l1Data[1] = l1Info->getCHODAverageTime(); //this is a double!!!
 	} else
-		LOG_ERROR("L1 Reference Time Source ID not recognised !!");
+		LOG_ERROR("KtagAlgo.cpp: L1 Reference Time Source ID not recognised !!");
 
 	algoPacket->numberOfWords = (sizeof(L1Algo) / 4.);
 //	LOG_INFO("l0MaskID " << l0MaskID);

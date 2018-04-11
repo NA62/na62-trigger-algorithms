@@ -28,7 +28,9 @@ uint L2TriggerProcessor::ReferenceTimeSourceID_ = 0;
 
 uint L2TriggerProcessor::NumberOfEnabledAlgos_[16];
 uint L2TriggerProcessor::NumberOfFlaggedAlgos_[16];
+uint L2TriggerProcessor::NumberOfEnabledAndFlaggedAlgos_[16];
 uint L2TriggerProcessor::MaskReductionFactor_[16];
+bool L2TriggerProcessor::MaskTimeoutFlag_[16];
 uint_fast16_t L2TriggerProcessor::AlgoEnableMask_[16];
 uint_fast16_t L2TriggerProcessor::AlgoFlagMask_[16];
 uint_fast16_t L2TriggerProcessor::AlgoLogicMask_[16];
@@ -48,6 +50,13 @@ void L2TriggerProcessor::initialize(l2Struct &l2Struct) {
 	L0MaskIDs_ = TriggerOptions::GetIntList(OPTION_ACTIVE_L0_MASKS);
 	NumberOfEnabledL0Masks_ = L0MaskIDs_.size();
 
+	if (NumberOfEnabledL0Masks_ == 1 && L0MaskIDs_[0] == 99) { //Default value
+		NumberOfEnabledL0Masks_ = 0;
+		LOG_INFO("No Mask provided from the run control");
+	}
+
+//	LOG_INFO("numberOfEnabledL0Masks " << (uint)numberOfEnabledL0Masks);
+
 	/*
 	 * Initialisation of individual Algo masks
 	 */
@@ -58,7 +67,9 @@ void L2TriggerProcessor::initialize(l2Struct &l2Struct) {
 
 		NumberOfEnabledAlgos_[i] = 0; //TO BE MODIFIED WITH REAL NUMBER !!!!!!!!
 		NumberOfFlaggedAlgos_[i] = 0;
+		NumberOfEnabledAndFlaggedAlgos_[i] = 0;
 		MaskReductionFactor_[i] = 0;
+		MaskTimeoutFlag_[i] = 0;
 		AlgoEnableMask_[i] = 0;
 		AlgoFlagMask_[i] = 0;
 		AlgoLogicMask_[i] = 0;
@@ -78,18 +89,19 @@ void L2TriggerProcessor::initialize(l2Struct &l2Struct) {
 
 uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 
-	bool isL0PhysicsTrigger = false;
-	//bool isL0PeriodicTrigger = false;
-	//bool isL0ControlTrigger = false;
-	bool isL2Bypassed = false;
-	uint numberOfTriggeredL2Masks = 0;
-	bool isAllL2AlgoDisable = false;
-
 	uint_fast8_t l2Trigger = 0;
 	uint_fast8_t l2GlobalFlagTrigger = 0;
 	uint_fast8_t l2MaskFlagTrigger = 0;
+	bool isL2Bypassed = false;
+	bool isAllL2AlgoDisable = false;
+	bool isL2WhileTimeout = false;
+	uint numberOfTriggeredL2Masks = 0;
+	bool isL0PhysicsTrigger = false;
+	//bool isL0PeriodicTrigger = false;
+	//bool isL0ControlTrigger = false;
 
 	L2InputEvents_.fetch_add(1, std::memory_order_relaxed);
+
 	/*
 	 * Check if the event is autopass
 	 */
@@ -110,6 +122,16 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 		writeData(event, l2Trigger);
 		return l2Trigger;
 	}
+
+	/*
+	 * Check if the event (PERIODICS INCLUDED) fulfills the reduction option
+	 *
+	 */
+	if (ReductionFactor_ && (L2InputEvents_ % ReductionFactor_ != 0))
+		return 0;
+
+	L2InputReducedEvents_.fetch_add(1, std::memory_order_relaxed);
+
 	if (event->isPulserGTKTriggerEvent() || event->isPeriodicTriggerEvent() || event->isL2Bypassed() || bypassEvent()) {
 		isL2Bypassed = true;
 		l2Trigger = ((uint) l2GlobalFlagTrigger << 7) | ((l2MaskFlagTrigger != 0) << 6) | (isL2Bypassed << 5) | (isAllL2AlgoDisable << 4)
@@ -122,18 +144,18 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 	 * Check if the event fulfills the reduction option
 	 *
 	 */
-	if (ReductionFactor_ && (L2InputEvents_ % ReductionFactor_ != 0))
-		return 0;
-
-	L2InputReducedEvents_.fetch_add(1, std::memory_order_relaxed);
+//	if (ReductionFactor_ && (L2InputEvents_ % ReductionFactor_ != 0))
+//		return 0;
+//	L2InputReducedEvents_.fetch_add(1, std::memory_order_relaxed);
 
 	/*
 	 * The event is ready to be processed
 	 *
 	 */
 	uint_fast16_t l0TrigFlags = event->getTriggerFlags();
-	uint_fast8_t l2TriggerResult;
 	uint_fast8_t l2TriggerTmp;
+	uint_fast8_t l2TriggerResult;
+	uint_fast8_t l2FlagTrigger;
 
 	if (event->isPhysicsTriggerEvent()) {
 		isL0PhysicsTrigger = 1;
@@ -152,19 +174,30 @@ uint_fast8_t L2TriggerProcessor::compute(Event* event) {
 			l2TriggerResult = 0;
 			if (l0TrigFlags & (1 << i)) {
 				l2TriggerTmp = 0;
+				l2FlagTrigger = 0;
+
+				if (NumberOfEnabledAndFlaggedAlgos_[i])
+					l2FlagTrigger = 1;
+
+				l2MaskFlagTrigger += l2FlagTrigger;
+
 				if (!NumberOfEnabledAlgos_[i])
 					isAllL2AlgoDisable = 1;
+
+				if(MaskTimeoutFlag_[i])
+					isL2WhileTimeout = true;
 
 				l2TriggerResult = ((l2TriggerTmp & AlgoEnableMask_[i]) == AlgoEnableMask_[i]);
 				event->setL2TriggerWord(i, l2TriggerResult);
 			}
-			if (__builtin_popcount((uint) l2TriggerResult))
+			if (__builtin_popcount((uint) l2TriggerResult)) {
 				numberOfTriggeredL2Masks++;
+			}
 		}
 	}
 
 	l2Trigger = ((uint) l2GlobalFlagTrigger << 7) | ((l2MaskFlagTrigger != 0) << 6) | (isL2Bypassed << 5) | (isAllL2AlgoDisable << 4)
-			| (numberOfTriggeredL2Masks != 0);
+		| (isL2WhileTimeout << 3) | (numberOfTriggeredL2Masks != 0);
 
 	if (l2Trigger != 0) {
 		if (l2Trigger & TRIGGER_L2_PHYSICS) {
