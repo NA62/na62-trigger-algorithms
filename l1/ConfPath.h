@@ -6,7 +6,7 @@
 #define CHOD_CONFIG_FILE "/etc/na62-trigger.d/l1/CHOD.2017.om.conf"
 #define IRCSAC_CONFIG_FILE "/etc/na62-trigger.d/l1/IRCSAC.2017.om.conf"
 #define LAV_CONFIG_FILE "/etc/na62-trigger.d/l1/LAV.2017.om.conf"
-#define STRAW_CONFIG_FILE "/etc/na62-trigger.d/l1/Spectrometer.2017.om.conf"
+#define STRAW_CONFIG_FILE "/etc/na62-trigger.d/l1/Spectrometer.2018.om.conf"
 #define STRAW_CONFIG_FILE_T0 "/etc/na62-trigger.d/l1/"
 
 #else
