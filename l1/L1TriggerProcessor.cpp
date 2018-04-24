@@ -794,7 +794,7 @@ void L1TriggerProcessor::writeL1Data(Event* const event, L1InfoToStorage* l1Info
 	globalPacket->refFineTime = event->getFinetime();
 	globalPacket->refTimeSourceID = ReferenceTimeSourceID_;
 	globalPacket->flagMode = FlagMode_;
-	globalPacket->format = 0;
+	globalPacket->format = 1; //1 Starting from run 8520
 	globalPacket->downscaleFactor = DownscaleFactor_;
 	globalPacket->reductionFactor = ReductionFactor_;
 	globalPacket->numberOfEnabledMasks = NumberOfEnabledL0Masks_;
