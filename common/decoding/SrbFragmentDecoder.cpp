@@ -89,7 +89,7 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	edgeSrbIDs = new uint_fast8_t[maxNEdges];
 
 	//initialize
-	for (uint i = 0; i < maxNwords; i++) {
+	for (uint i = 0; i < maxNEdges; i++) {
 		edgeTimes[i] = 0;
 		edgeStrawIDs[i] = 0;
 		edgeErrorFlags[i] = 0;

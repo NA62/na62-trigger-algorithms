@@ -67,19 +67,6 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 		isBadFrag_ = true;
 		return;
 	}
-	/*
-	 * Each word is 4 bytes: there is 1 board header and at least 1 FPGA header
-	 * -> use this to estimate the maximum number of words
-	 */
-
-	const int maxNwords = (trbDataFragment->getPayloadLength() / 4) - 2;
-
-	if (maxNwords <= 0) {
-		LOG_ERROR("DetID " << SourceIDManager::sourceIdToDetectorName((uint) trbDataFragment->getSourceID()) << " SubID " << (uint) trbDataFragment->getSourceSubID() << " : The packet payload is not as expected !!!");
-		//throw NA62Error("The packet payload is not as expected !!!");
-		isBadFrag_ = true;
-		return;
-	}
 
 	const char* const payload = trbDataFragment->getPayload();
 
@@ -91,12 +78,49 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 //	LOG_INFO("Source (Tel62) sub-ID " << (uint) boardHeader->sourceSubID);
 //	LOG_INFO("Format " << (uint) boardHeader->format);
 
+	/*
+	 * Each word is 4 bytes: there is 1 board header and at least 1 FPGA header
+	 * -> use this to estimate the maximum number of words
+	 */
+
+	const uint maxNwords = (trbDataFragment->getPayloadLength() / 4);
+
+	if (maxNwords <= 0) {
+		LOG_ERROR(
+				"DetID " << SourceIDManager::sourceIdToDetectorName((uint) trbDataFragment->getSourceID()) <<
+				" SubID " << (uint) trbDataFragment->getSourceSubID() <<
+				" (Tel62) Trigger type " << (uint) boardHeader->triggerType <<
+				" FPGA Flags " << (uint) boardHeader->fpgaFlags <<
+				" : The packet payload is not as expected !!!");
+		//throw NA62Error("The packet payload is not as expected !!!");
+		isBadFrag_ = true;
+		return;
+	}
+
+	if ((uint) boardHeader->triggerType & 0x80) {
+		LOG_ERROR(
+				"DetID " << SourceIDManager::sourceIdToDetectorName((uint) trbDataFragment->getSourceID()) <<
+				" SubID " << (uint) trbDataFragment->getSourceSubID() <<
+				" (Tel62) Trigger type " << (uint) boardHeader->triggerType <<
+				" FPGA Flags " << (uint) boardHeader->fpgaFlags <<
+				" : Special trigger detected in L1 TrbFragmentDecoder! Found data packet payload (in 32bit words) = " << maxNwords <<
+				" Return as different from physics packet");
+		return;
+	}
+
 	sourceSubId_ = (uint_fast16_t) boardHeader->sourceSubID;
 
 	const uint nFPGAs = boardHeader->getNumberOfFPGAs();
 //	LOG_INFO("Number of FPGAs (from boardHeader) " << nFPGAs);
-	if (!boardHeader->fpgaFlags || nFPGAs > 4) {
-		LOG_ERROR("DetID " << SourceIDManager::sourceIdToDetectorName((uint) trbDataFragment->getSourceID()) << " SubID " << (uint) trbDataFragment->getSourceSubID() << " : FPGA Flags or Number of FPGAs is not as expected !");
+
+	if (!((uint)boardHeader->triggerType & 0x80) && (!boardHeader->fpgaFlags || nFPGAs > 4)) {
+		LOG_ERROR(
+				"DetID " << SourceIDManager::sourceIdToDetectorName((uint) trbDataFragment->getSourceID()) <<
+				" SubID " << (uint) trbDataFragment->getSourceSubID() <<
+				" (Tel62) Trigger type " << (uint) boardHeader->triggerType <<
+				" FPGA Flags " << (uint) boardHeader->fpgaFlags <<
+				" number of FPGAs " << (uint)nFPGAs <<
+				" : Physics trigger - FPGA Flags or Number of FPGAs is not as expected !");
 		isBadFrag_ = true;
 		return;
 	}
@@ -105,6 +129,14 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	edgeChIDs = new uint_fast8_t[maxNwords];
 	edgeTdcIDs = new uint_fast8_t[maxNwords];
 	edgeIsLeading = new bool[maxNwords];
+
+	//initialize
+	for (uint i = 0; i < maxNwords; i++) {
+		edgeTimes[i] = 0;
+		edgeChIDs[i] = 0;
+		edgeTdcIDs[i] = 0;
+		edgeIsLeading[i] = 0;
+	}
 	uint_fast16_t nWords_tot = 0;
 
 	for (uint iFPGA = 0; iFPGA != nFPGAs; iFPGA++) {

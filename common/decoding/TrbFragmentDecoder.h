@@ -39,7 +39,7 @@ struct TrbDataHeader {
 	 * 8		4
 	 */
 	uint getNumberOfFPGAs() const {
-		return 32 - __builtin_clz(fpgaFlags);
+		return __builtin_popcount(fpgaFlags);
 	}
 }__attribute__ ((__packed__));
 
