@@ -12,8 +12,7 @@
 #include <cstdint>
 #include <iomanip>
 #include <options/Logging.h>
-//#include <l0/MEPFragment.h>
-//#include <l0/Subevent.h>
+
 #ifndef ONLINEHLT
 #include <l0/Subevent.h>
 #else
@@ -57,7 +56,12 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 //	LOG_INFO("SourceSubID " << (uint) srbDataFragment->getSourceSubID());
 //	LOG_INFO("srbData " << srbDataFragment->getPayloadLength());
 	if (!srbDataFragment->getPayloadLength()) {
+
+#ifndef ONLINEHLT
 		LOG_ERROR("DetID " << SourceIDManager::sourceIdToDetectorName((uint) srbDataFragment->getSourceID()) << " SubID " << (uint) srbDataFragment->getSourceSubID() << " : The packet payload is empty");
+#else
+		LOG_ERROR("DetID " << (uint) srbDataFragment->getSourceID() << " SubID " << (uint) srbDataFragment->getSourceSubID() << " : The packet payload is empty");
+#endif
 		isBadFrag_ = true;
 		return;
 	}
@@ -72,7 +76,11 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	const uint maxNwords = (srbDataFragment->getPayloadLength() / 4);
 
 	if (maxNwords <= 0) {
+#ifndef ONLINEHLT
 		LOG_ERROR("DetID " << SourceIDManager::sourceIdToDetectorName((uint) srbDataFragment->getSourceID()) << " SubID " << (uint) srbDataFragment->getSourceSubID() << " : The packet payload is not as expected !!!");
+#else
+		LOG_ERROR("DetID " << (uint) srbDataFragment->getSourceID() << " SubID " << (uint) srbDataFragment->getSourceSubID() << " : The packet payload is not as expected !!!");
+#endif
 		//throw NA62Error("The packet payload is not as expected !!!");
 		isBadFrag_ = true;
 		return;

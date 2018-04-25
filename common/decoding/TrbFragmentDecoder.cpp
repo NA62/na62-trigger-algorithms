@@ -18,9 +18,6 @@
 #include <l0/offline/Subevent.h>
 #endif
 
-//// Check if this could still work for offline reprocessing
-#include <eventBuilding/SourceIDManager.h>
-
 namespace na62 {
 
 TrbFragmentDecoder::TrbFragmentDecoder() :
@@ -63,7 +60,12 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 //	LOG_INFO("SourceSubID " << (uint) trbDataFragment->getSourceSubID());
 //	LOG_INFO("trbData " << trbDataFragment->getPayloadLength());
 	if (!trbDataFragment->getPayloadLength()) {
+
+#ifndef ONLINEHLT
 		LOG_ERROR("DetID " << SourceIDManager::sourceIdToDetectorName((uint) trbDataFragment->getSourceID()) << " SubID " << (uint) trbDataFragment->getSourceSubID() << " : The packet payload is empty");
+#else
+		LOG_ERROR("DetID " << (uint) trbDataFragment->getSourceID() << " SubID " << (uint) trbDataFragment->getSourceSubID() << " : The packet payload is empty");
+#endif
 		isBadFrag_ = true;
 		return;
 	}
@@ -86,12 +88,16 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	const uint maxNwords = (trbDataFragment->getPayloadLength() / 4);
 
 	if (maxNwords <= 0) {
+#ifndef ONLINEHLT
 		LOG_ERROR(
 				"DetID " << SourceIDManager::sourceIdToDetectorName((uint) trbDataFragment->getSourceID()) <<
 				" SubID " << (uint) trbDataFragment->getSourceSubID() <<
 				" (Tel62) Trigger type " << (uint) boardHeader->triggerType <<
 				" FPGA Flags " << (uint) boardHeader->fpgaFlags <<
 				" : The packet payload is not as expected !!!");
+#else
+		LOG_ERROR("DetID " << (uint) trbDataFragment->getSourceID() << " SubID " << (uint) trbDataFragment->getSourceSubID() << " : The packet payload is not as expected !!!");
+#endif
 		//throw NA62Error("The packet payload is not as expected !!!");
 		isBadFrag_ = true;
 		return;
@@ -114,6 +120,7 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 //	LOG_INFO("Number of FPGAs (from boardHeader) " << nFPGAs);
 
 	if (!((uint)boardHeader->triggerType & 0x80) && (!boardHeader->fpgaFlags || nFPGAs > 4)) {
+#ifndef ONLINEHLT
 		LOG_ERROR(
 				"DetID " << SourceIDManager::sourceIdToDetectorName((uint) trbDataFragment->getSourceID()) <<
 				" SubID " << (uint) trbDataFragment->getSourceSubID() <<
@@ -121,6 +128,9 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 				" FPGA Flags " << (uint) boardHeader->fpgaFlags <<
 				" number of FPGAs " << (uint)nFPGAs <<
 				" : Physics trigger - FPGA Flags or Number of FPGAs is not as expected !");
+#else
+		LOG_ERROR("DetID " << (uint) trbDataFragment->getSourceID() << " SubID " << (uint) trbDataFragment->getSourceSubID() << " : FPGA Flags or Number of FPGAs is not as expected !");
+#endif
 		isBadFrag_ = true;
 		return;
 	}
@@ -165,8 +175,14 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 			const uint_fast16_t nWordsOfCurrentFrame =
 					(uint) frameHeader->nWords;
 			if (!nWordsOfCurrentFrame) {
+
+#ifndef ONLINEHLT
 				LOG_ERROR("DetID " << SourceIDManager::sourceIdToDetectorName((uint) trbDataFragment->getSourceID()) << " SubID " << (uint) trbDataFragment->getSourceSubID() << " : Number of Words in Frame is Null !" << std::hex << (int) (trbDataFragment->getSourceID()) << ":"
 				<< (int)(trbDataFragment->getSourceSubID()));
+#else
+				LOG_ERROR("DetID " << (uint) trbDataFragment->getSourceID() << " SubID " << (uint) trbDataFragment->getSourceSubID() << " : Number of Words in Frame is Null !" << std::hex << (int) (trbDataFragment->getSourceID()) << ":"
+				<< (int)(trbDataFragment->getSourceSubID()));
+#endif
 				isBadFrag_ = true;
 				return;
 			}
@@ -235,7 +251,12 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 				 */
 				const uint_fast16_t nErrWords = errHeader->nErrWords;
 				if (!nErrWords) {
+
+#ifndef ONLINEHLT
 					LOG_ERROR("DetID " << SourceIDManager::sourceIdToDetectorName((uint) trbDataFragment->getSourceID()) << " SubID " << (uint) trbDataFragment->getSourceSubID() << " : Number of ErrWords is Null but Err Flag says otherwise!" << std::hex << (int) (trbDataFragment->getSourceID()) << ":" << (int)(trbDataFragment->getSourceSubID()));
+#else
+					LOG_ERROR("DetID " << (uint) trbDataFragment->getSourceID() << " SubID " << (uint) trbDataFragment->getSourceSubID() << " : Number of ErrWords is Null but Err Flag says otherwise!" << std::hex << (int) (trbDataFragment->getSourceID()) << ":" << (int)(trbDataFragment->getSourceSubID()));
+#endif
 					isBadFrag_ = true;
 					return;
 				}
