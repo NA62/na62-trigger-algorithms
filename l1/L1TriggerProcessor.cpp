@@ -590,10 +590,16 @@ uint_fast8_t L1TriggerProcessor::compute(Event* const event, StrawAlgo& strawalg
 						/*
 						 * StrawAlgoType_[i]: 0 for pnn, 1 for exotics
 						 */
-						if (!StrawAlgoType_[i])
-							strawTrigger = (strawTriggerTmp & 0x1);
-						else if (StrawAlgoType_[i] == 1)
-							strawTrigger = (strawTriggerTmp & 0x2) >> 1;
+//						if (!StrawAlgoType_[i])
+//							strawTrigger = (strawTriggerTmp & 0x1);
+//						else if (StrawAlgoType_[i] == 1)
+//							strawTrigger = (strawTriggerTmp & 0x2) >> 1;
+						/*
+						 * StrawAlgoType_[i]: 1 for pnn, 2 for exotics, 4 for multi-track
+						 * StrawAlgoType_[i]: 8 for displaced vertex (5cm lower cut), 16 for displaced vertex (10cm lower cut)
+						 * StrawAlgoType_[i]: 32 for at least one reco track with momentum < 65GeV/c
+						 */
+						strawTrigger = ((strawTriggerTmp & StrawAlgoType_[i]) == StrawAlgoType_[i]);
 
 						if (AlgoLogicMask_[i] & (1 << (uint) StrawAlgorithmId_)) {
 							l1TriggerTmp |= (strawTrigger << (uint) StrawAlgorithmId_);
@@ -794,7 +800,11 @@ void L1TriggerProcessor::writeL1Data(Event* const event, L1InfoToStorage* l1Info
 	globalPacket->refFineTime = event->getFinetime();
 	globalPacket->refTimeSourceID = ReferenceTimeSourceID_;
 	globalPacket->flagMode = FlagMode_;
-	globalPacket->format = 1; //1 Starting from run 8520
+//	globalPacket->format = 1; //1 Starting from run 8520
+	/*
+	 * Modification on 27/04/2018
+	 */
+	globalPacket->format = 2; //1 Starting from run 8584
 	globalPacket->downscaleFactor = DownscaleFactor_;
 	globalPacket->reductionFactor = ReductionFactor_;
 	globalPacket->numberOfEnabledMasks = NumberOfEnabledL0Masks_;
@@ -843,8 +853,16 @@ void L1TriggerProcessor::writeL1Data(Event* const event, L1InfoToStorage* l1Info
 		if (isL1WhileTimeout) {
 			maskPacket->flags |= (1 << 2);
 		}
+		/*
+		 * Modification on 27/04/2018: (bits 2,3,4,5 of StrawAlgoType control the straw variations introduced in 2018)
+		 */
+		if(StrawAlgoType_[numToMaskID] & 0x3c){
+			maskPacket->flags = 1;
+		}
+		maskPacket->reserved = (StrawAlgoType_[numToMaskID] >> 2);
+
 		maskPacket->reductionFactor = MaskReductionFactor_[numToMaskID];
-		maskPacket->reserved = 0;
+//		maskPacket->reserved = 0;
 
 		nMaskWords += sizeof(L1Mask); //2 32-bit header words for each mask
 

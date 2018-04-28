@@ -146,6 +146,10 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 	int flagL1 = 0;
 	int flagL1Pnn = 0;
 	int flagL1Exotic = 0;
+	int flagL1MultiTrk = 0;
+	int flagL1DVloose = 0;
+	int flagL1DVtight = 0;
+	int flagL1OneTrack = 0;
 	int flagL1Limit[1000];
 	int flagL1Three[1000] = { 0 };
 	int flagL1TreTracks = 0;
@@ -1861,10 +1865,18 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 		// We zero FlagL1Limit as needed rather than zeroing the entire array
 		flagL1Limit[e] = 0;
 
-		if (e < 5) {
+//		if (e < 5) {
+//			l1Info->setL1StrawTrackP(e, strawTrkIntermedie_[e].pz);
+//			l1Info->setL1StrawTrackVz(e, strawTrkIntermedie_[e].zvertex);
+//		}
+		/*
+		 * Modification on 27/04/2018
+		 */
+		if (e < 4) {
 			l1Info->setL1StrawTrackP(e, strawTrkIntermedie_[e].pz);
 			l1Info->setL1StrawTrackVz(e, strawTrkIntermedie_[e].zvertex);
 		}
+
 		if (strawTrkIntermedie_[e].zvertex > -100000 && strawTrkIntermedie_[e].zvertex < 180000 && strawTrkIntermedie_[e].cda < 200
 				&& strawTrkIntermedie_[e].pz < 50000) {
 			flagL1Limit[e]++;
@@ -1893,7 +1905,18 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 		if (flagL1Limit[e] > 0 && flagL1Three[e] > 0) {
 			flagL1TreTracks = 1;
 		}
+		if (strawTrkIntermedie_[e].zvertex > -100000 && strawTrkIntermedie_[e].zvertex < 180000 && strawTrkIntermedie_[e].cda < 200
+				&& strawTrkIntermedie_[e].pz < 65000) {
+			flagL1OneTrack = 1 ;
+		}
 	}
+
+	if(nTrackIntermedie >= 3){
+		flagL1MultiTrk = 1;
+	}
+
+	flagL1DVloose = 1;
+	flagL1DVtight = 1;
 
 //	LOG_INFO("\n RISULTATO:");
 //	if (flag_l1_pnn == 1)
@@ -1907,7 +1930,8 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 
 	l1Info->setL1StrawNTracks(nTrackIntermedie);
 	l1Info->setL1StrawProcessed();
-	flagL1 = ((flagL1Exotic & 0x1) << 1) | (flagL1Pnn & 0x1);
+//	flagL1 = ((flagL1Exotic & 0x1) << 1) | (flagL1Pnn & 0x1);
+	flagL1 = ((flagL1OneTrack & 0x1) << 5) | ((flagL1DVtight & 0x1) << 4) | ((flagL1DVloose& 0x1) << 3) | ((flagL1MultiTrk & 0x1) << 2) | ((flagL1Exotic & 0x1) << 1) | (flagL1Pnn & 0x1);
 	return flagL1;
 }
 
@@ -2041,12 +2065,23 @@ void StrawAlgo::writeData(L1StrawAlgo* algoPacket, uint l0MaskID, L1InfoToStorag
 	algoPacket->qualityFlags = (AlgoRefTimeSourceID_[l0MaskID] << 7) | (l1Info->isL1StrawProcessed() << 6) | (l1Info->isL1StrawEmptyPacket() << 4)
 			| (l1Info->isL1StrawBadData() << 2) | (l1Info->isL1StrawOverflow() << 1) | ((uint) l1Info->getL1StrawTrgWrd(l0MaskID));
 
-	for (uint iTrk = 0; iTrk != 5; iTrk++) {
+//	for (uint iTrk = 0; iTrk != 5; iTrk++) {
+////		LOG_INFO("track index " << iTrk << " momentum " << l1Info->getL1StrawTrack_P(iTrk));
+////		LOG_INFO("track index " << iTrk << " vertex " << l1Info->getL1StrawTrack_Vz(iTrk));
+//		algoPacket->l1Data[iTrk] = (uint) l1Info->getL1StrawTrackVz(iTrk);
+//		algoPacket->l1Data[iTrk + 5] = (uint) l1Info->getL1StrawTrackP(iTrk);
+//	}
+	/*
+	 * Modification on 27/04/2018
+	 */
+	for (uint iTrk = 0; iTrk != 4; iTrk++) {
 //		LOG_INFO("track index " << iTrk << " momentum " << l1Info->getL1StrawTrack_P(iTrk));
 //		LOG_INFO("track index " << iTrk << " vertex " << l1Info->getL1StrawTrack_Vz(iTrk));
 		algoPacket->l1Data[iTrk] = (uint) l1Info->getL1StrawTrackVz(iTrk);
-		algoPacket->l1Data[iTrk + 5] = (uint) l1Info->getL1StrawTrackP(iTrk);
+		algoPacket->l1Data[iTrk + 4] = (uint) l1Info->getL1StrawTrackP(iTrk);
 	}
+	algoPacket->l1Data[8] = 0; // CDA 2-track vertex
+	algoPacket->l1Data[9] = 0; // displaced vertex (max value)
 	algoPacket->l1Data[10] = l1Info->getL1StrawNTracks();
 
 	algoPacket->numberOfWords = (sizeof(L1StrawAlgo) / 4.);
