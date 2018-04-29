@@ -68,6 +68,7 @@ public:
 	static float posTubNew(int chamber, int view, int plane, int jStraw);
 	static int strawAcceptance(int n, double* coordinate, int zone);
 	static void cdaVertex(const Point& qBeam, Point& qTrack, const Point& mBeam, Point& mTrack, float& cda, Point& vertex);
+	static void pointToLineDistance(const Point& qBeam, Point& vertex, const Point& mBeam, float& distance);
 	Track& getTracks(int n);
 
 private:

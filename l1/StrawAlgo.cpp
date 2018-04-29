@@ -1861,6 +1861,9 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 	Point mTrack2;
 	Point qTrack2;
 
+	float distanceToBeamLine = 0.;
+	float distance_temp = 0.;
+
 	for (int e = 0; e < nTrackIntermedie; e++) {
 		// We zero FlagL1Limit as needed rather than zeroing the entire array
 		flagL1Limit[e] = 0;
@@ -1893,6 +1896,17 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 			if (cda < 30) {
 				flagL1Three[e]++;
 				flagL1Three[f]++;
+
+				if(((strawTrkIntermedie_[e].m1x - strawTrkIntermedie_[e].m2x) * (strawTrkIntermedie_[f].m1x - strawTrkIntermedie_[f].m2x)) < 0.) {
+
+					pointToLineDistance(QBeam_, vertex, MBeam_, distance_temp);
+
+					if(distance_temp > distanceToBeamLine) {
+						distanceToBeamLine = distance_temp;
+						l1Info->setL1StrawExo2TrkCDA(cda);
+						l1Info->setL1StrawExo2TrkVtxToBeamDistance(distanceToBeamLine);
+					}
+				}
 			}
 		}
 
@@ -1915,8 +1929,13 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 		flagL1MultiTrk = 1;
 	}
 
-	flagL1DVloose = 1;
-	flagL1DVtight = 1;
+	if(distanceToBeamLine > 50.){
+		flagL1DVloose = 1;
+	}
+
+	if(distanceToBeamLine > 100.){
+		flagL1DVtight = 1;
+	}
 
 //	LOG_INFO("\n RISULTATO:");
 //	if (flag_l1_pnn == 1)
@@ -1939,7 +1958,12 @@ uint_fast8_t StrawAlgo::abortProcessing(L1InfoToStorage* l1Info) {
 	l1Info->setL1StrawOverflow();
 	l1Info->setL1StrawProcessed();
 	// 3 for event fulfilled both L1 straw triggers for Kpnn and exotics data streams
-	return 3;
+	//return 3;
+	/*
+	 * Modification 28/04/2018
+	 */
+	// 0x3f for event fulfilled both all straw trigger flags
+	return 0x3f;
 }
 
 float StrawAlgo::posTubNew(int chamber, int view, int plane, int jstraw) {
@@ -2021,6 +2045,45 @@ int StrawAlgo::strawAcceptance(int n, double* coordinate, int zone) {
 	return 0;
 }
 
+void StrawAlgo::pointToLineDistance(const Point& qBeam, Point& vertex, const Point& mBeam, float& distance){
+
+	Point p2;
+
+	p2.x = mBeam.x - qBeam.x;
+	p2.y = mBeam.y - qBeam.y;
+	p2.z = mBeam.z - qBeam.z;
+
+	Point a, b;
+
+	a.x = vertex.x - qBeam.x;
+	a.y = vertex.y - qBeam.y;
+	a.z = vertex.z - ZMAGNET - qBeam.z;
+
+	b.x = p2.x - qBeam.x;
+	b.y = p2.y - qBeam.y;
+	b.z = p2.z - qBeam.z;
+
+	float cc, dd, ee;
+
+	cc = a.x * b.x + a.y * b.y + a.z * b.z;
+	dd = b.x * b.x + b.y * b.y + b.z * b.z;
+	ee = cc/dd;
+
+	Point f, g;
+
+	f.x = ee * b.x;
+	f.y = ee * b.y;
+	f.z = ee * b.z;
+
+	g.x = a.x - (ee * b.x);
+	g.y = a.y - (ee * b.y);
+	g.z = a.z - (ee * b.z);
+
+	distance = sqrt(g.x * g.x + g.y * g.y + g.z * g.z);
+
+}
+
+
 void StrawAlgo::cdaVertex(const Point& qBeam, Point& qTrack, const Point& mBeam, Point& mTrack, float& cda, Point& vertex) {
 
 	Point r12;
@@ -2080,8 +2143,8 @@ void StrawAlgo::writeData(L1StrawAlgo* algoPacket, uint l0MaskID, L1InfoToStorag
 		algoPacket->l1Data[iTrk] = (uint) l1Info->getL1StrawTrackVz(iTrk);
 		algoPacket->l1Data[iTrk + 4] = (uint) l1Info->getL1StrawTrackP(iTrk);
 	}
-	algoPacket->l1Data[8] = 0; // CDA 2-track vertex
-	algoPacket->l1Data[9] = 0; // displaced vertex (max value)
+	algoPacket->l1Data[8] = (uint) l1Info->getL1StrawExo2TrkCDA(); // CDA 2-track vertex
+	algoPacket->l1Data[9] = (uint) l1Info->getL1StrawExo2TrkVtxToBeamDistance(); // displaced vertex (max value)
 	algoPacket->l1Data[10] = l1Info->getL1StrawNTracks();
 
 	algoPacket->numberOfWords = (sizeof(L1StrawAlgo) / 4.);
