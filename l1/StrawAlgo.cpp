@@ -1899,12 +1899,14 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 
 				if(((strawTrkIntermedie_[e].m1x - strawTrkIntermedie_[e].m2x) * (strawTrkIntermedie_[f].m1x - strawTrkIntermedie_[f].m2x)) < 0.) {
 
-					pointToLineDistance(QBeam_, vertex, MBeam_, distance_temp);
+					if(vertex.z < 180000.) {
+						pointToLineDistance(QBeam_, vertex, MBeam_,distance_temp);
 
-					if(distance_temp > distanceToBeamLine) {
-						distanceToBeamLine = distance_temp;
-						l1Info->setL1StrawExo2TrkCDA(cda);
-						l1Info->setL1StrawExo2TrkVtxToBeamDistance(distanceToBeamLine);
+						if (distance_temp > distanceToBeamLine) {
+							distanceToBeamLine = distance_temp;
+							l1Info->setL1StrawExo2TrkCDA(cda);
+							l1Info->setL1StrawExo2TrkVtxToBeamDistance(distanceToBeamLine);
+						}
 					}
 				}
 			}
@@ -2049,9 +2051,9 @@ void StrawAlgo::pointToLineDistance(const Point& qBeam, Point& vertex, const Poi
 
 	Point p2;
 
-	p2.x = mBeam.x - qBeam.x;
-	p2.y = mBeam.y - qBeam.y;
-	p2.z = mBeam.z - qBeam.z;
+	p2.x = mBeam.x + qBeam.x;
+	p2.y = mBeam.y + qBeam.y;
+	p2.z = mBeam.z + qBeam.z;
 
 	Point a, b;
 
