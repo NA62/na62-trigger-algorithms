@@ -104,13 +104,22 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	}
 
 	if ((uint) boardHeader->triggerType & 0x80) {
+#ifndef ONLINEHLT
 		LOG_ERROR(
-				"DetID " << SourceIDManager::sourceIdToDetectorName((uint) trbDataFragment->getSourceID()) <<
-				" SubID " << (uint) trbDataFragment->getSourceSubID() <<
-				" (Tel62) Trigger type " << (uint) boardHeader->triggerType <<
-				" FPGA Flags " << (uint) boardHeader->fpgaFlags <<
-				" : Special trigger detected in L1 TrbFragmentDecoder! Found data packet payload (in 32bit words) = " << maxNwords <<
-				" Return as different from physics packet");
+			  "DetID " << SourceIDManager::sourceIdToDetectorName((uint) trbDataFragment->getSourceID()) <<
+			  " SubID " << (uint) trbDataFragment->getSourceSubID() <<
+			  " (Tel62) Trigger type " << (uint) boardHeader->triggerType <<
+			  " FPGA Flags " << (uint) boardHeader->fpgaFlags <<
+			  " : Special trigger detected in L1 TrbFragmentDecoder! Found data packet payload (in 32bit words) = " << maxNwords <<
+			  " Return as different from physics packet");
+#else
+		LOG_ERROR(
+			  " SubID " << (uint) trbDataFragment->getSourceSubID() <<
+			  " (Tel62) Trigger type " << (uint) boardHeader->triggerType <<
+			  " FPGA Flags " << (uint) boardHeader->fpgaFlags <<
+			  " : Special trigger detected in L1 TrbFragmentDecoder! Found data packet payload (in 32bit words) = " << maxNwords <<
+			  " Return as different from physics packet");
+#endif			      
 		return;
 	}
 
