@@ -48,6 +48,7 @@ TrbFragmentDecoder::~TrbFragmentDecoder() {
  * TODO: have you thought about corrupted data?
  */
 void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
+    //std::cout<<"Executing readData(): " << timestamp <<std::endl;
 	// Don't run again if we already read the data
 	if (edgeTimes != nullptr) {
 		return;
@@ -178,8 +179,8 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 			FrameDataHeader* frameHeader = (FrameDataHeader*) payload + 2
 					+ iFPGA + nWords_tot;
 
-//			LOG_INFO("Number of Words in Frame " << (uint) frameHeader->nWords);
-//			LOG_INFO("Frame Timestamp " << (uint) frameHeader->frameTimeStamp);
+			//LOG_INFO("Number of Words in Frame " << (uint) frameHeader->nWords);
+			//LOG_INFO("Frame Timestamp " << (uint) frameHeader->frameTimeStamp);
 
 			const uint_fast16_t nWordsOfCurrentFrame =
 					(uint) frameHeader->nWords;
@@ -196,12 +197,12 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 				return;
 			}
 			nWords_tot += nWordsOfCurrentFrame;
-//			LOG_INFO("Number of Words  " << nWords_tot);
+			//LOG_INFO("Number of Words  " << nWords_tot);
 
 			frameTS = (frameHeader->frameTimeStamp & 0x0000ffff)
 					+ (timestamp & 0xffff0000);
-//			LOG_INFO("Event Timestamp " << std::hex << timestamp << std::dec);
-//			LOG_INFO("FrameTS " << std::hex << frameTS << std::dec);
+			//LOG_INFO("Event Timestamp " << std::hex << timestamp << std::dec);
+			//LOG_INFO("FrameTS " << std::hex << frameTS << std::dec);
 
 			if ((timestamp & 0xf000) == 0xf000 && (frameTS & 0xf000) == 0x0000)
 				frameTS += 0x10000; //16 bits overflow
@@ -209,12 +210,20 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 				frameTS -= 0x10000; //16 bits overflow
 
 			const uint nEdges = nWordsOfCurrentFrame - 1;
-//			LOG_INFO("nEdges " << nEdges);
+			//LOG_INFO("nEdges " << nEdges << " Max Number of words: " << std::dec << nWords_tot);
 
 			for (uint iEdge = 0; iEdge < nEdges; iEdge++) {
-//				printf("writing getpayload() + %d\n", 2 + iFPGA + nWords_tot - nEdges + iEdge);
+				if (2 + iFPGA + nWords_tot - nEdges + iEdge > trbDataFragment->getPayloadLength() / 4) {
+					LOG_ERROR("!!!! Trying to access to a word outside the MEP Fragment");
+					isBadFrag_ = true;
+					return;
+				}
+				//LOG_INFO("Payload legnth: " << trbDataFragment->getPayloadLength() / 4 << " index: " << payload + 2 + iFPGA + nWords_tot);
+				//printf("writing getpayload() + %d\n", 2 + iFPGA + nWords_tot - nEdges + iEdge);
 				TrbData* tdcData = (TrbData*) payload + 2 + iFPGA + nWords_tot
 						- (nEdges - iEdge);
+                //int delta = 2 + iFPGA + nWords_tot - (2 + iFPGA + nWords_tot - (nEdges - iEdge));
+
 
 				/*
 				 * TODO: let the user decide what data he needs and remove the unwanted parts in compile time
@@ -231,12 +240,12 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 				edgeTdcIDs[iEdge + nEdges_tot] = (uint) tdcData->tdcID + fpgaHeader->FPGAID*4;
 				edgeIsLeading[iEdge + nEdges_tot] = tdcData->ID == 0x4;
 
-//				LOG_INFO("edgeChIDs[" << iEdge + nEdges_tot << "] " << (uint) edgeChIDs[iEdge + nEdges_tot]);
-//				LOG_INFO("edgeTdcIDs[" << iEdge + nEdges_tot << "] " << (uint) edgeTdcIDs[iEdge + nEdges_tot]);
-//				LOG_INFO("edgeIsLeading["<< iEdge + nEdges_tot << "] " << edgeIsLeading[iEdge + nEdges_tot]);
-//				LOG_INFO("edgeTimes[" << iEdge + nEdges_tot << "] " << std::hex << edgeTimes[iEdge + nEdges_tot] << std::dec);
+				//LOG_INFO("edgeChIDs[" << iEdge + nEdges_tot << "] " << (uint) edgeChIDs[iEdge + nEdges_tot]);
+				//LOG_INFO("edgeTdcIDs[" << iEdge + nEdges_tot << "] " << (uint) edgeTdcIDs[iEdge + nEdges_tot]);
+				//LOG_INFO("edgeIsLeading["<< iEdge + nEdges_tot << "] " << edgeIsLeading[iEdge + nEdges_tot]);
+				//LOG_INFO("edgeTimes[" << iEdge + nEdges_tot << "] " << std::hex << edgeTimes[iEdge + nEdges_tot] << std::dec);
 
-//				LOG_INFO("TIME (ns) " << ((edgeTimes[iEdge+nEdges_tot] - timestamp* 256.) * 0.097464731802));
+				//LOG_INFO(iEdge << " TIME (ns) " << ((edgeTimes[iEdge+nEdges_tot] - timestamp* 256.) * 0.097464731802));
 
 			}
 
@@ -251,9 +260,6 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 					&& ((nWords_tot + nFPGAs + 1)
 							!= (trbDataFragment->getPayloadLength() / 4))) {
 
-//				LOG_INFO("Frame 0 err words " << (uint) errHeader->frame0ErrWords);
-//				LOG_INFO("Frame 1 err words " << (uint) errHeader->frame1ErrWords);
-//				LOG_INFO("Number of err words " << (uint) errHeader->nErrWords);
 
 				/*
 				 * In 2015 DATA FORMAT error words can be present at the end of each FPGA block
@@ -272,22 +278,21 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 				const uint nErrors = nErrWords - 1;
 
 				for (uint iErr = 0; iErr != nErrors; iErr++) {
-//					printf("writing getpayload() + %d\n", 3 + iFPGA + nWords_tot + iErr);
-//					ErrData* errData = (ErrData*) payload + 3 + iFPGA + nWords_tot + iErr;
-//					LOG_INFO("Error Word " << std::hex << (uint) errData->errWord << std::dec);
-				}
+					//printf("writing getpayload() + %d\n", 3 + iFPGA + nWords_tot + iErr);
+					ErrData* errData = (ErrData*) payload + 3 + iFPGA + nWords_tot + iErr;
+					//LOG_INFO("Error Word " << std::hex << (uint) errData->errWord << std::dec);
+			}
 				nWords_tot += nErrWords;
-//				LOG_INFO("Number of Words  " << nWords_tot);
-			} else {
-//				LOG_INFO("Err flag " << (uint)fpgaHeader->errFlags);
-//				fpgaHeader->errFlags = (fpgaHeader->errFlags & 0xfe);
-//				LOG_INFO("Err flag " << (uint)fpgaHeader->errFlags);
-//				LOG_INFO(" **********Bit flip");
+				//LOG_INFO("Number of Words  " << nWords_tot);
+	 	} else {
+				//LOG_INFO("Err flag " << (uint)fpgaHeader->errFlags);
+				fpgaHeader->errFlags = (fpgaHeader->errFlags & 0xfe);
+				//LOG_INFO("Err flag " << (uint)fpgaHeader->errFlags);
+				//LOG_INFO(" **********Bit flip");
 
 			}
 		}
 	}
-//	LOG_INFO("TrbDecoder.cpp: DetID " << SourceIDManager::sourceIdToDetectorName((uint) trbDataFragment->getSourceID()) << " SubID " << (uint) trbDataFragment->getSourceSubID() << " : Analysed Tel62 ID " << fragmentNumber_ << " - Number of edges found " << nEdges_tot);
 }
 
 }
