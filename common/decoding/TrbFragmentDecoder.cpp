@@ -222,6 +222,12 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 //			LOG_INFO("nEdges " << nEdges);
 
 			for (uint iEdge = 0; iEdge < nEdges; iEdge++) {
+                if (2 + iFPGA + nWords_tot - nEdges + iEdge > trbDataFragment->getPayloadLength() / 4) {
+                    LOG_ERROR("!!!! Trying to access to a word outside the MEP Fragment");
+                    isBadFrag_ = true;
+                    return;
+                }
+
 //				printf("writing getpayload() + %d\n", 2 + iFPGA + nWords_tot - nEdges + iEdge);
 				TrbData* tdcData = (TrbData*) payload + 2 + iFPGA + nWords_tot
 						- (nEdges - iEdge);
