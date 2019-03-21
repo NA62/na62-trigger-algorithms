@@ -199,7 +199,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 		//	gettimeofday(&time[3], 0);
 		//	LOG_INFO( "Access Packets - Start " << time[3].tv_sec << " " << time[3].tv_usec );
 
-		if (!strawPacket_->isReady() || strawPacket_->isBadFragment()) {
+		if (not strawPacket_->isReady() or strawPacket_->isBadFragment()) {
 			LOG_ERROR("STRAW: This looks like a Bad Packet!!!! ");
 			l1Info->setL1StrawBadData();
 			return 0;
@@ -233,8 +233,17 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 			const int roChID = 256 * srbAddr[iEdge] + strawAddr[iEdge];
 
 			int chamberID = StrawGeo_[roChID] / 1952;
+            if (chamberID >= 4) {
+                return StrawAlgo::abortProcessing(l1Info);
+            }
 			int viewID = (StrawGeo_[roChID] % 1952) / 488;
+            if (viewID >= 4) {
+                return StrawAlgo::abortProcessing(l1Info);
+            }
 			int halfViewID = (StrawGeo_[roChID] % 488) / 244;
+            if (halfViewID >= 2) {
+                return StrawAlgo::abortProcessing(l1Info);
+            }
 			int planeID = (StrawGeo_[roChID] % 244) / 122;
 			int strawID = StrawGeo_[roChID] % 122;
 			float leading = -100000.;
