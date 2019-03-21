@@ -146,6 +146,12 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 		SrbTimeSlot* srbTimeSlot = (SrbTimeSlot*) payload + (2 + nWords) * 4 + iSlot;
 		NEdgesInSlot = (uint) srbTimeSlot->SlotCounter;
 		for (int iEdgeInSlot = 0; iEdgeInSlot < NEdgesInSlot; iEdgeInSlot++) {
+			if (nEdges_tot + iEdgeInSlot > maxNEdges) {
+				LOG_ERROR("!!!! Srb Decoder Trying to access to a word outside the MEP Fragment");
+				isBadFrag_ = true;
+				return;
+			}
+
 			slotTime = firstTSCoarseTime + iSlot;
 			edgeTimes[nEdges_tot + iEdgeInSlot] += slotTime * ClockPeriod;
 			//LOG_INFO(std::hex << timestamp << std::dec << " " << std::hex << firstTSCoarseTime+timestamp << std::dec << " " << std::hex << SrbID << std::dec << " " << std::setprecision(6) << edgeTimes[nEdges_tot + iEdgeInSlot] << " " << edgeIsLeading[nEdges_tot + iEdgeInSlot] << " "  << std::hex << edgeStrawIDs[nEdges_tot + iEdgeInSlot]  << std::dec);

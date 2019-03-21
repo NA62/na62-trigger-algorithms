@@ -14,8 +14,8 @@ ConfFileReader::ConfFileReader(const char* filename) :
 		file(filename), line(), failed(false) {
 }
 
-ConfFileReader::ConfFileReader(const std::string& filename) :
-		file(filename.c_str()), line(), failed(false), filename(filename) {
+ConfFileReader::ConfFileReader(const std::string& pfilename) :
+		filename(pfilename), file(filename.c_str()), line(), failed(false) {
 }
 
 ConfFileReader::~ConfFileReader() {

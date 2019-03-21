@@ -275,13 +275,12 @@ void TrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 					isBadFrag_ = true;
 					return;
 				}
-				const uint nErrors = nErrWords - 1;
-
-				for (uint iErr = 0; iErr != nErrors; iErr++) {
-					//printf("writing getpayload() + %d\n", 3 + iFPGA + nWords_tot + iErr);
-					ErrData* errData = (ErrData*) payload + 3 + iFPGA + nWords_tot + iErr;
-					//LOG_INFO("Error Word " << std::hex << (uint) errData->errWord << std::dec);
-			}
+				//const uint nErrors = nErrWords - 1;
+				//for (uint iErr = 0; iErr != nErrors; iErr++) {
+				//	//printf("writing getpayload() + %d\n", 3 + iFPGA + nWords_tot + iErr);
+				//	ErrData* errData = (ErrData*) payload + 3 + iFPGA + nWords_tot + iErr;
+				//	//LOG_INFO("Error Word " << std::hex << (uint) errData->errWord << std::dec);
+				//}
 				nWords_tot += nErrWords;
 				//LOG_INFO("Number of Words  " << nWords_tot);
 	 	} else {
