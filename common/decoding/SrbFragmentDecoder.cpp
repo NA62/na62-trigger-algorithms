@@ -96,7 +96,7 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 
 	//initialize
 	for (uint i = 0; i < maxNEdges; i++) {
-		edgeTimes[i] = 0;
+		edgeTimes[i] = 0.;
 		edgeStrawIDs[i] = 0;
 		edgeErrorFlags[i] = 0;
 		edgeIsLeading[i] = 0;
@@ -120,8 +120,17 @@ void SrbFragmentDecoder::readData(uint_fast32_t timestamp) {
 	const uint16_t nWords = ((uint16_t) boardHeader->packetLength) / 4 - 2 - 4;
 	const uint16_t nEdges = nWords * 2; //+1 empty edge if nWords in raw file was odd
 
-	//if (! nEdges)
-	//LOG_INFO("SrbDecoder.cpp: Number of Words/Edges is Null !");
+	//if (! nEdges) LOG_INFO("SrbDecoder.cpp: Number of Words/Edges is Null !");
+	if (nEdges > maxNEdges) {
+
+#ifndef ONLINEHLT
+	  LOG_ERROR("SrbFragmentDecoder::DetID " << SourceIDManager::sourceIdToDetectorName((uint) srbDataFragment->getSourceID()) << " SubID " << (uint) srbDataFragment->getSourceSubID() << " : Number of Edges found in packet is larger than Max number of Edges! " << std::hex << (int) (srbDataFragment->getSourceID()) << ":" << (int)(srbDataFragment->getSourceSubID()));
+#else
+	  LOG_ERROR("SrbFragmentDecoder::DetID " << (uint) srbDataFragment->getSourceID() << " SubID " << (uint) srbDataFragment->getSourceSubID() << " : Number of Edges found in packet is larger than Max number of Edges! " << std::hex << (int) (srbDataFragment->getSourceID()) << ":" << (int)(srbDataFragment->getSourceSubID()));
+#endif
+	  isBadFrag_ = true;
+	  return;
+	}
 
 	for (uint iEdge = 0; iEdge < nEdges; iEdge++) {
 
