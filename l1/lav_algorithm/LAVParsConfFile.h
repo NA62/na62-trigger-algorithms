@@ -11,6 +11,8 @@
 class LAVParsConfFile {
 public:
        LAVParsConfFile();
+       void loadConfigFile(std::string absolute_file_path);
+
        ~LAVParsConfFile();
 
        static LAVParsConfFile* GetInstance();

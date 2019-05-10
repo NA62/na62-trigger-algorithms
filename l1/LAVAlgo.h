@@ -39,6 +39,7 @@ public:
 
 	static uint_fast8_t processLAVTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
 	static void initialize(uint i, l1LAV &l1LAVStruct);
+	static void loadConfigurationFile(std::string absolute_file_pat);
 	static void writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 
 private:
@@ -48,8 +49,6 @@ private:
 	static uint AlgoLogic_[16];
 	static uint AlgoRefTimeSourceID_[16];
 	static double AlgoOnlineTimeWindow_[16];
-
-	static int* LgGeo_;
 
 };
 
