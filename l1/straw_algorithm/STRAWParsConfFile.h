@@ -16,11 +16,12 @@ public:
 	~STRAWParsConfFile();
 
 	static STRAWParsConfFile* GetInstance();
+	void loadConfigFile(std::string absolute_file_path);
 
 	int* getGeoMap();
 	int getNROChannels();
 
-	void readT0();
+	void readT0(std::string absolute_t0_path);
 	double* getT0();
 
 	void readStationT0();

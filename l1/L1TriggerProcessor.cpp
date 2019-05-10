@@ -160,6 +160,7 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 	L1Reduction::initialize();
 
 	LAVAlgo::loadConfigurationFile(LAV_CONFIG_FILE);
+	StrawAlgo::loadConfigurationFile(STRAW_CONFIG_FILE, STRAW_CONFIG_FILE_T0);
 
 	for (int i = 0; i != 16; i++) {
 		/*

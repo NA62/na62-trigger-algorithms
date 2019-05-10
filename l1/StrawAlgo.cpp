@@ -44,10 +44,10 @@ uint StrawAlgo::AlgoRefTimeSourceID_[16];
 double StrawAlgo::AlgoOnlineTimeWindow_[16];
 
 STRAWParsConfFile* StrawAlgo::InfoSTRAW_ = STRAWParsConfFile::GetInstance();
-int* StrawAlgo::StrawGeo_ = InfoSTRAW_->getGeoMap();
-double* StrawAlgo::ROMezzaninesT0_ = InfoSTRAW_->getT0();
-double StrawAlgo::StationT0_ = InfoSTRAW_->getStationT0();
-double StrawAlgo::MagicT0_ = InfoSTRAW_->getMagicT0();
+int* StrawAlgo::StrawGeo_ = nullptr;
+double* StrawAlgo::ROMezzaninesT0_ = nullptr;
+double StrawAlgo::StationT0_ = 0;
+double StrawAlgo::MagicT0_ = 0;
 
 //Defualt Values - TO BE REMOVED
 //double StrawAlgo::t0_main_shift = 6056.19;
@@ -133,6 +133,15 @@ void StrawAlgo::initialize(uint i, l1Straw& l1StrawStruct) {
 	AlgoOnlineTimeWindow_[i] = l1StrawStruct.configParams.l1TrigOnlineTimeWindow;
 
 	//	LOG_INFO("Straw mask: " << i << " logic " << AlgoLogic_[i] << " refTimeSourceID " << AlgoRefTimeSourceID_[i] << " online time window " << AlgoOnlineTimeWindow_[i]);
+}
+
+void StrawAlgo::loadConfigurationFile(std::string absolute_file_path, std::string absolute_t0_path) {
+	InfoSTRAW_->loadConfigFile(absolute_file_path);
+	InfoSTRAW_->readT0(absolute_t0_path);
+	StrawGeo_ = InfoSTRAW_->getGeoMap();
+	ROMezzaninesT0_ = InfoSTRAW_->getT0();
+	StationT0_ = InfoSTRAW_->getStationT0();
+	MagicT0_ = InfoSTRAW_->getMagicT0();
 }
 
 uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info) {
