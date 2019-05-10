@@ -22,7 +22,7 @@ STRAWParsConfFile::STRAWParsConfFile() {
 }
 
 void STRAWParsConfFile::loadConfigFile(std::string absolute_file_path) {
-	ConfFileReader fileName_(STRAW_CONFIG_FILE);
+	ConfFileReader fileName_(absolute_file_path);
 	int maxChannelID = 0;
 	int loopChannels = 0;
 	fileT0 = " ";
