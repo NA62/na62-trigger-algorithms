@@ -18,6 +18,10 @@ STRAWParsConfFile* STRAWParsConfFile::theInstance = nullptr;
 
 STRAWParsConfFile::STRAWParsConfFile() {
 
+
+}
+
+void STRAWParsConfFile::loadConfigFile(std::string absolute_file_path) {
 	ConfFileReader fileName_(STRAW_CONFIG_FILE);
 	int maxChannelID = 0;
 	int loopChannels = 0;
@@ -76,6 +80,8 @@ STRAWParsConfFile::STRAWParsConfFile() {
 	}
 }
 
+
+
 STRAWParsConfFile::~STRAWParsConfFile() {
 }
 
@@ -96,9 +102,9 @@ int STRAWParsConfFile::getNROChannels() {
 	return nROChannels;
 }
 
-void STRAWParsConfFile::readT0() {
+void STRAWParsConfFile::readT0(std::string absolute_t0_path) {
 
-	ConfFileReader fileT0_(STRAW_CONFIG_FILE_T0 + fileT0);
+	ConfFileReader fileT0_(absolute_t0_path + fileT0);
 
 	if (!fileT0_.isValid()) {
 		LOG_ERROR("STRAW ROMezzanines T0 file not found");
@@ -146,7 +152,6 @@ void STRAWParsConfFile::readT0() {
 }
 
 double* STRAWParsConfFile::getT0() {
-	readT0();
 	return fROMezzaninesT0;
 }
 

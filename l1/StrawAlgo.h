@@ -61,6 +61,7 @@ public:
 	 */
 	StrawAlgo();
 	static void initialize(uint i, l1Straw& l1StrawStruct);
+	static void loadConfigurationFile(std::string absolute_file_pat, std::string absolute_t0_path);
 	uint_fast8_t processStrawTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
 	static uint_fast8_t abortProcessing(L1InfoToStorage* l1Info);
 	static void writeData(L1StrawAlgo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
@@ -69,6 +70,7 @@ public:
 	static int strawAcceptance(int n, double* coordinate, int zone);
 	static void cdaVertex(const Point& qBeam, Point& qTrack, const Point& mBeam, Point& mTrack, float& cda, Point& vertex);
 	static void pointToLineDistance(const Point& qBeam, Point& vertex, const Point& mBeam, float& distance);
+
 	Track& getTracks(int n);
 
 private:
