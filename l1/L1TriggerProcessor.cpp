@@ -28,6 +28,8 @@
 #include "StrawAlgo.h"
 #include "NewCHODAlgo.h"
 
+#include <l1/ConfPath.h>
+
 namespace na62 {
 std::atomic<uint64_t>* L1TriggerProcessor::L1InputReducedEventsPerL0Mask_ = new std::atomic<uint64_t>[16];
 std::atomic<uint64_t>** L1TriggerProcessor::EventCountersByL0MaskByAlgoID_;
@@ -156,6 +158,8 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 
 	L1Downscaling::initialize();
 	L1Reduction::initialize();
+
+	LAVAlgo::loadConfigurationFile(LAV_CONFIG_FILE);
 
 	for (int i = 0; i != 16; i++) {
 		/*
@@ -292,6 +296,8 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 //		LOG_INFO("L0Mask " << i << " StrawAlgoType " << StrawAlgoType_[i]);
 //		LOG_INFO("L0Mask " << i << " MUVAlgoType " << MUVAlgoType_[i]);
 	}
+
+
 
 	L1DataPacketSize_ = sizeof(L1Global);
 

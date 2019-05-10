@@ -16,7 +16,12 @@
 LAVParsConfFile* LAVParsConfFile::theInstance = nullptr;
 
 LAVParsConfFile::LAVParsConfFile() {
-	ConfFileReader fileName_(LAV_CONFIG_FILE);
+}
+
+void LAVParsConfFile::loadConfigFile(std::string absolute_file_path) {
+	//ConfFileReader fileName_(LAV_CONFIG_FILE);
+	ConfFileReader fileName_(absolute_file_path);
+
 
 	if (fileName_.isValid()) {
 		LOG_INFO("LAV configuration file open");
@@ -51,6 +56,7 @@ LAVParsConfFile::LAVParsConfFile() {
 	} else {
 		LOG_ERROR("LAV Config file not found");
 	}
+
 }
 
 LAVParsConfFile::~LAVParsConfFile() {
