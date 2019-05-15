@@ -159,8 +159,8 @@ void L1TriggerProcessor::initialize(l1Struct &l1Struct) {
 	L1Downscaling::initialize();
 	L1Reduction::initialize();
 
-	LAVAlgo::loadConfigurationFile(LAV_CONFIG_FILE);
-	StrawAlgo::loadConfigurationFile(STRAW_CONFIG_FILE, STRAW_CONFIG_FILE_T0);
+	LAVAlgo::loadConfigurationFile(LAV_CHMAP_FILE);
+	StrawAlgo::loadConfigurationFile(STRAW_CHMAP_FILE, STRAW_COARSET0_FILE, STRAW_MAGICT0_FILE);
 
 	for (int i = 0; i != 16; i++) {
 		/*

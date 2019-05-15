@@ -38,8 +38,8 @@ void LAVAlgo::initialize(uint i, l1LAV &l1LAVStruct) {
 //	LOG_INFO("LAV mask: " << i << " logic " << AlgoLogic_[i] << " refTimeSourceID " << AlgoRefTimeSourceID_[i] << " online time window " << AlgoOnlineTimeWindow_[i]);
 }
 
-void LAVAlgo::loadConfigurationFile(std::string absolute_file_path) {
-	LAVAlgo::InfoLAV_->loadConfigFile(absolute_file_path);
+void LAVAlgo::loadConfigurationFile(std::string absolute_chMapFile_path) {
+	LAVAlgo::InfoLAV_->loadConfigFile(absolute_chMapFile_path);
 }
 
 uint_fast8_t LAVAlgo::processLAVTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info) {

@@ -39,7 +39,7 @@ public:
 
 	static uint_fast8_t processLAVTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
 	static void initialize(uint i, l1LAV &l1LAVStruct);
-	static void loadConfigurationFile(std::string absolute_file_pat);
+	static void loadConfigurationFile(std::string absolute_chMapFile_path);
 	static void writeData(L1Algo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);
 
 private:
