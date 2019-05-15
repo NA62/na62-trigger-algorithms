@@ -61,7 +61,7 @@ public:
 	 */
 	StrawAlgo();
 	static void initialize(uint i, l1Straw& l1StrawStruct);
-	static void loadConfigurationFile(std::string absolute_file_pat, std::string absolute_t0_path);
+	static void loadConfigurationFile(std::string absolute_chMapFile_path, std::string absolute_coarseT0_path, std::string absolute_magicT0_path);
 	uint_fast8_t processStrawTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info);
 	static uint_fast8_t abortProcessing(L1InfoToStorage* l1Info);
 	static void writeData(L1StrawAlgo* algoPacket, uint l0MaskID, L1InfoToStorage* l1Info);

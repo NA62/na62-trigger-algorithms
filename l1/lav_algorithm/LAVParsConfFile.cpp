@@ -19,12 +19,10 @@ LAVParsConfFile::LAVParsConfFile() {
 }
 
 void LAVParsConfFile::loadConfigFile(std::string absolute_file_path) {
-	//ConfFileReader fileName_(LAV_CONFIG_FILE);
 	ConfFileReader fileName_(absolute_file_path);
 
-
 	if (fileName_.isValid()) {
-		LOG_INFO("LAV configuration file open");
+		LOG_INFO(" > HLT LAV configuration file opening: " << fileName_.getFilename());
 
 		while (fileName_.nextLine()) {
 			if (fileName_.getField<std::string>(1) == "#") {
@@ -54,7 +52,7 @@ void LAVParsConfFile::loadConfigFile(std::string absolute_file_path) {
 			}
 		}
 	} else {
-		LOG_ERROR("LAV Config file not found");
+		LOG_ERROR(" > HLT LAV Configuration file not found: " << fileName_.getFilename());
 	}
 
 }

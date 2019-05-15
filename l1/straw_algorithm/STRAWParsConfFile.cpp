@@ -25,10 +25,9 @@ void STRAWParsConfFile::loadConfigFile(std::string absolute_file_path) {
 	ConfFileReader fileName_(absolute_file_path);
 	int maxChannelID = 0;
 	int loopChannels = 0;
-	fileT0 = " ";
 
 	if (fileName_.isValid()) {
-		//LOG_INFO(" > HLT STRAW configuration file opening: " << fileName_.getFilename());
+		LOG_INFO(" > HLT STRAW configuration file opening: " << fileName_.getFilename());
 
 		while (fileName_.nextLine()) {
 
@@ -62,18 +61,6 @@ void STRAWParsConfFile::loadConfigFile(std::string absolute_file_path) {
 					}
 				}
 			}
-			if (fileName_.getField<std::string>(1).find("ROMezzaninesT0FileInput=") != std::string::npos) {
-				fileT0 = fileName_.getField<std::string>(2);
-//				LOG_INFO("(Straw) Selecting R0MezzaninesT0File " << fileT0);
-			}
-			if ((fileName_.getField<std::string>(1).find("StationsT0=") != std::string::npos) && (fileName_.getField<std::string>(1).size() == 11)) {
-				fStationT0 = fileName_.getField<double>(2);
-//				LOG_INFO("(Straw) fStationT0 " << fStationT0);
-			}
-			if ((fileName_.getField<std::string>(1).find("MagicT0=") != std::string::npos) && (fileName_.getField<std::string>(1).size() == 8)) {
-				fMagicT0 = fileName_.getField<double>(2);
-//				LOG_INFO("(Straw) fMagicT0 " << fMagicT0);
-			}
 		}
 	} else {
 		LOG_ERROR(" > HLT STRAW Configuration file not found: " << fileName_.getFilename());
@@ -102,9 +89,9 @@ int STRAWParsConfFile::getNROChannels() {
 	return nROChannels;
 }
 
-void STRAWParsConfFile::readT0(std::string absolute_t0_path) {
+void STRAWParsConfFile::readT0(std::string absolute_coarseT0_path) {
 
-	ConfFileReader fileT0_(absolute_t0_path + fileT0);
+	ConfFileReader fileT0_(absolute_coarseT0_path);
 
 	if (!fileT0_.isValid()) {
 		LOG_ERROR("STRAW ROMezzanines T0 file not found");
@@ -128,26 +115,32 @@ void STRAWParsConfFile::readT0(std::string absolute_t0_path) {
 
 			if (fileT0_.getField<std::string>(1) == "#") {
 				continue;
-			} else if (fileT0_.getField<std::string>(1).find("MezzaninesT0_") != std::string::npos) {
-				for (int iGroup = 0; iGroup < nGroups; iGroup++) {
-					char name[1000];
-					sprintf(name, "MezzaninesT0_%02d=", iGroup);
-					std::string time = (std::string) name;
-//					LOG_INFO(time);
-//					LOG_INFO(fileT0_.getField<string>(1));
-
-					if (fileT0_.getField<std::string>(1) == time) {
-//					if(fileT0_.getField<string>(1).find(Form("MezzaninesT0_%02d=",iGroup))!= string::npos) {
-						for (int iMezzanine = 0; iMezzanine < 16; iMezzanine++) {
-							if (16 * iGroup + iMezzanine < nROMezzanines) {
-								fROMezzaninesT0[16 * iGroup + iMezzanine] = fileT0_.getField<double>(iMezzanine + 2);
-//								LOG_INFO("(Straw) fROMezzaninesT0 " << fROMezzaninesT0[16*iGroup+iMezzanine]);
-							}
-						}
-					}
+			}
+			if ((fileT0_.getField<std::string>(1).find("StationsT0=") != std::string::npos) && (fileT0_.getField<std::string>(1).size() == 11)) {
+			  fStationT0 = fileT0_.getField<double>(2);
+			  LOG_INFO("(Straw) fStationT0 " << fStationT0);
+			}
+			if (fileT0_.getField<std::string>(1).find("MezzaninesT0_") != std::string::npos) {
+			  for (int iGroup = 0; iGroup < nGroups; iGroup++) {
+			    char name[1000];
+			    sprintf(name, "MezzaninesT0_%02d=", iGroup);
+			    std::string time = (std::string) name;
+			    //LOG_INFO(time);
+			    //LOG_INFO(fileT0_.getField<string>(1));		    
+			    if (fileT0_.getField<std::string>(1) == time) {
+			      //if(fileT0_.getField<string>(1).find(Form("MezzaninesT0_%02d=",iGroup))!= string::npos) {
+			      for (int iMezzanine = 0; iMezzanine < 16; iMezzanine++) {
+				if (16 * iGroup + iMezzanine < nROMezzanines) {
+				  fROMezzaninesT0[16 * iGroup + iMezzanine] = fileT0_.getField<double>(iMezzanine + 2);
+				  //LOG_INFO("(Straw) fROMezzaninesT0 " << fROMezzaninesT0[16*iGroup+iMezzanine]);
 				}
+			      }
+			    }
+			  }
 			}
 		}
+	} else {
+		LOG_ERROR(" > HLT STRAW Coarse T0 file not found: " << fileT0_.getFilename());
 	}
 }
 
@@ -159,6 +152,29 @@ double STRAWParsConfFile::getStationT0() {
 	return fStationT0;
 }
 
-double STRAWParsConfFile::getMagicT0() {
+double STRAWParsConfFile::getMagicT0(std::string absolute_magicT0_path) {
+
+	ConfFileReader file_magicT0_(absolute_magicT0_path);
+
+	if (!file_magicT0_.isValid()) {
+		LOG_ERROR("STRAW Magic T0 file not found");
+	}
+
+	if (file_magicT0_.isValid()) {
+		LOG_INFO("STRAW Magic T0 file " << file_magicT0_.getFilename() << " open");
+
+		while (file_magicT0_.nextLine()) {
+
+			if (file_magicT0_.getField<std::string>(1) == "#") {
+				continue;
+			}
+			else{
+			  fMagicT0 = file_magicT0_.getField<double>(1);
+			  LOG_INFO("(Straw) fMagicT0 " << fMagicT0);
+			}
+		}
+	} else {
+		LOG_ERROR(" > HLT STRAW Magic T0 file not found: " << file_magicT0_.getFilename());
+	}
 	return fMagicT0;
 }

@@ -135,13 +135,13 @@ void StrawAlgo::initialize(uint i, l1Straw& l1StrawStruct) {
 	//	LOG_INFO("Straw mask: " << i << " logic " << AlgoLogic_[i] << " refTimeSourceID " << AlgoRefTimeSourceID_[i] << " online time window " << AlgoOnlineTimeWindow_[i]);
 }
 
-void StrawAlgo::loadConfigurationFile(std::string absolute_file_path, std::string absolute_t0_path) {
-	InfoSTRAW_->loadConfigFile(absolute_file_path);
-	InfoSTRAW_->readT0(absolute_t0_path);
+  void StrawAlgo::loadConfigurationFile(std::string absolute_chMapFile_path, std::string absolute_coarseT0_path, std::string absolute_magicT0_path) {
+	InfoSTRAW_->loadConfigFile(absolute_chMapFile_path);
+	InfoSTRAW_->readT0(absolute_coarseT0_path);
 	StrawGeo_ = InfoSTRAW_->getGeoMap();
 	ROMezzaninesT0_ = InfoSTRAW_->getT0();
 	StationT0_ = InfoSTRAW_->getStationT0();
-	MagicT0_ = InfoSTRAW_->getMagicT0();
+	MagicT0_ = InfoSTRAW_->getMagicT0(absolute_magicT0_path);
 }
 
 uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decoder, L1InfoToStorage* l1Info) {

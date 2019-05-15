@@ -16,17 +16,17 @@ public:
 	~STRAWParsConfFile();
 
 	static STRAWParsConfFile* GetInstance();
-	void loadConfigFile(std::string absolute_file_path);
+	void loadConfigFile(std::string absolute_chMap_path);
 
 	int* getGeoMap();
 	int getNROChannels();
 
-	void readT0(std::string absolute_t0_path);
+	void readT0(std::string absolute_coarseT0_path);
 	double* getT0();
 
 	void readStationT0();
 	double getStationT0();
-	double getMagicT0();
+	double getMagicT0(std::string absolute_magicT0_path);
 
 private:
 
@@ -35,7 +35,6 @@ private:
 	int nROChannels;
 	int geoMap[8192];
 
-	std::string fileT0;
 	double fROMezzaninesT0[512]; //from offline - to be removed
 
 	double fStationT0;
