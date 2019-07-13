@@ -106,7 +106,7 @@ public:
 	/**
 	 * Returns the Srb specific ID of the fragment decoded by this object
 	 */
-	inline const uint_fast16_t getFragmentNumber() const {
+	inline uint_fast16_t getFragmentNumber() const {
 		return fragmentNumber_;
 	}
 

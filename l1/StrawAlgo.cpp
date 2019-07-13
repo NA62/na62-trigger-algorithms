@@ -149,6 +149,8 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 	//gettimeofday(&time[0], 0);
 	//LOG_INFO( "Initial Time - Start " << time[0].tv_sec << " " << time[0].tv_usec );
 
+        if (l0MaskID >= 16) LOG_ERROR("STRAWAlgo: found L0 mask index greater or equal than 16!!! ");
+
 	using namespace l0;
 
 	int flagL1 = 0;
@@ -160,7 +162,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 	int flagL1OneTrack = 0;
 	int flagL1Limit[1000];
 	int flagL1Three[1000] = { 0 };
-	int flagL1TreTracks = 0;
+	//int flagL1TreTracks = 0;
 
 	uint nEdgesTotal = 0;
 	uint nHits = 0;
@@ -1463,17 +1465,17 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 						float x1 = 0.0;
 						float x2 = 0.0;
 						float x3 = 0.0;
-						float y0 = 0.0;
-						float y1 = 0.0;
-						float y2 = 0.0;
-						float y3 = 0.0;
+						//float y0 = 0.0;
+						//float y1 = 0.0;
+						//float y2 = 0.0;
+						//float y3 = 0.0;
 						float z0 = 0.0;
 						float z1 = 0.0;
 						float z2 = 0.0;
 						float z3 = 0.0;
 						float q01 = 0.0;
 						float q23 = 0.0;
-						float dqx = 1000000.0;
+						//float dqx = 1000000.0;
 						double trailingTemp = 0.0;
 
 						if (strawFirstTempTrk_[j].ncentrali + strawFirstTempTrk_[j].nlaterali > 2) {
@@ -1482,22 +1484,22 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 
 								if (strawFirstTempTrk_[j].camerec[z] == 0) {
 									x0 = strawPointFinal_[strawFirstTempTrk_[j].camerec[z]][strawFirstTempTrk_[j].hitc[z]].x;
-									y0 = strawPointFinal_[strawFirstTempTrk_[j].camerec[z]][strawFirstTempTrk_[j].hitc[z]].y;
+									//y0 = strawPointFinal_[strawFirstTempTrk_[j].camerec[z]][strawFirstTempTrk_[j].hitc[z]].y;
 									z0 = strawPointFinal_[strawFirstTempTrk_[j].camerec[z]][strawFirstTempTrk_[j].hitc[z]].z - ZMAGNET;
 								}
 								if (strawFirstTempTrk_[j].camerec[z] == 1) {
 									x1 = strawPointFinal_[strawFirstTempTrk_[j].camerec[z]][strawFirstTempTrk_[j].hitc[z]].x;
-									y1 = strawPointFinal_[strawFirstTempTrk_[j].camerec[z]][strawFirstTempTrk_[j].hitc[z]].y;
+									//y1 = strawPointFinal_[strawFirstTempTrk_[j].camerec[z]][strawFirstTempTrk_[j].hitc[z]].y;
 									z1 = strawPointFinal_[strawFirstTempTrk_[j].camerec[z]][strawFirstTempTrk_[j].hitc[z]].z - ZMAGNET;
 								}
 								if (strawFirstTempTrk_[j].camerec[z] == 2) {
 									x2 = strawPointFinal_[strawFirstTempTrk_[j].camerec[z]][strawFirstTempTrk_[j].hitc[z]].x;
-									y2 = strawPointFinal_[strawFirstTempTrk_[j].camerec[z]][strawFirstTempTrk_[j].hitc[z]].y;
+									//y2 = strawPointFinal_[strawFirstTempTrk_[j].camerec[z]][strawFirstTempTrk_[j].hitc[z]].y;
 									z2 = strawPointFinal_[strawFirstTempTrk_[j].camerec[z]][strawFirstTempTrk_[j].hitc[z]].z - ZMAGNET;
 								}
 								if (strawFirstTempTrk_[j].camerec[z] == 3) {
 									x3 = strawPointFinal_[strawFirstTempTrk_[j].camerec[z]][strawFirstTempTrk_[j].hitc[z]].x;
-									y3 = strawPointFinal_[strawFirstTempTrk_[j].camerec[z]][strawFirstTempTrk_[j].hitc[z]].y;
+									//y3 = strawPointFinal_[strawFirstTempTrk_[j].camerec[z]][strawFirstTempTrk_[j].hitc[z]].y;
 									z3 = strawPointFinal_[strawFirstTempTrk_[j].camerec[z]][strawFirstTempTrk_[j].hitc[z]].z - ZMAGNET;
 								}
 							}
@@ -1506,22 +1508,22 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 
 								if (strawFirstTempTrk_[j].camerel[z] == 0) {
 									x0 = strawPointFinal_[strawFirstTempTrk_[j].camerel[z]][strawFirstTempTrk_[j].hitl[z]].x;
-									y0 = strawPointFinal_[strawFirstTempTrk_[j].camerel[z]][strawFirstTempTrk_[j].hitc[z]].y;
+									//y0 = strawPointFinal_[strawFirstTempTrk_[j].camerel[z]][strawFirstTempTrk_[j].hitc[z]].y;
 									z0 = strawPointFinal_[strawFirstTempTrk_[j].camerel[z]][strawFirstTempTrk_[j].hitl[z]].z - ZMAGNET;
 								}
 								if (strawFirstTempTrk_[j].camerel[z] == 1) {
 									x1 = strawPointFinal_[strawFirstTempTrk_[j].camerel[z]][strawFirstTempTrk_[j].hitl[z]].x;
-									y1 = strawPointFinal_[strawFirstTempTrk_[j].camerel[z]][strawFirstTempTrk_[j].hitc[z]].y;
+									//y1 = strawPointFinal_[strawFirstTempTrk_[j].camerel[z]][strawFirstTempTrk_[j].hitc[z]].y;
 									z1 = strawPointFinal_[strawFirstTempTrk_[j].camerel[z]][strawFirstTempTrk_[j].hitl[z]].z - ZMAGNET;
 								}
 								if (strawFirstTempTrk_[j].camerel[z] == 2) {
 									x2 = strawPointFinal_[strawFirstTempTrk_[j].camerel[z]][strawFirstTempTrk_[j].hitl[z]].x;
-									y2 = strawPointFinal_[strawFirstTempTrk_[j].camerel[z]][strawFirstTempTrk_[j].hitc[z]].y;
+									//y2 = strawPointFinal_[strawFirstTempTrk_[j].camerel[z]][strawFirstTempTrk_[j].hitc[z]].y;
 									z2 = strawPointFinal_[strawFirstTempTrk_[j].camerel[z]][strawFirstTempTrk_[j].hitl[z]].z - ZMAGNET;
 								}
 								if (strawFirstTempTrk_[j].camerel[z] == 3) {
 									x3 = strawPointFinal_[strawFirstTempTrk_[j].camerel[z]][strawFirstTempTrk_[j].hitl[z]].x;
-									y3 = strawPointFinal_[strawFirstTempTrk_[j].camerel[z]][strawFirstTempTrk_[j].hitc[z]].y;
+									//y3 = strawPointFinal_[strawFirstTempTrk_[j].camerel[z]][strawFirstTempTrk_[j].hitc[z]].y;
 									z3 = strawPointFinal_[strawFirstTempTrk_[j].camerel[z]][strawFirstTempTrk_[j].hitl[z]].z - ZMAGNET;
 								}
 							}
@@ -1554,7 +1556,7 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 								strawFirstTempTrk_[j].m2x = (x3 - x2) / (z3 - z2);
 							}
 
-							dqx = q23 - q01;
+							//dqx = q23 - q01;
 
 							strawFirstTempTrk_[j].q1x = q01;
 							strawFirstTempTrk_[j].q2x = q23;
@@ -1936,9 +1938,9 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 		if (flagL1Limit[e] > 0 && flagL1Three[e] == 0) {
 			flagL1Pnn = 1;
 		}
-		if (flagL1Limit[e] > 0 && flagL1Three[e] > 0) {
-			flagL1TreTracks = 1;
-		}
+		//if (flagL1Limit[e] > 0 && flagL1Three[e] > 0) {
+		//	flagL1TreTracks = 1;
+		//}
 		if (strawTrkIntermedie_[e].zvertex > -100000 && strawTrkIntermedie_[e].zvertex < 180000 && strawTrkIntermedie_[e].cda < 200
 				&& strawTrkIntermedie_[e].pz < 65000) {
 			flagL1OneTrack = 1 ;
@@ -2060,8 +2062,11 @@ int StrawAlgo::strawAcceptance(int n, double* coordinate, int zone) {
 //	default:
 //		return 0;
 //	}
-	if (vx + vy + vu + vv == 2)
-		return 1;
+	if(zone == 12){ // Two views only
+	  if (vx + vy + vu + vv == 2)
+	    return 1;
+	}
+	else LOG_ERROR("StrawAlgo.cpp: track OUT of Straw Acceptance as we are not requiring [2 views only] !!!");
 	return 0;
 }
 

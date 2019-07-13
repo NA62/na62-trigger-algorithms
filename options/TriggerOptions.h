@@ -32,7 +32,7 @@ public:
 	TriggerOptions();
 	virtual ~TriggerOptions();
 
-	static void Load(int argc, char* argv[]) {
+	static void Load(int, char**) {
 		fileNameOptions.push_back(OPTION_TRIGGER_CONFIG_FILE);
 
 		desc.add_options()

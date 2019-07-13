@@ -152,14 +152,14 @@ public:
 	/**
 	 * Returns the subdetector specific ID of the fragment decoded by this object
 	 */
-	inline const uint_fast16_t getFragmentNumber() const {
+	inline uint_fast16_t getFragmentNumber() const {
 		return fragmentNumber_;
 	}
 
 	/**
 	 * Returns the readout board ID of the fragment decoded by this object
 	 */
-	inline const uint_fast16_t getSourceSubId() const {
+	inline uint_fast16_t getSourceSubId() const {
 		return sourceSubId_;
 	}
 
