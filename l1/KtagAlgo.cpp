@@ -21,7 +21,6 @@
 #include <common/decoding/TrbFragmentDecoder.h>
 
 extern "C" void initialize_ktag() {
-
     l1KTAG l1KtagStruct;
     l1KtagStruct.configParams.l1TrigProcessID = 1;
     l1KtagStruct.configParams.l1TrigMaskID = 0; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for MUV3, 5 for Straw
@@ -31,7 +30,7 @@ extern "C" void initialize_ktag() {
     l1KtagStruct.configParams.l1TrigRefTimeSourceID = 0;
     l1KtagStruct.configParams.l1TrigOnlineTimeWindow = 5;
 
-    na62::KtagAlgo::initialize(i, l1KtagStruct);
+    na62::KtagAlgo::initialize(0, l1KtagStruct);
 }
 
 extern "C" uint_fast8_t process_ktag(uint l0MaskID, na62::DecoderHandler& decoder, L1InfoToStorage* l1Info) {

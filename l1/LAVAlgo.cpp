@@ -19,6 +19,31 @@
 
 #include <common/decoding/TrbFragmentDecoder.h>
 
+
+
+
+extern "C" void initialize_lav() {
+    l1LAV l1LAVStruct;
+    l1LAVStruct.configParams.l1TrigProcessID = 2;
+    l1LAVStruct.configParams.l1TrigMaskID = 0;
+    l1LAVStruct.configParams.l1TrigEnable = 1;
+    l1LAVStruct.configParams.l1TrigLogic = 1;
+    l1LAVStruct.configParams.l1TrigFlag = 0;
+    l1LAVStruct.configParams.l1TrigRefTimeSourceID = 0;
+    l1LAVStruct.configParams.l1TrigOnlineTimeWindow = 5;
+
+    na62::LAVAlgo::initialize(0, l1LAVStruct);
+}
+
+extern "C" void load_lav_conf(std::string absolute_conf_path) {
+  na62::LAVAlgo::loadConfigurationFile(absolute_conf_path);
+}
+
+extern "C" uint_fast8_t process_lav(uint l0MaskID, na62::DecoderHandler& decoder, L1InfoToStorage* l1Info) {
+    return na62::LAVAlgo::processLAVTrigger(l0MaskID, decoder, l1Info);
+}
+
+
 namespace na62 {
 
 uint LAVAlgo::AlgoID_; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
