@@ -20,6 +20,23 @@
 #include <options/Logging.h>
 #include <common/decoding/TrbFragmentDecoder.h>
 
+extern "C" void initialize_ktag() {
+
+    l1KTAG l1KtagStruct;
+    l1KtagStruct.configParams.l1TrigProcessID = 1;
+    l1KtagStruct.configParams.l1TrigMaskID = 0; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for MUV3, 5 for Straw
+    l1KtagStruct.configParams.l1TrigEnable = 1;
+    l1KtagStruct.configParams.l1TrigLogic = 1;
+    l1KtagStruct.configParams.l1TrigFlag = 0;
+    l1KtagStruct.configParams.l1TrigRefTimeSourceID = 0;
+    l1KtagStruct.configParams.l1TrigOnlineTimeWindow = 5;
+
+    na62::KtagAlgo::initialize(i, l1KtagStruct);
+}
+
+extern "C" uint_fast8_t process_ktag(uint l0MaskID, na62::DecoderHandler& decoder, L1InfoToStorage* l1Info) {
+    return na62::KtagAlgo::processKtagTrigger(l0MaskID, decoder, l1Info);
+}
 
 namespace na62 {
 
@@ -33,6 +50,7 @@ void KtagAlgo::initialize(uint i, l1KTAG &l1KtagStruct) {
 	AlgoID_ = l1KtagStruct.configParams.l1TrigMaskID;
 	AlgoLogic_[i] = l1KtagStruct.configParams.l1TrigLogic;
 	AlgoRefTimeSourceID_[i] = l1KtagStruct.configParams.l1TrigRefTimeSourceID; //0 for L0TP, 1 for CHOD, 2 for RICH
+
 	AlgoOnlineTimeWindow_[i] = l1KtagStruct.configParams.l1TrigOnlineTimeWindow;
 //	LOG_INFO("KTAG: mask: " << i << " logic " << AlgoLogic_[i] << " refTimeSourceID " << AlgoRefTimeSourceID_[i] << " online time window " << AlgoOnlineTimeWindow_[i]);
 }
