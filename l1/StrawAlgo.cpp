@@ -36,6 +36,38 @@
 #define LMAGNET 3000
 #define ZMAGNET 197645
 
+extern "C" void initialize_straw() {
+    l1Straw l1StrawStruct;
+    l1StrawStruct.configParams.l1TrigProcessID = 3;
+    l1StrawStruct.configParams.l1TrigMaskID = 0;
+    l1StrawStruct.configParams.l1TrigEnable = 1;
+    l1StrawStruct.configParams.l1TrigLogic = 1;
+    l1StrawStruct.configParams.l1TrigFlag = 0;
+    l1StrawStruct.configParams.l1TrigRefTimeSourceID = 0;
+    l1StrawStruct.configParams.l1TrigOnlineTimeWindow = 5;
+
+    na62::StrawAlgo::initialize(0, l1StrawStruct);
+}
+
+extern "C" void load_straw_conf(std::string absolute_chMapFile_path, std::string absolute_coarseT0_path, std::string absolute_magicT0_path) {
+  na62::StrawAlgo::loadConfigurationFile(
+    absolute_chMapFile_path, absolute_coarseT0_path, absolute_magicT0_path
+  );
+}
+
+
+extern "C" na62::StrawAlgo* create_strawalgo() {
+    return new na62::StrawAlgo;
+}
+
+extern "C" uint_fast8_t process_straw(uint l0MaskID, na62::DecoderHandler& decoder, L1InfoToStorage* l1Info, na62::StrawAlgo* strawalgo) {
+    return strawalgo->processStrawTrigger(l0MaskID, decoder, l1Info);
+}
+
+extern "C" void destroy_strawalgo(na62::StrawAlgo* object) {
+    delete object;
+}
+
 namespace na62 {
 
 uint StrawAlgo::AlgoID_; //0 for CHOD, 1 for RICH, 2 for KTAG, 3 for LAV, 4 for IRCSAC, 5 for Straw, 6 for MUV3, 7 for NewCHOD
@@ -2081,9 +2113,6 @@ void StrawAlgo::writeData(L1StrawAlgo* algoPacket, uint l0MaskID, L1InfoToStorag
 
 }
 
-Track& StrawAlgo::getTracks(int n) {
-	return strawTrkIntermedie_[n];
-}
 
 } /* namespace na62 */
 
