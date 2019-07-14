@@ -71,7 +71,9 @@ public:
 	static void cdaVertex(const Point& qBeam, Point& qTrack, const Point& mBeam, Point& mTrack, float& cda, Point& vertex);
 	static void pointToLineDistance(const Point& qBeam, Point& vertex, const Point& mBeam, float& distance);
 
-	Track& getTracks(int n);
+    Track& getTracks(int n) {
+        return strawTrkIntermedie_[n];
+    }
 
 private:
 	static STRAWParsConfFile* InfoSTRAW_;
