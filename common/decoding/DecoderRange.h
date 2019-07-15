@@ -34,7 +34,7 @@ public:
 		return *this;
 	}
 
-	ElementIterator operator ++(int i) {
+	ElementIterator operator ++(int) {
 		ElementIterator copy(*this);
 		++current_;
 		return copy;
