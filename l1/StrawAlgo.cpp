@@ -1942,9 +1942,9 @@ uint_fast8_t StrawAlgo::processStrawTrigger(uint l0MaskID, DecoderHandler& decod
 		if (flagL1Limit[e] > 0 && flagL1Three[e] == 0) {
 			flagL1Pnn = 1;
 		}
-		if (flagL1Limit[e] > 0 && flagL1Three[e] > 0) {
-			flagL1TreTracks = 1;
-		}
+		//if (flagL1Limit[e] > 0 && flagL1Three[e] > 0) {
+		//	flagL1TreTracks = 1;
+		//}
 	}
 
 //	LOG_INFO("\n RISULTATO:");
