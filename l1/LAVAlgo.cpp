@@ -30,7 +30,7 @@ extern "C" void initialize_lav() {
     l1LAVStruct.configParams.l1TrigLogic = 1;
     l1LAVStruct.configParams.l1TrigFlag = 0;
     l1LAVStruct.configParams.l1TrigRefTimeSourceID = 0;
-    l1LAVStruct.configParams.l1TrigOnlineTimeWindow = 6;
+    l1LAVStruct.configParams.l1TrigOnlineTimeWindow = 10;
 
     na62::LAVAlgo::initialize(0, l1LAVStruct);
 }
